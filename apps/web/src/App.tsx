@@ -8,7 +8,7 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { liveProvider } from "@refinedev/supabase";
-import { AppWindow, LayoutDashboard } from "lucide-react";
+import { AppWindow, LayoutDashboard, Users } from "lucide-react";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -22,6 +22,7 @@ import { supabaseClient } from "@/providers/supabase-client";
 
 import { DashboardPage } from "@/pages/dashboard";
 import { LoginPage } from "@/pages/login";
+import { UsersPage } from "@/pages/users";
 import {
   ProjectCreate,
   ProjectEdit,
@@ -61,6 +62,14 @@ function App() {
                     icon: <AppWindow className="size-4" />,
                   },
                 },
+                {
+                  name: "users",
+                  list: "/users",
+                  meta: {
+                    label: "Kullanıcılar",
+                    icon: <Users className="size-4" />,
+                  },
+                },
               ]}
               options={{
                 syncWithLocation: true,
@@ -85,6 +94,7 @@ function App() {
                     <Route path="edit/:id" element={<ProjectEdit />} />
                     <Route path="show/:id" element={<ProjectShow />} />
                   </Route>
+                  <Route path="/users" element={<UsersPage />} />
                   <Route path="*" element={<ErrorComponent />} />
                 </Route>
 
