@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { RangeSelect } from "@/components/range-select";
 import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
 import { supabaseClient } from "@/providers/supabase-client";
@@ -44,12 +45,14 @@ interface ProjectRow {
 
 export const DashboardPage = () => {
   const [syncing, setSyncing] = useState(false);
+  const [range, setRange] = useState(90);
   const invalidate = useInvalidate();
   const { theme } = useHelmTheme();
 
   const since = useMemo(
-    () => new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10),
-    [],
+    () =>
+      new Date(Date.now() - range * 86_400_000).toISOString().slice(0, 10),
+    [range],
   );
 
   const { result: projectsResult, query: projectsQuery } = useList<Project>({
@@ -121,10 +124,15 @@ export const DashboardPage = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Cockpit</h1>
-        <Button onClick={handleSync} disabled={syncing}>
-          <RefreshCw className={syncing ? "size-4 animate-spin" : "size-4"} />
-          Şimdi senkronize et
-        </Button>
+        <div className="flex items-center gap-2">
+          <RangeSelect value={range} onChange={setRange} />
+          <Button onClick={handleSync} disabled={syncing}>
+            <RefreshCw
+              className={syncing ? "size-4 animate-spin" : "size-4"}
+            />
+            Şimdi senkronize et
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -158,7 +166,7 @@ export const DashboardPage = () => {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Reklam Geliri — son 90 gün</CardTitle>
+            <CardTitle>{`Reklam Geliri — son ${range} gün`}</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart
@@ -170,7 +178,7 @@ export const DashboardPage = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Günlük Aktif Kullanıcı — son 90 gün</CardTitle>
+            <CardTitle>{`Günlük Aktif Kullanıcı — son ${range} gün`}</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart

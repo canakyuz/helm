@@ -97,6 +97,8 @@ function App() {
                 >
                   <Route path="/login" element={<LoginPage />} />
                 </Route>
+
+                <Route path="/__debug" element={<HelmLayout />} />
               </Routes>
 
               <RefineKbar />

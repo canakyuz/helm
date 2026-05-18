@@ -22,6 +22,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { IntegrationsPanel } from "@/components/integrations-panel";
+import { RangeSelect } from "@/components/range-select";
 import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
 import { supabaseClient } from "@/providers/supabase-client";
@@ -35,6 +36,7 @@ export const ProjectShow = () => {
   const { theme } = useHelmTheme();
   const invalidate = useInvalidate();
   const [syncing, setSyncing] = useState(false);
+  const [range, setRange] = useState(90);
 
   const handleSync = async () => {
     if (!record?.id) return;
@@ -60,8 +62,9 @@ export const ProjectShow = () => {
   };
 
   const since = useMemo(
-    () => new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10),
-    [],
+    () =>
+      new Date(Date.now() - range * 86_400_000).toISOString().slice(0, 10),
+    [range],
   );
 
   const { result: metricsResult, query: metricsQuery } = useList<Metric>({
@@ -93,10 +96,15 @@ export const ProjectShow = () => {
         <h1 className="text-2xl font-semibold tracking-tight">
           {record?.name ?? "Proje"}
         </h1>
-        <Button onClick={handleSync} disabled={syncing}>
-          <RefreshCw className={syncing ? "size-4 animate-spin" : "size-4"} />
-          Senkronla
-        </Button>
+        <div className="flex items-center gap-2">
+          <RangeSelect value={range} onChange={setRange} />
+          <Button onClick={handleSync} disabled={syncing}>
+            <RefreshCw
+              className={syncing ? "size-4 animate-spin" : "size-4"}
+            />
+            Senkronla
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
@@ -162,7 +170,7 @@ export const ProjectShow = () => {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Reklam Geliri — son 90 gün</CardTitle>
+                <CardTitle>{`Reklam Geliri — son ${range} gün`}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TrendChart
@@ -174,7 +182,7 @@ export const ProjectShow = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Günlük Aktif Kullanıcı — son 90 gün</CardTitle>
+                <CardTitle>{`Günlük Aktif Kullanıcı — son ${range} gün`}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TrendChart
@@ -188,7 +196,7 @@ export const ProjectShow = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Kullanıcı Büyümesi — son 90 gün</CardTitle>
+              <CardTitle>{`Kullanıcı Büyümesi — son ${range} gün`}</CardTitle>
             </CardHeader>
             <CardContent>
               <TrendChart
