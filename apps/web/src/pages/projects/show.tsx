@@ -86,9 +86,15 @@ export const ProjectShow = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {record?.name ?? "Proje"}
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {record?.name ?? "Proje"}
+        </h1>
+        <Button onClick={handleSync} disabled={syncing}>
+          <RefreshCw className={syncing ? "size-4 animate-spin" : "size-4"} />
+          Senkronla
+        </Button>
+      </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
