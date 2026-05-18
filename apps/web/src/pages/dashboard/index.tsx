@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useInvalidate, useList } from "@refinedev/core";
 import { DollarSign, RefreshCw, Users, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,7 +18,7 @@ import { TrendChart } from "@/components/trend-chart";
 import { supabaseClient } from "@/providers/supabase-client";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import { compact, deltaPct, latest, series, usd } from "@/lib/metrics";
-import type { Metric, Project } from "@/types";
+import type { Metric, Project, SyncRun } from "@/types";
 
 /** Bir metrik için her projenin en güncel tarihli değerini döndürür. */
 const latestByProject = (metrics: Metric[], metricName: string) => {
@@ -62,8 +63,15 @@ export const DashboardPage = () => {
     pagination: { mode: "off" },
   });
 
+  const { result: syncResult } = useList<SyncRun>({
+    resource: "sync_runs",
+    sorters: [{ field: "started_at", order: "desc" }],
+    pagination: { mode: "off" },
+  });
+
   const projects = projectsResult.data;
   const metrics = metricsResult.data;
+  const syncRuns = syncResult.data;
   const loading = projectsQuery.isLoading || metricsQuery.isLoading;
 
   const adRevenueSeries = useMemo(
@@ -92,13 +100,14 @@ export const DashboardPage = () => {
     try {
       const { data, error } = await supabaseClient.functions.invoke(
         "helm-ingest",
-        { body: {} },
+        { body: { trigger: "manual" } },
       );
       if (error) throw error;
       toast.success("Senkronizasyon tamam", {
         description: `${data?.ingested ?? 0} metrik güncellendi.`,
       });
       invalidate({ resource: "metrics", invalidates: ["list"] });
+      invalidate({ resource: "sync_runs", invalidates: ["list"] });
     } catch (e) {
       toast.error("Senkronizasyon başarısız", {
         description: e instanceof Error ? e.message : String(e),
@@ -201,6 +210,56 @@ export const DashboardPage = () => {
                     <TableCell>{usd(r.adRevenue)}</TableCell>
                     <TableCell>{compact(r.dau)}</TableCell>
                     <TableCell>{compact(r.totalUsers)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Son Senkronlar</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {syncRuns.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Henüz senkron çalışmadı
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Zaman</TableHead>
+                  <TableHead>Tetikleyici</TableHead>
+                  <TableHead>Metrik</TableHead>
+                  <TableHead>Sonuç</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {syncRuns.slice(0, 8).map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell>
+                      {new Date(r.started_at).toLocaleString("tr-TR")}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {r.trigger === "cron" ? "otomatik" : "manuel"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{r.ingested}</TableCell>
+                    <TableCell>
+                      {r.error_count > 0 ? (
+                        <Badge variant="destructive">
+                          {r.error_count} hata
+                        </Badge>
+                      ) : (
+                        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                          {r.ok_count} ok
+                        </Badge>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

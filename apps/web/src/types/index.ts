@@ -61,6 +61,17 @@ export interface Metric {
   ingested_at: string;
 }
 
+export interface SyncRun {
+  id: number;
+  started_at: string;
+  finished_at: string | null;
+  trigger: "manual" | "cron";
+  ingested: number;
+  ok_count: number;
+  error_count: number;
+  details: unknown;
+}
+
 export const PROVIDER_LABELS: Record<ProviderName, string> = {
   revenuecat: "RevenueCat",
   admob: "AdMob",

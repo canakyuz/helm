@@ -7,8 +7,7 @@ import { fetchPostHog } from "./connectors/posthog.ts";
 import { fetchSupabaseUsers } from "./connectors/supabase-users.ts";
 
 // helm-ingest — her enabled entegrasyonu gezer, sağlayıcı API'sini çağırır,
-// metrics tablosuna idempotent upsert eder. Gece pg_cron tetikler;
-// panelden "Şimdi senkronize et" ile manuel de çağrılır.
+// metrics tablosuna idempotent upsert eder. Her çalışma sync_runs'a kaydedilir.
 
 const CONNECTORS: Record<string, Connector> = {
   revenuecat: fetchRevenueCat,
@@ -33,14 +32,45 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
+  // İstek gövdesinden tetikleyici (panel "manual" gönderir, cron göndermez).
+  let trigger: "manual" | "cron" = "cron";
+  try {
+    const body = await req.json();
+    if (body?.trigger === "manual") trigger = "manual";
+  } catch {
+    // gövde yok — cron
+  }
+
+  // Çalışmayı kaydet.
+  const { data: run } = await hub
+    .from("sync_runs")
+    .insert({ trigger })
+    .select("id")
+    .single();
+  const runId = run?.id as number | undefined;
+
   const { data: integrations, error } = await hub
     .from("project_integrations")
     .select("id, project_id, provider, config")
     .eq("enabled", true);
 
-  if (error) return json({ error: error.message }, 500);
+  if (error) {
+    if (runId) {
+      await hub
+        .from("sync_runs")
+        .update({
+          finished_at: new Date().toISOString(),
+          error_count: 1,
+          details: { error: error.message },
+        })
+        .eq("id", runId);
+    }
+    return json({ error: error.message }, 500);
+  }
 
   let ingested = 0;
+  let okCount = 0;
+  let errorCount = 0;
   const results: Array<Record<string, unknown>> = [];
   const syncedAt = new Date().toISOString();
 
@@ -66,6 +96,7 @@ Deno.serve(async (req) => {
       }
 
       ingested += rows.length;
+      okCount++;
       await hub
         .from("project_integrations")
         .update({
@@ -82,6 +113,7 @@ Deno.serve(async (req) => {
       });
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
+      errorCount++;
       await hub
         .from("project_integrations")
         .update({
@@ -99,5 +131,19 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ ingested, results });
+  // Çalışmayı kapat.
+  if (runId) {
+    await hub
+      .from("sync_runs")
+      .update({
+        finished_at: new Date().toISOString(),
+        ingested,
+        ok_count: okCount,
+        error_count: errorCount,
+        details: results,
+      })
+      .eq("id", runId);
+  }
+
+  return json({ ingested, ok: okCount, errors: errorCount, results });
 });
