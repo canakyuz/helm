@@ -7,8 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Empty } from "antd";
-import { useHelmTheme } from "../../theme/ThemeProvider";
+import { useHelmTheme } from "@/theme/ThemeProvider";
 
 export interface TrendPoint {
   date: string;
@@ -36,8 +35,11 @@ export const TrendChart = ({
 
   if (data.length === 0) {
     return (
-      <div style={{ height, display: "grid", placeItems: "center" }}>
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Veri yok" />
+      <div
+        className="grid place-items-center text-sm text-muted-foreground"
+        style={{ height }}
+      >
+        Veri yok
       </div>
     );
   }
@@ -77,6 +79,13 @@ export const TrendChart = ({
             "",
           ]}
           labelFormatter={(d) => String(d)}
+          contentStyle={{
+            background: "var(--popover)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius)",
+            color: "var(--popover-foreground)",
+            fontSize: 12,
+          }}
         />
         <Area
           type="monotone"

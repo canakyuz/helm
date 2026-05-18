@@ -1,4 +1,3 @@
-import { ConfigProvider } from "antd";
 import {
   type PropsWithChildren,
   createContext,
@@ -35,13 +34,16 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
     () => localStorage.getItem(STORAGE_KEY) ?? DEFAULT_THEME_KEY,
   );
 
+  const theme = useMemo(() => getTheme(themeKey), [themeKey]);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, themeKey);
-    // CSS katmanı temayı body[data-helm-theme] üzerinden hedefler.
-    document.body.dataset.helmTheme = themeKey;
-  }, [themeKey]);
-
-  const theme = useMemo(() => getTheme(themeKey), [themeKey]);
+    const root = document.documentElement;
+    // CSS token katmanı [data-helm-theme] ile hedeflenir.
+    root.dataset.helmTheme = themeKey;
+    // shadcn bileşenlerinin dark: varyantları için .dark sınıfı.
+    root.classList.toggle("dark", theme.isDark);
+  }, [themeKey, theme.isDark]);
 
   const value = useMemo(
     () => ({ theme, themeKey, setThemeKey, themes: HELM_THEMES }),
@@ -50,7 +52,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <HelmThemeContext.Provider value={value}>
-      <ConfigProvider theme={theme.config}>{children}</ConfigProvider>
+      {children}
     </HelmThemeContext.Provider>
   );
 };

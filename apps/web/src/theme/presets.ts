@@ -1,17 +1,12 @@
-import { theme as antdTheme, type ThemeConfig } from "antd";
-
 // helm tema sistemi.
-// Yeni tema eklemek = HELM_THEMES dizisine bir nesne eklemek. Başka değişiklik yok.
-
-const { darkAlgorithm, defaultAlgorithm } = antdTheme;
+// Yeni tema = HELM_THEMES'e bir girdi + src/styles/index.css'e bir
+// [data-helm-theme="..."] bloğu. Başka değişiklik yok.
 
 export interface HelmTheme {
   key: string;
   label: string;
   isDark: boolean;
-  /** Ant Design ConfigProvider'a beslenen tema. */
-  config: ThemeConfig;
-  /** recharts grafiklerinin okuduğu palet. */
+  /** recharts grafiklerinin okuduğu palet (recharts string renk ister). */
   chart: {
     grid: string;
     axis: string;
@@ -20,25 +15,11 @@ export interface HelmTheme {
   };
 }
 
-const FONT =
-  "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-
 export const HELM_THEMES: HelmTheme[] = [
   {
     key: "glass",
     label: "Liquid Glass",
     isDark: true,
-    config: {
-      algorithm: darkAlgorithm,
-      token: {
-        colorPrimary: "#a3e635",
-        colorInfo: "#a3e635",
-        colorBgBase: "#07070a",
-        borderRadius: 14,
-        fontFamily: FONT,
-        wireframe: false,
-      },
-    },
     chart: {
       grid: "rgba(255,255,255,0.07)",
       axis: "#6b7280",
@@ -50,19 +31,8 @@ export const HELM_THEMES: HelmTheme[] = [
     key: "terminal",
     label: "Terminal",
     isDark: true,
-    config: {
-      algorithm: darkAlgorithm,
-      token: {
-        colorPrimary: "#14b8a6",
-        colorInfo: "#14b8a6",
-        colorBgBase: "#0a0e0d",
-        borderRadius: 8,
-        fontFamily: FONT,
-        wireframe: false,
-      },
-    },
     chart: {
-      grid: "rgba(20,184,166,0.1)",
+      grid: "rgba(20,184,166,0.12)",
       axis: "#5b6b68",
       revenue: "#2dd4bf",
       users: "#22d3ee",
@@ -72,17 +42,6 @@ export const HELM_THEMES: HelmTheme[] = [
     key: "helm-dark",
     label: "Helm Dark",
     isDark: true,
-    config: {
-      algorithm: darkAlgorithm,
-      token: {
-        colorPrimary: "#6366f1",
-        colorInfo: "#6366f1",
-        colorBgBase: "#0b0b0f",
-        borderRadius: 10,
-        fontFamily: FONT,
-        wireframe: false,
-      },
-    },
     chart: {
       grid: "rgba(255,255,255,0.06)",
       axis: "#6b7280",
@@ -94,17 +53,6 @@ export const HELM_THEMES: HelmTheme[] = [
     key: "helm-light",
     label: "Helm Light",
     isDark: false,
-    config: {
-      algorithm: defaultAlgorithm,
-      token: {
-        colorPrimary: "#6366f1",
-        colorInfo: "#6366f1",
-        colorBgLayout: "#f5f5f7",
-        borderRadius: 10,
-        fontFamily: FONT,
-        wireframe: false,
-      },
-    },
     chart: {
       grid: "rgba(0,0,0,0.06)",
       axis: "#9ca3af",
@@ -116,19 +64,8 @@ export const HELM_THEMES: HelmTheme[] = [
     key: "midnight",
     label: "Midnight",
     isDark: true,
-    config: {
-      algorithm: darkAlgorithm,
-      token: {
-        colorPrimary: "#8b5cf6",
-        colorInfo: "#8b5cf6",
-        colorBgBase: "#0c0a14",
-        borderRadius: 12,
-        fontFamily: FONT,
-        wireframe: false,
-      },
-    },
     chart: {
-      grid: "rgba(168,139,250,0.1)",
+      grid: "rgba(168,139,250,0.12)",
       axis: "#7c7c93",
       revenue: "#34d399",
       users: "#a78bfa",

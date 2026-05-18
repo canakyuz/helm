@@ -1,21 +1,26 @@
 import { useMemo } from "react";
-import { Show } from "@refinedev/antd";
 import { useList, useShow } from "@refinedev/core";
-import { Card, Col, Row, Tabs } from "antd";
 import {
-  ApiOutlined,
-  BarChartOutlined,
-  DollarOutlined,
-  TeamOutlined,
-  UserOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
-import { IntegrationsPanel } from "../../components/integrations-panel";
-import { StatCard } from "../../components/stat-card";
-import { TrendChart } from "../../components/trend-chart";
-import { useHelmTheme } from "../../theme/ThemeProvider";
-import { compact, deltaPct, latest, series, usd } from "../../lib/metrics";
-import type { Metric, Project } from "../../types";
+  BarChart3,
+  Boxes,
+  DollarSign,
+  Users,
+  UserPlus,
+  Wallet,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { IntegrationsPanel } from "@/components/integrations-panel";
+import { StatCard } from "@/components/stat-card";
+import { TrendChart } from "@/components/trend-chart";
+import { useHelmTheme } from "@/theme/ThemeProvider";
+import { compact, deltaPct, latest, series, usd } from "@/lib/metrics";
+import type { Metric, Project } from "@/types";
 
 export const ProjectShow = () => {
   const { query } = useShow<Project>();
@@ -50,106 +55,99 @@ export const ProjectShow = () => {
     [metrics],
   );
 
-  const overview = (
-    <>
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="MRR"
-            value={usd(latest(metrics, "mrr"))}
-            icon={<DollarOutlined />}
-            loading={loading}
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="Reklam Geliri (son gün)"
-            value={usd(latest(metrics, "ad_revenue"))}
-            icon={<WalletOutlined />}
-            delta={deltaPct(adRevenueSeries)}
-            loading={loading}
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="DAU"
-            value={compact(latest(metrics, "dau"))}
-            icon={<TeamOutlined />}
-            delta={deltaPct(dauSeries)}
-            loading={loading}
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="Toplam Kullanıcı"
-            value={compact(latest(metrics, "total_users"))}
-            icon={<UserOutlined />}
-            delta={deltaPct(usersSeries)}
-            loading={loading}
-          />
-        </Col>
-      </Row>
-
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col xs={24} lg={12}>
-          <Card title="Reklam Geliri — son 90 gün" loading={loading}>
-            <TrendChart
-              data={adRevenueSeries}
-              color={theme.chart.revenue}
-              format={usd}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Günlük Aktif Kullanıcı — son 90 gün" loading={loading}>
-            <TrendChart
-              data={dauSeries}
-              color={theme.chart.users}
-              format={compact}
-            />
-          </Card>
-        </Col>
-        <Col xs={24}>
-          <Card title="Kullanıcı Büyümesi — son 90 gün" loading={loading}>
-            <TrendChart
-              data={usersSeries}
-              color={theme.chart.revenue}
-              format={compact}
-              height={200}
-            />
-          </Card>
-        </Col>
-      </Row>
-    </>
-  );
-
   return (
-    <Show isLoading={query.isLoading} title={record?.name ?? "Proje"}>
-      <Tabs
-        defaultActiveKey="overview"
-        items={[
-          {
-            key: "overview",
-            label: (
-              <span>
-                <BarChartOutlined /> Genel Bakış
-              </span>
-            ),
-            children: overview,
-          },
-          {
-            key: "integrations",
-            label: (
-              <span>
-                <ApiOutlined /> Entegrasyonlar
-              </span>
-            ),
-            children: record?.id ? (
-              <IntegrationsPanel projectId={record.id} />
-            ) : null,
-          },
-        ]}
-      />
-    </Show>
+    <div className="space-y-4">
+      <h1 className="text-2xl font-semibold tracking-tight">
+        {record?.name ?? "Proje"}
+      </h1>
+
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">
+            <BarChart3 className="size-4" /> Genel Bakış
+          </TabsTrigger>
+          <TabsTrigger value="integrations">
+            <Boxes className="size-4" /> Entegrasyonlar
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title="MRR"
+              value={usd(latest(metrics, "mrr"))}
+              icon={<DollarSign />}
+              loading={loading}
+            />
+            <StatCard
+              title="Reklam Geliri (son gün)"
+              value={usd(latest(metrics, "ad_revenue"))}
+              icon={<Wallet />}
+              delta={deltaPct(adRevenueSeries)}
+              loading={loading}
+            />
+            <StatCard
+              title="DAU"
+              value={compact(latest(metrics, "dau"))}
+              icon={<Users />}
+              delta={deltaPct(dauSeries)}
+              loading={loading}
+            />
+            <StatCard
+              title="Toplam Kullanıcı"
+              value={compact(latest(metrics, "total_users"))}
+              icon={<UserPlus />}
+              delta={deltaPct(usersSeries)}
+              loading={loading}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Reklam Geliri — son 90 gün</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TrendChart
+                  data={adRevenueSeries}
+                  color={theme.chart.revenue}
+                  format={usd}
+                />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Günlük Aktif Kullanıcı — son 90 gün</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TrendChart
+                  data={dauSeries}
+                  color={theme.chart.users}
+                  format={compact}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Kullanıcı Büyümesi — son 90 gün</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TrendChart
+                data={usersSeries}
+                color={theme.chart.revenue}
+                format={compact}
+                height={200}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="integrations">
+          {record?.id && <IntegrationsPanel projectId={record.id} />}
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };

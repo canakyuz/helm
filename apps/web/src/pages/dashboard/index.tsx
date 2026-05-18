@@ -1,27 +1,23 @@
 import { useMemo, useState } from "react";
 import { useInvalidate, useList } from "@refinedev/core";
+import { DollarSign, RefreshCw, Users, Wallet } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Button,
-  Card,
-  Col,
-  Empty,
-  Row,
   Table,
-  Typography,
-  notification,
-} from "antd";
-import {
-  DollarOutlined,
-  ReloadOutlined,
-  TeamOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
-import { supabaseClient } from "../../providers/supabase-client";
-import { TrendChart } from "../../components/trend-chart";
-import { StatCard } from "../../components/stat-card";
-import { useHelmTheme } from "../../theme/ThemeProvider";
-import { compact, deltaPct, latest, series, usd } from "../../lib/metrics";
-import type { Metric, Project } from "../../types";
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { StatCard } from "@/components/stat-card";
+import { TrendChart } from "@/components/trend-chart";
+import { supabaseClient } from "@/providers/supabase-client";
+import { useHelmTheme } from "@/theme/ThemeProvider";
+import { compact, deltaPct, latest, series, usd } from "@/lib/metrics";
+import type { Metric, Project } from "@/types";
 
 /** Bir metrik için her projenin en güncel tarihli değerini döndürür. */
 const latestByProject = (metrics: Metric[], metricName: string) => {
@@ -37,7 +33,7 @@ const latestByProject = (metrics: Metric[], metricName: string) => {
 };
 
 interface ProjectRow {
-  key: string;
+  id: string;
   name: string;
   mrr: number;
   adRevenue: number;
@@ -82,7 +78,7 @@ export const DashboardPage = () => {
     const dau = latestByProject(metrics, "dau");
     const totalUsers = latestByProject(metrics, "total_users");
     return projects.map((p) => ({
-      key: p.id,
+      id: p.id,
       name: p.name,
       mrr: mrr.get(p.id)?.value ?? 0,
       adRevenue: adRevenue.get(p.id)?.value ?? 0,
@@ -99,14 +95,12 @@ export const DashboardPage = () => {
         { body: {} },
       );
       if (error) throw error;
-      notification.success({
-        message: "Senkronizasyon tamam",
+      toast.success("Senkronizasyon tamam", {
         description: `${data?.ingested ?? 0} metrik güncellendi.`,
       });
       invalidate({ resource: "metrics", invalidates: ["list"] });
     } catch (e) {
-      notification.error({
-        message: "Senkronizasyon başarısız",
+      toast.error("Senkronizasyon başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -115,116 +109,104 @@ export const DashboardPage = () => {
   };
 
   return (
-    <div>
-      <Row justify="space-between" align="middle" style={{ marginBottom: 20 }}>
-        <Typography.Title level={3} style={{ margin: 0, fontWeight: 600 }}>
-          Cockpit
-        </Typography.Title>
-        <Button
-          type="primary"
-          icon={<ReloadOutlined />}
-          loading={syncing}
-          onClick={handleSync}
-        >
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">Cockpit</h1>
+        <Button onClick={handleSync} disabled={syncing}>
+          <RefreshCw className={syncing ? "size-4 animate-spin" : "size-4"} />
           Şimdi senkronize et
         </Button>
-      </Row>
+      </div>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="Toplam MRR"
-            value={usd(latest(metrics, "mrr"))}
-            icon={<DollarOutlined />}
-            loading={loading}
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="Reklam Geliri (son gün)"
-            value={usd(latest(metrics, "ad_revenue"))}
-            icon={<WalletOutlined />}
-            delta={deltaPct(adRevenueSeries)}
-            loading={loading}
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="Toplam DAU"
-            value={compact(latest(metrics, "dau"))}
-            icon={<TeamOutlined />}
-            delta={deltaPct(dauSeries)}
-            loading={loading}
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="Aktif Abone"
-            value={compact(latest(metrics, "active_subs"))}
-            loading={loading}
-          />
-        </Col>
-      </Row>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Toplam MRR"
+          value={usd(latest(metrics, "mrr"))}
+          icon={<DollarSign />}
+          loading={loading}
+        />
+        <StatCard
+          title="Reklam Geliri (son gün)"
+          value={usd(latest(metrics, "ad_revenue"))}
+          icon={<Wallet />}
+          delta={deltaPct(adRevenueSeries)}
+          loading={loading}
+        />
+        <StatCard
+          title="Toplam DAU"
+          value={compact(latest(metrics, "dau"))}
+          icon={<Users />}
+          delta={deltaPct(dauSeries)}
+          loading={loading}
+        />
+        <StatCard
+          title="Aktif Abone"
+          value={compact(latest(metrics, "active_subs"))}
+          loading={loading}
+        />
+      </div>
 
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col xs={24} lg={12}>
-          <Card title="Reklam Geliri — son 90 gün" loading={loading}>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Reklam Geliri — son 90 gün</CardTitle>
+          </CardHeader>
+          <CardContent>
             <TrendChart
               data={adRevenueSeries}
               color={theme.chart.revenue}
               format={usd}
             />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Günlük Aktif Kullanıcı — son 90 gün" loading={loading}>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Günlük Aktif Kullanıcı — son 90 gün</CardTitle>
+          </CardHeader>
+          <CardContent>
             <TrendChart
               data={dauSeries}
               color={theme.chart.users}
               format={compact}
             />
-          </Card>
-        </Col>
-      </Row>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card title="Proje Kırılımı" style={{ marginTop: 16 }}>
-        {projects.length === 0 && !loading ? (
-          <Empty description="Henüz proje eklenmedi" />
-        ) : (
-          <Table<ProjectRow>
-            dataSource={rows}
-            loading={loading}
-            pagination={false}
-          >
-            <Table.Column<ProjectRow>
-              title="Proje"
-              dataIndex="name"
-              render={(value) => (
-                <Typography.Text strong>{value}</Typography.Text>
-              )}
-            />
-            <Table.Column<ProjectRow>
-              title="MRR"
-              dataIndex="mrr"
-              render={(value) => usd(value)}
-            />
-            <Table.Column<ProjectRow>
-              title="Reklam Geliri"
-              dataIndex="adRevenue"
-              render={(value) => usd(value)}
-            />
-            <Table.Column<ProjectRow>
-              title="DAU"
-              dataIndex="dau"
-              render={(value) => compact(value)}
-            />
-            <Table.Column<ProjectRow>
-              title="Toplam Kullanıcı"
-              dataIndex="totalUsers"
-              render={(value) => compact(value)}
-            />
-          </Table>
-        )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Proje Kırılımı</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {projects.length === 0 && !loading ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Henüz proje eklenmedi
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Proje</TableHead>
+                  <TableHead>MRR</TableHead>
+                  <TableHead>Reklam Geliri</TableHead>
+                  <TableHead>DAU</TableHead>
+                  <TableHead>Toplam Kullanıcı</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium">{r.name}</TableCell>
+                    <TableCell>{usd(r.mrr)}</TableCell>
+                    <TableCell>{usd(r.adRevenue)}</TableCell>
+                    <TableCell>{compact(r.dau)}</TableCell>
+                    <TableCell>{compact(r.totalUsers)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
       </Card>
     </div>
   );

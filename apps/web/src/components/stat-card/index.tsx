@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
-import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
-import { Card, Typography, theme } from "antd";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface StatCardProps {
   title: string;
   value: string | number;
   icon?: ReactNode;
-  /** Yüzde değişim. null/undefined ise trend satırı gizlenir. */
+  /** Yüzde değişim. null/undefined ise trend satırı "—" gösterir. */
   delta?: number | null;
   deltaLabel?: string;
   loading?: boolean;
@@ -21,62 +23,56 @@ export const StatCard = ({
   deltaLabel = "son 7 gün",
   loading,
 }: StatCardProps) => {
-  const { token } = theme.useToken();
+  if (loading) {
+    return (
+      <Card className="h-full">
+        <CardContent className="space-y-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-7 w-28" />
+          <Skeleton className="h-3 w-20" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   const hasDelta =
     delta !== null && delta !== undefined && Number.isFinite(delta);
   const positive = (delta ?? 0) >= 0;
 
   return (
-    <Card
-      loading={loading}
-      style={{ height: "100%" }}
-      styles={{ body: { padding: 20 } }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 10,
-        }}
-      >
-        {icon && (
-          <span style={{ color: token.colorTextTertiary, fontSize: 15 }}>
-            {icon}
-          </span>
-        )}
-        <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-          {title}
-        </Typography.Text>
-      </div>
+    <Card className="h-full">
+      <CardContent>
+        <div className="mb-2.5 flex items-center gap-2 text-muted-foreground">
+          {icon && <span className="[&_svg]:size-4">{icon}</span>}
+          <span className="text-[13px]">{title}</span>
+        </div>
 
-      <Typography.Title level={3} style={{ margin: 0, fontWeight: 600 }}>
-        {value}
-      </Typography.Title>
+        <div className="text-2xl font-semibold tracking-tight">{value}</div>
 
-      {/* Trend satırı her zaman yer kaplar — kartlar aynı boyda kalsın. */}
-      <div style={{ marginTop: 6, fontSize: 12, minHeight: 20 }}>
-        {hasDelta ? (
-          <>
-            <span
-              style={{
-                color: positive ? token.colorSuccess : token.colorError,
-                fontWeight: 500,
-              }}
-            >
-              {positive ? <ArrowUpOutlined /> : <ArrowDownOutlined />}{" "}
-              {Math.abs(delta as number).toFixed(1)}%
-            </span>{" "}
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              {deltaLabel}
-            </Typography.Text>
-          </>
-        ) : (
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            —
-          </Typography.Text>
-        )}
-      </div>
+        {/* Trend satırı her zaman yer kaplar — kartlar aynı boyda kalsın. */}
+        <div className="mt-1.5 min-h-5 text-xs">
+          {hasDelta ? (
+            <>
+              <span
+                className={cn(
+                  "font-medium",
+                  positive ? "text-emerald-500" : "text-red-500",
+                )}
+              >
+                {positive ? (
+                  <ArrowUp className="inline size-3" />
+                ) : (
+                  <ArrowDown className="inline size-3" />
+                )}{" "}
+                {Math.abs(delta as number).toFixed(1)}%
+              </span>{" "}
+              <span className="text-muted-foreground">{deltaLabel}</span>
+            </>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };
