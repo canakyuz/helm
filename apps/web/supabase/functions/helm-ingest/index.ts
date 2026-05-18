@@ -32,11 +32,13 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  // İstek gövdesinden tetikleyici (panel "manual" gönderir, cron göndermez).
+  // İstek gövdesi: trigger (panel "manual", cron yok) + opsiyonel project_id.
   let trigger: "manual" | "cron" = "cron";
+  let projectId: string | undefined;
   try {
     const body = await req.json();
     if (body?.trigger === "manual") trigger = "manual";
+    if (typeof body?.project_id === "string") projectId = body.project_id;
   } catch {
     // gövde yok — cron
   }
@@ -49,10 +51,15 @@ Deno.serve(async (req) => {
     .single();
   const runId = run?.id as number | undefined;
 
-  const { data: integrations, error } = await hub
+  // project_id verilirse yalnızca o projeyi senkronla.
+  let integrationsQuery = hub
     .from("project_integrations")
     .select("id, project_id, provider, config")
     .eq("enabled", true);
+  if (projectId) {
+    integrationsQuery = integrationsQuery.eq("project_id", projectId);
+  }
+  const { data: integrations, error } = await integrationsQuery;
 
   if (error) {
     if (runId) {

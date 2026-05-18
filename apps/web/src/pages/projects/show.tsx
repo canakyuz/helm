@@ -1,13 +1,16 @@
-import { useMemo } from "react";
-import { useList, useShow } from "@refinedev/core";
+import { useMemo, useState } from "react";
+import { useInvalidate, useList, useShow } from "@refinedev/core";
 import {
   BarChart3,
   Boxes,
   DollarSign,
+  RefreshCw,
   Users,
   UserPlus,
   Wallet,
 } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Tabs,
@@ -18,6 +21,7 @@ import {
 import { IntegrationsPanel } from "@/components/integrations-panel";
 import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
+import { supabaseClient } from "@/providers/supabase-client";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import { compact, deltaPct, latest, series, usd } from "@/lib/metrics";
 import type { Metric, Project } from "@/types";
@@ -26,6 +30,31 @@ export const ProjectShow = () => {
   const { query } = useShow<Project>();
   const record = query.data?.data;
   const { theme } = useHelmTheme();
+  const invalidate = useInvalidate();
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = async () => {
+    if (!record?.id) return;
+    setSyncing(true);
+    try {
+      const { data, error } = await supabaseClient.functions.invoke(
+        "helm-ingest",
+        { body: { trigger: "manual", project_id: record.id } },
+      );
+      if (error) throw error;
+      toast.success("Senkronizasyon tamam", {
+        description: `${data?.ingested ?? 0} metrik güncellendi.`,
+      });
+      invalidate({ resource: "metrics", invalidates: ["list"] });
+      invalidate({ resource: "project_integrations", invalidates: ["list"] });
+    } catch (e) {
+      toast.error("Senkronizasyon başarısız", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const since = useMemo(
     () => new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10),
