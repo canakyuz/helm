@@ -3,7 +3,10 @@ import { useInvalidate, useList, useShow } from "@refinedev/core";
 import {
   BarChart3,
   Boxes,
+  CalendarDays,
   DollarSign,
+  Eye,
+  Gauge,
   RefreshCw,
   Users,
   UserPlus,
@@ -23,7 +26,7 @@ import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
 import { supabaseClient } from "@/providers/supabase-client";
 import { useHelmTheme } from "@/theme/ThemeProvider";
-import { compact, deltaPct, latest, series, usd } from "@/lib/metrics";
+import { compact, deltaPct, latest, series, usd, usd2 } from "@/lib/metrics";
 import type { Metric, Project } from "@/types";
 
 export const ProjectShow = () => {
@@ -133,6 +136,25 @@ export const ProjectShow = () => {
               value={compact(latest(metrics, "total_users"))}
               icon={<UserPlus />}
               delta={deltaPct(usersSeries)}
+              loading={loading}
+            />
+            <StatCard
+              title="Reklam Gösterimi (son gün)"
+              value={compact(latest(metrics, "ad_impressions"))}
+              icon={<Eye />}
+              delta={deltaPct(series(metrics, "ad_impressions"))}
+              loading={loading}
+            />
+            <StatCard
+              title="eCPM"
+              value={usd2(latest(metrics, "ad_ecpm"))}
+              icon={<Gauge />}
+              loading={loading}
+            />
+            <StatCard
+              title="WAU"
+              value={compact(latest(metrics, "wau"))}
+              icon={<CalendarDays />}
               loading={loading}
             />
           </div>

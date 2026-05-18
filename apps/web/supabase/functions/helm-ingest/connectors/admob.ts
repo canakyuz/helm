@@ -39,7 +39,7 @@ export const fetchAdMob: Connector = async (config) => {
     reportSpec: {
       dateRange: { startDate: ymd(start), endDate: ymd(end) },
       dimensions: ["DATE"],
-      metrics: ["ESTIMATED_EARNINGS"],
+      metrics: ["ESTIMATED_EARNINGS", "IMPRESSIONS", "IMPRESSION_RPM"],
     },
   };
 
@@ -66,17 +66,27 @@ export const fetchAdMob: Connector = async (config) => {
     const row = item.row as
       | {
           dimensionValues?: Record<string, { value?: string }>;
-          metricValues?: Record<string, { microsValue?: string }>;
+          metricValues?: Record<
+            string,
+            { microsValue?: string; integerValue?: string }
+          >;
         }
       | undefined;
     if (!row) continue;
 
     const dateRaw = row.dimensionValues?.DATE?.value; // "YYYYMMDD"
-    const micros = Number(row.metricValues?.ESTIMATED_EARNINGS?.microsValue ?? 0);
     if (!dateRaw || dateRaw.length !== 8) continue;
-
     const date = `${dateRaw.slice(0, 4)}-${dateRaw.slice(4, 6)}-${dateRaw.slice(6, 8)}`;
-    points.push({ date, metric: "ad_revenue", value: micros / 1_000_000 });
+
+    const mv = row.metricValues ?? {};
+    // ESTIMATED_EARNINGS, IMPRESSION_RPM → micros; IMPRESSIONS → integer.
+    const revenue = Number(mv.ESTIMATED_EARNINGS?.microsValue ?? 0) / 1_000_000;
+    const impressions = Number(mv.IMPRESSIONS?.integerValue ?? 0);
+    const ecpm = Number(mv.IMPRESSION_RPM?.microsValue ?? 0) / 1_000_000;
+
+    points.push({ date, metric: "ad_revenue", value: revenue });
+    points.push({ date, metric: "ad_impressions", value: impressions });
+    points.push({ date, metric: "ad_ecpm", value: ecpm });
   }
   return points;
 };

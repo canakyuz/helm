@@ -10,6 +10,15 @@ export const usd = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value);
 
+/** İki ondalıklı dolar — eCPM gibi küçük tutarlar için. */
+export const usd2 = (value: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+
 export const compact = (value: number) =>
   new Intl.NumberFormat("en-US", { notation: "compact" }).format(value);
 
