@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Authenticated, Refine } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
@@ -20,15 +21,28 @@ import { dataProvider } from "@/providers/data";
 import { notificationProvider } from "@/providers/notification";
 import { supabaseClient } from "@/providers/supabase-client";
 
-import { DashboardPage } from "@/pages/dashboard";
-import { LoginPage } from "@/pages/login";
-import { UsersPage } from "@/pages/users";
-import {
-  ProjectCreate,
-  ProjectEdit,
-  ProjectList,
-  ProjectShow,
-} from "@/pages/projects";
+// Route bazlı kod bölme — her sayfa kendi chunk'ında, ilk açılış hafifler.
+const DashboardPage = lazy(() =>
+  import("@/pages/dashboard").then((m) => ({ default: m.DashboardPage })),
+);
+const LoginPage = lazy(() =>
+  import("@/pages/login").then((m) => ({ default: m.LoginPage })),
+);
+const UsersPage = lazy(() =>
+  import("@/pages/users").then((m) => ({ default: m.UsersPage })),
+);
+const ProjectList = lazy(() =>
+  import("@/pages/projects").then((m) => ({ default: m.ProjectList })),
+);
+const ProjectCreate = lazy(() =>
+  import("@/pages/projects").then((m) => ({ default: m.ProjectCreate })),
+);
+const ProjectEdit = lazy(() =>
+  import("@/pages/projects").then((m) => ({ default: m.ProjectEdit })),
+);
+const ProjectShow = lazy(() =>
+  import("@/pages/projects").then((m) => ({ default: m.ProjectShow })),
+);
 
 function App() {
   return (
@@ -105,7 +119,14 @@ function App() {
                     </Authenticated>
                   }
                 >
-                  <Route path="/login" element={<LoginPage />} />
+                  <Route
+                    path="/login"
+                    element={
+                      <Suspense fallback={null}>
+                        <LoginPage />
+                      </Suspense>
+                    }
+                  />
                 </Route>
               </Routes>
 

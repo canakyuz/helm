@@ -1,6 +1,13 @@
+import { Suspense } from "react";
 import { useGetIdentity, useLogout, useMenu } from "@refinedev/core";
 import { Link, Outlet } from "react-router";
-import { Check, ChevronsUpDown, LogOut, Palette } from "lucide-react";
+import {
+  Check,
+  ChevronsUpDown,
+  Loader2,
+  LogOut,
+  Palette,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -147,7 +154,15 @@ export const HelmLayout = () => (
     <SidebarInset>
       <HeaderBar />
       <main className="p-4 lg:p-6">
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="grid place-items-center py-24">
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
     </SidebarInset>
   </SidebarProvider>
