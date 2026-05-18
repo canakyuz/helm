@@ -1,0 +1,66 @@
+/* Liquid Glass teması — body[data-helm-theme="glass"] aktifken cam efekti.
+   Diğer temalar etkilenmez (data attribute ile izole). */
+
+body[data-helm-theme="glass"] .ant-layout {
+  background-color: #07070a;
+  background-image:
+    radial-gradient(
+      640px circle at 12% 6%,
+      rgba(163, 230, 53, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      720px circle at 88% 94%,
+      rgba(56, 189, 248, 0.07),
+      transparent 55%
+    );
+  background-attachment: fixed;
+}
+
+/* Header + Sider — buzlu cam */
+body[data-helm-theme="glass"] .ant-layout-header,
+body[data-helm-theme="glass"] .ant-layout-sider {
+  background: rgba(18, 20, 26, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+
+/* Kartlar — yarı saydam, bulanık, ince ışık kenarlı */
+body[data-helm-theme="glass"] .ant-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+body[data-helm-theme="glass"] .ant-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+/* Tablo — şeffaf, başlık hafif vurgulu */
+body[data-helm-theme="glass"] .ant-table,
+body[data-helm-theme="glass"] .ant-table-tbody > tr > td {
+  background: transparent !important;
+}
+
+body[data-helm-theme="glass"] .ant-table-thead > tr > th {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+body[data-helm-theme="glass"] .ant-table-tbody > tr:hover > td {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Modal + Dropdown da camsı */
+body[data-helm-theme="glass"] .ant-modal-content,
+body[data-helm-theme="glass"] .ant-dropdown-menu {
+  background: rgba(22, 24, 30, 0.85) !important;
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}

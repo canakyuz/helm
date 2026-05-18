@@ -1,60 +1,87 @@
 import type { RefineThemedLayoutHeaderProps } from "@refinedev/antd";
 import { useGetIdentity } from "@refinedev/core";
+import { BgColorsOutlined, CheckOutlined } from "@ant-design/icons";
 import {
   Layout as AntdLayout,
   Avatar,
+  Button,
+  Dropdown,
   Space,
-  Switch,
-  theme,
   Typography,
+  theme,
 } from "antd";
-import React, { useContext } from "react";
-import { ColorModeContext } from "../../contexts/color-mode";
+import type React from "react";
+import { useHelmTheme } from "../../theme/ThemeProvider";
 
-const { Text } = Typography;
 const { useToken } = theme;
 
 type IUser = {
-  id: number;
+  id: string;
   name: string;
-  avatar: string;
+  avatar?: string;
 };
 
+// Üst bar — tema seçici + kullanıcı. Navigasyon kenar çubuğunda.
 export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({
   sticky = true,
 }) => {
   const { token } = useToken();
   const { data: user } = useGetIdentity<IUser>();
-  const { mode, setMode } = useContext(ColorModeContext);
+  const { themeKey, setThemeKey, themes } = useHelmTheme();
 
   const headerStyles: React.CSSProperties = {
-    backgroundColor: token.colorBgElevated,
+    backgroundColor: token.colorBgContainer,
+    borderBottom: `1px solid ${token.colorBorderSecondary}`,
     display: "flex",
     justifyContent: "flex-end",
     alignItems: "center",
-    padding: "0px 24px",
-    height: "64px",
+    gap: 12,
+    padding: "0 24px",
+    height: 64,
   };
 
   if (sticky) {
     headerStyles.position = "sticky";
     headerStyles.top = 0;
-    headerStyles.zIndex = 1;
+    headerStyles.zIndex = 10;
   }
 
   return (
     <AntdLayout.Header style={headerStyles}>
-      <Space>
-        <Switch
-          checkedChildren="🌛"
-          unCheckedChildren="🔆"
-          onChange={() => setMode(mode === "light" ? "dark" : "light")}
-          defaultChecked={mode === "dark"}
-        />
-        <Space style={{ marginLeft: "8px" }} size="middle">
-          {user?.name && <Text strong>{user.name}</Text>}
-          {user?.avatar && <Avatar src={user?.avatar} alt={user?.name} />}
-        </Space>
+      <Dropdown
+        trigger={["click"]}
+        menu={{
+          selectable: true,
+          selectedKeys: [themeKey],
+          onClick: ({ key }) => setThemeKey(key),
+          items: themes.map((t) => ({
+            key: t.key,
+            label: t.label,
+            icon:
+              t.key === themeKey ? (
+                <CheckOutlined />
+              ) : (
+                <span style={{ display: "inline-block", width: 14 }} />
+              ),
+          })),
+        }}
+      >
+        <Button type="text" icon={<BgColorsOutlined />}>
+          Tema
+        </Button>
+      </Dropdown>
+
+      <Space size="small">
+        {user?.name && (
+          <Typography.Text type="secondary">{user.name}</Typography.Text>
+        )}
+        <Avatar
+          size="small"
+          src={user?.avatar}
+          style={{ backgroundColor: token.colorPrimary }}
+        >
+          {user?.name?.[0]?.toUpperCase() ?? "?"}
+        </Avatar>
       </Space>
     </AntdLayout.Header>
   );
