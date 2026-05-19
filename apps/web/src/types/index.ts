@@ -139,6 +139,15 @@ export interface AppVersion {
   fetched_at: string;
 }
 
+export interface AuditLog {
+  id: number;
+  project_id: string | null;
+  target_user: string | null;
+  action: string;
+  detail: string | null;
+  created_at: string;
+}
+
 export const PROVIDER_LABELS: Record<ProviderName, string> = {
   revenuecat: "RevenueCat",
   admob: "AdMob",

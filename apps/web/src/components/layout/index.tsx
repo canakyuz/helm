@@ -7,19 +7,23 @@ import {
   Check,
   ChevronsUpDown,
   Filter,
+  History,
   LayoutDashboard,
   LineChart,
   Loader2,
   LogOut,
   Mail,
+  Megaphone,
   Palette,
   Plug,
   ScrollText,
+  Send,
   Settings,
   Star,
   Tag,
   TrendingUp,
   Users,
+  Workflow,
 } from "lucide-react";
 import {
   Sidebar,
@@ -72,6 +76,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { title: "Kullanıcılar", icon: Users, url: "/users" },
       { title: "Segmentler", icon: Filter, url: "/segments" },
       { title: "Yorumlar", icon: Star, url: "/reviews" },
+      { title: "Müdahale Geçmişi", icon: History, url: "/audit" },
     ],
   },
   {
@@ -79,12 +84,17 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { title: "Gelir & Reklam", icon: TrendingUp, url: "/revenue" },
       { title: "Büyüme", icon: LineChart, url: "/growth" },
+      { title: "Huni", icon: Workflow, url: "/funnel" },
       { title: "Uyarılar", icon: Bell, url: "/alerts" },
     ],
   },
   {
     label: "İletişim",
-    items: [{ title: "Mail", icon: Mail, url: "/mail" }],
+    items: [
+      { title: "Mail", icon: Mail, url: "/mail" },
+      { title: "Push", icon: Send, url: "/push" },
+      { title: "Kampanya Geçmişi", icon: Megaphone, url: "/campaigns" },
+    ],
   },
   {
     label: "DevOps",

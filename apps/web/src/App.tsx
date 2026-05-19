@@ -66,6 +66,18 @@ const SegmentsPage = lazy(() =>
 const VersionsPage = lazy(() =>
   import("@/pages/versions").then((m) => ({ default: m.VersionsPage })),
 );
+const FunnelPage = lazy(() =>
+  import("@/pages/funnel").then((m) => ({ default: m.FunnelPage })),
+);
+const PushPage = lazy(() =>
+  import("@/pages/push").then((m) => ({ default: m.PushPage })),
+);
+const CampaignsPage = lazy(() =>
+  import("@/pages/campaigns").then((m) => ({ default: m.CampaignsPage })),
+);
+const AuditPage = lazy(() =>
+  import("@/pages/audit").then((m) => ({ default: m.AuditPage })),
+);
 const ProjectCreate = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectCreate })),
 );
@@ -134,6 +146,18 @@ function App() {
                   list: "/versions",
                   meta: { label: "Sürümler" },
                 },
+                { name: "funnel", list: "/funnel", meta: { label: "Huni" } },
+                { name: "push", list: "/push", meta: { label: "Push" } },
+                {
+                  name: "campaigns",
+                  list: "/campaigns",
+                  meta: { label: "Kampanya Geçmişi" },
+                },
+                {
+                  name: "audit",
+                  list: "/audit",
+                  meta: { label: "Müdahale Geçmişi" },
+                },
                 {
                   name: "settings",
                   list: "/settings",
@@ -178,6 +202,10 @@ function App() {
                     <Route path="/logs" element={<LogsPage />} />
                     <Route path="/segments" element={<SegmentsPage />} />
                     <Route path="/versions" element={<VersionsPage />} />
+                    <Route path="/funnel" element={<FunnelPage />} />
+                    <Route path="/push" element={<PushPage />} />
+                    <Route path="/campaigns" element={<CampaignsPage />} />
+                    <Route path="/audit" element={<AuditPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route
                       path="/projects/create"
