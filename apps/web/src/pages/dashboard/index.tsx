@@ -5,7 +5,10 @@ import {
   useList,
   useNavigation,
 } from "@refinedev/core";
+import { Link } from "react-router";
 import {
+  Activity,
+  Bell,
   CalendarDays,
   DollarSign,
   Eye,
@@ -25,8 +28,15 @@ import { TrendChart } from "@/components/trend-chart";
 import { supabaseClient } from "@/providers/supabase-client";
 import { useScope } from "@/context/scope";
 import { useHelmTheme } from "@/theme/ThemeProvider";
+import { cn } from "@/lib/utils";
 import { compact, deltaPct, latest, series, usd, usd2 } from "@/lib/metrics";
-import type { Metric, Project } from "@/types";
+import type {
+  AlertEvent,
+  Metric,
+  Project,
+  ProjectIntegration,
+  SyncRun,
+} from "@/types";
 
 /** Bir metrik için her projenin en güncel tarihli değeri. */
 const latestByProject = (metrics: Metric[], metricName: string) => {
@@ -39,6 +49,23 @@ const latestByProject = (metrics: Metric[], metricName: string) => {
     }
   }
   return map;
+};
+
+const timeAgo = (iso: string | null) => {
+  if (!iso) return "hiç";
+  const min = (Date.now() - new Date(iso).getTime()) / 60_000;
+  if (min < 1) return "az önce";
+  if (min < 60) return `${Math.round(min)} dk önce`;
+  if (min < 1440) return `${Math.round(min / 60)} sa önce`;
+  return `${Math.round(min / 1440)} gün önce`;
+};
+
+/** Bir projenin connector sağlığı: ok / error / pending. */
+const projectHealth = (integrations: ProjectIntegration[]) => {
+  if (integrations.length === 0) return "pending";
+  if (integrations.some((i) => i.last_sync_status === "error")) return "error";
+  if (integrations.every((i) => i.last_sync_status === "ok")) return "ok";
+  return "pending";
 };
 
 export const DashboardPage = () => {
@@ -75,6 +102,45 @@ export const DashboardPage = () => {
   const metrics = metricsResult.data;
   const loading = metricsQuery.isLoading;
 
+  // Sağlık şeridi verileri.
+  const integFilters: CrudFilter[] = [];
+  if (!isAll) {
+    integFilters.push({ field: "project_id", operator: "eq", value: scope });
+  }
+  const { result: integResult } = useList<ProjectIntegration>({
+    resource: "project_integrations",
+    filters: integFilters,
+    pagination: { mode: "off" },
+  });
+  const integrations = integResult.data;
+
+  const { result: runsResult } = useList<SyncRun>({
+    resource: "sync_runs",
+    sorters: [{ field: "started_at", order: "desc" }],
+    pagination: { mode: "off" },
+  });
+  const lastRun = runsResult.data[0];
+
+  const since48h = useMemo(
+    () => new Date(Date.now() - 48 * 3_600_000).toISOString(),
+    [],
+  );
+  const { result: alertsResult } = useList<AlertEvent>({
+    resource: "alert_events",
+    filters: [
+      { field: "triggered_at", operator: "gte", value: since48h },
+    ],
+    pagination: { mode: "off" },
+  });
+  const openAlerts = alertsResult.data.length;
+
+  const okCount = integrations.filter(
+    (i) => i.last_sync_status === "ok",
+  ).length;
+  const errCount = integrations.filter(
+    (i) => i.last_sync_status === "error",
+  ).length;
+
   const activeProject = isAll
     ? null
     : projects.find((p) => p.id === scope);
@@ -84,10 +150,6 @@ export const DashboardPage = () => {
     [metrics],
   );
   const dauSeries = useMemo(() => series(metrics, "dau"), [metrics]);
-  const usersSeries = useMemo(
-    () => series(metrics, "total_users"),
-    [metrics],
-  );
 
   const handleSync = async () => {
     setSyncing(true);
@@ -105,6 +167,7 @@ export const DashboardPage = () => {
       });
       invalidate({ resource: "metrics", invalidates: ["list"] });
       invalidate({ resource: "sync_runs", invalidates: ["list"] });
+      invalidate({ resource: "project_integrations", invalidates: ["list"] });
     } catch (e) {
       toast.error("Senkronizasyon başarısız", {
         description: e instanceof Error ? e.message : String(e),
@@ -140,6 +203,44 @@ export const DashboardPage = () => {
         </div>
       </div>
 
+      {/* Durum şeridi — 30 saniyelik sağlık bakışı */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Link
+          to="/system"
+          className={cn(
+            "flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20",
+            errCount > 0 && "text-destructive",
+          )}
+        >
+          <Activity className="size-4" />
+          <span>
+            Kaynak sağlığı:{" "}
+            <strong>
+              {okCount}/{integrations.length}
+            </strong>
+            {errCount > 0 ? ` · ${errCount} hata` : ""}
+          </span>
+        </Link>
+        <div className="flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5">
+          <RefreshCw className="size-4" />
+          <span>
+            Son senkron: <strong>{timeAgo(lastRun?.started_at ?? null)}</strong>
+          </span>
+        </div>
+        <Link
+          to="/alerts"
+          className={cn(
+            "flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20",
+            openAlerts > 0 && "text-destructive",
+          )}
+        >
+          <Bell className="size-4" />
+          <span>
+            Açık uyarı (48s): <strong>{openAlerts}</strong>
+          </span>
+        </Link>
+      </div>
+
       {/* İstatistik kartları */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -173,7 +274,7 @@ export const DashboardPage = () => {
             title="Toplam Kullanıcı"
             value={compact(latest(metrics, "total_users"))}
             icon={<UserPlus />}
-            delta={deltaPct(usersSeries)}
+            delta={deltaPct(series(metrics, "total_users"))}
             loading={loading}
           />
         )}
@@ -249,6 +350,9 @@ export const DashboardPage = () => {
                   const mrr = latestByProject(metrics, "mrr");
                   const ad = latestByProject(metrics, "ad_revenue");
                   const dau = latestByProject(metrics, "dau");
+                  const health = projectHealth(
+                    integrations.filter((i) => i.project_id === p.id),
+                  );
                   return (
                     <button
                       type="button"
@@ -256,7 +360,17 @@ export const DashboardPage = () => {
                       onClick={() => setScope(p.id as string)}
                       className="rounded-lg border bg-card p-4 text-left ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20"
                     >
-                      <div className="font-medium">{p.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={cn(
+                            "size-2 rounded-full",
+                            health === "ok" && "bg-emerald-500",
+                            health === "error" && "bg-red-500",
+                            health === "pending" && "bg-muted-foreground/40",
+                          )}
+                        />
+                        <span className="font-medium">{p.name}</span>
+                      </div>
                       <div className="mt-3 grid grid-cols-3 gap-2">
                         <div>
                           <div className="text-xs text-muted-foreground">
