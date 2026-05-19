@@ -1,6 +1,13 @@
 import { useState } from "react";
-import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
-import { Plus, Trash2 } from "lucide-react";
+import {
+  useCreate,
+  useDelete,
+  useInvalidate,
+  useList,
+  useUpdate,
+} from "@refinedev/core";
+import { Plus, RefreshCw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,7 +52,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { AlertCondition, AlertRule, Project } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { supabaseClient } from "@/providers/supabase-client";
+import type {
+  AlertCondition,
+  AlertEvent,
+  AlertRule,
+  Project,
+} from "@/types";
 
 const METRICS: Record<string, string> = {
   dau: "DAU",
@@ -72,6 +86,9 @@ export const AlertsPage = () => {
   const [threshold, setThreshold] = useState("20");
   const [channel, setChannel] = useState<"telegram" | "email">("telegram");
 
+  const [evaluating, setEvaluating] = useState(false);
+  const invalidate = useInvalidate();
+
   const { result, query } = useList<AlertRule>({
     resource: "alert_rules",
     sorters: [{ field: "created_at", order: "desc" }],
@@ -81,8 +98,37 @@ export const AlertsPage = () => {
     resource: "projects",
     pagination: { mode: "off" },
   });
+  const { result: eventsResult } = useList<AlertEvent>({
+    resource: "alert_events",
+    sorters: [{ field: "triggered_at", order: "desc" }],
+    pagination: { mode: "off" },
+  });
   const rules = result.data;
   const projects = projectsResult.data;
+  const events = eventsResult.data;
+
+  const handleEvaluate = async () => {
+    setEvaluating(true);
+    try {
+      const { data, error } = await supabaseClient.functions.invoke(
+        "helm-alert",
+        { body: {} },
+      );
+      if (error) throw error;
+      toast.success("Değerlendirme tamam", {
+        description: `${data?.evaluated ?? 0} kural kontrol edildi, ${
+          data?.triggered ?? 0
+        } uyarı tetiklendi.`,
+      });
+      invalidate({ resource: "alert_events", invalidates: ["list"] });
+    } catch (e) {
+      toast.error("Değerlendirme başarısız", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setEvaluating(false);
+    }
+  };
 
   const { mutate: create, mutation: createMutation } = useCreate();
   const { mutate: update } = useUpdate();
@@ -126,7 +172,19 @@ export const AlertsPage = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Uyarılar</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">Uyarılar</h1>
+        <Button
+          variant="outline"
+          onClick={handleEvaluate}
+          disabled={evaluating}
+        >
+          <RefreshCw
+            className={evaluating ? "size-4 animate-spin" : "size-4"}
+          />
+          Şimdi değerlendir
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
@@ -339,9 +397,56 @@ export const AlertsPage = () => {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Tetiklenen Uyarılar</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {events.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Henüz uyarı tetiklenmedi
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Zaman</TableHead>
+                  <TableHead>Metrik</TableHead>
+                  <TableHead>Mesaj</TableHead>
+                  <TableHead>Bildirim</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {events.slice(0, 20).map((e) => (
+                  <TableRow key={e.id}>
+                    <TableCell>
+                      {new Date(e.triggered_at).toLocaleString("tr-TR")}
+                    </TableCell>
+                    <TableCell>{e.metric}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {e.message}
+                    </TableCell>
+                    <TableCell>
+                      {e.delivered ? (
+                        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                          gönderildi
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">panel-içi</Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
       <p className="text-xs text-muted-foreground">
-        Kurallar kaydedilir. Değerlendirme motoru (her senkron sonrası kontrol +
-        Telegram/e-posta bildirimi) yakında bağlanacak.
+        Kurallar her senkron sonrası otomatik değerlendirilir. Telegram'a ping
+        için Edge Function ortamına TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID
+        eklenmeli; eklenene kadar uyarılar panel-içi kaydedilir.
       </p>
     </div>
   );

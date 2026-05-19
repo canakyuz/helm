@@ -86,6 +86,17 @@ export interface AlertRule {
   created_at: string;
 }
 
+export interface AlertEvent {
+  id: number;
+  rule_id: string;
+  triggered_at: string;
+  metric: string;
+  current_value: number | null;
+  reference_value: number | null;
+  message: string;
+  delivered: boolean;
+}
+
 export const PROVIDER_LABELS: Record<ProviderName, string> = {
   revenuecat: "RevenueCat",
   admob: "AdMob",

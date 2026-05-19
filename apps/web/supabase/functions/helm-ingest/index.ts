@@ -152,5 +152,22 @@ Deno.serve(async (req) => {
       .eq("id", runId);
   }
 
+  // Senkron sonrası uyarı kurallarını değerlendir (fire-and-forget).
+  try {
+    await fetch(
+      `${Deno.env.get("SUPABASE_URL")}/functions/v1/helm-alert`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          "Content-Type": "application/json",
+        },
+        body: "{}",
+      },
+    );
+  } catch {
+    // uyarı değerlendirmesi senkronu bloklamasın
+  }
+
   return json({ ingested, ok: okCount, errors: errorCount, results });
 });
