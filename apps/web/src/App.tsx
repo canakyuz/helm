@@ -39,6 +39,18 @@ const IntegrationsPage = lazy(() =>
 const SystemPage = lazy(() =>
   import("@/pages/system").then((m) => ({ default: m.SystemPage })),
 );
+const RevenuePage = lazy(() =>
+  import("@/pages/revenue").then((m) => ({ default: m.RevenuePage })),
+);
+const AlertsPage = lazy(() =>
+  import("@/pages/alerts").then((m) => ({ default: m.AlertsPage })),
+);
+const MailPage = lazy(() =>
+  import("@/pages/mail").then((m) => ({ default: m.MailPage })),
+);
+const SettingsPage = lazy(() =>
+  import("@/pages/settings").then((m) => ({ default: m.SettingsPage })),
+);
 const ProjectCreate = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectCreate })),
 );
@@ -76,6 +88,22 @@ function App() {
                   meta: { label: "Sistem" },
                 },
                 {
+                  name: "revenue",
+                  list: "/revenue",
+                  meta: { label: "Gelir & Reklam" },
+                },
+                {
+                  name: "alerts",
+                  list: "/alerts",
+                  meta: { label: "Uyarılar" },
+                },
+                { name: "mail", list: "/mail", meta: { label: "Mail" } },
+                {
+                  name: "settings",
+                  list: "/settings",
+                  meta: { label: "Ayarlar" },
+                },
+                {
                   name: "projects",
                   create: "/projects/create",
                   edit: "/projects/edit/:id",
@@ -106,6 +134,10 @@ function App() {
                       element={<IntegrationsPage />}
                     />
                     <Route path="/system" element={<SystemPage />} />
+                    <Route path="/revenue" element={<RevenuePage />} />
+                    <Route path="/alerts" element={<AlertsPage />} />
+                    <Route path="/mail" element={<MailPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
                     <Route
                       path="/projects/create"
                       element={<ProjectCreate />}

@@ -72,6 +72,20 @@ export interface SyncRun {
   details: unknown;
 }
 
+export type AlertCondition = "drop_pct" | "rise_pct" | "below" | "above";
+
+export interface AlertRule {
+  id: string;
+  name: string;
+  project_id: string | null;
+  metric: string;
+  condition: AlertCondition;
+  threshold: number;
+  channel: "telegram" | "email";
+  enabled: boolean;
+  created_at: string;
+}
+
 export const PROVIDER_LABELS: Record<ProviderName, string> = {
   revenuecat: "RevenueCat",
   admob: "AdMob",

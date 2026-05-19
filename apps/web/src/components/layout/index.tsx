@@ -4,12 +4,12 @@ import { Link, Outlet, useLocation } from "react-router";
 import {
   Activity,
   Bell,
-  Boxes,
   Check,
   ChevronsUpDown,
   LayoutDashboard,
   Loader2,
   LogOut,
+  Mail,
   Palette,
   Plug,
   Settings,
@@ -68,9 +68,13 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Analitik",
     items: [
-      { title: "Gelir & Reklam", icon: TrendingUp, soon: true },
-      { title: "Uyarılar", icon: Bell, soon: true },
+      { title: "Gelir & Reklam", icon: TrendingUp, url: "/revenue" },
+      { title: "Uyarılar", icon: Bell, url: "/alerts" },
     ],
+  },
+  {
+    label: "İletişim",
+    items: [{ title: "Mail", icon: Mail, url: "/mail" }],
   },
   {
     label: "DevOps",
@@ -81,7 +85,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   },
   {
     label: "Sistem",
-    items: [{ title: "Ayarlar", icon: Settings, soon: true }],
+    items: [{ title: "Ayarlar", icon: Settings, url: "/settings" }],
   },
 ];
 
