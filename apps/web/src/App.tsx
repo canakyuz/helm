@@ -60,6 +60,12 @@ const GrowthPage = lazy(() =>
 const LogsPage = lazy(() =>
   import("@/pages/logs").then((m) => ({ default: m.LogsPage })),
 );
+const SegmentsPage = lazy(() =>
+  import("@/pages/segments").then((m) => ({ default: m.SegmentsPage })),
+);
+const VersionsPage = lazy(() =>
+  import("@/pages/versions").then((m) => ({ default: m.VersionsPage })),
+);
 const ProjectCreate = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectCreate })),
 );
@@ -119,6 +125,16 @@ function App() {
                 },
                 { name: "logs", list: "/logs", meta: { label: "Loglar" } },
                 {
+                  name: "user_segments",
+                  list: "/segments",
+                  meta: { label: "Segmentler" },
+                },
+                {
+                  name: "versions",
+                  list: "/versions",
+                  meta: { label: "Sürümler" },
+                },
+                {
                   name: "settings",
                   list: "/settings",
                   meta: { label: "Ayarlar" },
@@ -160,6 +176,8 @@ function App() {
                     <Route path="/reviews" element={<ReviewsPage />} />
                     <Route path="/growth" element={<GrowthPage />} />
                     <Route path="/logs" element={<LogsPage />} />
+                    <Route path="/segments" element={<SegmentsPage />} />
+                    <Route path="/versions" element={<VersionsPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route
                       path="/projects/create"

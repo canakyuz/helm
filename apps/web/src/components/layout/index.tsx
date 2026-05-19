@@ -6,6 +6,7 @@ import {
   Bell,
   Check,
   ChevronsUpDown,
+  Filter,
   LayoutDashboard,
   LineChart,
   Loader2,
@@ -16,6 +17,7 @@ import {
   ScrollText,
   Settings,
   Star,
+  Tag,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -68,6 +70,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: "CRM",
     items: [
       { title: "Kullanıcılar", icon: Users, url: "/users" },
+      { title: "Segmentler", icon: Filter, url: "/segments" },
       { title: "Yorumlar", icon: Star, url: "/reviews" },
     ],
   },
@@ -89,6 +92,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { title: "Entegrasyonlar", icon: Plug, url: "/integrations" },
       { title: "Senkron & Sağlık", icon: Activity, url: "/system" },
       { title: "Loglar", icon: ScrollText, url: "/logs" },
+      { title: "Sürümler", icon: Tag, url: "/versions" },
     ],
   },
   {

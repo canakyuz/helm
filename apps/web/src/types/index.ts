@@ -121,6 +121,24 @@ export interface Heartbeat {
   created_at: string;
 }
 
+export interface UserSegment {
+  id: string;
+  name: string;
+  project_id: string | null;
+  rule_type: "new" | "active" | "inactive";
+  rule_days: number;
+  created_at: string;
+}
+
+export interface AppVersion {
+  id: number;
+  project_id: string;
+  version: string;
+  release_date: string | null;
+  release_notes: string | null;
+  fetched_at: string;
+}
+
 export const PROVIDER_LABELS: Record<ProviderName, string> = {
   revenuecat: "RevenueCat",
   admob: "AdMob",
