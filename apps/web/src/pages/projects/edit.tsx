@@ -24,13 +24,23 @@ export const ProjectEdit = () => {
 
   const form = useHookForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
-    defaultValues: { name: "", slug: "" },
+    defaultValues: {
+      name: "",
+      slug: "",
+      app_store_id: "",
+      app_store_country: "us",
+    },
   });
 
   // Record yüklendiğinde formu doldur.
   useEffect(() => {
     if (record) {
-      form.reset({ name: record.name, slug: record.slug });
+      form.reset({
+        name: record.name,
+        slug: record.slug,
+        app_store_id: record.app_store_id ?? "",
+        app_store_country: record.app_store_country ?? "us",
+      });
     }
   }, [record?.id]);
 
@@ -69,6 +79,40 @@ export const ProjectEdit = () => {
                     <FormLabel>Slug</FormLabel>
                     <FormControl>
                       <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="app_store_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>App Store ID</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="6451234567 (yorumlar için)"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="app_store_country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>App Store ülkesi</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="us"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -51,6 +51,9 @@ const MailPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import("@/pages/settings").then((m) => ({ default: m.SettingsPage })),
 );
+const ReviewsPage = lazy(() =>
+  import("@/pages/reviews").then((m) => ({ default: m.ReviewsPage })),
+);
 const ProjectCreate = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectCreate })),
 );
@@ -99,6 +102,11 @@ function App() {
                 },
                 { name: "mail", list: "/mail", meta: { label: "Mail" } },
                 {
+                  name: "reviews",
+                  list: "/reviews",
+                  meta: { label: "Yorumlar" },
+                },
+                {
                   name: "settings",
                   list: "/settings",
                   meta: { label: "Ayarlar" },
@@ -137,6 +145,7 @@ function App() {
                     <Route path="/revenue" element={<RevenuePage />} />
                     <Route path="/alerts" element={<AlertsPage />} />
                     <Route path="/mail" element={<MailPage />} />
+                    <Route path="/reviews" element={<ReviewsPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route
                       path="/projects/create"

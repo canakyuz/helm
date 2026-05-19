@@ -6,7 +6,22 @@ export interface Project {
   id: string;
   name: string;
   slug: string;
+  app_store_id?: string | null;
+  app_store_country?: string | null;
   created_at: string;
+}
+
+export interface Review {
+  id: number;
+  project_id: string;
+  source: string;
+  external_id: string | null;
+  author: string | null;
+  rating: number | null;
+  title: string | null;
+  body: string | null;
+  review_date: string | null;
+  fetched_at: string;
 }
 
 /** Sağlayıcıya özel bağlantı konfigürasyonu. v1'de jsonb içinde tutulur. */

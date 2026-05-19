@@ -13,6 +13,7 @@ import {
   Palette,
   Plug,
   Settings,
+  Star,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -63,7 +64,10 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   },
   {
     label: "CRM",
-    items: [{ title: "Kullanıcılar", icon: Users, url: "/users" }],
+    items: [
+      { title: "Kullanıcılar", icon: Users, url: "/users" },
+      { title: "Yorumlar", icon: Star, url: "/reviews" },
+    ],
   },
   {
     label: "Analitik",
