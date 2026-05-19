@@ -97,6 +97,12 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     { key: "service_role_key", label: "Service Role Key", secret: true },
   ],
+  stripe: [{ key: "secret_key", label: "Stripe Secret Key", secret: true }],
+  plausible: [
+    { key: "site_id", label: "Site ID (alan adı)", placeholder: "ornek.com" },
+    { key: "api_key", label: "API Key", secret: true },
+    { key: "host", label: "Host", placeholder: "https://plausible.io" },
+  ],
 };
 
 const PROVIDERS = Object.keys(PROVIDER_LABELS) as ProviderName[];

@@ -5,6 +5,8 @@ import { fetchRevenueCat } from "./connectors/revenuecat.ts";
 import { fetchAdMob } from "./connectors/admob.ts";
 import { fetchPostHog } from "./connectors/posthog.ts";
 import { fetchSupabaseUsers } from "./connectors/supabase-users.ts";
+import { fetchStripe } from "./connectors/stripe.ts";
+import { fetchPlausible } from "./connectors/plausible.ts";
 
 // helm-ingest — her enabled entegrasyonu gezer, sağlayıcı API'sini çağırır,
 // metrics tablosuna idempotent upsert eder. Her çalışma sync_runs'a kaydedilir.
@@ -14,6 +16,8 @@ const CONNECTORS: Record<string, Connector> = {
   admob: fetchAdMob,
   posthog: fetchPostHog,
   supabase: fetchSupabaseUsers,
+  stripe: fetchStripe,
+  plausible: fetchPlausible,
 };
 
 const json = (body: unknown, status = 200) =>

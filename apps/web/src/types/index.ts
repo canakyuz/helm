@@ -1,6 +1,12 @@
 // helm — domain tipleri
 
-export type ProviderName = "revenuecat" | "admob" | "posthog" | "supabase";
+export type ProviderName =
+  | "revenuecat"
+  | "admob"
+  | "posthog"
+  | "supabase"
+  | "stripe"
+  | "plausible";
 
 export interface Project {
   id: string;
@@ -153,4 +159,6 @@ export const PROVIDER_LABELS: Record<ProviderName, string> = {
   admob: "AdMob",
   posthog: "PostHog",
   supabase: "Supabase",
+  stripe: "Stripe",
+  plausible: "Plausible",
 };
