@@ -62,6 +62,7 @@ interface FieldDef {
   label: string;
   secret?: boolean;
   placeholder?: string;
+  optional?: boolean;
 }
 
 // Her sağlayıcının "bağla" formunda istediği alanlar.
@@ -102,6 +103,19 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "site_id", label: "Site ID (alan adı)", placeholder: "ornek.com" },
     { key: "api_key", label: "API Key", secret: true },
     { key: "host", label: "Host", placeholder: "https://plausible.io" },
+  ],
+  rest: [
+    {
+      key: "url",
+      label: "Endpoint URL",
+      placeholder: "https://api.uygulamam.com/helm-metrics",
+    },
+    {
+      key: "auth_header",
+      label: "Authorization header (opsiyonel)",
+      secret: true,
+      optional: true,
+    },
   ],
 };
 
@@ -150,7 +164,10 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const integrations = result.data;
   const fields = provider ? PROVIDER_FIELDS[provider] : [];
   const valid =
-    provider !== "" && fields.every((f) => (config[f.key] ?? "").trim() !== "");
+    provider !== "" &&
+    fields.every(
+      (f) => f.optional || (config[f.key] ?? "").trim() !== "",
+    );
 
   const resetForm = () => {
     setProvider("");
