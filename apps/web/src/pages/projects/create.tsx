@@ -1,6 +1,7 @@
 import { useForm } from "@refinedev/core";
 import { useForm as useHookForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -15,7 +16,8 @@ import { Input } from "@/components/ui/input";
 import { projectSchema, slugify, type ProjectFormValues } from "./schema";
 
 export const ProjectCreate = () => {
-  const { onFinish } = useForm();
+  const { onFinish } = useForm({ redirect: false });
+  const navigate = useNavigate();
   const form = useHookForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: { name: "", slug: "" },
@@ -23,6 +25,7 @@ export const ProjectCreate = () => {
 
   const submit = form.handleSubmit(async (values) => {
     await onFinish(values);
+    navigate("/");
   });
 
   return (

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useForm } from "@refinedev/core";
 import { useForm as useHookForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,7 +18,8 @@ import { projectSchema, type ProjectFormValues } from "./schema";
 import type { Project } from "@/types";
 
 export const ProjectEdit = () => {
-  const { onFinish, query } = useForm();
+  const { onFinish, query } = useForm({ redirect: false });
+  const navigate = useNavigate();
   const record = query?.data?.data as Project | undefined;
 
   const form = useHookForm<ProjectFormValues>({
@@ -34,6 +36,7 @@ export const ProjectEdit = () => {
 
   const submit = form.handleSubmit(async (values) => {
     await onFinish(values);
+    navigate("/");
   });
 
   return (

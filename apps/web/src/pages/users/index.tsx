@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
-import { useList } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -18,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabaseClient } from "@/providers/supabase-client";
-import type { Project } from "@/types";
+import { useScope } from "@/context/scope";
 
 interface ProjectUser {
   id: string;
@@ -28,24 +20,22 @@ interface ProjectUser {
 }
 
 export const UsersPage = () => {
-  const { result } = useList<Project>({
-    resource: "projects",
-    pagination: { mode: "off" },
-  });
-  const projects = result.data;
-
-  const [projectId, setProjectId] = useState<string>("");
+  const { scope, isAll } = useScope();
   const [users, setUsers] = useState<ProjectUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!projectId) return;
+    if (isAll) {
+      setUsers([]);
+      setError(null);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);
     supabaseClient.functions
-      .invoke("helm-users", { body: { project_id: projectId } })
+      .invoke("helm-users", { body: { project_id: scope } })
       .then(({ data, error: fnError }) => {
         if (cancelled) return;
         if (fnError) throw fnError;
@@ -64,7 +54,7 @@ export const UsersPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [projectId]);
+  }, [scope, isAll]);
 
   const fmt = (value: string | null) =>
     value ? new Date(value).toLocaleString("tr-TR") : "—";
@@ -77,23 +67,10 @@ export const UsersPage = () => {
         <CardHeader>
           <CardTitle>Proje kullanıcıları</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Select value={projectId} onValueChange={setProjectId}>
-            <SelectTrigger className="w-72">
-              <SelectValue placeholder="Proje seç" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((p) => (
-                <SelectItem key={p.id} value={p.id!}>
-                  {p.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {!projectId ? (
+        <CardContent>
+          {isAll ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              Kullanıcılarını görmek için bir proje seç
+              Kullanıcıları görmek için sidebar'dan bir proje seç.
             </div>
           ) : loading ? (
             <div className="space-y-2">
@@ -110,36 +87,35 @@ export const UsersPage = () => {
               Kullanıcı bulunamadı
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>E-posta</TableHead>
-                  <TableHead>Kayıt</TableHead>
-                  <TableHead>Son giriş</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((u) => (
-                  <TableRow key={u.id}>
-                    <TableCell className="font-medium">
-                      {u.email ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {fmt(u.created_at)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {fmt(u.last_sign_in_at)}
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>E-posta</TableHead>
+                    <TableHead>Kayıt</TableHead>
+                    <TableHead>Son giriş</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-
-          {projectId && !loading && !error && users.length > 0 && (
-            <p className="text-xs text-muted-foreground">
-              {users.length} kullanıcı (ilk 200)
-            </p>
+                </TableHeader>
+                <TableBody>
+                  {users.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell className="font-medium">
+                        {u.email ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {fmt(u.created_at)}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {fmt(u.last_sign_in_at)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <p className="mt-3 text-xs text-muted-foreground">
+                {users.length} kullanıcı (ilk 200)
+              </p>
+            </>
           )}
         </CardContent>
       </Card>

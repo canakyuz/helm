@@ -1,12 +1,20 @@
 import { Suspense } from "react";
-import { useGetIdentity, useLogout, useMenu } from "@refinedev/core";
-import { Link, Outlet } from "react-router";
+import { useGetIdentity, useLogout } from "@refinedev/core";
+import { Link, Outlet, useLocation } from "react-router";
 import {
+  Activity,
+  Bell,
+  Boxes,
   Check,
   ChevronsUpDown,
+  LayoutDashboard,
   Loader2,
   LogOut,
   Palette,
+  Plug,
+  Settings,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -14,9 +22,11 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
@@ -33,9 +43,47 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ProjectSwitcher } from "./project-switcher";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 
 type IUser = { id: string; name?: string };
+
+type NavItem = {
+  title: string;
+  icon: typeof LayoutDashboard;
+  url?: string;
+  soon?: boolean;
+};
+
+// Sidebar modül haritası — gruplu. Yeni modül = buraya bir girdi.
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+  {
+    label: "Genel",
+    items: [{ title: "Cockpit", icon: LayoutDashboard, url: "/" }],
+  },
+  {
+    label: "CRM",
+    items: [{ title: "Kullanıcılar", icon: Users, url: "/users" }],
+  },
+  {
+    label: "Analitik",
+    items: [
+      { title: "Gelir & Reklam", icon: TrendingUp, soon: true },
+      { title: "Uyarılar", icon: Bell, soon: true },
+    ],
+  },
+  {
+    label: "DevOps",
+    items: [
+      { title: "Entegrasyonlar", icon: Plug, url: "/integrations" },
+      { title: "Senkron & Sağlık", icon: Activity, url: "/system" },
+    ],
+  },
+  {
+    label: "Sistem",
+    items: [{ title: "Ayarlar", icon: Settings, soon: true }],
+  },
+];
 
 const NavUser = () => {
   const { data: user } = useGetIdentity<IUser>();
@@ -70,7 +118,10 @@ const NavUser = () => {
               <Palette className="size-3.5" /> Tema
             </DropdownMenuLabel>
             {themes.map((t) => (
-              <DropdownMenuItem key={t.key} onClick={() => setThemeKey(t.key)}>
+              <DropdownMenuItem
+                key={t.key}
+                onClick={() => setThemeKey(t.key)}
+              >
                 {t.key === themeKey ? (
                   <Check className="size-4" />
                 ) : (
@@ -91,48 +142,56 @@ const NavUser = () => {
 };
 
 const AppSidebar = () => {
-  const { menuItems, selectedKey } = useMenu();
+  const { pathname } = useLocation();
+  const isActive = (url: string) =>
+    url === "/" ? pathname === "/" : pathname.startsWith(url);
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar variant="floating">
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to="/">
-                <span className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-                  h
-                </span>
-                <span className="text-lg font-semibold tracking-tight">
-                  helm
-                </span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <ProjectSwitcher />
       </SidebarHeader>
+
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.key}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.key === selectedKey}
-                    tooltip={item.label as string}
-                  >
-                    <Link to={item.route ?? "/"}>
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {NAV_GROUPS.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  if (item.soon || !item.url) {
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton disabled className="opacity-55">
+                          <Icon />
+                          <span>{item.title}</span>
+                        </SidebarMenuButton>
+                        <SidebarMenuBadge>yakında</SidebarMenuBadge>
+                      </SidebarMenuItem>
+                    );
+                  }
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(item.url)}
+                        tooltip={item.title}
+                      >
+                        <Link to={item.url}>
+                          <Icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
+
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>

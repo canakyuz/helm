@@ -9,19 +9,19 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { liveProvider } from "@refinedev/supabase";
-import { AppWindow, LayoutDashboard, Users } from "lucide-react";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorComponent } from "@/components/error";
 import { HelmLayout } from "@/components/layout";
 import { ThemeProvider } from "@/theme/ThemeProvider";
+import { ScopeProvider } from "@/context/scope";
 import authProvider from "@/providers/auth";
 import { dataProvider } from "@/providers/data";
 import { notificationProvider } from "@/providers/notification";
 import { supabaseClient } from "@/providers/supabase-client";
 
-// Route bazlı kod bölme — her sayfa kendi chunk'ında, ilk açılış hafifler.
+// Route bazlı kod bölme — her sayfa kendi chunk'ında.
 const DashboardPage = lazy(() =>
   import("@/pages/dashboard").then((m) => ({ default: m.DashboardPage })),
 );
@@ -31,17 +31,19 @@ const LoginPage = lazy(() =>
 const UsersPage = lazy(() =>
   import("@/pages/users").then((m) => ({ default: m.UsersPage })),
 );
-const ProjectList = lazy(() =>
-  import("@/pages/projects").then((m) => ({ default: m.ProjectList })),
+const IntegrationsPage = lazy(() =>
+  import("@/pages/integrations").then((m) => ({
+    default: m.IntegrationsPage,
+  })),
+);
+const SystemPage = lazy(() =>
+  import("@/pages/system").then((m) => ({ default: m.SystemPage })),
 );
 const ProjectCreate = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectCreate })),
 );
 const ProjectEdit = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectEdit })),
-);
-const ProjectShow = lazy(() =>
-  import("@/pages/projects").then((m) => ({ default: m.ProjectShow })),
 );
 
 function App() {
@@ -57,32 +59,27 @@ function App() {
               routerProvider={routerProvider}
               notificationProvider={notificationProvider}
               resources={[
-                {
-                  name: "dashboard",
-                  list: "/",
-                  meta: {
-                    label: "Cockpit",
-                    icon: <LayoutDashboard className="size-4" />,
-                  },
-                },
-                {
-                  name: "projects",
-                  list: "/projects",
-                  create: "/projects/create",
-                  edit: "/projects/edit/:id",
-                  show: "/projects/show/:id",
-                  meta: {
-                    label: "Projeler",
-                    icon: <AppWindow className="size-4" />,
-                  },
-                },
+                { name: "dashboard", list: "/", meta: { label: "Cockpit" } },
                 {
                   name: "users",
                   list: "/users",
-                  meta: {
-                    label: "Kullanıcılar",
-                    icon: <Users className="size-4" />,
-                  },
+                  meta: { label: "Kullanıcılar" },
+                },
+                {
+                  name: "integrations",
+                  list: "/integrations",
+                  meta: { label: "Entegrasyonlar" },
+                },
+                {
+                  name: "system",
+                  list: "/system",
+                  meta: { label: "Sistem" },
+                },
+                {
+                  name: "projects",
+                  create: "/projects/create",
+                  edit: "/projects/edit/:id",
+                  meta: { label: "Proje" },
                 },
               ]}
               options={{
@@ -90,45 +87,54 @@ function App() {
                 warnWhenUnsavedChanges: true,
               }}
             >
-              <Routes>
-                <Route
-                  element={
-                    <Authenticated
-                      key="authenticated-routes"
-                      fallback={<CatchAllNavigate to="/login" />}
-                    >
-                      <HelmLayout />
-                    </Authenticated>
-                  }
-                >
-                  <Route index element={<DashboardPage />} />
-                  <Route path="/projects">
-                    <Route index element={<ProjectList />} />
-                    <Route path="create" element={<ProjectCreate />} />
-                    <Route path="edit/:id" element={<ProjectEdit />} />
-                    <Route path="show/:id" element={<ProjectShow />} />
-                  </Route>
-                  <Route path="/users" element={<UsersPage />} />
-                  <Route path="*" element={<ErrorComponent />} />
-                </Route>
-
-                <Route
-                  element={
-                    <Authenticated key="auth-pages" fallback={<Outlet />}>
-                      <NavigateToResource resource="dashboard" />
-                    </Authenticated>
-                  }
-                >
+              <ScopeProvider>
+                <Routes>
                   <Route
-                    path="/login"
                     element={
-                      <Suspense fallback={null}>
-                        <LoginPage />
-                      </Suspense>
+                      <Authenticated
+                        key="authenticated-routes"
+                        fallback={<CatchAllNavigate to="/login" />}
+                      >
+                        <HelmLayout />
+                      </Authenticated>
                     }
-                  />
-                </Route>
-              </Routes>
+                  >
+                    <Route index element={<DashboardPage />} />
+                    <Route path="/users" element={<UsersPage />} />
+                    <Route
+                      path="/integrations"
+                      element={<IntegrationsPage />}
+                    />
+                    <Route path="/system" element={<SystemPage />} />
+                    <Route
+                      path="/projects/create"
+                      element={<ProjectCreate />}
+                    />
+                    <Route
+                      path="/projects/edit/:id"
+                      element={<ProjectEdit />}
+                    />
+                    <Route path="*" element={<ErrorComponent />} />
+                  </Route>
+
+                  <Route
+                    element={
+                      <Authenticated key="auth-pages" fallback={<Outlet />}>
+                        <NavigateToResource resource="dashboard" />
+                      </Authenticated>
+                    }
+                  >
+                    <Route
+                      path="/login"
+                      element={
+                        <Suspense fallback={null}>
+                          <LoginPage />
+                        </Suspense>
+                      }
+                    />
+                  </Route>
+                </Routes>
+              </ScopeProvider>
 
               <RefineKbar />
               <UnsavedChangesNotifier />
