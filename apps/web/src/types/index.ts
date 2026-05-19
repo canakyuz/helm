@@ -97,6 +97,15 @@ export interface AlertEvent {
   delivered: boolean;
 }
 
+export interface Heartbeat {
+  id: string;
+  name: string;
+  project_id: string | null;
+  interval_minutes: number;
+  last_ping_at: string | null;
+  created_at: string;
+}
+
 export const PROVIDER_LABELS: Record<ProviderName, string> = {
   revenuecat: "RevenueCat",
   admob: "AdMob",
