@@ -7,11 +7,13 @@ import {
   Check,
   ChevronsUpDown,
   LayoutDashboard,
+  LineChart,
   Loader2,
   LogOut,
   Mail,
   Palette,
   Plug,
+  ScrollText,
   Settings,
   Star,
   TrendingUp,
@@ -73,6 +75,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: "Analitik",
     items: [
       { title: "Gelir & Reklam", icon: TrendingUp, url: "/revenue" },
+      { title: "Büyüme", icon: LineChart, url: "/growth" },
       { title: "Uyarılar", icon: Bell, url: "/alerts" },
     ],
   },
@@ -85,6 +88,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { title: "Entegrasyonlar", icon: Plug, url: "/integrations" },
       { title: "Senkron & Sağlık", icon: Activity, url: "/system" },
+      { title: "Loglar", icon: ScrollText, url: "/logs" },
     ],
   },
   {

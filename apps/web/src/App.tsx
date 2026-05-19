@@ -54,6 +54,12 @@ const SettingsPage = lazy(() =>
 const ReviewsPage = lazy(() =>
   import("@/pages/reviews").then((m) => ({ default: m.ReviewsPage })),
 );
+const GrowthPage = lazy(() =>
+  import("@/pages/growth").then((m) => ({ default: m.GrowthPage })),
+);
+const LogsPage = lazy(() =>
+  import("@/pages/logs").then((m) => ({ default: m.LogsPage })),
+);
 const ProjectCreate = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectCreate })),
 );
@@ -107,6 +113,12 @@ function App() {
                   meta: { label: "Yorumlar" },
                 },
                 {
+                  name: "growth",
+                  list: "/growth",
+                  meta: { label: "Büyüme" },
+                },
+                { name: "logs", list: "/logs", meta: { label: "Loglar" } },
+                {
                   name: "settings",
                   list: "/settings",
                   meta: { label: "Ayarlar" },
@@ -146,6 +158,8 @@ function App() {
                     <Route path="/alerts" element={<AlertsPage />} />
                     <Route path="/mail" element={<MailPage />} />
                     <Route path="/reviews" element={<ReviewsPage />} />
+                    <Route path="/growth" element={<GrowthPage />} />
+                    <Route path="/logs" element={<LogsPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route
                       path="/projects/create"
