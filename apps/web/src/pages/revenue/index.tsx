@@ -13,8 +13,16 @@ import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
 import { useScope } from "@/context/scope";
 import { useHelmTheme } from "@/theme/ThemeProvider";
-import { compact, deltaPct, latest, series, usd, usd2 } from "@/lib/metrics";
-import type { Metric } from "@/types";
+import {
+  compact,
+  deltaPct,
+  formatMoney,
+  formatMoney2,
+  latest,
+  series,
+  usd,
+} from "@/lib/metrics";
+import type { Metric, ProjectIntegration } from "@/types";
 
 export const RevenuePage = () => {
   const { scope, isAll } = useScope();
@@ -40,6 +48,33 @@ export const RevenuePage = () => {
   });
   const metrics = result.data;
   const loading = query.isLoading;
+
+  const integFilters: CrudFilter[] = [];
+  if (!isAll) {
+    integFilters.push({ field: "project_id", operator: "eq", value: scope });
+  }
+  const { result: integResult } = useList<ProjectIntegration>({
+    resource: "project_integrations",
+    filters: integFilters,
+    pagination: { mode: "off" },
+  });
+  const integrations = integResult.data;
+
+  const adCurrency = useMemo(() => {
+    const admobs = integrations.filter((i) => i.provider === "admob");
+    if (!isAll) {
+      const cfg = admobs.find((i) => i.project_id === scope)?.config as
+        | { currency?: string }
+        | undefined;
+      return cfg?.currency || "USD";
+    }
+    const codes = new Set(
+      admobs.map(
+        (i) => ((i.config as { currency?: string })?.currency) || "USD",
+      ),
+    );
+    return codes.size === 1 ? [...codes][0] : "USD";
+  }, [integrations, scope, isAll]);
 
   const mrrSeries = useMemo(() => series(metrics, "mrr"), [metrics]);
   const adSeries = useMemo(() => series(metrics, "ad_revenue"), [metrics]);
@@ -106,7 +141,7 @@ export const RevenuePage = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
               title="Reklam Geliri (son gün)"
-              value={usd(latest(metrics, "ad_revenue"))}
+              value={formatMoney(latest(metrics, "ad_revenue"), adCurrency)}
               icon={<Wallet />}
               delta={deltaPct(adSeries)}
               loading={loading}
@@ -120,7 +155,7 @@ export const RevenuePage = () => {
             />
             <StatCard
               title="eCPM"
-              value={usd2(latest(metrics, "ad_ecpm"))}
+              value={formatMoney2(latest(metrics, "ad_ecpm"), adCurrency)}
               icon={<Gauge />}
               loading={loading}
             />
@@ -134,7 +169,7 @@ export const RevenuePage = () => {
                 <TrendChart
                   data={adSeries}
                   color={theme.chart.revenue}
-                  format={usd}
+                  format={(v) => formatMoney(v, adCurrency)}
                 />
               </CardContent>
             </Card>

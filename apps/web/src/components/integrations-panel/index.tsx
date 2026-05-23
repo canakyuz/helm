@@ -84,6 +84,12 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "client_id", label: "OAuth Client ID" },
     { key: "client_secret", label: "OAuth Client Secret", secret: true },
     { key: "refresh_token", label: "Refresh Token", secret: true },
+    {
+      key: "currency",
+      label: "Para birimi (ISO kodu — TRY/USD/EUR)",
+      placeholder: "USD",
+      optional: true,
+    },
   ],
   posthog: [
     { key: "project_id", label: "PostHog Project ID", placeholder: "12345" },
@@ -114,6 +120,17 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       key: "auth_header",
       label: "Authorization header (opsiyonel)",
       secret: true,
+      optional: true,
+    },
+  ],
+  sentry: [
+    { key: "org_slug", label: "Sentry organizasyon slug" },
+    { key: "project_slug", label: "Proje slug" },
+    { key: "auth_token", label: "Auth Token", secret: true },
+    {
+      key: "host",
+      label: "Host (self-hosted için)",
+      placeholder: "https://sentry.io",
       optional: true,
     },
   ],

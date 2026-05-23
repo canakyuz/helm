@@ -7,7 +7,8 @@ export type ProviderName =
   | "supabase"
   | "stripe"
   | "plausible"
-  | "rest";
+  | "rest"
+  | "sentry";
 
 export interface Project {
   id: string;
@@ -163,4 +164,5 @@ export const PROVIDER_LABELS: Record<ProviderName, string> = {
   stripe: "Stripe",
   plausible: "Plausible",
   rest: "REST API",
+  sentry: "Sentry",
 };

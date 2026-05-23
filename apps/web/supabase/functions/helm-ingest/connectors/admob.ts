@@ -82,7 +82,11 @@ export const fetchAdMob: Connector = async (config) => {
     // ESTIMATED_EARNINGS, IMPRESSION_RPM → micros; IMPRESSIONS → integer.
     const revenue = Number(mv.ESTIMATED_EARNINGS?.microsValue ?? 0) / 1_000_000;
     const impressions = Number(mv.IMPRESSIONS?.integerValue ?? 0);
-    const ecpm = Number(mv.IMPRESSION_RPM?.microsValue ?? 0) / 1_000_000;
+    let ecpm = Number(mv.IMPRESSION_RPM?.microsValue ?? 0) / 1_000_000;
+    // AdMob bazı günlerde RPM dönmüyor — gelir/gösterimden hesapla.
+    if (ecpm === 0 && impressions > 0) {
+      ecpm = (revenue / impressions) * 1000;
+    }
 
     points.push({ date, metric: "ad_revenue", value: revenue });
     points.push({ date, metric: "ad_impressions", value: impressions });

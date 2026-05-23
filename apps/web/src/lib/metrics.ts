@@ -19,6 +19,32 @@ export const usd2 = (value: number) =>
     maximumFractionDigits: 2,
   }).format(value);
 
+/** Verilen ISO para birimi koduyla biçimlendirir (TRY/USD/EUR …). */
+export const formatMoney = (value: number, currency = "USD") => {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${value.toFixed(0)} ${currency}`;
+  }
+};
+
+export const formatMoney2 = (value: number, currency = "USD") => {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toFixed(2)} ${currency}`;
+  }
+};
+
 export const compact = (value: number) =>
   new Intl.NumberFormat("en-US", { notation: "compact" }).format(value);
 

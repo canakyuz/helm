@@ -29,7 +29,15 @@ import { supabaseClient } from "@/providers/supabase-client";
 import { useScope } from "@/context/scope";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { compact, deltaPct, latest, series, usd, usd2 } from "@/lib/metrics";
+import {
+  compact,
+  deltaPct,
+  formatMoney,
+  formatMoney2,
+  latest,
+  series,
+  usd,
+} from "@/lib/metrics";
 import type {
   AlertEvent,
   Metric,
@@ -145,6 +153,30 @@ export const DashboardPage = () => {
     ? null
     : projects.find((p) => p.id === scope);
 
+  // AdMob raporlama para birimi — entegrasyon config'inden okunur.
+  const adCurrency = useMemo(() => {
+    const admobs = integrations.filter((i) => i.provider === "admob");
+    if (!isAll) {
+      const cfg = admobs.find((i) => i.project_id === scope)?.config as
+        | { currency?: string }
+        | undefined;
+      return cfg?.currency || "USD";
+    }
+    const codes = new Set(
+      admobs.map(
+        (i) => ((i.config as { currency?: string })?.currency) || "USD",
+      ),
+    );
+    return codes.size === 1 ? [...codes][0] : "USD";
+  }, [integrations, scope, isAll]);
+
+  const projAdCurrency = (pid: string) => {
+    const cfg = integrations.find(
+      (i) => i.project_id === pid && i.provider === "admob",
+    )?.config as { currency?: string } | undefined;
+    return cfg?.currency || "USD";
+  };
+
   const adRevenueSeries = useMemo(
     () => series(metrics, "ad_revenue"),
     [metrics],
@@ -251,7 +283,7 @@ export const DashboardPage = () => {
         />
         <StatCard
           title="Reklam Geliri (son gün)"
-          value={usd(latest(metrics, "ad_revenue"))}
+          value={formatMoney(latest(metrics, "ad_revenue"), adCurrency)}
           icon={<Wallet />}
           delta={deltaPct(adRevenueSeries)}
           loading={loading}
@@ -292,7 +324,7 @@ export const DashboardPage = () => {
           />
           <StatCard
             title="eCPM"
-            value={usd2(latest(metrics, "ad_ecpm"))}
+            value={formatMoney2(latest(metrics, "ad_ecpm"), adCurrency)}
             icon={<Gauge />}
             loading={loading}
           />
@@ -315,7 +347,7 @@ export const DashboardPage = () => {
             <TrendChart
               data={adRevenueSeries}
               color={theme.chart.revenue}
-              format={usd}
+              format={(v) => formatMoney(v, adCurrency)}
             />
           </CardContent>
         </Card>
@@ -385,7 +417,10 @@ export const DashboardPage = () => {
                             Reklam
                           </div>
                           <div className="text-sm font-medium">
-                            {usd(ad.get(p.id as string)?.value ?? 0)}
+                            {formatMoney(
+                              ad.get(p.id as string)?.value ?? 0,
+                              projAdCurrency(p.id as string),
+                            )}
                           </div>
                         </div>
                         <div>
