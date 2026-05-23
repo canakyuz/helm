@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useCreate, useDelete, useList } from "@refinedev/core";
-import { Copy, Plus, Trash2 } from "lucide-react";
+import { AlertOctagon, Copy, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -45,9 +45,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TrendChart } from "@/components/trend-chart";
+import { compact, deltaPct, latest, series } from "@/lib/metrics";
 import {
   PROVIDER_LABELS,
   type Heartbeat,
+  type Metric,
   type Project,
   type ProjectIntegration,
   type SyncRun,
@@ -68,6 +71,11 @@ const fmt = (value: string | null) =>
   value ? new Date(value).toLocaleString("tr-TR") : "—";
 
 export const SystemPage = () => {
+  const since90 = useMemo(
+    () => new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10),
+    [],
+  );
+
   const { result: runsResult } = useList<SyncRun>({
     resource: "sync_runs",
     sorters: [{ field: "started_at", order: "desc" }],
@@ -85,12 +93,42 @@ export const SystemPage = () => {
     resource: "heartbeats",
     pagination: { mode: "off" },
   });
+  const { result: errorsResult } = useList<Metric>({
+    resource: "metrics",
+    filters: [
+      { field: "metric", operator: "eq", value: "errors" },
+      { field: "date", operator: "gte", value: since90 },
+    ],
+    pagination: { mode: "off" },
+  });
 
   const runs = runsResult.data;
   const integrations = integResult.data;
   const heartbeats = hbResult.data;
+  const errors = errorsResult.data;
   const projectName = (id: string) =>
     projectsResult.data.find((p) => p.id === id)?.name ?? "—";
+
+  const errorSeries = useMemo(() => series(errors, "errors"), [errors]);
+  const errorLatest = latest(errors, "errors");
+  const errorDelta = deltaPct(errorSeries);
+
+  // Son 7 gün proje kırılımı — Sentry bağlı projelerin toplam hatası.
+  const errorsByProject = useMemo(() => {
+    const since7 = new Date(Date.now() - 7 * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    const totals = new Map<string, number>();
+    for (const m of errors) {
+      if (m.date < since7) continue;
+      totals.set(m.project_id, (totals.get(m.project_id) ?? 0) + Number(m.value));
+    }
+    return [...totals.entries()].sort((a, b) => b[1] - a[1]);
+  }, [errors]);
+
+  const hasSentry = integrations.some(
+    (it) => it.provider === "sentry" && it.enabled,
+  );
 
   const { mutate: create, mutation: createMutation } = useCreate();
   const { mutate: remove } = useDelete();
@@ -151,6 +189,66 @@ export const SystemPage = () => {
       <h1 className="text-2xl font-semibold tracking-tight">
         Senkron & Sağlık
       </h1>
+
+      {/* Hatalar (Sentry) — sadece bağlı projeler için göster */}
+      {hasSentry && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertOctagon className="size-4" />
+              Hatalar — son 90 gün
+            </CardTitle>
+            <CardAction>
+              <div className="text-right text-sm">
+                <div className="font-mono text-lg">{compact(errorLatest)}</div>
+                <div
+                  className={
+                    errorDelta === null
+                      ? "text-xs text-muted-foreground"
+                      : errorDelta > 0
+                        ? "text-xs text-destructive"
+                        : "text-xs text-emerald-500"
+                  }
+                >
+                  {errorDelta === null
+                    ? "son gün"
+                    : `${errorDelta > 0 ? "+" : ""}${errorDelta.toFixed(1)}% / 7g`}
+                </div>
+              </div>
+            </CardAction>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <TrendChart
+              data={errorSeries}
+              color="#ef4444"
+              format={compact}
+              height={180}
+            />
+            {errorsByProject.length > 0 && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Proje</TableHead>
+                    <TableHead className="text-right">Son 7g hata</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {errorsByProject.map(([pid, total]) => (
+                    <TableRow key={pid}>
+                      <TableCell className="font-medium">
+                        {projectName(pid)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {compact(total)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Veri Kaynağı Sağlığı */}
       <Card>
