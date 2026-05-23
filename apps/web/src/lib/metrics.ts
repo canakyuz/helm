@@ -66,11 +66,18 @@ export const latest = (metrics: Metric[], metricName: string): number => {
   return s.length ? s[s.length - 1].value : 0;
 };
 
-/** Serinin son değeri ile ~days gün öncesi arasındaki yüzde değişim. */
+/** Serinin son değeri ile ~days gün öncesi arasındaki yüzde değişim.
+ *  Seride o yaşta sıfır-olmayan nokta yoksa, en eski sıfır-olmayan değerle
+ *  kıyaslar — yeni başlayan projelerde delta yine de görünsün diye. */
 export const deltaPct = (s: TrendPoint[], days = 7): number | null => {
   if (s.length < 2) return null;
   const last = s[s.length - 1].value;
-  const prev = s[Math.max(0, s.length - 1 - days)].value;
-  if (prev === 0) return null;
+  const targetIdx = Math.max(0, s.length - 1 - days);
+  let prev = s[targetIdx].value;
+  if (prev === 0) {
+    const firstNonZero = s.slice(0, s.length - 1).find((p) => p.value > 0);
+    if (!firstNonZero) return null;
+    prev = firstNonZero.value;
+  }
   return ((last - prev) / prev) * 100;
 };
