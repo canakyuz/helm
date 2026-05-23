@@ -1,0 +1,488 @@
+{
+  "info": {
+    "_postman_id": "8a7e2b14-6c4a-4f2b-9d11-helm00000001",
+    "name": "helm",
+    "description": "helm — connector'ların yaptığı TAM HTTP çağrıları + helm Edge Function'ları. Variables sekmesinden değerleri doldur, çalıştır, ham yanıtı gör. Connector kodu: supabase/functions/helm-ingest/connectors/.\n\nKullanım:\n1) Import → bu JSON.\n2) Collection 'Variables' sekmesi — anahtarları doldur.\n3) AdMob için önce '0 — Refresh access token' çalıştır (token otomatik kaydolur).\n4) İstediğin connector çağrısını çalıştır, ham yanıtı incele.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Koleksiyon-genel pre-request — tarih değişkenlerini hesapla.",
+          "const now = new Date();",
+          "const start = new Date(now.getTime() - 90 * 86400000);",
+          "const fmt = (d) => d.toISOString().slice(0, 10);",
+          "const ymd = (d) => `{\\\"year\\\":${d.getUTCFullYear()},\\\"month\\\":${d.getUTCMonth()+1},\\\"day\\\":${d.getUTCDate()}}`;",
+          "pm.collectionVariables.set('DATE_90_AGO', fmt(start));",
+          "pm.collectionVariables.set('DATE_TODAY', fmt(now));",
+          "pm.collectionVariables.set('EPOCH_90_AGO', String(Math.floor(start.getTime()/1000)));",
+          "pm.collectionVariables.set('EPOCH_NOW', String(Math.floor(now.getTime()/1000)));",
+          "pm.collectionVariables.set('YMD_START', ymd(start));",
+          "pm.collectionVariables.set('YMD_END', ymd(now));"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "AdMob",
+      "description": "helm connector: connectors/admob.ts. Önce 0 — refresh_token ile access_token al; sonra 1 — networkReport.",
+      "item": [
+        {
+          "name": "0 — Refresh access token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.access_token) {",
+                  "  pm.collectionVariables.set('ADMOB_ACCESS_TOKEN', json.access_token);",
+                  "  console.log('ADMOB_ACCESS_TOKEN kaydedildi (', json.expires_in, 'sn geçerli)');",
+                  "} else {",
+                  "  console.log('Token alınamadı:', json);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "client_id", "value": "{{ADMOB_CLIENT_ID}}" },
+                { "key": "client_secret", "value": "{{ADMOB_CLIENT_SECRET}}" },
+                { "key": "refresh_token", "value": "{{ADMOB_REFRESH_TOKEN}}" },
+                { "key": "grant_type", "value": "refresh_token" }
+              ]
+            },
+            "url": {
+              "raw": "https://oauth2.googleapis.com/token",
+              "protocol": "https",
+              "host": ["oauth2", "googleapis", "com"],
+              "path": ["token"]
+            }
+          }
+        },
+        {
+          "name": "1 — Network report (son 90 gün)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{ADMOB_ACCESS_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reportSpec\": {\n    \"dateRange\": {\n      \"startDate\": {{YMD_START}},\n      \"endDate\": {{YMD_END}}\n    },\n    \"dimensions\": [\"DATE\"],\n    \"metrics\": [\"ESTIMATED_EARNINGS\", \"IMPRESSIONS\", \"IMPRESSION_RPM\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "https://admob.googleapis.com/v1/accounts/{{ADMOB_PUBLISHER_ID}}/networkReport:generate",
+              "protocol": "https",
+              "host": ["admob", "googleapis", "com"],
+              "path": ["v1", "accounts", "{{ADMOB_PUBLISHER_ID}}", "networkReport:generate"]
+            },
+            "description": "Yanıt: header + row[] + footer akışı.\n- row.dimensionValues.DATE.value → 'YYYYMMDD'\n- row.metricValues.ESTIMATED_EARNINGS.microsValue → micros (raporlama para birimi cinsinden, /1e6)\n- row.metricValues.IMPRESSIONS.integerValue\n- row.metricValues.IMPRESSION_RPM.microsValue\n\nhelm currency: header.localizationSettings.currencyCode (TRY/USD/...)\nhelm: revenue=micros/1e6, impressions=integer, ecpm=RPM/1e6 (0 ise revenue/impressions*1000 fallback)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "RevenueCat",
+      "item": [
+        {
+          "name": "Overview metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{REVENUECAT_SECRET_KEY}}" }
+            ],
+            "url": {
+              "raw": "https://api.revenuecat.com/v2/projects/{{REVENUECAT_PROJECT_ID}}/metrics/overview",
+              "protocol": "https",
+              "host": ["api", "revenuecat", "com"],
+              "path": ["v2", "projects", "{{REVENUECAT_PROJECT_ID}}", "metrics", "overview"]
+            },
+            "description": "Yanıt: { metrics: [{id, name, value, unit, ...}] }\nhelm aradığı id'ler: 'mrr', 'active_subscriptions', 'revenue'.\nGerçek id'ler RC'de farklı dönerse → 0 yazar. Yanıtı inceleyip id'leri DOĞRULA."
+          }
+        }
+      ]
+    },
+    {
+      "name": "PostHog",
+      "item": [
+        {
+          "name": "HogQL — günlük DAU (son 90 gün)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{POSTHOG_API_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\n    \"kind\": \"HogQLQuery\",\n    \"query\": \"SELECT toDate(timestamp) AS day, uniq(person_id) AS dau FROM events WHERE timestamp >= now() - INTERVAL 90 DAY GROUP BY day ORDER BY day\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{POSTHOG_HOST}}/api/projects/{{POSTHOG_PROJECT_ID}}/query/",
+              "host": ["{{POSTHOG_HOST}}"],
+              "path": ["api", "projects", "{{POSTHOG_PROJECT_ID}}", "query", ""]
+            },
+            "description": "Yanıt: { results: [[date, dau], ...] }\nDAU 0 sürekli geliyorsa → person_id olayların çoğunda boş demektir."
+          }
+        },
+        {
+          "name": "HogQL — anlık WAU (son 7 gün)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{POSTHOG_API_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\n    \"kind\": \"HogQLQuery\",\n    \"query\": \"SELECT uniq(person_id) FROM events WHERE timestamp >= now() - INTERVAL 7 DAY\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{POSTHOG_HOST}}/api/projects/{{POSTHOG_PROJECT_ID}}/query/",
+              "host": ["{{POSTHOG_HOST}}"],
+              "path": ["api", "projects", "{{POSTHOG_PROJECT_ID}}", "query", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stripe",
+      "item": [
+        {
+          "name": "Aktif abonelikler (ilk 100)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{STRIPE_SECRET_KEY}}" }
+            ],
+            "url": {
+              "raw": "https://api.stripe.com/v1/subscriptions?status=active&limit=100",
+              "protocol": "https",
+              "host": ["api", "stripe", "com"],
+              "path": ["v1", "subscriptions"],
+              "query": [
+                { "key": "status", "value": "active" },
+                { "key": "limit", "value": "100" }
+              ]
+            },
+            "description": "Yanıt: { data: [{ id, items: { data: [{ price: { unit_amount, currency, recurring: { interval, interval_count } }, quantity }] } }] }\nhelm MRR: items'i normalize eder (yıllık /12, vb), unit_amount cents olduğundan /100."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plausible",
+      "item": [
+        {
+          "name": "Timeseries — günlük ziyaretçi 90g",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{PLAUSIBLE_API_KEY}}" }
+            ],
+            "url": {
+              "raw": "{{PLAUSIBLE_HOST}}/api/v1/stats/timeseries?site_id={{PLAUSIBLE_SITE_ID}}&period=custom&date={{DATE_90_AGO}},{{DATE_TODAY}}&metrics=visitors&interval=date",
+              "host": ["{{PLAUSIBLE_HOST}}"],
+              "path": ["api", "v1", "stats", "timeseries"],
+              "query": [
+                { "key": "site_id", "value": "{{PLAUSIBLE_SITE_ID}}" },
+                { "key": "period", "value": "custom" },
+                { "key": "date", "value": "{{DATE_90_AGO}},{{DATE_TODAY}}" },
+                { "key": "metrics", "value": "visitors" },
+                { "key": "interval", "value": "date" }
+              ]
+            },
+            "description": "Yanıt: { results: [{ date, visitors }] }\nhelm bunu 'dau' metriği olarak yazar."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sentry",
+      "item": [
+        {
+          "name": "Project stats — received 90g",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{SENTRY_AUTH_TOKEN}}" }
+            ],
+            "url": {
+              "raw": "{{SENTRY_HOST}}/api/0/projects/{{SENTRY_ORG_SLUG}}/{{SENTRY_PROJECT_SLUG}}/stats/?stat=received&resolution=1d&since={{EPOCH_90_AGO}}&until={{EPOCH_NOW}}",
+              "host": ["{{SENTRY_HOST}}"],
+              "path": ["api", "0", "projects", "{{SENTRY_ORG_SLUG}}", "{{SENTRY_PROJECT_SLUG}}", "stats", ""],
+              "query": [
+                { "key": "stat", "value": "received" },
+                { "key": "resolution", "value": "1d" },
+                { "key": "since", "value": "{{EPOCH_90_AGO}}" },
+                { "key": "until", "value": "{{EPOCH_NOW}}" }
+              ]
+            },
+            "description": "Yanıt: [[unix_ts, count], ...]\nhelm 'errors' metriği olarak yazar."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Target Supabase (proje kullanıcıları)",
+      "item": [
+        {
+          "name": "List users (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TARGET_SUPABASE_SERVICE_ROLE_KEY}}" },
+              { "key": "apikey", "value": "{{TARGET_SUPABASE_SERVICE_ROLE_KEY}}" }
+            ],
+            "url": {
+              "raw": "{{TARGET_SUPABASE_URL}}/auth/v1/admin/users?page=1&per_page=100",
+              "host": ["{{TARGET_SUPABASE_URL}}"],
+              "path": ["auth", "v1", "admin", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "per_page", "value": "100" }
+              ]
+            },
+            "description": "Yanıt: { users: [{ id, email, created_at, last_sign_in_at }], total, ... }\nhelm-users tüm sayfaları gezer."
+          }
+        }
+      ]
+    },
+    {
+      "name": "App Store",
+      "item": [
+        {
+          "name": "Reviews RSS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://itunes.apple.com/{{APP_STORE_COUNTRY}}/rss/customerreviews/page=1/id={{APP_STORE_ID}}/sortby=mostrecent/json",
+              "protocol": "https",
+              "host": ["itunes", "apple", "com"],
+              "path": ["{{APP_STORE_COUNTRY}}", "rss", "customerreviews", "page=1", "id={{APP_STORE_ID}}", "sortby=mostrecent", "json"]
+            },
+            "description": "Auth yok (public RSS). Yanıt feed.entry[]: ilk girdi app info, kalanlar yorum (im:rating, author.name.label, title.label, content.label, updated.label)."
+          }
+        },
+        {
+          "name": "App lookup (versiyon)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://itunes.apple.com/lookup?id={{APP_STORE_ID}}&country={{APP_STORE_COUNTRY}}",
+              "protocol": "https",
+              "host": ["itunes", "apple", "com"],
+              "path": ["lookup"],
+              "query": [
+                { "key": "id", "value": "{{APP_STORE_ID}}" },
+                { "key": "country", "value": "{{APP_STORE_COUNTRY}}" }
+              ]
+            },
+            "description": "Yanıt: { results: [{ version, currentVersionReleaseDate, releaseNotes, trackName, ... }] }"
+          }
+        }
+      ]
+    },
+    {
+      "name": "helm Edge Functions",
+      "description": "helm'in kendi endpoint'leri — HELM_SUPABASE_URL + ANON_KEY ile.",
+      "item": [
+        {
+          "name": "helm-ingest — manuel senkron",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{HELM_SUPABASE_ANON_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"trigger\": \"manual\" }"
+            },
+            "url": {
+              "raw": "{{HELM_SUPABASE_URL}}/functions/v1/helm-ingest",
+              "host": ["{{HELM_SUPABASE_URL}}"],
+              "path": ["functions", "v1", "helm-ingest"]
+            },
+            "description": "Opsiyonel body: { trigger: 'manual' | 'cron', project_id?: '<uuid>' }"
+          }
+        },
+        {
+          "name": "helm-test — tek entegrasyon",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{HELM_SUPABASE_ANON_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"integration_id\": \"{{TARGET_INTEGRATION_ID}}\" }"
+            },
+            "url": {
+              "raw": "{{HELM_SUPABASE_URL}}/functions/v1/helm-test",
+              "host": ["{{HELM_SUPABASE_URL}}"],
+              "path": ["functions", "v1", "helm-test"]
+            },
+            "description": "Bir entegrasyonu DB'ye yazmadan çalıştırır, sonucu döner."
+          }
+        },
+        {
+          "name": "helm-verify — upstream vs DB diff",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{HELM_SUPABASE_ANON_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"integration_id\": \"{{TARGET_INTEGRATION_ID}}\", \"days\": 7 }"
+            },
+            "url": {
+              "raw": "{{HELM_SUPABASE_URL}}/functions/v1/helm-verify",
+              "host": ["{{HELM_SUPABASE_URL}}"],
+              "path": ["functions", "v1", "helm-verify"]
+            },
+            "description": "Connector + son N gün stored metric → DIFF tablosu. Yanıt: { ok, summary: {match, mismatch, missing_stored, missing_upstream}, diffs: [{date, metric, upstream, stored, delta, delta_pct, status}] }"
+          }
+        },
+        {
+          "name": "helm-users — proje kullanıcıları",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{HELM_SUPABASE_ANON_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"project_id\": \"{{TARGET_PROJECT_ID}}\" }"
+            },
+            "url": {
+              "raw": "{{HELM_SUPABASE_URL}}/functions/v1/helm-users",
+              "host": ["{{HELM_SUPABASE_URL}}"],
+              "path": ["functions", "v1", "helm-users"]
+            }
+          }
+        },
+        {
+          "name": "helm-alert — uyarı değerlendir",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{HELM_SUPABASE_ANON_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{HELM_SUPABASE_URL}}/functions/v1/helm-alert",
+              "host": ["{{HELM_SUPABASE_URL}}"],
+              "path": ["functions", "v1", "helm-alert"]
+            }
+          }
+        },
+        {
+          "name": "helm-reviews — yorumları çek",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{HELM_SUPABASE_ANON_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{HELM_SUPABASE_URL}}/functions/v1/helm-reviews",
+              "host": ["{{HELM_SUPABASE_URL}}"],
+              "path": ["functions", "v1", "helm-reviews"]
+            }
+          }
+        },
+        {
+          "name": "helm-versions — sürümleri çek",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{HELM_SUPABASE_ANON_KEY}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{HELM_SUPABASE_URL}}/functions/v1/helm-versions",
+              "host": ["{{HELM_SUPABASE_URL}}"],
+              "path": ["functions", "v1", "helm-versions"]
+            }
+          }
+        },
+        {
+          "name": "helm-heartbeat — ping",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": { "mode": "raw", "raw": "" },
+            "url": {
+              "raw": "{{HELM_SUPABASE_URL}}/functions/v1/helm-heartbeat?id={{HEARTBEAT_ID}}",
+              "host": ["{{HELM_SUPABASE_URL}}"],
+              "path": ["functions", "v1", "helm-heartbeat"],
+              "query": [{ "key": "id", "value": "{{HEARTBEAT_ID}}" }]
+            },
+            "description": "JWT istemez (deploy --no-verify-jwt). Cron job'undan curl ile çağrılır."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "HELM_SUPABASE_URL", "value": "", "type": "string" },
+    { "key": "HELM_SUPABASE_ANON_KEY", "value": "", "type": "string" },
+    { "key": "HELM_SUPABASE_SERVICE_ROLE_KEY", "value": "", "type": "string" },
+    { "key": "ADMOB_CLIENT_ID", "value": "", "type": "string" },
+    { "key": "ADMOB_CLIENT_SECRET", "value": "", "type": "string" },
+    { "key": "ADMOB_REFRESH_TOKEN", "value": "", "type": "string" },
+    { "key": "ADMOB_ACCESS_TOKEN", "value": "", "type": "string" },
+    { "key": "ADMOB_PUBLISHER_ID", "value": "", "type": "string" },
+    { "key": "REVENUECAT_PROJECT_ID", "value": "", "type": "string" },
+    { "key": "REVENUECAT_SECRET_KEY", "value": "", "type": "string" },
+    { "key": "POSTHOG_HOST", "value": "https://eu.posthog.com", "type": "string" },
+    { "key": "POSTHOG_PROJECT_ID", "value": "", "type": "string" },
+    { "key": "POSTHOG_API_KEY", "value": "", "type": "string" },
+    { "key": "STRIPE_SECRET_KEY", "value": "", "type": "string" },
+    { "key": "PLAUSIBLE_HOST", "value": "https://plausible.io", "type": "string" },
+    { "key": "PLAUSIBLE_SITE_ID", "value": "", "type": "string" },
+    { "key": "PLAUSIBLE_API_KEY", "value": "", "type": "string" },
+    { "key": "SENTRY_HOST", "value": "https://sentry.io", "type": "string" },
+    { "key": "SENTRY_ORG_SLUG", "value": "", "type": "string" },
+    { "key": "SENTRY_PROJECT_SLUG", "value": "", "type": "string" },
+    { "key": "SENTRY_AUTH_TOKEN", "value": "", "type": "string" },
+    { "key": "TARGET_SUPABASE_URL", "value": "", "type": "string" },
+    { "key": "TARGET_SUPABASE_SERVICE_ROLE_KEY", "value": "", "type": "string" },
+    { "key": "TARGET_PROJECT_ID", "value": "", "type": "string" },
+    { "key": "TARGET_INTEGRATION_ID", "value": "", "type": "string" },
+    { "key": "APP_STORE_ID", "value": "", "type": "string" },
+    { "key": "APP_STORE_COUNTRY", "value": "us", "type": "string" },
+    { "key": "HEARTBEAT_ID", "value": "", "type": "string" },
+    { "key": "DATE_90_AGO", "value": "", "type": "string" },
+    { "key": "DATE_TODAY", "value": "", "type": "string" },
+    { "key": "EPOCH_90_AGO", "value": "", "type": "string" },
+    { "key": "EPOCH_NOW", "value": "", "type": "string" },
+    { "key": "YMD_START", "value": "", "type": "string" },
+    { "key": "YMD_END", "value": "", "type": "string" }
+  ]
+}
