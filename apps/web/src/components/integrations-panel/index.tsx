@@ -1,6 +1,14 @@
 import { useMemo, useState } from "react";
 import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
-import { Play, Plus, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  Play,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabaseClient } from "@/providers/supabase-client";
 import {
@@ -174,6 +182,70 @@ interface TestResult {
   error?: string;
 }
 
+type DiffStatus = "match" | "mismatch" | "missing_stored" | "missing_upstream";
+
+interface DiffRow {
+  date: string;
+  metric: string;
+  upstream: number | null;
+  stored: number | null;
+  delta: number | null;
+  delta_pct: number | null;
+  status: DiffStatus;
+}
+
+interface VerifyResult {
+  ok?: boolean;
+  provider?: string;
+  duration_ms?: number;
+  days?: number;
+  counts?: {
+    upstream_total: number;
+    upstream_in_window: number;
+    stored_in_window: number;
+  };
+  summary?: Record<DiffStatus, number>;
+  diffs?: DiffRow[];
+  truncated?: boolean;
+  error?: string;
+}
+
+const fmtNum = (n: number | null) =>
+  n === null
+    ? "—"
+    : Number.isInteger(n)
+      ? n.toLocaleString("tr-TR")
+      : n.toLocaleString("tr-TR", { maximumFractionDigits: 4 });
+
+const StatusCell = ({ status }: { status: DiffStatus }) => {
+  if (status === "match") {
+    return (
+      <span className="inline-flex items-center gap-1 text-emerald-500">
+        <Check className="size-3.5" />
+      </span>
+    );
+  }
+  if (status === "mismatch") {
+    return (
+      <span className="inline-flex items-center gap-1 text-destructive">
+        <X className="size-3.5" /> sapma
+      </span>
+    );
+  }
+  if (status === "missing_stored") {
+    return (
+      <span className="inline-flex items-center gap-1 text-amber-500">
+        <AlertTriangle className="size-3.5" /> DB'de yok
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-amber-500">
+      <AlertTriangle className="size-3.5" /> upstream'de yok
+    </span>
+  );
+};
+
 export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const [open, setOpen] = useState(false);
   const [provider, setProvider] = useState<ProviderName | "">("");
@@ -182,6 +254,10 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const [testing, setTesting] = useState<string | null>(null);
   const [testOpen, setTestOpen] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
+
+  const [verifying, setVerifying] = useState<string | null>(null);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<VerifyResult | null>(null);
 
   const handleTest = async (integrationId: string) => {
     setTesting(integrationId);
@@ -202,6 +278,28 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
       toast.error("Test başarısız");
     } finally {
       setTesting(null);
+    }
+  };
+
+  const handleVerify = async (integrationId: string) => {
+    setVerifying(integrationId);
+    setVerifyResult(null);
+    setVerifyOpen(true);
+    try {
+      const { data, error } = await supabaseClient.functions.invoke(
+        "helm-verify",
+        { body: { integration_id: integrationId, days: 7 } },
+      );
+      if (error) throw error;
+      setVerifyResult(data as VerifyResult);
+    } catch (e) {
+      setVerifyResult({
+        ok: false,
+        error: e instanceof Error ? e.message : String(e),
+      });
+      toast.error("Doğrulama başarısız");
+    } finally {
+      setVerifying(null);
     }
   };
 
@@ -387,6 +485,15 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                     >
                       <Play className="size-4" />
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Doğrula"
+                      disabled={verifying === it.id}
+                      onClick={() => handleVerify(it.id)}
+                    >
+                      <ShieldCheck className="size-4" />
+                    </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -490,6 +597,114 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                 <Badge variant="destructive">hata</Badge>
                 <pre className="max-h-72 overflow-auto rounded-md border bg-muted p-3 text-xs">
                   {testResult.error ?? "Bilinmeyen hata"}
+                </pre>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Doğrulama — upstream vs DB</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {!verifyResult && (
+              <div className="py-4 text-center text-sm text-muted-foreground">
+                Connector koşuyor + son 7 günü çekiliyor…
+              </div>
+            )}
+            {verifyResult && verifyResult.ok && verifyResult.summary && (
+              <>
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                    {verifyResult.summary.match} eşleşme
+                  </Badge>
+                  {verifyResult.summary.mismatch > 0 && (
+                    <Badge variant="destructive">
+                      {verifyResult.summary.mismatch} sapma
+                    </Badge>
+                  )}
+                  {verifyResult.summary.missing_stored > 0 && (
+                    <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500">
+                      {verifyResult.summary.missing_stored} DB'de yok
+                    </Badge>
+                  )}
+                  {verifyResult.summary.missing_upstream > 0 && (
+                    <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500">
+                      {verifyResult.summary.missing_upstream} upstream'de yok
+                    </Badge>
+                  )}
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {verifyResult.duration_ms}ms · son {verifyResult.days}g ·
+                    upstream {verifyResult.counts?.upstream_in_window}/
+                    {verifyResult.counts?.upstream_total} · DB{" "}
+                    {verifyResult.counts?.stored_in_window}
+                  </span>
+                </div>
+                <div className="max-h-96 overflow-auto rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tarih</TableHead>
+                        <TableHead>Metrik</TableHead>
+                        <TableHead className="text-right">Upstream</TableHead>
+                        <TableHead className="text-right">DB</TableHead>
+                        <TableHead className="text-right">Δ%</TableHead>
+                        <TableHead>Durum</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(verifyResult.diffs ?? []).map((d, i) => (
+                        <TableRow
+                          key={i}
+                          className={
+                            d.status === "mismatch"
+                              ? "bg-destructive/5"
+                              : d.status === "missing_stored" ||
+                                  d.status === "missing_upstream"
+                                ? "bg-amber-500/5"
+                                : undefined
+                          }
+                        >
+                          <TableCell className="font-mono text-xs">
+                            {d.date}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {d.metric}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-xs">
+                            {fmtNum(d.upstream)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-xs">
+                            {fmtNum(d.stored)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-xs">
+                            {d.delta_pct === null
+                              ? "—"
+                              : `${d.delta_pct > 0 ? "+" : ""}${d.delta_pct.toFixed(1)}%`}
+                          </TableCell>
+                          <TableCell>
+                            <StatusCell status={d.status} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {verifyResult.truncated && (
+                  <p className="text-xs text-muted-foreground">
+                    İlk 200 satır gösteriliyor.
+                  </p>
+                )}
+              </>
+            )}
+            {verifyResult && !verifyResult.ok && (
+              <>
+                <Badge variant="destructive">hata</Badge>
+                <pre className="max-h-72 overflow-auto rounded-md border bg-muted p-3 text-xs">
+                  {verifyResult.error ?? "Bilinmeyen hata"}
                 </pre>
               </>
             )}
