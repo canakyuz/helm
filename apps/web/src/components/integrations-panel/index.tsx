@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
-import { Plus, Trash2 } from "lucide-react";
+import { Play, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { supabaseClient } from "@/providers/supabase-client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -163,10 +165,45 @@ const SyncBadge = ({ record }: { record: ProjectIntegration }) => {
   return <Badge variant="secondary">henüz çalışmadı</Badge>;
 };
 
+interface TestResult {
+  ok?: boolean;
+  provider?: string;
+  duration_ms?: number;
+  count?: number;
+  points?: Array<{ date: string; metric: string; value: number }>;
+  error?: string;
+}
+
 export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const [open, setOpen] = useState(false);
   const [provider, setProvider] = useState<ProviderName | "">("");
   const [config, setConfig] = useState<Record<string, string>>({});
+
+  const [testing, setTesting] = useState<string | null>(null);
+  const [testOpen, setTestOpen] = useState(false);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
+
+  const handleTest = async (integrationId: string) => {
+    setTesting(integrationId);
+    setTestResult(null);
+    setTestOpen(true);
+    try {
+      const { data, error } = await supabaseClient.functions.invoke(
+        "helm-test",
+        { body: { integration_id: integrationId } },
+      );
+      if (error) throw error;
+      setTestResult(data as TestResult);
+    } catch (e) {
+      setTestResult({
+        ok: false,
+        error: e instanceof Error ? e.message : String(e),
+      });
+      toast.error("Test başarısız");
+    } finally {
+      setTesting(null);
+    }
+  };
 
   const { result, query } = useList<ProjectIntegration>({
     resource: "project_integrations",
@@ -310,7 +347,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                 <TableHead>Durum</TableHead>
                 <TableHead>Son senkron</TableHead>
                 <TableHead>Aktif</TableHead>
-                <TableHead className="w-12" />
+                <TableHead className="w-32 text-right">İşlemler</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -340,14 +377,24 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                     />
                   </TableCell>
                   <TableCell>
+                    <div className="flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Test"
+                      disabled={testing === it.id}
+                      onClick={() => handleTest(it.id)}
+                    >
+                      <Play className="size-4" />
+                    </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
-                          variant="destructive"
+                          variant="ghost"
                           size="icon-sm"
                           aria-label="Sil"
                         >
-                          <Trash2 className="size-4" />
+                          <Trash2 className="size-4 text-destructive" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
@@ -375,6 +422,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -382,6 +430,72 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
           </Table>
         )}
       </CardContent>
+
+      <Dialog open={testOpen} onOpenChange={setTestOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Entegrasyon testi</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {!testResult && (
+              <div className="py-4 text-center text-sm text-muted-foreground">
+                Connector çalışıyor…
+              </div>
+            )}
+            {testResult && testResult.ok && (
+              <>
+                <div className="flex items-center gap-2 text-sm">
+                  <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                    başarılı
+                  </Badge>
+                  <span className="text-muted-foreground">
+                    {testResult.duration_ms}ms · {testResult.count} metrik
+                  </span>
+                </div>
+                <div className="max-h-72 overflow-auto rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tarih</TableHead>
+                        <TableHead>Metrik</TableHead>
+                        <TableHead className="text-right">Değer</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(testResult.points ?? []).slice(0, 50).map((p, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-mono text-xs">
+                            {p.date}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {p.metric}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-xs">
+                            {p.value}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {(testResult.points?.length ?? 0) > 50 && (
+                  <p className="text-xs text-muted-foreground">
+                    İlk 50 satır gösteriliyor (toplam {testResult.count}).
+                  </p>
+                )}
+              </>
+            )}
+            {testResult && !testResult.ok && (
+              <>
+                <Badge variant="destructive">hata</Badge>
+                <pre className="max-h-72 overflow-auto rounded-md border bg-muted p-3 text-xs">
+                  {testResult.error ?? "Bilinmeyen hata"}
+                </pre>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

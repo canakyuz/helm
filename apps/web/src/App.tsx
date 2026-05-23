@@ -16,6 +16,7 @@ import { ErrorComponent } from "@/components/error";
 import { HelmLayout } from "@/components/layout";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { ScopeProvider } from "@/context/scope";
+import { DisplayCurrencyProvider } from "@/context/currency";
 import authProvider from "@/providers/auth";
 import { dataProvider } from "@/providers/data";
 import { notificationProvider } from "@/providers/notification";
@@ -176,6 +177,7 @@ function App() {
               }}
             >
               <ScopeProvider>
+                <DisplayCurrencyProvider>
                 <Routes>
                   <Route
                     element={
@@ -235,6 +237,7 @@ function App() {
                     />
                   </Route>
                 </Routes>
+                </DisplayCurrencyProvider>
               </ScopeProvider>
 
               <RefineKbar />

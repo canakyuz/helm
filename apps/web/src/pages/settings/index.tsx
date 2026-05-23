@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useLogout } from "@refinedev/core";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,19 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDisplayCurrency } from "@/context/currency";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 
 export const SettingsPage = () => {
   const { themeKey, setThemeKey, themes } = useHelmTheme();
   const { mutate: logout } = useLogout();
-
-  const [currency, setCurrency] = useState(
-    () => localStorage.getItem("helm-currency") ?? "USD",
-  );
-  const changeCurrency = (value: string) => {
-    setCurrency(value);
-    localStorage.setItem("helm-currency", value);
-  };
+  const { currency, setCurrency } = useDisplayCurrency();
 
   return (
     <div className="space-y-4">
@@ -55,8 +48,8 @@ export const SettingsPage = () => {
           <CardTitle>Genel</CardTitle>
         </CardHeader>
         <CardContent className="max-w-sm space-y-2">
-          <Label>Para birimi</Label>
-          <Select value={currency} onValueChange={changeCurrency}>
+          <Label>Ekran para birimi</Label>
+          <Select value={currency} onValueChange={setCurrency}>
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -64,10 +57,13 @@ export const SettingsPage = () => {
               <SelectItem value="USD">USD ($)</SelectItem>
               <SelectItem value="EUR">EUR (€)</SelectItem>
               <SelectItem value="TRY">TRY (₺)</SelectItem>
+              <SelectItem value="GBP">GBP (£)</SelectItem>
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Metrikler şu an USD geliyor; çoklu para birimi dönüşümü yakında.
+            Tüm para metrikleri (gelir, eCPM) bu birime çevrilerek gösterilir.
+            FX rate'leri Frankfurter API'sinden günlük çekilir, localStorage'a
+            cache'lenir.
           </p>
         </CardContent>
       </Card>

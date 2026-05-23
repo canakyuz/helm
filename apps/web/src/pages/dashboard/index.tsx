@@ -27,8 +27,10 @@ import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
 import { supabaseClient } from "@/providers/supabase-client";
 import { useScope } from "@/context/scope";
+import { useDisplayCurrency } from "@/context/currency";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { useFxRates } from "@/lib/fx";
 import {
   compact,
   deltaPct,
@@ -36,7 +38,6 @@ import {
   formatMoney2,
   latest,
   series,
-  usd,
 } from "@/lib/metrics";
 import type {
   AlertEvent,
@@ -177,6 +178,51 @@ export const DashboardPage = () => {
     return cfg?.currency || "USD";
   };
 
+  // Ekran para birimi — Ayarlar'dan. Tüm para değerleri buna çevrilir.
+  const { currency: displayCcy } = useDisplayCurrency();
+  const sourceCurrencies = useMemo(() => {
+    const set = new Set<string>(["USD"]); // MRR/RevenueCat default
+    for (const i of integrations) {
+      if (i.provider === "admob") {
+        const c = (i.config as { currency?: string })?.currency || "USD";
+        set.add(c);
+      }
+    }
+    return Array.from(set);
+  }, [integrations]);
+  const fxRates = useFxRates(sourceCurrencies, displayCcy);
+  const rateOf = (ccy: string) => fxRates[ccy] ?? 1;
+
+  // Para birimi-duyarlı toplam ad_revenue (her projeyi kendi kaynak ccy'sinden
+  // çevirip topla).
+  const adRevenueDisplay = useMemo(() => {
+    if (!isAll) {
+      return latest(metrics, "ad_revenue") * rateOf(adCurrency);
+    }
+    let total = 0;
+    for (const [pid, { value }] of latestByProject(metrics, "ad_revenue")) {
+      total += value * rateOf(projAdCurrency(pid));
+    }
+    return total;
+  }, [metrics, isAll, fxRates, adCurrency]);
+
+  const adRevenueSeriesDisplay = useMemo(() => {
+    const byDate = new Map<string, number>();
+    for (const m of metrics) {
+      if (m.metric !== "ad_revenue") continue;
+      const ccy = isAll ? projAdCurrency(m.project_id) : adCurrency;
+      byDate.set(
+        m.date,
+        (byDate.get(m.date) ?? 0) + Number(m.value) * rateOf(ccy),
+      );
+    }
+    return [...byDate.entries()]
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+      .map(([date, value]) => ({ date, value }));
+  }, [metrics, isAll, fxRates, adCurrency]);
+
+  const mrrDisplay = latest(metrics, "mrr") * rateOf("USD");
+
   const adRevenueSeries = useMemo(
     () => series(metrics, "ad_revenue"),
     [metrics],
@@ -277,13 +323,13 @@ export const DashboardPage = () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title={isAll ? "Toplam MRR" : "MRR"}
-          value={usd(latest(metrics, "mrr"))}
+          value={formatMoney(mrrDisplay, displayCcy)}
           icon={<DollarSign />}
           loading={loading}
         />
         <StatCard
           title="Reklam Geliri (son gün)"
-          value={formatMoney(latest(metrics, "ad_revenue"), adCurrency)}
+          value={formatMoney(adRevenueDisplay, displayCcy)}
           icon={<Wallet />}
           delta={deltaPct(adRevenueSeries)}
           loading={loading}
@@ -324,7 +370,10 @@ export const DashboardPage = () => {
           />
           <StatCard
             title="eCPM"
-            value={formatMoney2(latest(metrics, "ad_ecpm"), adCurrency)}
+            value={formatMoney2(
+              latest(metrics, "ad_ecpm") * rateOf(adCurrency),
+              displayCcy,
+            )}
             icon={<Gauge />}
             loading={loading}
           />
@@ -345,9 +394,9 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <TrendChart
-              data={adRevenueSeries}
+              data={adRevenueSeriesDisplay}
               color={theme.chart.revenue}
-              format={(v) => formatMoney(v, adCurrency)}
+              format={(v) => formatMoney(v, displayCcy)}
             />
           </CardContent>
         </Card>
@@ -379,9 +428,14 @@ export const DashboardPage = () => {
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {projects.map((p) => {
-                  const mrr = latestByProject(metrics, "mrr");
+                  const mrrMap = latestByProject(metrics, "mrr");
                   const ad = latestByProject(metrics, "ad_revenue");
                   const dau = latestByProject(metrics, "dau");
+                  const mrrConverted =
+                    (mrrMap.get(p.id as string)?.value ?? 0) * rateOf("USD");
+                  const adConverted =
+                    (ad.get(p.id as string)?.value ?? 0) *
+                    rateOf(projAdCurrency(p.id as string));
                   const health = projectHealth(
                     integrations.filter((i) => i.project_id === p.id),
                   );
@@ -409,7 +463,7 @@ export const DashboardPage = () => {
                             MRR
                           </div>
                           <div className="text-sm font-medium">
-                            {usd(mrr.get(p.id as string)?.value ?? 0)}
+                            {formatMoney(mrrConverted, displayCcy)}
                           </div>
                         </div>
                         <div>
@@ -417,10 +471,7 @@ export const DashboardPage = () => {
                             Reklam
                           </div>
                           <div className="text-sm font-medium">
-                            {formatMoney(
-                              ad.get(p.id as string)?.value ?? 0,
-                              projAdCurrency(p.id as string),
-                            )}
+                            {formatMoney(adConverted, displayCcy)}
                           </div>
                         </div>
                         <div>

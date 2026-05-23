@@ -12,7 +12,9 @@ import { RangeSelect } from "@/components/range-select";
 import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
 import { useScope } from "@/context/scope";
+import { useDisplayCurrency } from "@/context/currency";
 import { useHelmTheme } from "@/theme/ThemeProvider";
+import { useFxRates } from "@/lib/fx";
 import {
   compact,
   deltaPct,
@@ -20,7 +22,6 @@ import {
   formatMoney2,
   latest,
   series,
-  usd,
 } from "@/lib/metrics";
 import type { Metric, ProjectIntegration } from "@/types";
 
@@ -83,6 +84,32 @@ export const RevenuePage = () => {
     [metrics],
   );
 
+  const { currency: displayCcy } = useDisplayCurrency();
+  const sourceCurrencies = useMemo(() => {
+    const set = new Set<string>(["USD"]);
+    for (const i of integrations) {
+      if (i.provider === "admob") {
+        const c = (i.config as { currency?: string })?.currency || "USD";
+        set.add(c);
+      }
+    }
+    return Array.from(set);
+  }, [integrations]);
+  const fxRates = useFxRates(sourceCurrencies, displayCcy);
+  const rateOf = (ccy: string) => fxRates[ccy] ?? 1;
+
+  const adRevenueDisplay = latest(metrics, "ad_revenue") * rateOf(adCurrency);
+  const adSeriesDisplay = useMemo(
+    () =>
+      adSeries.map((p) => ({
+        date: p.date,
+        value: p.value * rateOf(adCurrency),
+      })),
+    [adSeries, fxRates, adCurrency],
+  );
+  const mrrDisplay = latest(metrics, "mrr") * rateOf("USD");
+  const revenue28d = latest(metrics, "revenue_28d") * rateOf("USD");
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -106,7 +133,7 @@ export const RevenuePage = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
               title="MRR"
-              value={usd(latest(metrics, "mrr"))}
+              value={formatMoney(mrrDisplay, displayCcy)}
               icon={<DollarSign />}
               loading={loading}
             />
@@ -118,7 +145,7 @@ export const RevenuePage = () => {
             />
             <StatCard
               title="Gelir (28 gün)"
-              value={usd(latest(metrics, "revenue_28d"))}
+              value={formatMoney(revenue28d, displayCcy)}
               icon={<Wallet />}
               loading={loading}
             />
@@ -129,9 +156,12 @@ export const RevenuePage = () => {
             </CardHeader>
             <CardContent>
               <TrendChart
-                data={mrrSeries}
+                data={mrrSeries.map((p) => ({
+                  date: p.date,
+                  value: p.value * rateOf("USD"),
+                }))}
                 color={theme.chart.revenue}
-                format={usd}
+                format={(v) => formatMoney(v, displayCcy)}
               />
             </CardContent>
           </Card>
@@ -141,7 +171,7 @@ export const RevenuePage = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
               title="Reklam Geliri (son gün)"
-              value={formatMoney(latest(metrics, "ad_revenue"), adCurrency)}
+              value={formatMoney(adRevenueDisplay, displayCcy)}
               icon={<Wallet />}
               delta={deltaPct(adSeries)}
               loading={loading}
@@ -155,7 +185,10 @@ export const RevenuePage = () => {
             />
             <StatCard
               title="eCPM"
-              value={formatMoney2(latest(metrics, "ad_ecpm"), adCurrency)}
+              value={formatMoney2(
+                latest(metrics, "ad_ecpm") * rateOf(adCurrency),
+                displayCcy,
+              )}
               icon={<Gauge />}
               loading={loading}
             />
@@ -167,9 +200,9 @@ export const RevenuePage = () => {
               </CardHeader>
               <CardContent>
                 <TrendChart
-                  data={adSeries}
+                  data={adSeriesDisplay}
                   color={theme.chart.revenue}
-                  format={(v) => formatMoney(v, adCurrency)}
+                  format={(v) => formatMoney(v, displayCcy)}
                 />
               </CardContent>
             </Card>
