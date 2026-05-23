@@ -147,8 +147,9 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   app_store_connect: [
     {
       key: "issuer_id",
-      label: "Issuer ID",
+      label: "Issuer ID (Team Key için — Individual API Key'de BOŞ bırak)",
       placeholder: "57246542-96fe-1a63-e053-0824d011072a",
+      optional: true,
     },
     {
       key: "key_id",

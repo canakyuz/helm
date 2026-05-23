@@ -2,9 +2,11 @@ import { type Connector, type MetricPoint } from "./types.ts";
 
 // App Store Connect — Sales Reports (daily summary).
 // JWT ES256 ile auth → günlük satış raporu (gzip TSV).
-// config: { key_id, issuer_id, private_key, vendor_number, currency? }
+// config: { key_id, issuer_id?, private_key, vendor_number, currency? }
+//   issuer_id: Team Key için Integrations sayfasındaki Issuer ID (UUID).
+//              Individual API Key kullanıyorsan BOŞ bırak (Apple `sub: "user"` bekler).
 //   private_key: .p8 dosyasının tüm içeriği (BEGIN/END satırları dahil).
-//   currency: developer proceeds para birimi (Apple raporu varsayılanı, çoğu vendor için USD).
+//   currency: developer proceeds para birimi (vendor varsayılanı; çoğu hesapta USD).
 
 const DAYS_BACK = 7;
 
@@ -41,12 +43,18 @@ const pemToDer = (pem: string): Uint8Array => {
 async function makeJwt(config: Record<string, string>): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: "ES256", kid: config.key_id, typ: "JWT" };
-  const payload = {
-    iss: config.issuer_id,
+  // Team Key → iss = issuer_id (UUID)
+  // Individual API Key → iss yok, sub: "user"
+  const payload: Record<string, unknown> = {
     iat: now,
     exp: now + 1199, // < 20 min (Apple limit)
     aud: "appstoreconnect-v1",
   };
+  if (config.issuer_id && config.issuer_id.trim().length > 0) {
+    payload.iss = config.issuer_id;
+  } else {
+    payload.sub = "user";
+  }
   const headerB64 = b64url(JSON.stringify(header));
   const payloadB64 = b64url(JSON.stringify(payload));
   const signingInput = `${headerB64}.${payloadB64}`;
