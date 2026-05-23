@@ -19,7 +19,7 @@ Bu dosya: ne var, ne eksik, sıralı.
 
 | # | İş | Not |
 |---|-----|-----|
-| 1 | Gece cron'unu aktifleştir | `scripts/p0-cron-bootstrap.sql`'i SQL Editor'e yapıştır, `<SERVICE_ROLE_KEY>` yerine gerçek key. Bu Vault'a 2 secret yazar + cron job'u (re)kurar. Dashboard "Son senkron" şeridi 36 saat eskimişse kırmızıya döner. |
+| 1 | Saatlik cron'u aktifleştir | `scripts/p0-cron-bootstrap.sql`'i SQL Editor'e yapıştır, `<SERVICE_ROLE_KEY>` yerine gerçek key. Bu Vault'a 2 secret yazar + `helm-ingest-hourly` cron'unu (re)kurar (`0 * * * *`). Dashboard "Son senkron" şeridi 36s eskirse kırmızıya döner. |
 | 2 | RevenueCat bağla | Empire Inc MRR $0 — abonelik geliri akmıyor. v2 secret key + project_id panelden Entegrasyonlar → "+". |
 | 3 | DAU=0 doğrula | PostHog connector backfill'e geçti; entegrasyon satırındaki ShieldCheck (Doğrula) — upstream vs DB 7 günlük diff. `missing_stored` çok ise re-sync, sıfırsa gerçekten 0. |
 | 4 | Diğer projeleri ekle | Friday, Levios, Dante×2 → panelden "Yeni proje" + her birine entegrasyon. |

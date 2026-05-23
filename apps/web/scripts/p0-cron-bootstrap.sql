@@ -41,14 +41,14 @@ begin
 end $$;
 
 -- Cron job'unu yeniden kur (yoksa oluşturur, varsa overwrite eder).
-select cron.unschedule('helm-ingest-nightly')
-where exists (
-  select 1 from cron.job where jobname = 'helm-ingest-nightly'
-);
+-- Eski adlandırma (helm-ingest-nightly) varsa onu da temizle.
+select cron.unschedule(jobname)
+from cron.job
+where jobname in ('helm-ingest-nightly', 'helm-ingest-hourly');
 
 select cron.schedule(
-  'helm-ingest-nightly',
-  '0 3 * * *',
+  'helm-ingest-hourly',
+  '0 * * * *',
   $job$
   select net.http_post(
     url := (
@@ -70,7 +70,7 @@ select cron.schedule(
 -- Doğrulama: cron job + son secret'lar listelensin.
 select jobid, jobname, schedule, active
 from cron.job
-where jobname = 'helm-ingest-nightly';
+where jobname = 'helm-ingest-hourly';
 
 select name, created_at, updated_at
 from vault.secrets

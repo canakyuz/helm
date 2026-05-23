@@ -8,6 +8,7 @@ import {
 import { Link } from "react-router";
 import {
   Activity,
+  AlertOctagon,
   Bell,
   CalendarDays,
   DollarSign,
@@ -231,6 +232,12 @@ export const DashboardPage = () => {
     [metrics],
   );
   const dauSeries = useMemo(() => series(metrics, "dau"), [metrics]);
+  const errorSeries = useMemo(() => series(metrics, "errors"), [metrics]);
+  const errorLatest = latest(metrics, "errors");
+  const errorDelta = deltaPct(errorSeries);
+  const hasSentry = integrations.some(
+    (i) => i.provider === "sentry" && i.enabled,
+  );
 
   const handleSync = async () => {
     setSyncing(true);
@@ -285,7 +292,12 @@ export const DashboardPage = () => {
       </div>
 
       {/* Durum şeridi — 30 saniyelik sağlık bakışı */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-3 sm:grid-cols-3",
+          hasSentry && "lg:grid-cols-4",
+        )}
+      >
         <Link
           to="/system"
           className={cn(
@@ -332,6 +344,26 @@ export const DashboardPage = () => {
             Açık uyarı (48s): <strong>{openAlerts}</strong>
           </span>
         </Link>
+        {hasSentry && (
+          <Link
+            to="/system"
+            className={cn(
+              "flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20",
+              errorLatest > 0 && "text-destructive",
+            )}
+          >
+            <AlertOctagon className="size-4" />
+            <span>
+              Hatalar (son gün): <strong>{compact(errorLatest)}</strong>
+              {errorDelta !== null && (
+                <span className="ml-1 text-xs">
+                  ({errorDelta > 0 ? "+" : ""}
+                  {errorDelta.toFixed(0)}% / 7g)
+                </span>
+              )}
+            </span>
+          </Link>
+        )}
       </div>
 
       {/* İstatistik kartları */}
@@ -402,7 +434,12 @@ export const DashboardPage = () => {
       )}
 
       {/* Grafikler */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-4 lg:grid-cols-2",
+          hasSentry && "xl:grid-cols-3",
+        )}
+      >
         <Card>
           <CardHeader>
             <CardTitle>{`Reklam Geliri — son ${range} gün`}</CardTitle>
@@ -427,6 +464,20 @@ export const DashboardPage = () => {
             />
           </CardContent>
         </Card>
+        {hasSentry && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{`Hatalar — son ${range} gün`}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TrendChart
+                data={errorSeries}
+                color="#ef4444"
+                format={compact}
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Tüm Projeler: proje kartları ızgarası */}
