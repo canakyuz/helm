@@ -144,6 +144,34 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       optional: true,
     },
   ],
+  app_store_connect: [
+    {
+      key: "issuer_id",
+      label: "Issuer ID",
+      placeholder: "57246542-96fe-1a63-e053-0824d011072a",
+    },
+    {
+      key: "key_id",
+      label: "Key ID",
+      placeholder: "2X9R4HXF34",
+    },
+    {
+      key: "private_key",
+      label: "Private Key (.p8 içeriği — BEGIN/END dahil)",
+      secret: true,
+    },
+    {
+      key: "vendor_number",
+      label: "Vendor Number (Payments and Financial Reports)",
+      placeholder: "85123456",
+    },
+    {
+      key: "currency",
+      label: "Proceeds para birimi (ISO kodu)",
+      placeholder: "USD",
+      optional: true,
+    },
+  ],
 };
 
 const PROVIDERS = Object.keys(PROVIDER_LABELS) as ProviderName[];

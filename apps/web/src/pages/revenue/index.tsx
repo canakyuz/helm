@@ -1,6 +1,14 @@
 import { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { DollarSign, Eye, Gauge, Users, Wallet } from "lucide-react";
+import {
+  Download,
+  DollarSign,
+  Eye,
+  Gauge,
+  Store,
+  Users,
+  Wallet,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Tabs,
@@ -77,10 +85,39 @@ export const RevenuePage = () => {
     return codes.size === 1 ? [...codes][0] : "USD";
   }, [integrations, scope, isAll]);
 
+  // App Store Connect proceeds currency. Vendor varsayılanı çoğu hesapta USD.
+  const appCurrency = useMemo(() => {
+    const apps = integrations.filter((i) => i.provider === "app_store_connect");
+    if (!isAll) {
+      const cfg = apps.find((i) => i.project_id === scope)?.config as
+        | { currency?: string }
+        | undefined;
+      return cfg?.currency || "USD";
+    }
+    const codes = new Set(
+      apps.map(
+        (i) => ((i.config as { currency?: string })?.currency) || "USD",
+      ),
+    );
+    return codes.size === 1 ? [...codes][0] : "USD";
+  }, [integrations, scope, isAll]);
+
+  const hasAppStore = integrations.some(
+    (i) => i.provider === "app_store_connect" && i.enabled,
+  );
+
   const mrrSeries = useMemo(() => series(metrics, "mrr"), [metrics]);
   const adSeries = useMemo(() => series(metrics, "ad_revenue"), [metrics]);
   const impSeries = useMemo(
     () => series(metrics, "ad_impressions"),
+    [metrics],
+  );
+  const appRevSeries = useMemo(
+    () => series(metrics, "app_revenue"),
+    [metrics],
+  );
+  const downloadsSeries = useMemo(
+    () => series(metrics, "app_downloads"),
     [metrics],
   );
 
@@ -88,7 +125,7 @@ export const RevenuePage = () => {
   const sourceCurrencies = useMemo(() => {
     const set = new Set<string>(["USD"]);
     for (const i of integrations) {
-      if (i.provider === "admob") {
+      if (i.provider === "admob" || i.provider === "app_store_connect") {
         const c = (i.config as { currency?: string })?.currency || "USD";
         set.add(c);
       }
@@ -110,6 +147,17 @@ export const RevenuePage = () => {
   const mrrDisplay = latest(metrics, "mrr") * rateOf("USD");
   const revenue28d = latest(metrics, "revenue_28d") * rateOf("USD");
 
+  const appRevDisplay = latest(metrics, "app_revenue") * rateOf(appCurrency);
+  const appRevSeriesDisplay = useMemo(
+    () =>
+      appRevSeries.map((p) => ({
+        date: p.date,
+        value: p.value * rateOf(appCurrency),
+      })),
+    [appRevSeries, fxRates, appCurrency],
+  );
+  const downloadsLatest = latest(metrics, "app_downloads");
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -127,6 +175,11 @@ export const RevenuePage = () => {
           <TabsTrigger value="ads">
             <Wallet className="size-4" /> Reklam
           </TabsTrigger>
+          {hasAppStore && (
+            <TabsTrigger value="store">
+              <Store className="size-4" /> Mağaza
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="subscription" className="space-y-4">
@@ -220,6 +273,63 @@ export const RevenuePage = () => {
             </Card>
           </div>
         </TabsContent>
+
+        {hasAppStore && (
+          <TabsContent value="store" className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <StatCard
+                title="Mağaza Geliri (son gün)"
+                value={formatMoney(appRevDisplay, displayCcy)}
+                icon={<DollarSign />}
+                delta={deltaPct(appRevSeries)}
+                loading={loading}
+              />
+              <StatCard
+                title="İndirme (son gün)"
+                value={compact(downloadsLatest)}
+                icon={<Download />}
+                delta={deltaPct(downloadsSeries)}
+                loading={loading}
+              />
+              <StatCard
+                title="Gelir/İndirme"
+                value={
+                  downloadsLatest > 0
+                    ? formatMoney2(appRevDisplay / downloadsLatest, displayCcy)
+                    : "—"
+                }
+                icon={<Gauge />}
+                loading={loading}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{`Mağaza Geliri — son ${range} gün`}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TrendChart
+                    data={appRevSeriesDisplay}
+                    color={theme.chart.revenue}
+                    format={(v) => formatMoney(v, displayCcy)}
+                  />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{`İndirme — son ${range} gün`}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TrendChart
+                    data={downloadsSeries}
+                    color={theme.chart.users}
+                    format={compact}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

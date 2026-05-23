@@ -8,7 +8,8 @@ export type ProviderName =
   | "stripe"
   | "plausible"
   | "rest"
-  | "sentry";
+  | "sentry"
+  | "app_store_connect";
 
 export interface Project {
   id: string;
@@ -165,4 +166,5 @@ export const PROVIDER_LABELS: Record<ProviderName, string> = {
   plausible: "Plausible",
   rest: "REST API",
   sentry: "Sentry",
+  app_store_connect: "App Store Connect",
 };
