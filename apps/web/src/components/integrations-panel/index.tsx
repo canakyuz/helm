@@ -3,6 +3,7 @@ import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
 import {
   AlertTriangle,
   Check,
+  Pencil,
   Play,
   Plus,
   ShieldCheck,
@@ -277,6 +278,7 @@ const StatusCell = ({ status }: { status: DiffStatus }) => {
 
 export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [provider, setProvider] = useState<ProviderName | "">("");
   const [config, setConfig] = useState<Record<string, string>>({});
 
@@ -339,7 +341,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   });
 
   const { mutate: create, mutation: createMutation } = useCreate();
-  const { mutate: update } = useUpdate();
+  const { mutate: update, mutation: updateMutation } = useUpdate();
   const { mutate: remove } = useDelete();
 
   const integrations = result.data;
@@ -353,22 +355,46 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const resetForm = () => {
     setProvider("");
     setConfig({});
+    setEditingId(null);
   };
 
-  const handleAdd = () => {
+  const handleEdit = (it: ProjectIntegration) => {
+    setEditingId(it.id);
+    setProvider(it.provider);
+    setConfig((it.config ?? {}) as Record<string, string>);
+    setOpen(true);
+  };
+
+  const handleSave = () => {
     if (!valid) return;
-    create(
-      {
-        resource: "project_integrations",
-        values: { project_id: projectId, provider, config, enabled: true },
-      },
-      {
-        onSuccess: () => {
-          setOpen(false);
-          resetForm();
+    if (editingId) {
+      update(
+        {
+          resource: "project_integrations",
+          id: editingId,
+          values: { config },
         },
-      },
-    );
+        {
+          onSuccess: () => {
+            setOpen(false);
+            resetForm();
+          },
+        },
+      );
+    } else {
+      create(
+        {
+          resource: "project_integrations",
+          values: { project_id: projectId, provider, config, enabled: true },
+        },
+        {
+          onSuccess: () => {
+            setOpen(false);
+            resetForm();
+          },
+        },
+      );
+    }
   };
 
   const usedProviders = useMemo(
@@ -393,7 +419,11 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
             </Button>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Veri kaynağı bağla</DialogTitle>
+                <DialogTitle>
+                  {editingId
+                    ? `${PROVIDER_LABELS[provider as ProviderName]} düzenle`
+                    : "Veri kaynağı bağla"}
+                </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-4 py-2">
@@ -401,6 +431,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                   <Label>Sağlayıcı</Label>
                   <Select
                     value={provider}
+                    disabled={!!editingId}
                     onValueChange={(v) => {
                       setProvider(v as ProviderName);
                       setConfig({});
@@ -414,10 +445,10 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                         <SelectItem
                           key={p}
                           value={p}
-                          disabled={usedProviders.has(p)}
+                          disabled={usedProviders.has(p) && !editingId}
                         >
                           {PROVIDER_LABELS[p]}
-                          {usedProviders.has(p) ? " (bağlı)" : ""}
+                          {usedProviders.has(p) && !editingId ? " (bağlı)" : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -450,8 +481,12 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                   Vazgeç
                 </Button>
                 <Button
-                  onClick={handleAdd}
-                  disabled={!valid || createMutation.isPending}
+                  onClick={handleSave}
+                  disabled={
+                    !valid ||
+                    createMutation.isPending ||
+                    updateMutation.isPending
+                  }
                 >
                   Kaydet
                 </Button>
@@ -522,6 +557,14 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                       onClick={() => handleVerify(it.id)}
                     >
                       <ShieldCheck className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Düzenle"
+                      onClick={() => handleEdit(it)}
+                    >
+                      <Pencil className="size-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
