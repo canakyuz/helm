@@ -129,6 +129,9 @@ export const DashboardPage = () => {
     pagination: { mode: "off" },
   });
   const lastRun = runsResult.data[0];
+  const syncStale =
+    !lastRun?.started_at ||
+    Date.now() - new Date(lastRun.started_at).getTime() > 36 * 3_600_000;
 
   const since48h = useMemo(
     () => new Date(Date.now() - 48 * 3_600_000).toISOString(),
@@ -299,12 +302,24 @@ export const DashboardPage = () => {
             {errCount > 0 ? ` · ${errCount} hata` : ""}
           </span>
         </Link>
-        <div className="flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5">
+        <Link
+          to="/system"
+          className={cn(
+            "flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20",
+            syncStale && "text-destructive",
+          )}
+          title={
+            syncStale
+              ? "Gece cron'u çalışmıyor olabilir — Vault secret'larını kontrol et"
+              : undefined
+          }
+        >
           <RefreshCw className="size-4" />
           <span>
             Son senkron: <strong>{timeAgo(lastRun?.started_at ?? null)}</strong>
+            {syncStale ? " · cron?" : ""}
           </span>
-        </div>
+        </Link>
         <Link
           to="/alerts"
           className={cn(
