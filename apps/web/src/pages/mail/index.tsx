@@ -233,6 +233,31 @@ export const MailPage = () => {
             </div>
           )}
 
+          {/* Hızlı şablonlar */}
+          <div className="space-y-2">
+            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              Hızlı şablon
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+              {MAIL_TEMPLATES.map((t) => (
+                <button
+                  key={t.label}
+                  type="button"
+                  onClick={() => {
+                    setSubject(t.subject);
+                    setBody(t.body);
+                  }}
+                  className="rounded-md border bg-card/40 px-3 py-2 text-left text-xs hover:bg-card/80"
+                >
+                  <div className="font-medium">{t.label}</div>
+                  <div className="truncate text-[10px] text-muted-foreground">
+                    {t.subject}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -308,3 +333,26 @@ export const MailPage = () => {
     </div>
   );
 };
+
+const MAIL_TEMPLATES = [
+  {
+    label: "Hoş geldin",
+    subject: "Aramıza hoş geldin! 👋",
+    body: "Merhaba,\n\nEmpire Inc ailesine katıldığın için teşekkürler. İlk adımda yardıma ihtiyacın olursa bize yaz — buradayız.\n\nİyi günler,\nEmpire ekibi",
+  },
+  {
+    label: "Geri çağırma",
+    subject: "Seni özledik 💙",
+    body: "Selam,\n\nBir süredir uğramadın. Geri dönmen için sürpriz bir hediyemiz var — hesabını ziyaret et, gör.\n\nGörüşürüz!",
+  },
+  {
+    label: "Ödeme hatası",
+    subject: "Aboneliğinde bir sorun var",
+    body: "Merhaba,\n\nSon aylık aboneliğin işlenirken bir hata oldu. Premium içeriklere erişmeyi kaçırmamak için ödeme yöntemini güncellemen yeterli.\n\nDestek için her zaman buradayız.",
+  },
+  {
+    label: "Yeni özellik",
+    subject: "🎉 Yeni özellik: ...",
+    body: "Selam,\n\nBugün uygulamamıza yepyeni bir özellik ekledik. Hemen güncelle, denemeye başla.\n\nİyi eğlenceler!",
+  },
+];
