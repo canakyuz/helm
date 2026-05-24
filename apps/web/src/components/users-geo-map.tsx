@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { Compass, Globe2, X } from "lucide-react";
+import { Globe2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GeoMap } from "@/components/tool-ui/geo-map";
@@ -117,7 +117,7 @@ export const UsersGeoMap = ({
       className={cn(
         "relative h-full helm-pulse-markers",
         !fullCanvas && "[&_[role=region]]:!h-[var(--helm-map-h)]",
-        fullCanvas && "[&_[role=region]]:!h-full [&_[data-slot=geo-map]>div]:!h-full [&_[data-slot=geo-map]>div]:!rounded-none [&_[data-slot=geo-map]>div]:!border-0",
+        fullCanvas && "[&_[role=region]]:!h-full [&_[data-slot=geo-map]>div]:!h-full [&_[data-slot=geo-map]>div]:!min-h-0 [&_[data-slot=geo-map]>div]:!rounded-none [&_[data-slot=geo-map]>div]:!border-0",
       )}
       style={
         !fullCanvas
@@ -136,8 +136,9 @@ export const UsersGeoMap = ({
         onMarkerClick={(m) => setSelected(m.id ?? null)}
       />
 
+      {/* Top-left: en yoğun ülke (zoom +/- sağ-üstte; çakışma yok). */}
       {topCountry && (
-        <div className="pointer-events-none absolute right-3 top-3 z-[500] rounded-lg border border-border/70 bg-background/70 px-3 py-2 text-xs shadow-md backdrop-blur-md">
+        <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-lg border border-border/70 bg-background/70 px-3 py-2 text-xs shadow-md backdrop-blur-md">
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
             En yoğun
           </div>
@@ -146,13 +147,6 @@ export const UsersGeoMap = ({
           </div>
         </div>
       )}
-
-      <div className="pointer-events-none absolute bottom-3 left-3 z-[500] grid size-12 place-items-center rounded-full border border-border/70 bg-background/70 shadow-md backdrop-blur-md">
-        <Compass
-          className="size-6 text-primary/70 animate-[spin_60s_linear_infinite]"
-          strokeWidth={1.5}
-        />
-      </div>
 
       {selected && selectedGeo && (
         <div
