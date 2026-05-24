@@ -20,6 +20,7 @@ import {
   Zap,
 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -105,6 +106,7 @@ export const AlertsPage = () => {
   const [channel, setChannel] = useState<"telegram" | "email">("telegram");
 
   const [evaluating, setEvaluating] = useState(false);
+  const [testingRule, setTestingRule] = useState<string | null>(null);
   const [eventFilter, setEventFilter] = useState<string>("all");
   const [eventChannel, setEventChannel] = useState<string>("all");
   const [eventSearch, setEventSearch] = useState("");
@@ -194,6 +196,34 @@ export const AlertsPage = () => {
       });
     } finally {
       setEvaluating(false);
+    }
+  };
+
+  const handleTestRule = async (ruleId: string) => {
+    setTestingRule(ruleId);
+    try {
+      const { data, error } = await supabaseClient.functions.invoke(
+        "helm-alert",
+        { body: { rule_id: ruleId } },
+      );
+      if (error) throw error;
+      const rule = rules.find((r) => r.id === ruleId);
+      if (data?.triggered > 0) {
+        toast.warning(`Kural tetiklendi: ${rule?.name}`, {
+          description: "Olaylar tablosunda detay var.",
+        });
+      } else {
+        toast.success(`Kural değerlendirildi: ${rule?.name}`, {
+          description: "Eşik aşılmadı, tetiklenme yok.",
+        });
+      }
+      invalidate({ resource: "alert_events", invalidates: ["list"] });
+    } catch (e) {
+      toast.error("Test başarısız", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setTestingRule(null);
     }
   };
 
@@ -422,12 +452,20 @@ export const AlertsPage = () => {
                   <TableHead>Kapsam</TableHead>
                   <TableHead>Koşul</TableHead>
                   <TableHead>Kanal</TableHead>
+                  <TableHead className="text-right">7g</TableHead>
                   <TableHead>Aktif</TableHead>
-                  <TableHead className="w-12" />
+                  <TableHead className="w-24 text-right">İşlem</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rules.map((r) => (
+                {rules.map((r) => {
+                  const ruleEvents = events.filter((e) => e.rule_id === r.id);
+                  const lastWeek = ruleEvents.filter(
+                    (e) =>
+                      Date.now() - new Date(e.triggered_at).getTime() <=
+                      7 * 86_400_000,
+                  );
+                  return (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">{r.name}</TableCell>
                     <TableCell className="text-muted-foreground">
@@ -440,6 +478,18 @@ export const AlertsPage = () => {
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {r.channel === "telegram" ? "Telegram" : "E-posta"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {lastWeek.length > 0 ? (
+                        <Badge
+                          variant="secondary"
+                          className="font-mono tabular-nums"
+                        >
+                          {lastWeek.length}×
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Switch
@@ -454,43 +504,61 @@ export const AlertsPage = () => {
                       />
                     </TableCell>
                     <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label="Sil"
-                          >
-                            <Trash2 className="size-4 text-destructive" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Kural silinsin mi?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {r.name} kuralı kaldırılacak.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Vazgeç</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() =>
-                                remove({
-                                  resource: "alert_rules",
-                                  id: r.id,
-                                })
-                              }
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Test et"
+                          disabled={testingRule === r.id}
+                          onClick={() => handleTestRule(r.id as string)}
+                          title="Bu kuralı şimdi değerlendir"
+                        >
+                          <Zap
+                            className={cn(
+                              "size-4",
+                              testingRule === r.id && "animate-pulse",
+                            )}
+                          />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label="Sil"
                             >
-                              Sil
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                              <Trash2 className="size-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Kural silinsin mi?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {r.name} kuralı kaldırılacak.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() =>
+                                  remove({
+                                    resource: "alert_rules",
+                                    id: r.id,
+                                  })
+                                }
+                              >
+                                Sil
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           )}

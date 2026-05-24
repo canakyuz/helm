@@ -50,15 +50,29 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Body: { rule_id? } — verilirse sadece o kural değerlendirilir (test için)
+  let onlyRuleId: string | undefined;
+  try {
+    const body = await req.json();
+    if (typeof body?.rule_id === "string") onlyRuleId = body.rule_id;
+  } catch {
+    // body yok — tüm kurallar
+  }
+
   const hub = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  const { data: rules, error } = await hub
+  let rulesQuery = hub
     .from("alert_rules")
-    .select("id, name, project_id, metric, condition, threshold")
-    .eq("enabled", true);
+    .select("id, name, project_id, metric, condition, threshold");
+  if (onlyRuleId) {
+    rulesQuery = rulesQuery.eq("id", onlyRuleId);
+  } else {
+    rulesQuery = rulesQuery.eq("enabled", true);
+  }
+  const { data: rules, error } = await rulesQuery;
   if (error) return json({ error: error.message }, 500);
 
   const dedupeSince = new Date(Date.now() - 20 * 3_600_000).toISOString();
