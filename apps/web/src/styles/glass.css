@@ -2,57 +2,28 @@
    Tek tema, iki mod. Selector [data-helm-theme^="glass"] her iki moda da uygular.
    Token'lar src/styles/index.css'te (glass-dark / glass-light). */
 
-/* Dark mod — AGRESİF kozmik bloom. Airlinesim/Haulix referansı.
-   Body neredeyse pure black; bloom orb'ları %40-50 opacity ile
-   dramatik kontrast verir. Çok-katmanlı: lime/cyan/violet/pink. */
+/* Dark mod — Editorial mono. Tek lime bloom üst-sol, çok düşük opacity.
+   Pink/violet/cyan/cyan2 katmanları kaldırıldı; Linear/Notion ölçeğinde
+   sessiz, editorial his. Lime accent içerikte (KPI, harita, çizgi)
+   parlamaya devam eder; arka plan susar. */
 [data-helm-theme="glass-dark"] body {
-  background-color: #030308;
+  background-color: #07080c;
   background-image:
     radial-gradient(
-      circle 1100px at -5% -10%,
-      rgba(163, 230, 53, 0.45),
-      transparent 50%
-    ),
-    radial-gradient(
-      circle 1200px at 105% 110%,
-      rgba(56, 189, 248, 0.4),
-      transparent 50%
-    ),
-    radial-gradient(
-      circle 800px at 50% 0%,
-      rgba(139, 92, 246, 0.28),
-      transparent 60%
-    ),
-    radial-gradient(
-      circle 600px at 100% 0%,
-      rgba(236, 72, 153, 0.22),
-      transparent 50%
-    ),
-    radial-gradient(
-      circle 700px at 0% 100%,
-      rgba(34, 211, 238, 0.2),
+      circle 1300px at -8% -12%,
+      rgba(163, 230, 53, 0.14),
       transparent 60%
     );
   background-attachment: fixed;
 }
 
-/* Light mod — sıcak/soğuk pastel bloom. */
+/* Light mod — paralel sadeleştirme: tek soğuk-yeşil pastel orb üst-sol. */
 [data-helm-theme="glass-light"] body {
-  background-color: #eef0f5;
+  background-color: #f2f4f8;
   background-image:
     radial-gradient(
-      900px circle at 8% -5%,
-      rgba(101, 163, 13, 0.18),
-      transparent 55%
-    ),
-    radial-gradient(
-      1000px circle at 95% 100%,
-      rgba(2, 132, 199, 0.18),
-      transparent 55%
-    ),
-    radial-gradient(
-      700px circle at 55% 35%,
-      rgba(139, 92, 246, 0.08),
+      1100px circle at 6% -8%,
+      rgba(101, 163, 13, 0.09),
       transparent 60%
     );
   background-attachment: fixed;
@@ -138,30 +109,19 @@
   filter: drop-shadow(0 0 4px color-mix(in oklch, var(--primary) 70%, transparent));
 }
 
-/* Aurora drift — background-position yavaş kayar (40s).
-   Body image multiple gradients zaten var; position hareketi
-   tüm orb'ları yumuşakça oynatır. */
+/* Aurora drift — tek bloom yavaşça oynar (60s, daha durgun).
+   Editorial mono'da tek gradient olduğu için tek position yeter. */
 @keyframes aurora-drift {
   0%,
   100% {
-    background-position:
-      0% 0%,
-      100% 100%,
-      50% 0%,
-      100% 0%,
-      0% 100%;
+    background-position: 0% 0%;
   }
   50% {
-    background-position:
-      20% 10%,
-      80% 90%,
-      40% 20%,
-      90% 10%,
-      10% 90%;
+    background-position: 12% 8%;
   }
 }
 [data-helm-theme^="glass"] body {
-  animation: aurora-drift 40s ease-in-out infinite;
+  animation: aurora-drift 60s ease-in-out infinite;
 }
 
 /* Reduced motion respect — animasyonları kapat. */
