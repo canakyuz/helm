@@ -89,6 +89,9 @@ const ProjectCreate = lazy(() =>
 const ProjectEdit = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectEdit })),
 );
+const PropertyCreate = lazy(() =>
+  import("@/pages/properties").then((m) => ({ default: m.PropertyCreate })),
+);
 const CollectionsListPage = lazy(() =>
   import("@/pages/cms/collections/list").then((m) => ({
     default: m.CollectionsListPage,
@@ -196,7 +199,16 @@ function App() {
                   name: "projects",
                   create: "/projects/create",
                   edit: "/projects/edit/:id",
-                  meta: { label: "Proje" },
+                  meta: { label: "Proje (eski)" },
+                },
+                {
+                  name: "properties",
+                  create: "/properties/create",
+                  meta: { label: "Property" },
+                },
+                {
+                  name: "brands",
+                  meta: { label: "Brand" },
                 },
                 {
                   name: "cms_collections",
@@ -263,6 +275,10 @@ function App() {
                     <Route
                       path="/projects/edit/:id"
                       element={<ProjectEdit />}
+                    />
+                    <Route
+                      path="/properties/create"
+                      element={<PropertyCreate />}
                     />
                     <Route
                       path="/cms/collections"
