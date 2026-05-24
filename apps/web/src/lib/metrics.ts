@@ -19,20 +19,9 @@ export const usd2 = (value: number) =>
     maximumFractionDigits: 2,
   }).format(value);
 
-/** Verilen ISO para birimi koduyla biçimlendirir (TRY/USD/EUR …). */
+/** Verilen ISO para birimi koduyla biçimlendirir (TRY/USD/EUR …).
+ *  Her zaman 2 ondalık — kuruş bilgisi kaybolmasın diye. */
 export const formatMoney = (value: number, currency = "USD") => {
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(value);
-  } catch {
-    return `${value.toFixed(0)} ${currency}`;
-  }
-};
-
-export const formatMoney2 = (value: number, currency = "USD") => {
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -44,6 +33,9 @@ export const formatMoney2 = (value: number, currency = "USD") => {
     return `${value.toFixed(2)} ${currency}`;
   }
 };
+
+/** Geriye uyumluluk — eski adıyla aynı format. */
+export const formatMoney2 = formatMoney;
 
 export const compact = (value: number) =>
   new Intl.NumberFormat("en-US", { notation: "compact" }).format(value);
@@ -64,6 +56,76 @@ export const series = (metrics: Metric[], metricName: string): TrendPoint[] => {
 export const latest = (metrics: Metric[], metricName: string): number => {
   const s = series(metrics, metricName);
   return s.length ? s[s.length - 1].value : 0;
+};
+
+/** Belirli tarih aralığında bir metriğin toplamı (proje-bağımsız).
+ *  start/end ISO YYYY-MM-DD (start dahil, end dahil). */
+export const sumInRange = (
+  metrics: Metric[],
+  metricName: string,
+  start: string,
+  end: string,
+): number => {
+  let total = 0;
+  for (const m of metrics) {
+    if (m.metric !== metricName) continue;
+    if (m.date < start || m.date > end) continue;
+    total += Number(m.value);
+  }
+  return total;
+};
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const iso = (y: number, m: number, d: number) =>
+  `${y}-${pad(m)}-${pad(d)}`;
+
+/** AdMob/Apple konsoluna paralel tarih aralıkları (UTC). */
+export const moneyRanges = () => {
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth(); // 0-indexed
+  const d = now.getUTCDate();
+  const today = iso(y, m + 1, d);
+  const yesterday = ymdOffset(now, -1);
+  const thisMonthStart = iso(y, m + 1, 1);
+  // Geçen ay başı/sonu
+  const prevMonthDate = new Date(Date.UTC(y, m - 1, 1));
+  const prevY = prevMonthDate.getUTCFullYear();
+  const prevM = prevMonthDate.getUTCMonth();
+  const prevMonthStart = iso(prevY, prevM + 1, 1);
+  // bu ay başı - 1 gün = geçen ay sonu
+  const prevMonthEndDate = new Date(Date.UTC(y, m, 0));
+  const prevMonthEnd = iso(
+    prevMonthEndDate.getUTCFullYear(),
+    prevMonthEndDate.getUTCMonth() + 1,
+    prevMonthEndDate.getUTCDate(),
+  );
+  return {
+    today,
+    yesterday,
+    thisMonthStart,
+    thisMonthEnd: today,
+    prevMonthStart,
+    prevMonthEnd,
+  };
+};
+
+const ymdOffset = (base: Date, days: number) => {
+  const d = new Date(base.getTime() + days * 86_400_000);
+  return iso(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
+};
+
+/** Bir tarih için tek metric değeri (proje-bağımsız toplam). */
+export const valueOnDate = (
+  metrics: Metric[],
+  metricName: string,
+  date: string,
+): number => {
+  let total = 0;
+  for (const m of metrics) {
+    if (m.metric === metricName && m.date === date) total += Number(m.value);
+  }
+  return total;
 };
 
 /** Serinin son değeri ile ~days gün öncesi arasındaki yüzde değişim.

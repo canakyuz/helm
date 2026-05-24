@@ -29,7 +29,10 @@ import {
   formatMoney,
   formatMoney2,
   latest,
+  moneyRanges,
   series,
+  sumInRange,
+  valueOnDate,
 } from "@/lib/metrics";
 import type { Metric, ProjectIntegration } from "@/types";
 
@@ -147,6 +150,36 @@ export const RevenuePage = () => {
   const mrrDisplay = latest(metrics, "mrr") * rateOf("USD");
   const revenue28d = latest(metrics, "revenue_28d") * rateOf("USD");
 
+  // AdMob konsolundaki "Bugün / Dün / Bu ay / Geçen ay" paneline paralel
+  // toplamlar (display currency'ye çevrilmiş).
+  const ranges = useMemo(() => moneyRanges(), []);
+  const adTotals = useMemo(() => {
+    const rate = rateOf(adCurrency);
+    return {
+      today: valueOnDate(metrics, "ad_revenue", ranges.today) * rate,
+      yesterday: valueOnDate(metrics, "ad_revenue", ranges.yesterday) * rate,
+      thisMonth:
+        sumInRange(metrics, "ad_revenue", ranges.thisMonthStart, ranges.thisMonthEnd) *
+        rate,
+      prevMonth:
+        sumInRange(metrics, "ad_revenue", ranges.prevMonthStart, ranges.prevMonthEnd) *
+        rate,
+    };
+  }, [metrics, ranges, fxRates, adCurrency]);
+  const appTotals = useMemo(() => {
+    const rate = rateOf(appCurrency);
+    return {
+      today: valueOnDate(metrics, "app_revenue", ranges.today) * rate,
+      yesterday: valueOnDate(metrics, "app_revenue", ranges.yesterday) * rate,
+      thisMonth:
+        sumInRange(metrics, "app_revenue", ranges.thisMonthStart, ranges.thisMonthEnd) *
+        rate,
+      prevMonth:
+        sumInRange(metrics, "app_revenue", ranges.prevMonthStart, ranges.prevMonthEnd) *
+        rate,
+    };
+  }, [metrics, ranges, fxRates, appCurrency]);
+
   const appRevDisplay = latest(metrics, "app_revenue") * rateOf(appCurrency);
   const appRevSeriesDisplay = useMemo(
     () =>
@@ -221,6 +254,39 @@ export const RevenuePage = () => {
         </TabsContent>
 
         <TabsContent value="ads" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Toplam Tahmini Kazanç (AdMob)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div>
+                  <div className="text-xs text-muted-foreground">Bugün şimdiye kadar</div>
+                  <div className="mt-1 font-mono text-2xl">
+                    {formatMoney(adTotals.today, displayCcy)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Dün</div>
+                  <div className="mt-1 font-mono text-2xl">
+                    {formatMoney(adTotals.yesterday, displayCcy)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Bu ay şimdiye kadar</div>
+                  <div className="mt-1 font-mono text-2xl">
+                    {formatMoney(adTotals.thisMonth, displayCcy)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Geçen ay</div>
+                  <div className="mt-1 font-mono text-2xl">
+                    {formatMoney(adTotals.prevMonth, displayCcy)}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
               title="Reklam Geliri (son gün)"
@@ -276,6 +342,39 @@ export const RevenuePage = () => {
 
         {hasAppStore && (
           <TabsContent value="store" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Toplam Mağaza Kazancı</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Bugün şimdiye kadar</div>
+                    <div className="mt-1 font-mono text-2xl">
+                      {formatMoney(appTotals.today, displayCcy)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Dün</div>
+                    <div className="mt-1 font-mono text-2xl">
+                      {formatMoney(appTotals.yesterday, displayCcy)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Bu ay şimdiye kadar</div>
+                    <div className="mt-1 font-mono text-2xl">
+                      {formatMoney(appTotals.thisMonth, displayCcy)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Geçen ay</div>
+                    <div className="mt-1 font-mono text-2xl">
+                      {formatMoney(appTotals.prevMonth, displayCcy)}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <StatCard
                 title="Mağaza Geliri (son gün)"
