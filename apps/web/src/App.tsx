@@ -32,6 +32,9 @@ const LoginPage = lazy(() =>
 const UsersPage = lazy(() =>
   import("@/pages/users").then((m) => ({ default: m.UsersPage })),
 );
+const UserDetailPage = lazy(() =>
+  import("@/pages/users/$id").then((m) => ({ default: m.UserDetailPage })),
+);
 const IntegrationsPage = lazy(() =>
   import("@/pages/integrations").then((m) => ({
     default: m.IntegrationsPage,
@@ -191,6 +194,7 @@ function App() {
                   >
                     <Route index element={<DashboardPage />} />
                     <Route path="/users" element={<UsersPage />} />
+                    <Route path="/users/:id" element={<UserDetailPage />} />
                     <Route
                       path="/integrations"
                       element={<IntegrationsPage />}
