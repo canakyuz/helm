@@ -1,0 +1,276 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// helm-send-push — bir segmentin kullanıcılarına Expo Push bildirimi gönderir.
+// Body: { project_id, segment_id, title, body, data?, dry_run? }
+// Push token'ları: project_integrations.supabase.config.push_token_{table,column,user_column}
+//   defaults: profiles / expo_push_token / id
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
+interface AuthUser {
+  id: string;
+  email?: string | null;
+  created_at: string;
+  last_sign_in_at?: string | null;
+}
+
+const matches = (
+  u: AuthUser,
+  rule_type: "new" | "active" | "inactive",
+  rule_days: number,
+): boolean => {
+  const cutoff = Date.now() - rule_days * 86_400_000;
+  if (rule_type === "new") return new Date(u.created_at).getTime() >= cutoff;
+  if (rule_type === "active") {
+    return (
+      !!u.last_sign_in_at && new Date(u.last_sign_in_at).getTime() >= cutoff
+    );
+  }
+  return (
+    !u.last_sign_in_at || new Date(u.last_sign_in_at).getTime() < cutoff
+  );
+};
+
+async function listAllUsers(
+  url: string,
+  key: string,
+): Promise<AuthUser[]> {
+  const admin = createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const out: AuthUser[] = [];
+  for (let page = 1; page <= 20; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
+    if (error) throw new Error(error.message);
+    const users = data?.users ?? [];
+    for (const u of users) {
+      out.push({
+        id: u.id,
+        email: u.email ?? null,
+        created_at: u.created_at,
+        last_sign_in_at: u.last_sign_in_at ?? null,
+      });
+    }
+    if (users.length < 200) break;
+  }
+  return out;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  let body: {
+    project_id?: string;
+    segment_id?: string;
+    title?: string;
+    body?: string;
+    data?: Record<string, unknown>;
+    dry_run?: boolean;
+  } = {};
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "Geçersiz JSON" }, 400);
+  }
+  const {
+    project_id,
+    segment_id,
+    title,
+    body: msgBody,
+    data,
+    dry_run,
+  } = body;
+  if (!project_id || !segment_id || !title || !msgBody) {
+    return json(
+      { error: "project_id, segment_id, title, body gerekli" },
+      400,
+    );
+  }
+
+  const hub = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+
+  const { data: seg } = await hub
+    .from("user_segments")
+    .select("rule_type, rule_days, project_id")
+    .eq("id", segment_id)
+    .maybeSingle();
+  if (!seg) return json({ error: "Segment bulunamadı" }, 404);
+
+  const targetProjectId = seg.project_id ?? project_id;
+  const { data: supaIntg } = await hub
+    .from("project_integrations")
+    .select("config")
+    .eq("project_id", targetProjectId)
+    .eq("provider", "supabase")
+    .eq("enabled", true)
+    .maybeSingle();
+  const cfg = supaIntg?.config as
+    | {
+        project_url?: string;
+        service_role_key?: string;
+        push_token_table?: string;
+        push_token_column?: string;
+        push_user_column?: string;
+      }
+    | undefined;
+  if (!cfg?.project_url || !cfg?.service_role_key) {
+    return json({ error: "Segment projesinde Supabase entegrasyonu yok" }, 400);
+  }
+
+  const tokenTable = cfg.push_token_table || "profiles";
+  const tokenCol = cfg.push_token_column || "expo_push_token";
+  const userCol = cfg.push_user_column || "id";
+
+  let users: AuthUser[];
+  try {
+    users = await listAllUsers(cfg.project_url, cfg.service_role_key);
+  } catch (e) {
+    return json(
+      { error: e instanceof Error ? e.message : String(e) },
+      500,
+    );
+  }
+  const userIds = users
+    .filter((u) => matches(u, seg.rule_type, seg.rule_days))
+    .map((u) => u.id);
+
+  if (userIds.length === 0) {
+    return json({ recipients: 0, sent: 0, failed: 0, sample: [] });
+  }
+
+  // Push token'larını çek
+  const admin = createClient(cfg.project_url, cfg.service_role_key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  // Büyük listede tek seferde `in` query patlayabilir → chunk'la
+  const tokens: string[] = [];
+  const TOKEN_CHUNK = 200;
+  for (let i = 0; i < userIds.length; i += TOKEN_CHUNK) {
+    const slice = userIds.slice(i, i + TOKEN_CHUNK);
+    const { data: rows, error: tokErr } = await admin
+      .from(tokenTable)
+      .select(`${userCol}, ${tokenCol}`)
+      .in(userCol, slice);
+    if (tokErr) {
+      return json(
+        {
+          error: `Push token tablosundan okunamadı (${tokenTable}.${tokenCol}): ${tokErr.message}`,
+        },
+        500,
+      );
+    }
+    for (const r of rows ?? []) {
+      const t = (r as Record<string, unknown>)[tokenCol];
+      if (typeof t === "string" && t.startsWith("ExponentPushToken[")) {
+        tokens.push(t);
+      }
+    }
+  }
+
+  // Tekrar eden token'ları at
+  const uniqueTokens = Array.from(new Set(tokens));
+
+  if (dry_run) {
+    return json({
+      recipients: uniqueTokens.length,
+      eligible_users: userIds.length,
+      sent: 0,
+      failed: 0,
+      dry_run: true,
+      sample: uniqueTokens.slice(0, 5),
+    });
+  }
+
+  // Expo Push API — chunk 100
+  let sent = 0;
+  let failed = 0;
+  const errors: string[] = [];
+  const PUSH_CHUNK = 100;
+
+  for (let i = 0; i < uniqueTokens.length; i += PUSH_CHUNK) {
+    const chunk = uniqueTokens.slice(i, i + PUSH_CHUNK);
+    const messages = chunk.map((to) => ({
+      to,
+      title,
+      body: msgBody,
+      sound: "default",
+      ...(data ? { data } : {}),
+    }));
+    try {
+      const res = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Accept-Encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messages),
+      });
+      if (!res.ok) {
+        failed += chunk.length;
+        errors.push(`chunk ${i}: ${res.status} ${(await res.text()).slice(0, 200)}`);
+        continue;
+      }
+      const result = await res.json();
+      const tickets: Array<{ status?: string; message?: string }> =
+        result?.data ?? [];
+      for (const t of tickets) {
+        if (t.status === "ok") sent++;
+        else {
+          failed++;
+          if (t.message) errors.push(t.message);
+        }
+      }
+    } catch (e) {
+      failed += chunk.length;
+      errors.push(
+        `chunk ${i}: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
+  }
+
+  const { data: camp } = await hub
+    .from("campaigns")
+    .insert({
+      project_id,
+      segment_id,
+      channel: "push",
+      subject: title,
+      body: msgBody.slice(0, 4000),
+      recipients: uniqueTokens.length,
+      sent,
+      failed,
+      error: errors.length > 0 ? errors.join("\n").slice(0, 2000) : null,
+    })
+    .select("id")
+    .single();
+
+  return json({
+    recipients: uniqueTokens.length,
+    eligible_users: userIds.length,
+    sent,
+    failed,
+    campaign_id: camp?.id ?? null,
+    errors: errors.length > 0 ? errors.slice(0, 5) : undefined,
+  });
+});

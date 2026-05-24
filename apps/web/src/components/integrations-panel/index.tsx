@@ -120,6 +120,24 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       placeholder: "profiles:id, gems, subscriptions",
       optional: true,
     },
+    {
+      key: "push_token_table",
+      label: "Push token tablosu (Expo)",
+      placeholder: "profiles",
+      optional: true,
+    },
+    {
+      key: "push_token_column",
+      label: "Push token kolonu",
+      placeholder: "expo_push_token",
+      optional: true,
+    },
+    {
+      key: "push_user_column",
+      label: "Push tablosunda user UUID kolonu",
+      placeholder: "id",
+      optional: true,
+    },
   ],
   stripe: [{ key: "secret_key", label: "Stripe Secret Key", secret: true }],
   plausible: [
