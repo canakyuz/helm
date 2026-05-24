@@ -326,11 +326,21 @@ export const DashboardPage = () => {
 
   return (
     <div className="space-y-4">
-      {/* Başlık */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {isAll ? "Cockpit" : (activeProject?.name ?? "Proje")}
-        </h1>
+      {/* Hero başlık — büyük welcome + meta sağ */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            {new Date().toLocaleDateString("tr-TR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </div>
+          <h1 className="mt-1 text-4xl font-semibold tracking-tight">
+            {isAll ? "Cockpit" : (activeProject?.name ?? "Proje")}
+          </h1>
+        </div>
         <div className="flex items-center gap-2">
           <RangeSelect value={range} onChange={setRange} />
           {!isAll && activeProject && (
@@ -425,45 +435,48 @@ export const DashboardPage = () => {
         )}
       </div>
 
-      {/* Toplam Tahmini Kazanç — AdMob konsoluna paralel detay */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            Toplam Tahmini Kazanç
-            {hasAppStore ? " (Reklam + Mağaza)" : " (Reklam)"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            <div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                Bugün şimdiye kadar
-              </div>
-              <div className="mt-1 font-mono text-3xl font-semibold tabular-nums">
-                {formatMoney(totalEarnings.today, displayCcy)}
-              </div>
+      {/* Toplam Tahmini Kazanç — HERO treatment.
+          Sol: bugünkü tutar dev (5xl-6xl). Sağ: 3 mini sayı sticky. */}
+      <Card className="relative overflow-hidden">
+        {/* Dekoratif bloom — sol-üst lime, sağ-alt cyan */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-20 -top-20 size-72 rounded-full bg-primary/20 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 -right-20 size-72 rounded-full bg-sky-500/20 blur-3xl"
+        />
+        <CardContent className="relative grid gap-6 md:grid-cols-[1.4fr_1fr]">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              Bugün şimdiye kadar
+              {hasAppStore ? " · Reklam + Mağaza" : " · Reklam"}
             </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                Dün
-              </div>
-              <div className="mt-1 font-mono text-3xl font-semibold tabular-nums">
+            <div className="helm-hero-number mt-2 text-5xl md:text-6xl text-foreground">
+              {formatMoney(totalEarnings.today, displayCcy)}
+            </div>
+            <div className="mt-3 text-sm text-muted-foreground">
+              Dün:{" "}
+              <span className="font-mono font-medium text-foreground tabular-nums">
                 {formatMoney(totalEarnings.yesterday, displayCcy)}
-              </div>
+              </span>
             </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                Bu ay şimdiye kadar
+          </div>
+          <div className="grid grid-cols-2 gap-4 self-center">
+            <div className="rounded-lg border border-foreground/5 bg-background/30 p-3">
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Bu ay
               </div>
-              <div className="mt-1 font-mono text-3xl font-semibold tabular-nums">
+              <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
                 {formatMoney(totalEarnings.thisMonth, displayCcy)}
               </div>
             </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-lg border border-foreground/5 bg-background/30 p-3">
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 Geçen ay
               </div>
-              <div className="mt-1 font-mono text-3xl font-semibold tabular-nums">
+              <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
                 {formatMoney(totalEarnings.prevMonth, displayCcy)}
               </div>
             </div>

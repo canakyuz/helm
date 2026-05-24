@@ -2,36 +2,58 @@
    Tek tema, iki mod. Selector [data-helm-theme^="glass"] her iki moda da uygular.
    Token'lar src/styles/index.css'te (glass-dark / glass-light). */
 
-/* Dark mod — derin uzay zemin + lime/cyan bloom. */
+/* Dark mod — AGRESİF kozmik bloom. Airlinesim/Haulix referansı.
+   Body neredeyse pure black; bloom orb'ları %40-50 opacity ile
+   dramatik kontrast verir. Çok-katmanlı: lime/cyan/violet/pink. */
 [data-helm-theme="glass-dark"] body {
-  background-color: #07070a;
+  background-color: #030308;
   background-image:
     radial-gradient(
-      640px circle at 12% 4%,
-      rgba(163, 230, 53, 0.08),
+      circle 1100px at -5% -10%,
+      rgba(163, 230, 53, 0.45),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle 1200px at 105% 110%,
+      rgba(56, 189, 248, 0.4),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle 800px at 50% 0%,
+      rgba(139, 92, 246, 0.28),
       transparent 60%
     ),
     radial-gradient(
-      720px circle at 88% 96%,
-      rgba(56, 189, 248, 0.07),
-      transparent 55%
+      circle 600px at 100% 0%,
+      rgba(236, 72, 153, 0.22),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle 700px at 0% 100%,
+      rgba(34, 211, 238, 0.2),
+      transparent 60%
     );
   background-attachment: fixed;
 }
 
-/* Light mod — sıcak/soğuk pastel bloom (lime + sky, daha hafif). */
+/* Light mod — sıcak/soğuk pastel bloom. */
 [data-helm-theme="glass-light"] body {
-  background-color: #f6f7fa;
+  background-color: #eef0f5;
   background-image:
     radial-gradient(
-      720px circle at 12% 4%,
-      rgba(101, 163, 13, 0.07),
-      transparent 60%
+      900px circle at 8% -5%,
+      rgba(101, 163, 13, 0.18),
+      transparent 55%
     ),
     radial-gradient(
-      820px circle at 88% 96%,
-      rgba(2, 132, 199, 0.06),
+      1000px circle at 95% 100%,
+      rgba(2, 132, 199, 0.18),
       transparent 55%
+    ),
+    radial-gradient(
+      700px circle at 55% 35%,
+      rgba(139, 92, 246, 0.08),
+      transparent 60%
     );
   background-attachment: fixed;
 }
@@ -50,10 +72,28 @@
   -webkit-backdrop-filter: blur(20px) saturate(140%);
 }
 
-/* Sidebar yüzeyi de camsı — her iki modda da. */
+/* Sidebar yüzeyi de camsı — her iki modda da.
+   Floating variant + transparan bg → bloom arkadan görünür. */
 [data-helm-theme^="glass"] [data-slot="sidebar-container"] {
-  backdrop-filter: blur(18px) saturate(135%);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+[data-helm-theme="glass-dark"] [data-slot="sidebar-inner"] {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 48px rgba(0, 0, 0, 0.4);
+}
+[data-helm-theme="glass-light"] [data-slot="sidebar-inner"] {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+/* SidebarInset bg-background opak — bloom'u kapıyor. Glass tema'da
+   şeffaf yap ki body radial gradient görünür kalsın. */
+[data-helm-theme^="glass"] [data-slot="sidebar-inset"] {
+  background: transparent !important;
 }
 
 /* Sidebar aktif item glow — sol kenarda 2px primary glow şeridi. */
@@ -78,16 +118,50 @@
   -webkit-backdrop-filter: blur(14px) saturate(130%);
 }
 
-/* Card inset border + outer shadow — derinlik. */
+/* Card glass texture — DRAMATIK derinlik (Haulix/Airlinesim referansı):
+   - Görünür border (rgba 0.1) — bloom üzerinde silinip görünmesin
+   - Çift inset highlight (üstte beyaz, altta soft glow)
+   - Çok katmanlı outer shadow — gerçek camsı yüzme hissi. */
 [data-helm-theme="glass-dark"] [data-slot="card"] {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 8px 32px rgba(0, 0, 0, 0.24);
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 16px 48px rgba(0, 0, 0, 0.5);
 }
 [data-helm-theme="glass-light"] [data-slot="card"] {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 255, 255, 0.5) 100%
+    );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 4px 24px rgba(15, 23, 42, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 40px rgba(15, 23, 42, 0.1);
+}
+
+/* Hover lift — interaktif kartlarda. */
+[data-helm-theme^="glass"] a[data-slot="card"]:hover,
+[data-helm-theme^="glass"] button[data-slot="card"]:hover {
+  transform: translateY(-2px);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+/* Hero typography utility — büyük, mono, tabular. */
+[data-helm-theme^="glass"] .helm-hero-number {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 /* Table row hover — frosted highlight. */

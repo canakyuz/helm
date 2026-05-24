@@ -1,5 +1,5 @@
 import { useList, useNavigation } from "@refinedev/core";
-import { Boxes, ChevronsUpDown, Plus } from "lucide-react";
+import { Boxes, ChevronsUpDown, Pencil, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ import type { Project } from "@/types";
 // Sidebar üstündeki kapsam seçici — "Tüm Projeler" + projeler + proje ekle.
 export const ProjectSwitcher = () => {
   const { scope, setScope } = useScope();
-  const { create } = useNavigation();
+  const { create, edit } = useNavigation();
   const { result } = useList<Project>({
     resource: "projects",
     pagination: { mode: "off" },
@@ -63,9 +63,23 @@ export const ProjectSwitcher = () => {
               <DropdownMenuItem
                 key={p.id}
                 onClick={() => setScope(p.id as string)}
+                className="group flex items-center justify-between gap-2"
               >
-                <span className="size-4" />
-                {p.name}
+                <span className="flex flex-1 items-center gap-2 truncate">
+                  <span className="size-4" />
+                  <span className="truncate">{p.name}</span>
+                </span>
+                <button
+                  type="button"
+                  aria-label={`${p.name} projesini düzenle`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    edit("projects", p.id as string);
+                  }}
+                  className="rounded p-1 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
+                >
+                  <Pencil className="size-3.5" />
+                </button>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
