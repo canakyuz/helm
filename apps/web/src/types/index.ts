@@ -178,6 +178,7 @@ export interface UserSegment {
 export interface AppVersion {
   id: number;
   project_id: string;
+  source: "ios" | "android";
   version: string;
   release_date: string | null;
   release_notes: string | null;
