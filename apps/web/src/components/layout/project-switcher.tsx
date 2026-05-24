@@ -40,7 +40,7 @@ export const ProjectSwitcher = () => {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-accent text-sidebar-foreground ring-1 ring-foreground/10">
                 <Boxes className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
