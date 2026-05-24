@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useCreate, useDelete, useList } from "@refinedev/core";
 import { ExternalLink, Layers, Plus, Trash2, UserCheck, Users } from "lucide-react";
@@ -155,9 +155,115 @@ export const SegmentsPage = () => {
     );
   };
 
+  // KPI hesapları — sadece hesaplanmış segmentleri kapsar
+  const stats = useMemo(() => {
+    const computed = Object.values(counts).map((c) => c.count);
+    const total = computed.reduce((s, n) => s + n, 0);
+    const max = computed.length > 0 ? Math.max(...computed) : 0;
+    const min = computed.length > 0 ? Math.min(...computed) : 0;
+    return {
+      total: segments.length,
+      computed: computed.length,
+      matchedSum: total,
+      largest: max,
+      smallest: min,
+    };
+  }, [counts, segments]);
+
+  const handleCreateFromTemplate = (tpl: typeof SEGMENT_TEMPLATES[number]) => {
+    create({
+      resource: "user_segments",
+      values: {
+        name: tpl.name,
+        project_id: null,
+        rule_type: tpl.rule_type,
+        rule_days: tpl.rule_days,
+      },
+    });
+  };
+
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Segmentler</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">Segmentler</h1>
+        <div className="text-xs text-muted-foreground">
+          {stats.total > 0 && (
+            <>
+              <span className="font-mono tabular-nums">{stats.total}</span>{" "}
+              segment ·{" "}
+              <span className="font-mono tabular-nums">
+                {stats.computed}
+              </span>{" "}
+              hesaplandı
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* KPI cluster */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <SegKpi label="Toplam Segment" value={stats.total} icon={<Layers />} />
+        <SegKpi
+          label="Hesaplanmış"
+          value={`${stats.computed} / ${stats.total}`}
+          icon={<UserCheck />}
+          tone={stats.computed === stats.total ? "emerald" : undefined}
+        />
+        <SegKpi
+          label="Toplam Eşleşen"
+          value={stats.matchedSum}
+          icon={<Users />}
+          tone="primary"
+        />
+        <SegKpi
+          label="En Büyük / En Küçük"
+          value={
+            stats.computed > 0
+              ? `${stats.largest} / ${stats.smallest}`
+              : "—"
+          }
+          icon={<Layers />}
+        />
+      </div>
+
+      {/* Şablonlar — segment hiç yoksa veya az ise göster */}
+      {segments.length < 4 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Hızlı Başlangıç</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              {SEGMENT_TEMPLATES.map((t) => {
+                const exists = segments.some(
+                  (s) =>
+                    s.name === t.name ||
+                    (s.rule_type === t.rule_type && s.rule_days === t.rule_days),
+                );
+                return (
+                  <button
+                    key={t.name}
+                    type="button"
+                    disabled={exists}
+                    onClick={() => handleCreateFromTemplate(t)}
+                    className="rounded-md border bg-card/40 p-3 text-left text-xs hover:bg-card/80 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <div className="font-medium text-sm">{t.name}</div>
+                    <div className="mt-1 text-[11px] text-muted-foreground">
+                      {t.description}
+                    </div>
+                    {exists && (
+                      <div className="mt-2 text-[10px] text-emerald-500">
+                        ✓ tanımlı
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -419,6 +525,68 @@ export const SegmentsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+const SEGMENT_TEMPLATES: Array<{
+  name: string;
+  description: string;
+  rule_type: UserSegment["rule_type"];
+  rule_days: number;
+}> = [
+  {
+    name: "Yeni kullanıcılar (7g)",
+    description: "Son 7 günde kaydolmuş — onboarding'i optimize et",
+    rule_type: "new",
+    rule_days: 7,
+  },
+  {
+    name: "Aktif kullanıcılar (30g)",
+    description: "Son 30 günde giriş yapmış — kampanya hedefi",
+    rule_type: "active",
+    rule_days: 30,
+  },
+  {
+    name: "Risk altındakiler (14g)",
+    description: "14 gündür uğramamış — geri çağırma maili",
+    rule_type: "inactive",
+    rule_days: 14,
+  },
+  {
+    name: "Kayıp kullanıcılar (60g)",
+    description: "60 gündür yok — son şans kampanyası",
+    rule_type: "inactive",
+    rule_days: 60,
+  },
+];
+
+const SegKpi = ({
+  label,
+  value,
+  icon,
+  tone,
+}: {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  tone?: "emerald" | "primary";
+}) => {
+  const toneCls =
+    tone === "emerald"
+      ? "text-emerald-500"
+      : tone === "primary"
+        ? "text-primary"
+        : "text-foreground";
+  return (
+    <div className="rounded-lg border bg-card/40 p-3">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+        <span className="[&>svg]:size-3.5">{icon}</span>
+        {label}
+      </div>
+      <div className={`mt-1 font-mono text-2xl tabular-nums ${toneCls}`}>
+        {value}
+      </div>
     </div>
   );
 };
