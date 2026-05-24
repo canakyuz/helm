@@ -12,6 +12,7 @@ import { liveProvider } from "@refinedev/supabase";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorComponent } from "@/components/error";
 import { HelmLayout } from "@/components/layout";
 import { ThemeProvider } from "@/theme/ThemeProvider";
@@ -88,12 +89,36 @@ const ProjectCreate = lazy(() =>
 const ProjectEdit = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectEdit })),
 );
+const CollectionsListPage = lazy(() =>
+  import("@/pages/cms/collections/list").then((m) => ({
+    default: m.CollectionsListPage,
+  })),
+);
+const CollectionEditPage = lazy(() =>
+  import("@/pages/cms/collections/edit").then((m) => ({
+    default: m.CollectionEditPage,
+  })),
+);
+const EntriesListPage = lazy(() =>
+  import("@/pages/cms/entries/list").then((m) => ({
+    default: m.EntriesListPage,
+  })),
+);
+const EntryEditPage = lazy(() =>
+  import("@/pages/cms/entries/edit").then((m) => ({
+    default: m.EntryEditPage,
+  })),
+);
+const AssetsPage = lazy(() =>
+  import("@/pages/cms/assets").then((m) => ({ default: m.AssetsPage })),
+);
 
 function App() {
   return (
     <BrowserRouter>
       <RefineKbarProvider>
         <ThemeProvider>
+          <TooltipProvider>
           <DevtoolsProvider>
             <Refine
               dataProvider={dataProvider}
@@ -173,6 +198,24 @@ function App() {
                   edit: "/projects/edit/:id",
                   meta: { label: "Proje" },
                 },
+                {
+                  name: "cms_collections",
+                  list: "/cms/collections",
+                  edit: "/cms/collections/edit/:id",
+                  meta: { label: "İçerik Şemaları" },
+                },
+                {
+                  name: "cms_entries",
+                  list: "/cms/entries",
+                  create: "/cms/entries/create",
+                  edit: "/cms/entries/edit/:id",
+                  meta: { label: "İçerikler" },
+                },
+                {
+                  name: "cms_assets",
+                  list: "/cms/assets",
+                  meta: { label: "Medya" },
+                },
               ]}
               options={{
                 syncWithLocation: true,
@@ -221,6 +264,24 @@ function App() {
                       path="/projects/edit/:id"
                       element={<ProjectEdit />}
                     />
+                    <Route
+                      path="/cms/collections"
+                      element={<CollectionsListPage />}
+                    />
+                    <Route
+                      path="/cms/collections/edit/:id"
+                      element={<CollectionEditPage />}
+                    />
+                    <Route path="/cms/entries" element={<EntriesListPage />} />
+                    <Route
+                      path="/cms/entries/create"
+                      element={<EntryEditPage />}
+                    />
+                    <Route
+                      path="/cms/entries/edit/:id"
+                      element={<EntryEditPage />}
+                    />
+                    <Route path="/cms/assets" element={<AssetsPage />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
 
@@ -251,6 +312,7 @@ function App() {
             <DevtoolsPanel />
           </DevtoolsProvider>
           <Toaster />
+          </TooltipProvider>
         </ThemeProvider>
       </RefineKbarProvider>
     </BrowserRouter>

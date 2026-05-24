@@ -21,6 +21,8 @@ interface TrendChartProps {
   height?: number;
   /** Y ekseni ve tooltip değer biçimlendirici. */
   format?: (value: number) => string;
+  /** "minimal" → axis/grid/tooltip yok, sparkline gibi inline kullan. */
+  variant?: "default" | "minimal";
 }
 
 // recharts tabanlı hafif zaman serisi grafiği. Izgara/eksen renkleri temadan.
@@ -29,6 +31,7 @@ export const TrendChart = ({
   color,
   height = 240,
   format,
+  variant = "default",
 }: TrendChartProps) => {
   const { theme } = useHelmTheme();
   const lineColor = color ?? theme.chart.users;
@@ -47,10 +50,18 @@ export const TrendChart = ({
   const idSuffix = lineColor.replace(/[^a-z0-9]/gi, "");
   const gradientId = `helm-grad-${idSuffix}`;
   const glowId = `helm-glow-${idSuffix}`;
+  const isMinimal = variant === "minimal";
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+      <AreaChart
+        data={data}
+        margin={
+          isMinimal
+            ? { top: 2, right: 2, bottom: 2, left: 2 }
+            : { top: 8, right: 8, bottom: 0, left: 0 }
+        }
+      >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={lineColor} stopOpacity={0.45} />
@@ -65,38 +76,44 @@ export const TrendChart = ({
             </feMerge>
           </filter>
         </defs>
-        <CartesianGrid
-          strokeDasharray="3 3"
-          stroke={theme.chart.grid}
-          vertical={false}
-        />
-        <XAxis
-          dataKey="date"
-          stroke={theme.chart.axis}
-          tick={{ fontSize: 11, fill: theme.chart.axis }}
-          tickFormatter={(d: string) => d.slice(5)}
-          minTickGap={28}
-        />
-        <YAxis
-          stroke={theme.chart.axis}
-          tick={{ fontSize: 11, fill: theme.chart.axis }}
-          width={52}
-          tickFormatter={(v: number) => (format ? format(v) : String(v))}
-        />
-        <Tooltip
-          formatter={(v) => [
-            format ? format(Number(v ?? 0)) : String(v ?? ""),
-            "",
-          ]}
-          labelFormatter={(d) => String(d)}
-          contentStyle={{
-            background: "var(--popover)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
-            color: "var(--popover-foreground)",
-            fontSize: 12,
-          }}
-        />
+        {!isMinimal && (
+          <>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={theme.chart.grid}
+              vertical={false}
+            />
+            <XAxis
+              dataKey="date"
+              stroke={theme.chart.axis}
+              tick={{ fontSize: 11, fill: theme.chart.axis }}
+              tickFormatter={(d: string) => d.slice(5)}
+              minTickGap={28}
+            />
+            <YAxis
+              stroke={theme.chart.axis}
+              tick={{ fontSize: 11, fill: theme.chart.axis }}
+              width={52}
+              tickFormatter={(v: number) =>
+                format ? format(v) : String(v)
+              }
+            />
+            <Tooltip
+              formatter={(v) => [
+                format ? format(Number(v ?? 0)) : String(v ?? ""),
+                "",
+              ]}
+              labelFormatter={(d) => String(d)}
+              contentStyle={{
+                background: "var(--popover)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius)",
+                color: "var(--popover-foreground)",
+                fontSize: 12,
+              }}
+            />
+          </>
+        )}
         <Area
           type="monotone"
           dataKey="value"

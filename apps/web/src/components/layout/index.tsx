@@ -6,8 +6,11 @@ import {
   Activity,
   Bell,
   ChevronsUpDown,
+  FileText,
   Filter,
   History,
+  Image as ImageIcon,
+  Layers,
   LayoutDashboard,
   LineChart,
   Loader2,
@@ -53,7 +56,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ProjectSwitcher } from "./project-switcher";
-import { RightRail } from "./right-rail";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 
 type IUser = { id: string; name?: string };
@@ -95,6 +97,14 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { title: "Mail", icon: Mail, url: "/mail" },
       { title: "Push", icon: Send, url: "/push" },
       { title: "Kampanya Geçmişi", icon: Megaphone, url: "/campaigns" },
+    ],
+  },
+  {
+    label: "İçerik (CMS)",
+    items: [
+      { title: "Şemalar", icon: Layers, url: "/cms/collections" },
+      { title: "İçerikler", icon: FileText, url: "/cms/entries" },
+      { title: "Medya", icon: ImageIcon, url: "/cms/assets" },
     ],
   },
   {
@@ -306,7 +316,13 @@ export const HelmLayout = () => {
       <AppSidebar />
       <SidebarInset>
         <HeaderBar />
-        <main className="p-4 lg:p-6">
+        <main
+          className={
+            isDashboard
+              ? "relative min-h-0 flex-1 overflow-hidden"
+              : "min-h-0 flex-1 p-4 lg:p-6"
+          }
+        >
           <Suspense
             fallback={
               <div className="grid place-items-center py-24">
@@ -314,16 +330,7 @@ export const HelmLayout = () => {
               </div>
             }
           >
-            {isDashboard ? (
-              <div className="flex gap-6">
-                <div className="min-w-0 flex-1">
-                  <Outlet />
-                </div>
-                <RightRail />
-              </div>
-            ) : (
-              <Outlet />
-            )}
+            <Outlet />
           </Suspense>
         </main>
       </SidebarInset>

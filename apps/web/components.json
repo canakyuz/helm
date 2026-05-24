@@ -22,6 +22,7 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@tool-ui": "https://www.tool-ui.com/r/{name}.json"
+    "@tool-ui": "https://www.tool-ui.com/r/{name}.json",
+    "@plate": "https://platejs.org/r/{name}.json"
   }
 }

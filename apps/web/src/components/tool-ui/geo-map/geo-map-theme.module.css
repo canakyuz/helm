@@ -64,16 +64,16 @@
   mix-blend-mode: screen;
 }
 
-/* Dark modda tile'ları biraz tona ada (carto dark_nolabels yumuşaması). */
+/* Tile filter — daha doygun + kontrastlı (marker'lar belirginleşsin). */
 :global([data-helm-theme="glass-dark"])
   .root[data-slot="geo-map"]
   :global(.leaflet-tile-pane) {
-  filter: saturate(0.7) brightness(0.92);
+  filter: saturate(1.1) brightness(1) contrast(1.05);
 }
 :global([data-helm-theme="glass-light"])
   .root[data-slot="geo-map"]
   :global(.leaflet-tile-pane) {
-  filter: saturate(0.7) brightness(1.02);
+  filter: saturate(0.95) brightness(1) contrast(1.02);
 }
 
 .root[data-slot="geo-map"] :global(.leaflet-control-zoom) {

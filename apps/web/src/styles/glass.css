@@ -96,6 +96,82 @@
   background: transparent !important;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Liquid Cells — animasyon keyframes (Helm Cockpit v3)
+   ════════════════════════════════════════════════════════════════ */
+
+/* Sync orb nabız atışı — ring fade in/out + hafif scale. */
+@keyframes sync-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Map marker nefes alma — Leaflet CircleMarker SVG path için.
+   Transform kullanmıyoruz (Leaflet pozisyonu bozulur); stroke-width
+   + stroke-opacity animate ederek "halka genişler" hissi. */
+@keyframes helm-marker-pulse {
+  0%,
+  100% {
+    stroke-width: 2;
+    stroke-opacity: 0.9;
+  }
+  50% {
+    stroke-width: 10;
+    stroke-opacity: 0.3;
+  }
+}
+[data-helm-theme^="glass"] .helm-pulse-markers path.leaflet-interactive {
+  animation: helm-marker-pulse 2.4s ease-in-out infinite;
+  stroke: var(--primary);
+  fill: var(--primary);
+  fill-opacity: 0.95;
+  filter: drop-shadow(0 0 4px color-mix(in oklch, var(--primary) 70%, transparent));
+}
+
+/* Aurora drift — background-position yavaş kayar (40s).
+   Body image multiple gradients zaten var; position hareketi
+   tüm orb'ları yumuşakça oynatır. */
+@keyframes aurora-drift {
+  0%,
+  100% {
+    background-position:
+      0% 0%,
+      100% 100%,
+      50% 0%,
+      100% 0%,
+      0% 100%;
+  }
+  50% {
+    background-position:
+      20% 10%,
+      80% 90%,
+      40% 20%,
+      90% 10%,
+      10% 90%;
+  }
+}
+[data-helm-theme^="glass"] body {
+  animation: aurora-drift 40s ease-in-out infinite;
+}
+
+/* Reduced motion respect — animasyonları kapat. */
+@media (prefers-reduced-motion: reduce) {
+  .helm-marker-pulse,
+  [data-helm-theme^="glass"] body {
+    animation: none !important;
+  }
+}
+
 /* Sidebar aktif item glow — sol kenarda 2px primary glow şeridi. */
 [data-helm-theme^="glass"] [data-slot="sidebar-menu-button"] {
   position: relative;

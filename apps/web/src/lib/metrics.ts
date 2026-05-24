@@ -7,6 +7,7 @@ export const usd = (value: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+    currencyDisplay: "narrowSymbol",
     maximumFractionDigits: 0,
   }).format(value);
 
@@ -15,17 +16,19 @@ export const usd2 = (value: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+    currencyDisplay: "narrowSymbol",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
 
 /** Verilen ISO para birimi koduyla biçimlendirir (TRY/USD/EUR …).
- *  Her zaman 2 ondalık — kuruş bilgisi kaybolmasın diye. */
+ *  narrowSymbol → her zaman sembol (₺, $, €, £) — kod (TRY, USD) değil. */
 export const formatMoney = (value: number, currency = "USD") => {
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,
+      currencyDisplay: "narrowSymbol",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value);

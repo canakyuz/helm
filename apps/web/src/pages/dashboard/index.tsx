@@ -10,15 +10,10 @@ import {
   Activity,
   AlertOctagon,
   Bell,
-  CalendarDays,
-  DollarSign,
-  Eye,
-  Gauge,
+  Globe2,
+  Loader2,
   Pencil,
   RefreshCw,
-  Users,
-  UserPlus,
-  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -32,8 +27,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RangeSelect } from "@/components/range-select";
-import { StatCard } from "@/components/stat-card";
-import { TrendChart } from "@/components/trend-chart";
+import { TrendChart, type TrendPoint } from "@/components/trend-chart";
+import { HeroGhost } from "@/components/hero-ghost";
+import { KpiCell } from "@/components/kpi-cell";
 // Leaflet ağır (~150KB gzip); ayrı chunk'a koy, ilk dashboard renderı bloklamasın.
 const UsersGeoMap = lazy(() =>
   import("@/components/users-geo-map").then((m) => ({
@@ -324,69 +320,57 @@ export const DashboardPage = () => {
     }
   };
 
-  return (
-    <div className="space-y-4">
-      {/* Hero başlık — büyük welcome + meta sağ */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            {new Date().toLocaleDateString("tr-TR", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </div>
-          <h1 className="mt-1 text-4xl font-semibold tracking-tight">
-            {isAll ? "Cockpit" : (activeProject?.name ?? "Proje")}
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <RangeSelect value={range} onChange={setRange} />
-          {!isAll && activeProject && (
-            <Button
-              variant="outline"
-              onClick={() => edit("projects", scope)}
-            >
-              <Pencil className="size-4" /> Düzenle
-            </Button>
-          )}
-          <Button onClick={handleSync} disabled={syncing}>
-            <RefreshCw
-              className={syncing ? "size-4 animate-spin" : "size-4"}
-            />
-            Senkronize et
-          </Button>
-        </div>
-      </div>
+  // MRR sparkline serisi — display ccy converted (USD * rate).
+  const mrrSpark: TrendPoint[] = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const m of metrics) {
+      if (m.metric !== "mrr") continue;
+      map.set(m.date, (map.get(m.date) ?? 0) + Number(m.value));
+    }
+    const rate = rateOf("USD");
+    return [...map.entries()]
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+      .map(([date, value]) => ({ date, value: value * rate }));
+  }, [metrics, fxRates]);
 
-      {/* Durum şeridi — 30 saniyelik sağlık bakışı */}
-      <div
-        className={cn(
-          "grid grid-cols-1 gap-3 sm:grid-cols-3",
-          hasSentry && "lg:grid-cols-4",
-        )}
-      >
+  return (
+    <div className="absolute inset-0 grid grid-rows-[36px_112px_minmax(0,1fr)_220px] gap-3 overflow-hidden p-3">
+      {/* ════════ STATUS STRIP — 36px ════════ */}
+      <div className="flex items-center gap-2 px-1 text-[11px]">
+        <div className="flex flex-1 items-center gap-3">
+          <div>
+            <span className="text-muted-foreground">
+              {new Date().toLocaleDateString("tr-TR", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })}{" "}
+              ·{" "}
+            </span>
+            <span className="font-semibold">
+              {isAll ? "Cockpit" : (activeProject?.name ?? "Proje")}
+            </span>
+          </div>
+        </div>
         <Link
           to="/system"
           className={cn(
-            "flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20",
+            "flex items-center gap-1 rounded-full border border-foreground/10 px-2 py-0.5 transition-colors hover:bg-accent",
             errCount > 0 && "text-destructive",
+            okCount === integrations.length &&
+              integrations.length > 0 &&
+              "text-emerald-400",
           )}
         >
-          <Activity className="size-4" />
-          <span>
-            Kaynak sağlığı:{" "}
-            <strong>
-              {okCount}/{integrations.length}
-            </strong>
-            {errCount > 0 ? ` · ${errCount} hata` : ""}
+          <Activity className="size-3" />
+          <span className="font-mono tabular-nums">
+            {okCount}/{integrations.length}
           </span>
         </Link>
         <Link
           to="/system"
           className={cn(
-            "flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20",
+            "flex items-center gap-1 rounded-full border border-foreground/10 px-2 py-0.5 transition-colors hover:bg-accent",
             syncStale && "text-destructive",
           )}
           title={
@@ -395,248 +379,213 @@ export const DashboardPage = () => {
               : undefined
           }
         >
-          <RefreshCw className="size-4" />
-          <span>
-            Son senkron: <strong>{timeAgo(lastRun?.started_at ?? null)}</strong>
-            {syncStale ? " · cron?" : ""}
+          <RefreshCw className="size-3" />
+          <span className="font-mono tabular-nums">
+            {timeAgo(lastRun?.started_at ?? null)}
           </span>
         </Link>
         <Link
           to="/alerts"
           className={cn(
-            "flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20",
+            "flex items-center gap-1 rounded-full border border-foreground/10 px-2 py-0.5 transition-colors hover:bg-accent",
             openAlerts > 0 && "text-destructive",
           )}
         >
-          <Bell className="size-4" />
-          <span>
-            Açık uyarı (48s): <strong>{openAlerts}</strong>
-          </span>
+          <Bell className="size-3" />
+          <span className="font-mono tabular-nums">{openAlerts}</span>
         </Link>
         {hasSentry && (
           <Link
             to="/system"
             className={cn(
-              "flex items-center gap-2 rounded-lg border bg-card p-3 text-sm ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20",
+              "flex items-center gap-1 rounded-full border border-foreground/10 px-2 py-0.5 transition-colors hover:bg-accent",
               errorLatest > 0 && "text-destructive",
             )}
           >
-            <AlertOctagon className="size-4" />
-            <span>
-              Hatalar (son gün): <strong>{compact(errorLatest)}</strong>
-              {errorDelta !== null && (
-                <span className="ml-1 text-xs">
-                  ({errorDelta > 0 ? "+" : ""}
-                  {errorDelta.toFixed(0)}% / 7g)
-                </span>
-              )}
+            <AlertOctagon className="size-3" />
+            <span className="font-mono tabular-nums">
+              {compact(errorLatest)}
             </span>
           </Link>
         )}
-      </div>
-
-      {/* Toplam Tahmini Kazanç — HERO treatment.
-          Sol: bugünkü tutar dev (5xl-6xl). Sağ: 3 mini sayı sticky. */}
-      <Card className="relative overflow-hidden">
-        {/* Dekoratif bloom — sol-üst lime, sağ-alt cyan */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -left-20 -top-20 size-72 rounded-full bg-primary/20 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-20 -right-20 size-72 rounded-full bg-sky-500/20 blur-3xl"
-        />
-        <CardContent className="relative grid gap-6 md:grid-cols-[1.4fr_1fr]">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              Bugün şimdiye kadar
-              {hasAppStore ? " · Reklam + Mağaza" : " · Reklam"}
-            </div>
-            <div className="helm-hero-number mt-2 text-5xl md:text-6xl text-foreground">
-              {formatMoney(totalEarnings.today, displayCcy)}
-            </div>
-            <div className="mt-3 text-sm text-muted-foreground">
-              Dün:{" "}
-              <span className="font-mono font-medium text-foreground tabular-nums">
-                {formatMoney(totalEarnings.yesterday, displayCcy)}
-              </span>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 self-center">
-            <div className="rounded-lg border border-foreground/5 bg-background/30 p-3">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                Bu ay
-              </div>
-              <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
-                {formatMoney(totalEarnings.thisMonth, displayCcy)}
-              </div>
-            </div>
-            <div className="rounded-lg border border-foreground/5 bg-background/30 p-3">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                Geçen ay
-              </div>
-              <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
-                {formatMoney(totalEarnings.prevMonth, displayCcy)}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* MarineX 12-col: solda 4 stat (2x2), sağda büyük harita */}
-      <div className="grid gap-4 xl:grid-cols-12">
-        <div className="grid grid-cols-2 gap-4 xl:col-span-5 self-start">
-          <StatCard
-            title={isAll ? "Toplam MRR" : "MRR"}
-            value={formatMoney(mrrDisplay, displayCcy)}
-            icon={<DollarSign />}
-            loading={loading}
-          />
-          <StatCard
-            title="Reklam Geliri (son gün)"
-            value={formatMoney(adRevenueDisplay, displayCcy)}
-            icon={<Wallet />}
-            delta={deltaPct(adRevenueSeries)}
-            loading={loading}
-          />
-          <StatCard
-            title={isAll ? "Toplam DAU" : "DAU"}
-            value={compact(latest(metrics, "dau"))}
-            icon={<Users />}
-            delta={deltaPct(dauSeries)}
-            loading={loading}
-          />
-          {isAll ? (
-            <StatCard
-              title="Aktif Abone"
-              value={compact(latest(metrics, "active_subs"))}
-              loading={loading}
-            />
-          ) : (
-            <StatCard
-              title="Toplam Kullanıcı"
-              value={compact(latest(metrics, "total_users"))}
-              icon={<UserPlus />}
-              delta={deltaPct(series(metrics, "total_users"))}
-              loading={loading}
-            />
-          )}
-        </div>
-        <div className="xl:col-span-7">
-          <Suspense
-            fallback={
-              <Card>
-                <CardHeader>
-                  <CardTitle>Kullanıcı Dağılımı — Ülkelere Göre</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[320px] animate-pulse rounded-lg bg-muted/40" />
-                </CardContent>
-              </Card>
-            }
+        <span className="h-3 w-px bg-foreground/10" />
+        <RangeSelect value={range} onChange={setRange} />
+        {!isAll && activeProject && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => edit("projects", scope)}
           >
-            <UsersGeoMap scope={scope} isAll={isAll} days={range} />
-          </Suspense>
-        </div>
+            <Pencil className="size-3" /> Düzenle
+          </Button>
+        )}
+        <Button
+          size="sm"
+          className="h-7 text-xs"
+          onClick={handleSync}
+          disabled={syncing}
+        >
+          <RefreshCw
+            className={syncing ? "size-3 animate-spin" : "size-3"}
+          />
+          Senkronize et
+        </Button>
       </div>
 
-      {/* Projeye özel ek kartlar */}
-      {!isAll && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <StatCard
-            title="Reklam Gösterimi (son gün)"
-            value={compact(latest(metrics, "ad_impressions"))}
-            icon={<Eye />}
-            delta={deltaPct(series(metrics, "ad_impressions"))}
+      {/* ════════ ZONE A — KPI Cluster (220px) ════════ */}
+      <div
+        className={cn(
+          "grid gap-3 min-h-0",
+          isAll
+            ? "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr]"
+            : "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]",
+        )}
+      >
+        {/* Cell 1: Hero ₺ (col-span-2 for prominence) */}
+        <Card className="xl:col-span-1 col-span-2 overflow-hidden">
+          <CardContent className="h-full p-4">
+            <HeroGhost
+              label={
+                "Bugün şimdiye kadar · " +
+                (hasAppStore ? "Reklam + Mağaza" : "Reklam")
+              }
+              value={formatMoney(totalEarnings.today, displayCcy)}
+              spark={adRevenueSeriesDisplay}
+              sparkColor={theme.chart.revenue}
+              sub={
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span>
+                    Dün{" "}
+                    <span className="font-mono font-medium text-foreground tabular-nums">
+                      {formatMoney(totalEarnings.yesterday, displayCcy)}
+                    </span>
+                  </span>
+                  <span>
+                    Bu ay{" "}
+                    <span className="font-mono font-medium text-foreground tabular-nums">
+                      {formatMoney(totalEarnings.thisMonth, displayCcy)}
+                    </span>
+                  </span>
+                  <span>
+                    Geçen{" "}
+                    <span className="font-mono font-medium text-foreground tabular-nums">
+                      {formatMoney(totalEarnings.prevMonth, displayCcy)}
+                    </span>
+                  </span>
+                </div>
+              }
+            />
+          </CardContent>
+        </Card>
+
+        {/* Cell 2: MRR */}
+        <KpiCell
+          label={isAll ? "Toplam MRR" : "MRR"}
+          value={formatMoney(mrrDisplay, displayCcy)}
+          hint="Aylık tekrarlı gelir"
+          loading={loading}
+        />
+
+        {/* Cell 3: DAU + delta */}
+        <KpiCell
+          label={isAll ? "Toplam DAU" : "DAU"}
+          value={compact(latest(metrics, "dau"))}
+          delta={deltaPct(dauSeries)}
+          hint="Günlük aktif"
+          loading={loading}
+        />
+
+        {/* Cell 4: isAll → Aktif Abone | proje → eCPM */}
+        {isAll ? (
+          <KpiCell
+            label="Aktif Abone"
+            value={compact(latest(metrics, "active_subs"))}
+            hint="RevenueCat"
             loading={loading}
           />
-          <StatCard
-            title="eCPM"
+        ) : (
+          <KpiCell
+            label="eCPM"
             value={formatMoney2(
               latest(metrics, "ad_ecpm") * rateOf(adCurrency),
               displayCcy,
             )}
-            icon={<Gauge />}
+            hint="Etkili CPM"
             loading={loading}
           />
-          <StatCard
-            title="WAU"
-            value={compact(latest(metrics, "wau"))}
-            icon={<CalendarDays />}
-            loading={loading}
-          />
-        </div>
-      )}
+        )}
 
-      {/* Grafikler */}
-      <div
-        className={cn(
-          "grid grid-cols-1 gap-4 lg:grid-cols-2",
-          hasSentry && "xl:grid-cols-3",
+        {/* Cell 5: isAll → Toplam Kullanıcı | proje → WAU */}
+        {isAll ? (
+          <KpiCell
+            label="Toplam Kullanıcı"
+            value={compact(latest(metrics, "total_users"))}
+            delta={deltaPct(series(metrics, "total_users"))}
+            hint="Supabase"
+            loading={loading}
+          />
+        ) : (
+          <KpiCell
+            label="WAU"
+            value={compact(latest(metrics, "wau"))}
+            hint="Haftalık aktif"
+            loading={loading}
+          />
         )}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>{`Reklam Geliri — son ${range} gün`}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TrendChart
-              data={adRevenueSeriesDisplay}
-              color={theme.chart.revenue}
-              format={(v) => formatMoney(v, displayCcy)}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{`Günlük Aktif Kullanıcı — son ${range} gün`}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TrendChart
-              data={dauSeries}
-              color={theme.chart.users}
-              format={compact}
-            />
-          </CardContent>
-        </Card>
-        {hasSentry && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{`Hatalar — son ${range} gün`}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TrendChart
-                data={errorSeries}
-                color="#ef4444"
-                format={compact}
-              />
-            </CardContent>
-          </Card>
-        )}
+
       </div>
 
-      {/* Tüm Projeler: operasyon tablosu (MarineX referansı) */}
-      {isAll && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Projeler</CardTitle>
+      {/* ════════ ZONE B — Living Canvas (map full) ════════ */}
+      {/* ZONE B grid: map 8 col + Projeler tablo 4 col yan */}
+      <div className="grid min-h-0 gap-3 lg:grid-cols-12">
+        {/* Map — 8 col */}
+        <Card className="relative overflow-hidden lg:col-span-8">
+          <Suspense
+            fallback={
+              <div className="absolute inset-0 grid place-items-center text-muted-foreground">
+                <Loader2 className="size-6 animate-spin" />
+              </div>
+            }
+          >
+            <UsersGeoMap
+              scope={scope}
+              isAll={isAll}
+              days={range}
+              fullCanvas
+            />
+          </Suspense>
+        </Card>
+        {/* Side panel — 4 col (Projeler tablosu) */}
+        <Card className="overflow-hidden lg:col-span-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center justify-between text-sm">
+              <span>Projeler</span>
+              <span className="text-[10px] font-normal text-muted-foreground">
+                {projects.length}
+              </span>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="h-[calc(100%-2.5rem)] overflow-y-auto p-0">
             {projects.length === 0 ? (
-              <div className="py-8 text-center text-sm text-muted-foreground">
-                Henüz proje yok — sidebar'dan "Proje ekle".
+              <div className="grid h-full place-items-center text-xs text-muted-foreground">
+                Henüz proje yok
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-8" />
-                    <TableHead>Proje</TableHead>
-                    <TableHead className="text-right">MRR</TableHead>
-                    <TableHead className="text-right">Reklam</TableHead>
-                    <TableHead className="text-right">DAU</TableHead>
-                    <TableHead className="w-20 text-right">Detay</TableHead>
+                    <TableHead className="h-7 w-6 px-2" />
+                    <TableHead className="h-7 px-2 text-xs">Proje</TableHead>
+                    <TableHead className="h-7 px-2 text-right text-xs">
+                      MRR
+                    </TableHead>
+                    <TableHead className="h-7 px-2 text-right text-xs">
+                      Reklam
+                    </TableHead>
+                    <TableHead className="h-7 px-2 text-right text-xs">
+                      DAU
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -652,43 +601,45 @@ export const DashboardPage = () => {
                     const health = projectHealth(
                       integrations.filter((i) => i.project_id === p.id),
                     );
+                    const isCurrent = !isAll && p.id === scope;
                     return (
                       <TableRow
                         key={p.id}
-                        className="cursor-pointer"
+                        className={cn(
+                          "cursor-pointer",
+                          isCurrent && "bg-primary/10",
+                        )}
                         onClick={() => setScope(p.id as string)}
                       >
-                        <TableCell>
+                        <TableCell className="px-2 py-1.5">
                           <span
                             className={cn(
-                              "block size-2 rounded-full",
-                              health === "ok" && "bg-emerald-500 shadow-[0_0_8px_-1px_rgb(16,185,129)]",
-                              health === "error" && "bg-red-500 shadow-[0_0_8px_-1px_rgb(239,68,68)]",
-                              health === "pending" && "bg-muted-foreground/40",
+                              "block size-1.5 rounded-full",
+                              health === "ok" &&
+                                "bg-emerald-500 shadow-[0_0_6px_-1px_rgb(16,185,129)]",
+                              health === "error" &&
+                                "bg-red-500 shadow-[0_0_6px_-1px_rgb(239,68,68)]",
+                              health === "pending" &&
+                                "bg-muted-foreground/40",
                             )}
                           />
                         </TableCell>
-                        <TableCell className="font-medium">{p.name}</TableCell>
-                        <TableCell className="text-right font-mono tabular-nums">
+                        <TableCell
+                          className={cn(
+                            "truncate px-2 py-1.5 text-xs",
+                            isCurrent ? "font-semibold" : "font-medium",
+                          )}
+                        >
+                          {p.name}
+                        </TableCell>
+                        <TableCell className="px-2 py-1.5 text-right font-mono text-xs tabular-nums">
                           {formatMoney(mrrConverted, displayCcy)}
                         </TableCell>
-                        <TableCell className="text-right font-mono tabular-nums">
+                        <TableCell className="px-2 py-1.5 text-right font-mono text-xs tabular-nums">
                           {formatMoney(adConverted, displayCcy)}
                         </TableCell>
-                        <TableCell className="text-right font-mono tabular-nums">
+                        <TableCell className="px-2 py-1.5 text-right font-mono text-xs tabular-nums">
                           {compact(dau.get(p.id as string)?.value ?? 0)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            asChild
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Link to={`/users`} onClick={() => setScope(p.id as string)}>
-                              Aç
-                            </Link>
-                          </Button>
                         </TableCell>
                       </TableRow>
                     );
@@ -698,7 +649,54 @@ export const DashboardPage = () => {
             )}
           </CardContent>
         </Card>
-      )}
+      </div>
+
+      {/* ════════ ZONE C — 3 trend chart (Projeler ZONE B yan'a taşındı) ════════ */}
+      <div className="grid min-h-0 grid-cols-1 gap-3 md:grid-cols-3">
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">
+              Reklam Geliri · {range}g
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[calc(100%-2.5rem)] p-2">
+            <TrendChart
+              data={adRevenueSeriesDisplay}
+              color={theme.chart.revenue}
+              height={150}
+              format={(v) => formatMoney(v, displayCcy)}
+            />
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">DAU · {range}g</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[calc(100%-2.5rem)] p-2">
+            <TrendChart
+              data={dauSeries}
+              color={theme.chart.users}
+              height={150}
+              format={compact}
+            />
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">
+              {hasSentry ? `Hatalar · ${range}g` : `MRR · ${range}g`}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[calc(100%-2.5rem)] p-2">
+            <TrendChart
+              data={hasSentry ? errorSeries : mrrSpark}
+              color={hasSentry ? "#ef4444" : theme.chart.revenue}
+              height={150}
+              format={hasSentry ? compact : (v) => formatMoney(v, displayCcy)}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

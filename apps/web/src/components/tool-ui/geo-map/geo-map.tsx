@@ -102,13 +102,13 @@ export const GeoMap = memo(function GeoMap({
 
   return (
     <div
-      className={cn("w-full min-w-80", styles.root, className)}
+      className={cn("w-full min-w-80 h-full", styles.root, className)}
       style={resolvedRootStyle}
       data-slot="geo-map"
       data-tool-ui-id={id}
     >
       <div
-        className="bg-muted/20 relative h-[320px] w-full overflow-hidden rounded-lg border"
+        className="bg-muted/20 relative h-full min-h-[320px] w-full overflow-hidden rounded-lg border"
         role="region"
         aria-label={mapAriaLabel}
       >
