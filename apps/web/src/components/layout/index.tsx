@@ -1,4 +1,5 @@
-import { Suspense, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import { useGetIdentity, useLogout } from "@refinedev/core";
 import { useKBar } from "@refinedev/kbar";
 import { Link, Outlet, useLocation } from "react-router";
@@ -297,7 +298,7 @@ const useBreadcrumb = () => {
   }, [pathname]);
 };
 
-const HeaderBar = () => {
+const HeaderBar = ({ scrolled }: { scrolled: boolean }) => {
   const title = useBreadcrumb();
   const { data: user } = useGetIdentity<IUser>();
   const initial = (user?.name ?? "?")[0]?.toUpperCase() ?? "?";
@@ -305,7 +306,13 @@ const HeaderBar = () => {
   return (
     <header
       data-slot="helm-header"
-      className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/70 px-3 lg:px-4"
+      data-scrolled={scrolled ? "true" : "false"}
+      className={cn(
+        "sticky top-0 z-10 flex h-14 items-center gap-3 px-3 lg:px-4 transition-[background-color,backdrop-filter,border-color] duration-200",
+        scrolled
+          ? "border-b border-border bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60"
+          : "border-b border-transparent bg-transparent backdrop-blur-0",
+      )}
     >
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-5" />
@@ -353,11 +360,31 @@ const HeaderBar = () => {
 export const HelmLayout = () => {
   const { pathname } = useLocation();
   const isDashboard = pathname === "/";
+  const [scrolled, setScrolled] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Sentinel + IntersectionObserver — scroll container'dan bağımsız çalışır
+  // (window scroll, sidebar inset scroll, body scroll — hangisi varsa).
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setScrolled(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [pathname]);
+
+  // Route değişiminde reset (yeni sayfa en üstten başlar).
+  useEffect(() => setScrolled(false), [pathname]);
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <HeaderBar />
+        <div ref={sentinelRef} className="h-px w-full" aria-hidden />
+        <HeaderBar scrolled={scrolled} />
         <main
           className={
             isDashboard
