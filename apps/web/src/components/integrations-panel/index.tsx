@@ -151,6 +151,25 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       optional: true,
     },
   ],
+  resend: [
+    {
+      key: "api_key",
+      label: "Resend API Key",
+      placeholder: "re_xxxxxxxxxxxxxxxxxxxxxxxx",
+      secret: true,
+    },
+    {
+      key: "from_email",
+      label: "Gönderen e-posta (Resend'de doğrulanmış domain)",
+      placeholder: "no-reply@helm.app",
+    },
+    {
+      key: "from_name",
+      label: "Gönderen adı",
+      placeholder: "Helm",
+      optional: true,
+    },
+  ],
   app_store_connect: [
     {
       key: "issuer_id",
