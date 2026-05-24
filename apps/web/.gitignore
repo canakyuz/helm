@@ -28,3 +28,4 @@ _.ntvs_
 _.njsproj
 _.sln
 \*.sw?
+.gstack/

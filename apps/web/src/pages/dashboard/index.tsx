@@ -445,7 +445,7 @@ export const DashboardPage = () => {
           "grid gap-3 min-h-0",
           isAll
             ? "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr]"
-            : "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]",
+            : "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr]",
         )}
       >
         {/* Cell 1: Hero ₺ (col-span-2 for prominence) — yatay layout */}
@@ -454,27 +454,30 @@ export const DashboardPage = () => {
             data={adRevenueSeriesDisplay}
             color={theme.chart.revenue}
           />
-          <CardContent className="relative p-4">
-            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-              Bugün şimdiye kadar ·{" "}
-              {hasAppStore ? "Reklam + Mağaza" : "Reklam"}
-            </div>
-            <div className="mt-1 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
-              <div className="helm-hero-number text-[clamp(1.875rem,4cqw,2.5rem)] leading-none">
-                {formatMoney(totalEarnings.today, displayCcy)}
+          <CardContent className="relative px-4 mt-0 py-4">
+            <div className="flex flex-wrap justify-between">
+              <div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  Now ·{" "} Reklam
+                </div>
+                <div className="mt-1 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+                  <div className="helm-hero-number text-[clamp(1.875rem,4cqw,2.5rem)] leading-none">
+                    {formatMoney(totalEarnings.today, displayCcy)}
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3 pt-0 mt-0 flex-wrap align-top">
                 <SubStat
-                  label="Dün"
-                  value={formatMoney(totalEarnings.yesterday, displayCcy)}
+                    label="Dün"
+                    value={formatMoney(totalEarnings.yesterday, displayCcy)}
                 />
                 <SubStat
-                  label="Bu ay"
-                  value={formatMoney(totalEarnings.thisMonth, displayCcy)}
+                    label="Bu ay"
+                    value={formatMoney(totalEarnings.thisMonth, displayCcy)}
                 />
                 <SubStat
-                  label="Geçen ay"
-                  value={formatMoney(totalEarnings.prevMonth, displayCcy)}
+                    label="Geçen ay"
+                    value={formatMoney(totalEarnings.prevMonth, displayCcy)}
                 />
               </div>
             </div>
