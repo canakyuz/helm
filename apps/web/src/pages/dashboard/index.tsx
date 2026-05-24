@@ -448,34 +448,36 @@ export const DashboardPage = () => {
             : "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]",
         )}
       >
-        {/* Cell 1: Hero ₺ (col-span-2 for prominence) */}
-        <Card className="xl:col-span-1 col-span-2">
-          <CardContent className="p-4">
-            <HeroGhost
-              label={
-                "Bugün şimdiye kadar · " +
-                (hasAppStore ? "Reklam + Mağaza" : "Reklam")
-              }
-              value={formatMoney(totalEarnings.today, displayCcy)}
-              spark={adRevenueSeriesDisplay}
-              sparkColor={theme.chart.revenue}
-              sub={
-                <div className="grid grid-cols-3 gap-3 border-t border-foreground/10 pt-2">
-                  <SubStat
-                    label="Dün"
-                    value={formatMoney(totalEarnings.yesterday, displayCcy)}
-                  />
-                  <SubStat
-                    label="Bu ay"
-                    value={formatMoney(totalEarnings.thisMonth, displayCcy)}
-                  />
-                  <SubStat
-                    label="Geçen ay"
-                    value={formatMoney(totalEarnings.prevMonth, displayCcy)}
-                  />
-                </div>
-              }
-            />
+        {/* Cell 1: Hero ₺ (col-span-2 for prominence) — yatay layout */}
+        <Card className="relative xl:col-span-1 col-span-2 overflow-hidden mt-0 pt-0">
+          <HeroSpark
+            data={adRevenueSeriesDisplay}
+            color={theme.chart.revenue}
+          />
+          <CardContent className="relative p-4">
+            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              Bugün şimdiye kadar ·{" "}
+              {hasAppStore ? "Reklam + Mağaza" : "Reklam"}
+            </div>
+            <div className="mt-1 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+              <div className="helm-hero-number text-[clamp(1.875rem,4cqw,2.5rem)] leading-none">
+                {formatMoney(totalEarnings.today, displayCcy)}
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <SubStat
+                  label="Dün"
+                  value={formatMoney(totalEarnings.yesterday, displayCcy)}
+                />
+                <SubStat
+                  label="Bu ay"
+                  value={formatMoney(totalEarnings.thisMonth, displayCcy)}
+                />
+                <SubStat
+                  label="Geçen ay"
+                  value={formatMoney(totalEarnings.prevMonth, displayCcy)}
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -724,3 +726,52 @@ const SubStat = ({ label, value }: { label: string; value: string }) => (
     </div>
   </div>
 );
+
+/** Hero kart arka planında ghost sparkline. */
+const HeroSpark = ({
+  data,
+  color,
+}: {
+  data: { date: string; value: number }[];
+  color: string;
+}) => {
+  if (!data || data.length < 2) return null;
+  const W = 100;
+  const H = 30;
+  const values = data.map((p) => p.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  const dx = W / (data.length - 1);
+  const pts = data
+    .map((p, i) => {
+      const x = i * dx;
+      const y = H - ((p.value - min) / span) * H;
+      return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
+    })
+    .join(" ");
+  const area = `${pts} L${W},${H} L0,${H} Z`;
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 100 30"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] w-full opacity-[0.25]"
+    >
+      <defs>
+        <linearGradient id="hero-spark-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.7} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={area} fill="url(#hero-spark-grad)" />
+      <path
+        d={pts}
+        stroke={color}
+        strokeWidth={1.5}
+        fill="none"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+};
