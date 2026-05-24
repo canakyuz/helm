@@ -36,6 +36,7 @@ import {
 } from "@/lib/metrics";
 import type { Metric, ProjectIntegration } from "@/types";
 import { ErrorBanner } from "@/components/error-banner";
+import { cn } from "@/lib/utils";
 
 export const RevenuePage = () => {
   const { scope, isAll } = useScope();
@@ -196,6 +197,29 @@ export const RevenuePage = () => {
   );
   const downloadsLatest = latest(metrics, "app_downloads");
 
+  // Birleşik gelir özeti — 3 kanal toplamı (MRR günlük tahmini + ad + app)
+  const combinedTotals = useMemo(() => {
+    const mrr = latest(metrics, "mrr") * rateOf("USD");
+    const mrrDaily = mrr / 30;
+    return {
+      today: adTotals.today + appTotals.today + mrrDaily,
+      yesterday: adTotals.yesterday + appTotals.yesterday + mrrDaily,
+      thisMonth: adTotals.thisMonth + appTotals.thisMonth + mrr, // MRR ay başına
+      prevMonth: adTotals.prevMonth + appTotals.prevMonth + mrr,
+    };
+  }, [metrics, adTotals, appTotals, fxRates]);
+
+  // Hangi kanal lider?
+  const topChannel = useMemo(() => {
+    const channels: Array<{ name: string; value: number }> = [
+      { name: "Reklam", value: adTotals.thisMonth },
+      { name: "Mağaza", value: appTotals.thisMonth },
+      { name: "Abonelik", value: latest(metrics, "mrr") * rateOf("USD") },
+    ];
+    const max = channels.reduce((a, b) => (b.value > a.value ? b : a));
+    return max.value > 0 ? max.name : "—";
+  }, [adTotals, appTotals, metrics, fxRates]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -203,6 +227,28 @@ export const RevenuePage = () => {
           Gelir & Reklam
         </h1>
         <RangeSelect value={range} onChange={setRange} />
+      </div>
+
+      {/* Üst KPI cluster — 3 kanal birleşik gelir özeti */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <RevKpi
+          label="Bugün (birleşik)"
+          value={formatMoney(combinedTotals.today, displayCcy)}
+          tone="emerald"
+        />
+        <RevKpi
+          label="Dün"
+          value={formatMoney(combinedTotals.yesterday, displayCcy)}
+        />
+        <RevKpi
+          label="Bu ay"
+          value={formatMoney(combinedTotals.thisMonth, displayCcy)}
+          tone="primary"
+        />
+        <RevKpi
+          label={`Geçen ay · en büyük: ${topChannel}`}
+          value={formatMoney(combinedTotals.prevMonth, displayCcy)}
+        />
       </div>
 
       <Tabs defaultValue="subscription" className="space-y-4">
@@ -441,6 +487,33 @@ export const RevenuePage = () => {
           </TabsContent>
         )}
       </Tabs>
+    </div>
+  );
+};
+
+const RevKpi = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "emerald" | "primary";
+}) => {
+  const toneCls =
+    tone === "emerald"
+      ? "text-emerald-500"
+      : tone === "primary"
+        ? "text-primary"
+        : "text-foreground";
+  return (
+    <div className="rounded-lg border bg-card/40 p-3">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+        {label}
+      </div>
+      <div className={cn("mt-1 font-mono text-2xl tabular-nums", toneCls)}>
+        {value}
+      </div>
     </div>
   );
 };
