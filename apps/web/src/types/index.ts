@@ -41,6 +41,8 @@ export interface Property {
   enabled_modules: import("@/lib/modules").ModuleKey[];
   app_store_id?: string | null;
   app_store_country?: string | null;
+  google_play_id?: string | null;
+  google_play_country?: string | null;
   cms_publish_targets?: import("./cms").CmsPublishTarget[];
   created_at: string;
 }

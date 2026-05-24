@@ -38,6 +38,8 @@ const propertyEditSchema = z.object({
   enabled_modules: z.array(z.string()),
   app_store_id: z.string().optional(),
   app_store_country: z.string().optional(),
+  google_play_id: z.string().optional(),
+  google_play_country: z.string().optional(),
 });
 
 type PropertyEditValues = z.infer<typeof propertyEditSchema>;
@@ -58,18 +60,26 @@ export const PropertyEdit = () => {
       enabled_modules: [],
       app_store_id: "",
       app_store_country: "us",
+      google_play_id: "",
+      google_play_country: "us",
     },
   });
 
   useEffect(() => {
     if (record) {
+      const r = record as Property & {
+        google_play_id?: string | null;
+        google_play_country?: string | null;
+      };
       form.reset({
-        name: record.name,
-        slug: record.slug,
-        type: record.type,
-        enabled_modules: record.enabled_modules ?? [],
-        app_store_id: record.app_store_id ?? "",
-        app_store_country: record.app_store_country ?? "us",
+        name: r.name,
+        slug: r.slug,
+        type: r.type,
+        enabled_modules: r.enabled_modules ?? [],
+        app_store_id: r.app_store_id ?? "",
+        app_store_country: r.app_store_country ?? "us",
+        google_play_id: r.google_play_id ?? "",
+        google_play_country: r.google_play_country ?? "us",
       });
     }
   }, [record?.id]);
@@ -90,11 +100,16 @@ export const PropertyEdit = () => {
   };
 
   const submit = form.handleSubmit(async (values) => {
+    const isMobileLike = MOBILE_LIKE.includes(values.type);
     await onFinish({
       ...values,
       app_store_id: values.app_store_id || null,
-      app_store_country: MOBILE_LIKE.includes(values.type)
+      app_store_country: isMobileLike
         ? values.app_store_country || "us"
+        : null,
+      google_play_id: values.google_play_id || null,
+      google_play_country: isMobileLike
+        ? values.google_play_country || "us"
         : null,
     });
     navigate("/");
@@ -219,47 +234,91 @@ export const PropertyEdit = () => {
           </Card>
 
           {MOBILE_LIKE.includes(currentType as PropertyType) && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">App Store</CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-3 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="app_store_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>App Store ID</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="6451234567 (yorumlar için)"
-                          {...field}
-                          value={field.value ?? ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="app_store_country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>App Store ülkesi</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="us"
-                          {...field}
-                          value={field.value ?? ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">App Store (iOS)</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-3 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="app_store_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>App Store ID</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="6451234567"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="app_store_country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>App Store ülkesi</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="us"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Play Store (Android)</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-3 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="google_play_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Package adı</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="com.empireinc.app"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="google_play_country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Play Store ülkesi</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="us"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </>
           )}
 
           <div className="flex items-center justify-end gap-2">
