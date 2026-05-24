@@ -20,6 +20,28 @@ export interface Project {
   slug: string;
   app_store_id?: string | null;
   app_store_country?: string | null;
+  cms_publish_targets?: import("./cms").CmsPublishTarget[];
+  created_at: string;
+}
+
+// Brand / Property / Module — modül mimarisi (0019). Detay: .docs/MODULES.md
+export interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
+
+export interface Property {
+  id: string;
+  brand_id: string;
+  name: string;
+  slug: string;
+  type: import("@/lib/modules").PropertyType;
+  enabled_modules: import("@/lib/modules").ModuleKey[];
+  app_store_id?: string | null;
+  app_store_country?: string | null;
+  cms_publish_targets?: import("./cms").CmsPublishTarget[];
   created_at: string;
 }
 
