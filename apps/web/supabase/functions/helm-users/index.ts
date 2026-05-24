@@ -66,12 +66,24 @@ Deno.serve(async (req) => {
   });
   if (usersError) return json({ error: usersError.message }, 500);
 
-  const users = data.users.map((u) => ({
-    id: u.id,
-    email: u.email ?? null,
-    created_at: u.created_at,
-    last_sign_in_at: u.last_sign_in_at ?? null,
-  }));
+  const users = data.users.map((u) => {
+    const meta = (u as { banned_until?: string }).banned_until ?? null;
+    const isBanned =
+      meta !== null && new Date(meta).getTime() > Date.now();
+    const premium = Boolean(
+      (u.app_metadata as { premium?: unknown })?.premium,
+    );
+    return {
+      id: u.id,
+      email: u.email ?? null,
+      created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at ?? null,
+      email_confirmed_at: u.email_confirmed_at ?? null,
+      banned: isBanned,
+      premium,
+      providers: (u.identities ?? []).map((i) => i.provider).filter(Boolean),
+    };
+  });
 
   return json({ users, total: users.length });
 });
