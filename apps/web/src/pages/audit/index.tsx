@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { ExternalLink, Search } from "lucide-react";
+import { ClipboardList, ExternalLink, Search } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,11 +123,20 @@ export const AuditPage = () => {
           </div>
 
           {filtered.length === 0 && !query.isLoading ? (
-            <div className="py-10 text-center text-sm text-muted-foreground">
-              {logs.length === 0
-                ? "Henüz müdahale kaydı yok. Kullanıcı detayından bir aksiyon yapıldığında — kim, ne zaman, hangi kullanıcı — burada kaydedilir."
-                : "Filtreye uyan kayıt yok"}
-            </div>
+            <EmptyState
+              icon={<ClipboardList className="size-6" />}
+              title={
+                logs.length === 0
+                  ? "Henüz müdahale kaydı yok"
+                  : "Filtreye uyan kayıt yok"
+              }
+              description={
+                logs.length === 0
+                  ? "Kullanıcılar → herhangi bir kullanıcının detayında ban / premium / şifre sıfırla / sil → her aksiyon burada toplanır (kim, ne zaman, kime, ne yaptı)."
+                  : "Filtre/aramayı gevşet veya aksiyon türünü 'Tüm aksiyonlar' yap."
+              }
+              compact
+            />
           ) : (
             <Table>
               <TableHeader>

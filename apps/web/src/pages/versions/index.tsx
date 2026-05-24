@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { type CrudFilter, useInvalidate, useList } from "@refinedev/core";
-import { Apple, Globe, RefreshCw, Smartphone } from "lucide-react";
+import { Apple, Globe, Package, RefreshCw, Smartphone } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,18 +132,28 @@ export const VersionsPage = () => {
             </CardHeader>
             <CardContent>
               {filtered.length === 0 && !query.isLoading ? (
-                <div className="py-8 text-center text-sm text-muted-foreground">
-                  {versions.length === 0 ? (
-                    <>
-                      Sürüm yok. Property → Düzenle ile{" "}
-                      <code className="text-xs">app_store_id</code> ve/veya{" "}
-                      <code className="text-xs">google_play_id</code> gir,
-                      sonra "Yenile".
-                    </>
-                  ) : (
-                    `${tab === "ios" ? "iOS" : "Android"} sürüm yok`
-                  )}
-                </div>
+                <EmptyState
+                  icon={<Package className="size-6" />}
+                  title={
+                    versions.length === 0
+                      ? "Sürüm yok"
+                      : `${tab === "ios" ? "iOS" : "Android"} sürüm yok`
+                  }
+                  description={
+                    versions.length === 0 ? (
+                      <>
+                        Property → <strong>Düzenle</strong> ile{" "}
+                        <code>app_store_id</code> ve/veya{" "}
+                        <code>google_play_id</code> gir, sonra{" "}
+                        <strong>Yenile</strong>. iOS = iTunes lookup, Android =
+                        Play Store sayfası scrape.
+                      </>
+                    ) : (
+                      "Diğer tab'da olabilir veya bu mağazada bağlantı yok."
+                    )
+                  }
+                  compact
+                />
               ) : (
                 <div className="divide-y">
                   {filtered.map((v) => (

@@ -35,6 +35,7 @@ import {
   valueOnDate,
 } from "@/lib/metrics";
 import type { Metric, ProjectIntegration } from "@/types";
+import { ErrorBanner } from "@/components/error-banner";
 
 export const RevenuePage = () => {
   const { scope, isAll } = useScope();
@@ -221,12 +222,10 @@ export const RevenuePage = () => {
 
         <TabsContent value="subscription" className="space-y-4">
           {!hasRevenueCat && (
-            <Card className="border-amber-500/30 bg-amber-500/5">
-              <CardContent className="py-4 text-sm text-amber-600 dark:text-amber-400">
-                RevenueCat bağlanmadı. Abonelik geliri akmıyor — Entegrasyonlar
-                sekmesinden RevenueCat'i bağla (v2 secret key + project_id).
-              </CardContent>
-            </Card>
+            <ErrorBanner variant="warning" title="RevenueCat bağlanmadı">
+              Abonelik geliri akmıyor — Entegrasyonlar → <strong>+</strong> →
+              RevenueCat (v2 secret key + project_id).
+            </ErrorBanner>
           )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useList } from "@refinedev/core";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, History, Search } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -160,11 +161,20 @@ export const LogsPage = () => {
           </div>
 
           {filtered.length === 0 && !query.isLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              {runs.length === 0
-                ? "Henüz senkron çalışmadı"
-                : "Filtreye uyan kayıt yok"}
-            </div>
+            <EmptyState
+              icon={<History className="size-6" />}
+              title={
+                runs.length === 0
+                  ? "Henüz senkron çalışmadı"
+                  : "Filtreye uyan kayıt yok"
+              }
+              description={
+                runs.length === 0
+                  ? "Cockpit'ten 'Senkronize et' ile manuel tetikle veya saatlik cron'u bekle. Her çalışma burada toplanır."
+                  : "Filtreyi gevşet veya 'Tüm durumlar' seç."
+              }
+              compact
+            />
           ) : (
             <>
               <Table>

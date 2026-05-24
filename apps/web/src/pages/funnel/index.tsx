@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useInvalidate, useList, useUpdate } from "@refinedev/core";
 import {
-  AlertTriangle,
   ArrowDown,
-  Info,
   Pencil,
   Plus,
   RefreshCw,
@@ -12,6 +10,8 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorBanner } from "@/components/error-banner";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -221,19 +221,16 @@ export const FunnelPage = () => {
       </div>
 
       {isAll && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
-          <span>Huni için sidebar'dan bir proje seç.</span>
-        </div>
+        <ErrorBanner variant="warning">
+          Huni için sidebar'dan bir proje seç.
+        </ErrorBanner>
       )}
 
       {!isAll && !phIntg && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
-          <span>
-            Bu projeye PostHog bağlı değil. Entegrasyonlar → "+" → PostHog.
-          </span>
-        </div>
+        <ErrorBanner variant="warning" title="PostHog bağlı değil">
+          Entegrasyonlar → <strong>+</strong> → PostHog → Project ID + Personal
+          API Key.
+        </ErrorBanner>
       )}
 
       {!isAll && phIntg && showPicker && (
@@ -277,22 +274,20 @@ export const FunnelPage = () => {
             </CardAction>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
+            <ErrorBanner variant="warning" title="İdeal: 3-5 adım">
               <div className="space-y-1">
                 <div>
-                  <strong>İdeal: 3-5 adım.</strong> 6+ adımda her drop küçük
-                  görünür, conversion neredeyse hep %0 çıkar. Funnel ≠ event
-                  log — kullanıcı yolculuğunun <strong>ana</strong>{" "}
-                  kilometre taşlarını seç.
+                  6+ adımda her drop küçük görünür, conversion neredeyse hep %0
+                  çıkar. Funnel ≠ event log — kullanıcı yolculuğunun{" "}
+                  <strong>ana</strong> kilometre taşlarını seç.
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs opacity-80">
                   Tipik mobil oyun: <code>app_opened</code> →{" "}
                   <code>tutorial_complete</code> → <code>level_5</code> →{" "}
                   <code>first_purchase</code>
                 </div>
               </div>
-            </div>
+            </ErrorBanner>
 
             {eventsLoading && events.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
@@ -442,15 +437,12 @@ export const FunnelPage = () => {
           </div>
 
           {data.steps.length > 6 && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
-              <span>
-                <strong>{data.steps.length} adım çok fazla</strong> — her
-                küçük adım toplam conversion'u baltalar. Sağ üstteki{" "}
-                <strong>Adımları düzenle</strong> ile 3-5 ana kilometre taşına
-                indir.
-              </span>
-            </div>
+            <ErrorBanner variant="warning">
+              <strong>{data.steps.length} adım çok fazla</strong> — her küçük
+              adım toplam conversion'u baltalar. Sağ üstteki{" "}
+              <strong>Adımları düzenle</strong> ile 3-5 ana kilometre taşına
+              indir.
+            </ErrorBanner>
           )}
 
           <Card>
@@ -487,8 +479,12 @@ export const FunnelPage = () => {
 
       {!data && !loading && !error && !isAll && stepsConfigured && (
         <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Veri yok
+          <CardContent>
+            <EmptyState
+              icon={<TrendingDown className="size-6" />}
+              title="Veri yok"
+              description="PostHog'tan funnel sonucu boş döndü. Adımlardaki event isimlerinin doğru olduğundan emin ol (case-sensitive) — Adımları düzenle ile kontrol et."
+            />
           </CardContent>
         </Card>
       )}

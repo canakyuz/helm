@@ -3,10 +3,12 @@ import { type CrudFilter, useInvalidate, useList } from "@refinedev/core";
 import {
   ChevronLeft,
   ChevronRight,
+  MessageSquare,
   RefreshCw,
   Search,
   Star,
 } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -224,11 +226,20 @@ export const ReviewsPage = () => {
           </div>
 
           {filtered.length === 0 && !query.isLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              {reviews.length === 0
-                ? "Yorum yok. Proje detayında \"Düzenle\" → App Store ID gir, sonra \"Yenile\"."
-                : "Filtreye uyan yorum yok"}
-            </div>
+            <EmptyState
+              icon={<MessageSquare className="size-6" />}
+              title={
+                reviews.length === 0
+                  ? "Yorum yok"
+                  : "Filtreye uyan yorum yok"
+              }
+              description={
+                reviews.length === 0
+                  ? "Property → Düzenle → App Store ID gir → Yenile. App Store RSS son 50 yorumu çeker."
+                  : "Filtre/aramayı gevşet."
+              }
+              compact
+            />
           ) : (
             <>
               <div className="divide-y">
