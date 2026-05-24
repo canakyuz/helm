@@ -94,6 +94,11 @@ const PropertyCreate = lazy(() =>
 const PropertyEdit = lazy(() =>
   import("@/pages/properties").then((m) => ({ default: m.PropertyEdit })),
 );
+const PropertiesListPage = lazy(() =>
+  import("@/pages/properties").then((m) => ({
+    default: m.PropertiesListPage,
+  })),
+);
 const BrandEdit = lazy(() =>
   import("@/pages/brands").then((m) => ({ default: m.BrandEdit })),
 );
@@ -209,9 +214,10 @@ function App() {
                 },
                 {
                   name: "properties",
+                  list: "/properties",
                   create: "/properties/create",
                   edit: "/properties/edit/:id",
-                  meta: { label: "Property" },
+                  meta: { label: "Property'ler" },
                 },
                 {
                   name: "brands",
@@ -286,6 +292,10 @@ function App() {
                     <Route
                       path="/projects/edit/:id"
                       element={<ProjectEdit />}
+                    />
+                    <Route
+                      path="/properties"
+                      element={<PropertiesListPage />}
                     />
                     <Route
                       path="/properties/create"
