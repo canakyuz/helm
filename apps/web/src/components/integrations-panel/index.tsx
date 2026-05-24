@@ -196,6 +196,18 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   ],
   app_store_connect: [
     {
+      key: "app_store_id",
+      label: "App Store ID (App Store URL'inde id sonrası rakam — yorumlar için)",
+      placeholder: "6451234567",
+      optional: true,
+    },
+    {
+      key: "app_store_country",
+      label: "App Store ülke kodları (virgülle ayır — yorumlar için)",
+      placeholder: "tr,us,gb,de",
+      optional: true,
+    },
+    {
       key: "issuer_id",
       label: "Issuer ID (Team Key için — Individual API Key'de BOŞ bırak)",
       placeholder: "57246542-96fe-1a63-e053-0824d011072a",
