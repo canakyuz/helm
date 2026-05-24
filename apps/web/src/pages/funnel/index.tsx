@@ -475,85 +475,11 @@ export const FunnelPage = () => {
                 </Button>
               </CardAction>
             </CardHeader>
-            <CardContent className="space-y-1">
-              {data.steps.map((s, i) => {
-                const widthPct =
-                  maxCount > 0 ? (s.count / maxCount) * 100 : 0;
-                const isFirst = i === 0;
-                const stepClass = isFirst
-                  ? "bg-primary"
-                  : s.step_pct >= 80
-                    ? "bg-emerald-500"
-                    : s.step_pct >= 40
-                      ? "bg-amber-500"
-                      : "bg-destructive";
-                const stepLabelClass = isFirst
-                  ? "text-muted-foreground"
-                  : s.step_pct >= 80
-                    ? "text-emerald-500"
-                    : s.step_pct >= 40
-                      ? "text-amber-500"
-                      : "text-destructive";
-
-                return (
-                  <div key={`${s.event}-${i}`}>
-                    {/* Drop indicator — bu adıma giriş oranı */}
-                    {i > 0 && (
-                      <div className="flex items-center gap-2 py-1.5 pl-6 text-xs">
-                        <ArrowDown
-                          className={cn("size-3.5", stepLabelClass)}
-                        />
-                        <span
-                          className={cn(
-                            "font-mono tabular-nums",
-                            stepLabelClass,
-                          )}
-                        >
-                          %{s.step_pct.toFixed(1)} kalan
-                        </span>
-                        {s.drop > 0 && (
-                          <span className="font-mono tabular-nums text-muted-foreground">
-                            · −{compact(s.drop)} kişi düştü
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Adım kartı */}
-                    <div className="rounded-lg border bg-card/50 p-3">
-                      <div className="mb-2 flex items-baseline justify-between gap-3">
-                        <div className="flex min-w-0 items-baseline gap-2">
-                          <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
-                            #{i + 1}
-                          </span>
-                          <code className="truncate font-mono text-sm font-medium">
-                            {s.event}
-                          </code>
-                        </div>
-                        <div className="flex shrink-0 items-baseline gap-3">
-                          <span className="font-mono text-xl font-semibold tabular-nums">
-                            {compact(s.count)}
-                          </span>
-                          <span className="w-14 text-right font-mono text-xs tabular-nums text-muted-foreground">
-                            %{s.overall_pct.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="relative h-2.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className={cn(
-                            "absolute inset-y-0 left-0 rounded-full transition-all",
-                            stepClass,
-                          )}
-                          style={{
-                            width: `${Math.max(widthPct, 0.5)}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <CardContent>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+                <FunnelShape steps={data.steps} />
+                <FunnelTable steps={data.steps} />
+              </div>
             </CardContent>
           </Card>
         </>
@@ -569,3 +495,148 @@ export const FunnelPage = () => {
     </div>
   );
 };
+
+/* ───────────────────────── Trapezoid SVG funnel ───────────────────────── */
+
+const stepFill = (stepPct: number, isFirst: boolean) => {
+  if (isFirst) return "#6366f1"; // indigo
+  if (stepPct >= 80) return "#10b981"; // emerald
+  if (stepPct >= 40) return "#f59e0b"; // amber
+  return "#ef4444"; // red
+};
+
+const stepTextClass = (stepPct: number, isFirst: boolean) => {
+  if (isFirst) return "text-indigo-500";
+  if (stepPct >= 80) return "text-emerald-500";
+  if (stepPct >= 40) return "text-amber-500";
+  return "text-destructive";
+};
+
+const FunnelShape = ({ steps }: { steps: FunnelStep[] }) => {
+  if (steps.length === 0) return null;
+  const first = steps[0].count;
+  const ROW = 56;
+  const PAD = 8;
+  const VBW = 100; // viewBox width
+  const totalH = steps.length * ROW + PAD * 2;
+
+  // Her satır için top/bottom width (önceki count → bu count akışı)
+  const rows = steps.map((s, i) => {
+    const topRatio = i === 0 ? 1 : steps[i - 1].count / first;
+    const botRatio = s.count / first;
+    const top = Math.max(topRatio * VBW, 1);
+    const bot = Math.max(botRatio * VBW, 1);
+    return {
+      step: s,
+      topW: top,
+      botW: bot,
+      y: PAD + i * ROW,
+    };
+  });
+
+  return (
+    <div className="relative">
+      <svg
+        viewBox={`0 0 ${VBW} ${totalH}`}
+        preserveAspectRatio="none"
+        className="block h-auto w-full"
+        style={{ minHeight: totalH * 4 }}
+      >
+        {rows.map((r, i) => {
+          const tl = (VBW - r.topW) / 2;
+          const tr = tl + r.topW;
+          const bl = (VBW - r.botW) / 2;
+          const br = bl + r.botW;
+          const fill = stepFill(r.step.step_pct, i === 0);
+          return (
+            <polygon
+              key={i}
+              points={`${tl},${r.y} ${tr},${r.y} ${br},${r.y + ROW - 4} ${bl},${r.y + ROW - 4}`}
+              fill={fill}
+              fillOpacity={0.85}
+              stroke={fill}
+              strokeOpacity={0.4}
+              strokeWidth={0.3}
+            />
+          );
+        })}
+      </svg>
+
+      {/* Overlay: her satır için event adı + count (HTML, SVG dışı — text aspect-fix sorunu olmasın) */}
+      <div className="absolute inset-0 flex flex-col px-2 py-2">
+        {rows.map((r, i) => (
+          <div
+            key={i}
+            className="relative flex flex-1 items-center justify-center"
+          >
+            <div className="pointer-events-none flex items-center gap-2 rounded-md bg-background/80 px-2 py-0.5 text-xs backdrop-blur-sm">
+              <span className="font-mono text-[10px] text-muted-foreground">
+                #{i + 1}
+              </span>
+              <code className="max-w-[180px] truncate font-mono text-xs font-medium">
+                {r.step.event}
+              </code>
+              <span className="font-mono text-sm font-semibold tabular-nums">
+                {compact(r.step.count)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ───────────────────────── Detay tablo (sağ taraf) ───────────────────────── */
+
+const FunnelTable = ({ steps }: { steps: FunnelStep[] }) => (
+  <div className="space-y-1">
+    <div className="grid grid-cols-[24px_minmax(0,1fr)_56px_56px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+      <span>#</span>
+      <span>Adım</span>
+      <span className="text-right">Adım</span>
+      <span className="text-right">Toplam</span>
+    </div>
+    {steps.map((s, i) => {
+      const isFirst = i === 0;
+      const cls = stepTextClass(s.step_pct, isFirst);
+      return (
+        <div
+          key={`${s.event}-${i}`}
+          className="grid grid-cols-[24px_minmax(0,1fr)_56px_56px] items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-sm hover:border-border hover:bg-muted/40"
+        >
+          <span className="font-mono text-xs text-muted-foreground tabular-nums">
+            {i + 1}
+          </span>
+          <div className="min-w-0">
+            <code className="block truncate font-mono text-xs font-medium">
+              {s.event}
+            </code>
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground tabular-nums">
+              <span className="font-mono">{compact(s.count)}</span>
+              {!isFirst && s.drop > 0 && (
+                <>
+                  <ArrowDown className="size-2.5 text-destructive" />
+                  <span className="font-mono text-destructive">
+                    −{compact(s.drop)}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+          <span
+            className={cn(
+              "text-right font-mono text-xs font-semibold tabular-nums",
+              cls,
+            )}
+          >
+            {isFirst ? "—" : `%${s.step_pct.toFixed(0)}`}
+          </span>
+          <span className="text-right font-mono text-xs tabular-nums text-muted-foreground">
+            %{s.overall_pct.toFixed(1)}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+);
