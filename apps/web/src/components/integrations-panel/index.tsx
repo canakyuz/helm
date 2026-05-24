@@ -67,6 +67,14 @@ import {
   type ProjectIntegration,
   type ProviderName,
 } from "@/types";
+import {
+  CATEGORY_LABELS,
+  CATEGORY_ORDER,
+  PROVIDER_META,
+  type ProviderCategory,
+} from "@/lib/integrations";
+import * as Icons from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FieldDef {
   key: string;
@@ -557,117 +565,75 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
         </CardAction>
       </CardHeader>
 
-      <CardContent>
-        {integrations.length === 0 && !query.isLoading ? (
-          <div className="py-8 text-center text-sm text-muted-foreground">
-            Henüz veri kaynağı bağlanmadı
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Kaynak</TableHead>
-                <TableHead>Durum</TableHead>
-                <TableHead>Son senkron</TableHead>
-                <TableHead>Aktif</TableHead>
-                <TableHead className="w-32 text-right">İşlemler</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {integrations.map((it) => (
-                <TableRow key={it.id}>
-                  <TableCell className="font-medium">
-                    {PROVIDER_LABELS[it.provider]}
-                  </TableCell>
-                  <TableCell>
-                    <SyncBadge record={it} />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {it.last_synced_at
-                      ? new Date(it.last_synced_at).toLocaleString("tr-TR")
-                      : "—"}
-                  </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={it.enabled}
-                      onCheckedChange={(checked) =>
+      <CardContent className="space-y-6">
+        {CATEGORY_ORDER.map((cat) => {
+          // Bu kategorideki tüm provider'lar (bağlı + bağlı olmayan)
+          const providersInCat = (Object.keys(PROVIDER_LABELS) as ProviderName[])
+            .filter((p) => PROVIDER_META[p]?.category === cat);
+          if (providersInCat.length === 0) return null;
+          const connectedCount = integrations.filter(
+            (i) => providersInCat.includes(i.provider),
+          ).length;
+          return (
+            <div key={cat} className="space-y-2">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+                <span className="font-medium">{CATEGORY_LABELS[cat]}</span>
+                <span className="font-mono tabular-nums">
+                  {connectedCount} / {providersInCat.length}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {providersInCat.map((p) => {
+                  const integration = integrations.find(
+                    (i) => i.provider === p,
+                  );
+                  return (
+                    <ProviderCard
+                      key={p}
+                      provider={p}
+                      integration={integration}
+                      testing={testing === integration?.id}
+                      verifying={verifying === integration?.id}
+                      onTest={() =>
+                        integration && handleTest(integration.id as string)
+                      }
+                      onVerify={() =>
+                        integration && handleVerify(integration.id as string)
+                      }
+                      onEdit={() => integration && handleEdit(integration)}
+                      onToggle={(checked) =>
+                        integration &&
                         update({
                           resource: "project_integrations",
-                          id: it.id,
+                          id: integration.id,
                           values: { enabled: checked },
                         })
                       }
+                      onDelete={() =>
+                        integration &&
+                        remove({
+                          resource: "project_integrations",
+                          id: integration.id,
+                        })
+                      }
+                      onConnect={() => {
+                        setProvider(p);
+                        setConfig({});
+                        setEditingId(null);
+                        setOpen(true);
+                      }}
                     />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Test"
-                      disabled={testing === it.id}
-                      onClick={() => handleTest(it.id)}
-                    >
-                      <Play className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Doğrula"
-                      disabled={verifying === it.id}
-                      onClick={() => handleVerify(it.id)}
-                    >
-                      <ShieldCheck className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Düzenle"
-                      onClick={() => handleEdit(it)}
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label="Sil"
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Entegrasyon silinsin mi?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {PROVIDER_LABELS[it.provider]} bağlantısı
-                            kaldırılacak. Bu işlem geri alınamaz.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Vazgeç</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() =>
-                              remove({
-                                resource: "project_integrations",
-                                id: it.id,
-                              })
-                            }
-                          >
-                            Sil
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+        {integrations.length === 0 && !query.isLoading && (
+          <div className="rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground">
+            Henüz hiçbir veri kaynağı bağlanmadı. Yukarıdaki kartlardan
+            <strong> Bağla</strong> ile başla.
+          </div>
         )}
       </CardContent>
 
@@ -845,5 +811,175 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
         </DialogContent>
       </Dialog>
     </Card>
+  );
+};
+
+/* ───────────────────────── ProviderCard (yeni grid) ───────────────────────── */
+
+interface ProviderCardProps {
+  provider: ProviderName;
+  integration?: ProjectIntegration;
+  testing: boolean;
+  verifying: boolean;
+  onTest: () => void;
+  onVerify: () => void;
+  onEdit: () => void;
+  onToggle: (checked: boolean) => void;
+  onDelete: () => void;
+  onConnect: () => void;
+}
+
+const ProviderIcon = ({ name }: { name: string }) => {
+  const Comp = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[name];
+  if (!Comp) return <Icons.Box className="size-5" />;
+  return <Comp className="size-5" />;
+};
+
+const ProviderCard = ({
+  provider,
+  integration,
+  testing,
+  verifying,
+  onTest,
+  onVerify,
+  onEdit,
+  onToggle,
+  onDelete,
+  onConnect,
+}: ProviderCardProps) => {
+  const meta = PROVIDER_META[provider];
+  const connected = !!integration;
+  const status = integration?.last_sync_status;
+  const lastSync = integration?.last_synced_at
+    ? new Date(integration.last_synced_at).toLocaleString("tr-TR")
+    : null;
+
+  return (
+    <div
+      className={cn(
+        "group flex flex-col gap-2 rounded-lg border bg-card/40 p-3 transition-colors",
+        connected ? "hover:bg-card/80" : "opacity-60 hover:opacity-100",
+      )}
+    >
+      {/* Header: ikon + ad + sync badge */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2 min-w-0">
+          <div
+            className={cn(
+              "flex size-8 shrink-0 items-center justify-center rounded-md ring-1 ring-foreground/10",
+              status === "ok"
+                ? "bg-emerald-500/10 text-emerald-500"
+                : status === "error"
+                  ? "bg-destructive/10 text-destructive"
+                  : connected
+                    ? "bg-muted text-foreground"
+                    : "bg-muted/50 text-muted-foreground",
+            )}
+          >
+            <ProviderIcon name={meta?.icon ?? "Box"} />
+          </div>
+          <div className="min-w-0">
+            <div className="truncate font-medium text-sm">
+              {PROVIDER_LABELS[provider]}
+            </div>
+            <div className="truncate text-[11px] text-muted-foreground">
+              {meta?.description ?? ""}
+            </div>
+          </div>
+        </div>
+        {connected && integration && (
+          <SyncBadge record={integration} />
+        )}
+      </div>
+
+      {/* Footer: durum + aksiyon butonları */}
+      <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+        {connected && integration ? (
+          <>
+            <div className="min-w-0">
+              {lastSync ? (
+                <div className="truncate text-[10px] text-muted-foreground">
+                  Son: {lastSync}
+                </div>
+              ) : (
+                <div className="text-[10px] text-muted-foreground">
+                  Henüz çalışmadı
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-0.5">
+              <Switch
+                checked={integration.enabled}
+                onCheckedChange={onToggle}
+                className="mr-1 scale-75"
+                aria-label="Aktif/Pasif"
+              />
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Test"
+                disabled={testing}
+                onClick={onTest}
+              >
+                <Play className="size-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Doğrula"
+                disabled={verifying}
+                onClick={onVerify}
+              >
+                <ShieldCheck className="size-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Düzenle"
+                onClick={onEdit}
+              >
+                <Pencil className="size-3.5" />
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Sil"
+                  >
+                    <Trash2 className="size-3.5 text-destructive" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Bağlantı kaldırılsın mı?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {PROVIDER_LABELS[provider]} entegrasyonu silinir. Geri
+                      alınamaz.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                    <AlertDialogAction onClick={onDelete}>
+                      Sil
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={onConnect}
+          >
+            <Plus className="size-3.5" />
+            <span className="ml-1">Bağla</span>
+          </Button>
+        )}
+      </div>
+    </div>
   );
 };
