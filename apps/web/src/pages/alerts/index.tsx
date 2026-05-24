@@ -9,6 +9,7 @@ import {
 import {
   Activity,
   Bell,
+  BellRing,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -16,7 +17,9 @@ import {
   RefreshCw,
   Search,
   Trash2,
+  Zap,
 } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -399,10 +402,18 @@ export const AlertsPage = () => {
         </CardHeader>
         <CardContent>
           {rules.length === 0 && !query.isLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Henüz uyarı kuralı yok. <strong>Kural ekle</strong> ile başla —
-              örn. "DAU son 7g %20 düştü → Telegram".
-            </div>
+            <EmptyState
+              icon={<Zap className="size-6" />}
+              title="Henüz uyarı kuralı yok"
+              description={
+                <>
+                  Kural ekle ile başla — örn.{" "}
+                  <strong>"DAU son 7g %20 düştü → Telegram"</strong> veya{" "}
+                  <strong>"Hata sayısı 100'ün üzerine çıktı → e-posta"</strong>.
+                </>
+              }
+              compact
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -527,11 +538,20 @@ export const AlertsPage = () => {
           </div>
 
           {filteredEvents.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              {events.length === 0
-                ? "Henüz uyarı tetiklenmedi"
-                : "Filtreye uyan olay yok"}
-            </div>
+            <EmptyState
+              icon={<BellRing className="size-6" />}
+              title={
+                events.length === 0
+                  ? "Henüz uyarı tetiklenmedi"
+                  : "Filtreye uyan olay yok"
+              }
+              description={
+                events.length === 0
+                  ? "Cron her saat kuralları kontrol eder; eşik aşılınca burada listelenir. Şimdi değerlendir butonu ile manuel tetikle."
+                  : "Filtreyi gevşet veya 'Tüm kurallar' / 'Tüm durumlar' seç."
+              }
+              compact
+            />
           ) : (
             <>
               <Table>

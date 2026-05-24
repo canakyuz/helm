@@ -164,6 +164,9 @@ export const SystemPage = () => {
   const [issueProjects, setIssueProjects] = useState<IssueProject[]>([]);
   const [issuesLoading, setIssuesLoading] = useState(false);
   const [issuesError, setIssuesError] = useState<string | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<
+    (SentryIssue & { project_id: string }) | null
+  >(null);
 
   const loadIssues = useMemo(
     () => async () => {
@@ -392,14 +395,23 @@ export const SystemPage = () => {
                 </TableHeader>
                 <TableBody>
                   {topIssues.map((i) => (
-                    <TableRow key={i.id}>
+                    <TableRow
+                      key={i.id}
+                      className="cursor-pointer"
+                      onClick={() => setSelectedIssue(i)}
+                    >
                       <TableCell>
                         <LevelBadge level={i.level} />
                       </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{i.title}</div>
+                      <TableCell className="max-w-md">
+                        <div className="truncate font-medium" title={i.title}>
+                          {i.title}
+                        </div>
                         {i.culprit && (
-                          <div className="font-mono text-xs text-muted-foreground">
+                          <div
+                            className="truncate font-mono text-xs text-muted-foreground"
+                            title={i.culprit}
+                          >
                             {i.culprit}
                           </div>
                         )}
@@ -421,7 +433,7 @@ export const SystemPage = () => {
                       <TableCell className="whitespace-nowrap text-xs">
                         {new Date(i.last_seen).toLocaleString("tr-TR")}
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <Button
                           asChild
                           variant="ghost"
@@ -445,6 +457,123 @@ export const SystemPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Hata detay dialog */}
+      <Dialog
+        open={!!selectedIssue}
+        onOpenChange={(o) => !o && setSelectedIssue(null)}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          {selectedIssue && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-start gap-2">
+                  <LevelBadge level={selectedIssue.level} />
+                  <span className="break-all">{selectedIssue.title}</span>
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 py-2 text-sm">
+                {selectedIssue.culprit && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Kaynak
+                    </div>
+                    <code className="block break-all rounded-md border bg-muted/50 p-2 text-xs">
+                      {selectedIssue.culprit}
+                    </code>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Olay</div>
+                    <div className="mt-0.5 font-mono">
+                      {compact(selectedIssue.count)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">
+                      Etkilenen
+                    </div>
+                    <div className="mt-0.5 font-mono">
+                      {compact(selectedIssue.user_count)} kişi
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">
+                      Kısa ID
+                    </div>
+                    <div className="mt-0.5 font-mono text-xs">
+                      {selectedIssue.short_id}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Durum</div>
+                    <div className="mt-0.5 text-xs">
+                      {selectedIssue.status}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">
+                      İlk görüldü
+                    </div>
+                    <div className="mt-0.5 text-xs">
+                      {new Date(selectedIssue.first_seen).toLocaleString(
+                        "tr-TR",
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">
+                      Son görüldü
+                    </div>
+                    <div className="mt-0.5 text-xs">
+                      {new Date(selectedIssue.last_seen).toLocaleString(
+                        "tr-TR",
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Proje</div>
+                    <div className="mt-0.5 text-xs">
+                      {projectName(selectedIssue.project_id)}
+                    </div>
+                  </div>
+                  {selectedIssue.type && (
+                    <div>
+                      <div className="text-xs text-muted-foreground">Tip</div>
+                      <div className="mt-0.5 font-mono text-xs">
+                        {selectedIssue.type}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {selectedIssue.value && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Mesaj
+                    </div>
+                    <pre className="max-h-48 overflow-auto rounded-md border bg-muted/50 p-2 text-xs">
+                      {selectedIssue.value}
+                    </pre>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button asChild variant="outline" size="sm">
+                  <a
+                    href={selectedIssue.permalink}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <ExternalLink className="size-4" />
+                    <span className="ml-2">Sentry'de aç</span>
+                  </a>
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Veri Kaynağı Sağlığı */}
       <Card>

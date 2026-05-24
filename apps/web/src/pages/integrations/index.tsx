@@ -1,4 +1,6 @@
+import { Plug } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import { IntegrationsPanel } from "@/components/integrations-panel";
 import { useScope } from "@/context/scope";
 
@@ -14,9 +16,11 @@ export const IntegrationsPage = () => {
       {isAll ? (
         <Card>
           <CardContent>
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Entegrasyonları yönetmek için sidebar'dan bir proje seç.
-            </div>
+            <EmptyState
+              icon={<Plug className="size-6" />}
+              title="Proje seç"
+              description="Entegrasyonlar property-bazlıdır. Sidebar'dan üstteki switcher'a tıkla, hangisini yönetmek istiyorsan seç — 'Tüm Property'ler' modunda eklenemez."
+            />
           </CardContent>
         </Card>
       ) : (

@@ -225,7 +225,14 @@ export const UsersPage = () => {
                       {pageData.map((u) => (
                         <TableRow key={u.id}>
                           <TableCell className="font-medium">
-                            {u.email ?? "—"}
+                            {u.email ?? (
+                              <span className="text-muted-foreground">
+                                <span className="text-xs">(e-posta yok)</span>{" "}
+                                <code className="font-mono text-[10px]">
+                                  {u.id.slice(0, 8)}…
+                                </code>
+                              </span>
+                            )}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {fmt(u.created_at)}

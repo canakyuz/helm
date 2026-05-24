@@ -495,10 +495,10 @@ export const FunnelPage = () => {
 /* ───────────────────────── Trapezoid SVG funnel ───────────────────────── */
 
 const stepFill = (stepPct: number, isFirst: boolean) => {
-  if (isFirst) return "#6366f1"; // indigo
-  if (stepPct >= 80) return "#10b981"; // emerald
-  if (stepPct >= 40) return "#f59e0b"; // amber
-  return "#ef4444"; // red
+  if (isFirst) return "#818cf8"; // indigo-400 (referans, hafif)
+  if (stepPct >= 80) return "#22c55e"; // green-500 (sağlıklı)
+  if (stepPct >= 40) return "#f59e0b"; // amber-500 (orta drop)
+  return "#ef4444"; // red-500 (kritik drop)
 };
 
 const stepTextClass = (stepPct: number, isFirst: boolean) => {
@@ -549,10 +549,8 @@ const FunnelShape = ({ steps }: { steps: FunnelStep[] }) => {
               key={i}
               points={`${tl},${r.y} ${tr},${r.y} ${br},${r.y + ROW - 4} ${bl},${r.y + ROW - 4}`}
               fill={fill}
-              fillOpacity={0.85}
-              stroke={fill}
-              strokeOpacity={0.4}
-              strokeWidth={0.3}
+              fillOpacity={0.92}
+              stroke="none"
             />
           );
         })}
