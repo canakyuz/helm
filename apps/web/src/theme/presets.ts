@@ -1,11 +1,13 @@
-// helm tema sistemi.
-// Yeni tema = HELM_THEMES'e bir girdi + src/styles/index.css'e bir
-// [data-helm-theme="..."] bloğu. Başka değişiklik yok.
+// helm tema sistemi — Liquid Glass, iki mod (dark + light).
+// Tek toggle ile geçiş. Yeni mod eklemek için: HELM_THEMES'e bir girdi +
+// src/styles/index.css'e bir [data-helm-theme="..."] bloğu.
+
+export type HelmMode = "dark" | "light";
 
 export interface HelmTheme {
   key: string;
   label: string;
-  isDark: boolean;
+  mode: HelmMode;
   /** recharts grafiklerinin okuduğu palet (recharts string renk ister). */
   chart: {
     grid: string;
@@ -17,9 +19,9 @@ export interface HelmTheme {
 
 export const HELM_THEMES: HelmTheme[] = [
   {
-    key: "glass",
-    label: "Liquid Glass",
-    isDark: true,
+    key: "glass-dark",
+    label: "Karanlık",
+    mode: "dark",
     chart: {
       grid: "rgba(255,255,255,0.07)",
       axis: "#6b7280",
@@ -28,52 +30,23 @@ export const HELM_THEMES: HelmTheme[] = [
     },
   },
   {
-    key: "terminal",
-    label: "Terminal",
-    isDark: true,
-    chart: {
-      grid: "rgba(20,184,166,0.12)",
-      axis: "#5b6b68",
-      revenue: "#2dd4bf",
-      users: "#22d3ee",
-    },
-  },
-  {
-    key: "helm-dark",
-    label: "Helm Dark",
-    isDark: true,
-    chart: {
-      grid: "rgba(255,255,255,0.06)",
-      axis: "#6b7280",
-      revenue: "#10b981",
-      users: "#818cf8",
-    },
-  },
-  {
-    key: "helm-light",
-    label: "Helm Light",
-    isDark: false,
+    key: "glass-light",
+    label: "Aydınlık",
+    mode: "light",
     chart: {
       grid: "rgba(0,0,0,0.06)",
-      axis: "#9ca3af",
-      revenue: "#059669",
-      users: "#6366f1",
-    },
-  },
-  {
-    key: "midnight",
-    label: "Midnight",
-    isDark: true,
-    chart: {
-      grid: "rgba(168,139,250,0.12)",
-      axis: "#7c7c93",
-      revenue: "#34d399",
-      users: "#a78bfa",
+      axis: "#71717a",
+      revenue: "#65a30d",
+      users: "#0284c7",
     },
   },
 ];
 
-export const DEFAULT_THEME_KEY = "glass";
+export const DEFAULT_THEME_KEY: string = "glass-dark";
 
 export const getTheme = (key: string): HelmTheme =>
   HELM_THEMES.find((t) => t.key === key) ?? HELM_THEMES[0];
+
+/** Mod tersine çevir — Moon/Sun toggle için. */
+export const otherKey = (key: string): string =>
+  key === "glass-dark" ? "glass-light" : "glass-dark";

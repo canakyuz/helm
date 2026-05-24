@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useInvalidate, useList, useUpdate } from "@refinedev/core";
 import {
-  ChevronDown,
-  Copy,
+  AlertTriangle,
+  ArrowDown,
   Info,
+  Pencil,
   Plus,
   RefreshCw,
   TrendingDown,
+  TrendingUp,
   Users,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,6 +65,7 @@ export const FunnelPage = () => {
   const [events, setEvents] = useState<PHEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [pickedEvents, setPickedEvents] = useState<string[]>([]);
+  const [editing, setEditing] = useState(false);
 
   const { result: integResult } = useList<ProjectIntegration>({
     resource: "project_integrations",
@@ -182,6 +186,7 @@ export const FunnelPage = () => {
       {
         onSuccess: () => {
           toast.success("Huni adımları kaydedildi");
+          setEditing(false);
           invalidate({
             resource: "project_integrations",
             invalidates: ["list"],
@@ -190,6 +195,8 @@ export const FunnelPage = () => {
       },
     );
   };
+
+  const showPicker = !stepsConfigured || editing;
 
   const maxCount = data?.steps[0]?.count ?? 0;
 
@@ -229,7 +236,7 @@ export const FunnelPage = () => {
         </div>
       )}
 
-      {!isAll && phIntg && !stepsConfigured && (
+      {!isAll && phIntg && showPicker && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -237,25 +244,55 @@ export const FunnelPage = () => {
               Huni adımlarını seç
             </CardTitle>
             <CardAction>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={loadEvents}
-                disabled={eventsLoading}
-              >
-                <RefreshCw
-                  className={`size-4 ${eventsLoading ? "animate-spin" : ""}`}
-                />
-                <span className="ml-2">Yenile</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                {editing && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditing(false);
+                      setPickedEvents(
+                        phCfg.funnel_steps
+                          ?.split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean) ?? [],
+                      );
+                    }}
+                  >
+                    Vazgeç
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadEvents}
+                  disabled={eventsLoading}
+                >
+                  <RefreshCw
+                    className={`size-4 ${eventsLoading ? "animate-spin" : ""}`}
+                  />
+                  <span className="ml-2">Yenile</span>
+                </Button>
+              </div>
             </CardAction>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              PostHog'taki event'lerin sıralı:{" "}
-              <strong>en yeni görülenden eskiye</strong>. Sırayla 2-6 event'e
-              tıkla, alta seçim çıkar. Kaydet → huni hesabı başlar.
-            </p>
+            <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
+              <div className="space-y-1">
+                <div>
+                  <strong>İdeal: 3-5 adım.</strong> 6+ adımda her drop küçük
+                  görünür, conversion neredeyse hep %0 çıkar. Funnel ≠ event
+                  log — kullanıcı yolculuğunun <strong>ana</strong>{" "}
+                  kilometre taşlarını seç.
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Tipik mobil oyun: <code>app_opened</code> →{" "}
+                  <code>tutorial_complete</code> → <code>level_5</code> →{" "}
+                  <code>first_purchase</code>
+                </div>
+              </div>
+            </div>
 
             {eventsLoading && events.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
@@ -375,7 +412,7 @@ export const FunnelPage = () => {
         </div>
       )}
 
-      {data && (
+      {data && !showPicker && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
@@ -393,66 +430,127 @@ export const FunnelPage = () => {
             <StatCard
               title="Toplam Dönüşüm"
               value={`%${data.overall_conversion.toFixed(1)}`}
-              icon={<TrendingDown />}
+              icon={
+                data.overall_conversion >= 50 ? (
+                  <TrendingUp />
+                ) : (
+                  <TrendingDown />
+                )
+              }
               loading={loading}
             />
           </div>
 
+          {data.steps.length > 6 && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
+              <span>
+                <strong>{data.steps.length} adım çok fazla</strong> — her
+                küçük adım toplam conversion'u baltalar. Sağ üstteki{" "}
+                <strong>Adımları düzenle</strong> ile 3-5 ana kilometre taşına
+                indir.
+              </span>
+            </div>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>
-                Onboarding Hunisi — son {days} gün ({data.steps.length} adım)
+                Onboarding Hunisi — son {days} gün
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  {data.steps.length} adım · sıralı · unique user
+                </span>
               </CardTitle>
               <CardAction>
-                <span className="text-xs text-muted-foreground">
-                  sıralı funnel · unique user
-                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditing(true);
+                    loadEvents();
+                  }}
+                >
+                  <Pencil className="size-4" />
+                  <span className="ml-2">Adımları düzenle</span>
+                </Button>
               </CardAction>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-1">
               {data.steps.map((s, i) => {
                 const widthPct =
                   maxCount > 0 ? (s.count / maxCount) * 100 : 0;
+                const isFirst = i === 0;
+                const stepClass = isFirst
+                  ? "bg-primary"
+                  : s.step_pct >= 80
+                    ? "bg-emerald-500"
+                    : s.step_pct >= 40
+                      ? "bg-amber-500"
+                      : "bg-destructive";
+                const stepLabelClass = isFirst
+                  ? "text-muted-foreground"
+                  : s.step_pct >= 80
+                    ? "text-emerald-500"
+                    : s.step_pct >= 40
+                      ? "text-amber-500"
+                      : "text-destructive";
+
                 return (
-                  <div key={s.event} className="space-y-1">
-                    <div className="flex items-baseline justify-between text-sm">
-                      <span className="font-medium">
-                        {i + 1}.{" "}
-                        <code className="font-mono text-xs">{s.event}</code>
-                      </span>
-                      <span className="font-mono tabular-nums">
-                        <span className="text-base">{compact(s.count)}</span>
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          %{s.overall_pct.toFixed(1)} toplam
-                        </span>
-                      </span>
-                    </div>
-                    <div className="relative h-8 overflow-hidden rounded-md bg-muted">
-                      <div
-                        className="absolute inset-y-0 left-0 flex items-center bg-primary/40 px-3 text-xs"
-                        style={{ width: `${Math.max(widthPct, 2)}%` }}
-                      >
-                        {widthPct > 15 && (
-                          <span className="font-mono text-xs">
-                            {compact(s.count)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  <div key={`${s.event}-${i}`}>
+                    {/* Drop indicator — bu adıma giriş oranı */}
                     {i > 0 && (
-                      <div className="flex items-center gap-2 pl-3 text-xs text-muted-foreground">
-                        <ChevronDown className="size-3" />
-                        <span>
-                          {s.step_pct >= 100 ? "+" : ""}
-                          {s.step_pct.toFixed(1)}% önceki adımdan
+                      <div className="flex items-center gap-2 py-1.5 pl-6 text-xs">
+                        <ArrowDown
+                          className={cn("size-3.5", stepLabelClass)}
+                        />
+                        <span
+                          className={cn(
+                            "font-mono tabular-nums",
+                            stepLabelClass,
+                          )}
+                        >
+                          %{s.step_pct.toFixed(1)} kalan
                         </span>
                         {s.drop > 0 && (
-                          <span className="text-destructive">
-                            −{compact(s.drop)} düşüş
+                          <span className="font-mono tabular-nums text-muted-foreground">
+                            · −{compact(s.drop)} kişi düştü
                           </span>
                         )}
                       </div>
                     )}
+
+                    {/* Adım kartı */}
+                    <div className="rounded-lg border bg-card/50 p-3">
+                      <div className="mb-2 flex items-baseline justify-between gap-3">
+                        <div className="flex min-w-0 items-baseline gap-2">
+                          <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
+                            #{i + 1}
+                          </span>
+                          <code className="truncate font-mono text-sm font-medium">
+                            {s.event}
+                          </code>
+                        </div>
+                        <div className="flex shrink-0 items-baseline gap-3">
+                          <span className="font-mono text-xl font-semibold tabular-nums">
+                            {compact(s.count)}
+                          </span>
+                          <span className="w-14 text-right font-mono text-xs tabular-nums text-muted-foreground">
+                            %{s.overall_pct.toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="relative h-2.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={cn(
+                            "absolute inset-y-0 left-0 rounded-full transition-all",
+                            stepClass,
+                          )}
+                          style={{
+                            width: `${Math.max(widthPct, 0.5)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 );
               })}

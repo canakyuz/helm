@@ -44,16 +44,26 @@ export const TrendChart = ({
     );
   }
 
-  const gradientId = `helm-grad-${lineColor.replace(/[^a-z0-9]/gi, "")}`;
+  const idSuffix = lineColor.replace(/[^a-z0-9]/gi, "");
+  const gradientId = `helm-grad-${idSuffix}`;
+  const glowId = `helm-glow-${idSuffix}`;
 
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={lineColor} stopOpacity={0.35} />
-            <stop offset="100%" stopColor={lineColor} stopOpacity={0} />
+            <stop offset="0%" stopColor={lineColor} stopOpacity={0.45} />
+            <stop offset="100%" stopColor={lineColor} stopOpacity={0.04} />
           </linearGradient>
+          {/* Liquid Glass — line üzerinde soft glow (referans Airlinesim). */}
+          <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
@@ -93,6 +103,7 @@ export const TrendChart = ({
           stroke={lineColor}
           strokeWidth={2}
           fill={`url(#${gradientId})`}
+          filter={`url(#${glowId})`}
         />
       </AreaChart>
     </ResponsiveContainer>

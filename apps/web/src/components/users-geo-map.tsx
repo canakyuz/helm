@@ -1,39 +1,31 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { Globe2 } from "lucide-react";
+import { Compass, Globe2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GeoMap } from "@/components/tool-ui/geo-map";
 import type { GeoMapMarker } from "@/components/tool-ui/geo-map";
 import { getCountryGeo } from "@/lib/country-geo";
 import { compact } from "@/lib/metrics";
+import { cn } from "@/lib/utils";
 import type { MetricCountry } from "@/types";
 
 interface UsersGeoMapProps {
-  /** Aktif proje scope. "all" → tüm projeler toplam. */
   scope: string;
   isAll: boolean;
-  /** Geriye dönük gün sayısı (sayfanın range select'i). */
   days: number;
-  /**
-   * Ülke kırılımı hangi metrik(ler)den okunsun?
-   *   - "app_downloads" (App Store Connect)
-   *   - "dau" (PostHog $geoip_country_code)
-   * Veri kaynağı yoksa boş state gösterilir.
-   */
   metrics?: string[];
 }
 
 const DEFAULT_METRICS = ["app_downloads", "dau"];
 
-/** Marker boyutu için lineer-log ölçek: 1 → 6px, 100 → ~10px, 10000 → ~14px. */
+/** Marker boyutu için lineer-log ölçek: 1 → 6px, max → ~14px. */
 const radiusFor = (value: number, max: number) => {
   if (max <= 0) return 6;
   const ratio = Math.log10(Math.max(1, value)) / Math.log10(Math.max(10, max));
-  return 6 + ratio * 10; // 6–16 arası
+  return 6 + ratio * 10;
 };
 
-/** Toplam kullanıcı/indirme dağılımı dünya haritasında. Ana cockpit kartı. */
 export const UsersGeoMap = ({
   scope,
   isAll,
@@ -61,9 +53,6 @@ export const UsersGeoMap = ({
   const loading = query.isLoading;
   const rows = result.data;
 
-  // Ülke kodu → toplam değer. Aynı ülkenin farklı tarih+metric satırlarını
-  // topla. (Aynı kullanıcının birden fazla güne sayılması mümkün; bu kart
-  // dağılımı göstermek için — exact unique count değil.)
   const byCountry = useMemo(() => {
     const map = new Map<string, number>();
     for (const r of rows) {
@@ -73,6 +62,8 @@ export const UsersGeoMap = ({
     }
     return map;
   }, [rows]);
+
+  const [selected, setSelected] = useState<string | null>(null);
 
   const { markers, totalCountries, totalUsers, topCountries } = useMemo(() => {
     const maxVal = Math.max(0, ...byCountry.values());
@@ -108,17 +99,21 @@ export const UsersGeoMap = ({
     };
   }, [byCountry]);
 
+  const topCountry = topCountries[0];
+  const selectedGeo = selected ? getCountryGeo(selected) : null;
+  const selectedValue = selected ? byCountry.get(selected) ?? 0 : 0;
+
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
             <Globe2 className="size-4" />
-            Kullanıcı Dağılımı — Ülkelere Göre
+            Kullanıcı Dağılımı
           </span>
           {markers.length > 0 && (
             <span className="font-mono text-sm font-normal text-muted-foreground tabular-nums">
-              {totalCountries} ülke · {compact(totalUsers)} toplam
+              {totalCountries} ülke · {compact(totalUsers)}
             </span>
           )}
         </CardTitle>
@@ -127,7 +122,7 @@ export const UsersGeoMap = ({
         {loading ? (
           <Skeleton className="h-[320px] w-full rounded-lg" />
         ) : markers.length === 0 ? (
-          <div className="flex h-[200px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground">
+          <div className="flex h-[320px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground">
             <Globe2 className="size-6 opacity-40" />
             <div>Henüz ülke verisi yok.</div>
             <div className="text-xs">
@@ -137,33 +132,100 @@ export const UsersGeoMap = ({
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="relative">
             <GeoMap
               id={`users-geo-map-${isAll ? "all" : scope}`}
               markers={markers}
               clustering={{ enabled: false }}
               viewport={{ mode: "fit", padding: 24, maxZoom: 5 }}
               showZoomControl
+              onMarkerClick={(m) => setSelected(m.id ?? null)}
             />
-            {topCountries.length > 0 && (
-              <div className="flex flex-wrap gap-2 text-xs">
-                {topCountries.map(([cc, v]) => {
-                  const g = getCountryGeo(cc);
-                  return (
-                    <span
-                      key={cc}
-                      className="inline-flex items-center gap-1 rounded-md border bg-muted/40 px-2 py-1 font-mono tabular-nums"
-                    >
-                      <span className="font-semibold">{cc}</span>
-                      <span className="text-muted-foreground">
-                        {g?.name ?? cc}
-                      </span>
-                      <span>· {compact(v)}</span>
-                    </span>
-                  );
-                })}
+
+            {/* Top-right floating: en yoğun ülke özeti */}
+            {topCountry && (
+              <div className="pointer-events-none absolute right-3 top-3 z-[500] rounded-lg border border-border/70 bg-background/70 px-3 py-2 text-xs shadow-md backdrop-blur-md">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  En yoğun
+                </div>
+                <div className="mt-0.5 font-mono text-sm font-semibold tabular-nums">
+                  {topCountry[0]} · {compact(topCountry[1])}
+                </div>
               </div>
             )}
+
+            {/* Bottom-left: dönen compass (cosmetic — Haulix referansı) */}
+            <div className="pointer-events-none absolute bottom-3 left-3 z-[500] grid size-12 place-items-center rounded-full border border-border/70 bg-background/70 shadow-md backdrop-blur-md">
+              <Compass
+                className="size-6 text-primary/70 animate-[spin_60s_linear_infinite]"
+                strokeWidth={1.5}
+              />
+            </div>
+
+            {/* Center-floating modal: marker tıklamayla açılır */}
+            {selected && selectedGeo && (
+              <div
+                className={cn(
+                  "absolute left-1/2 top-1/2 z-[600] w-[260px] -translate-x-1/2 -translate-y-1/2",
+                  "rounded-xl border border-border/70 bg-popover/90 p-4 shadow-xl backdrop-blur-md",
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelected(null)}
+                  aria-label="Kapat"
+                  className="absolute right-2 top-2 grid size-6 place-items-center rounded-md text-muted-foreground hover:bg-accent"
+                >
+                  <X className="size-3.5" />
+                </button>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md bg-primary/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-primary ring-1 ring-primary/30">
+                    {selected}
+                  </span>
+                  <span className="text-sm font-semibold">
+                    {selectedGeo.name}
+                  </span>
+                </div>
+                <div className="mt-3">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    Toplam (son {days}g)
+                  </div>
+                  <div className="font-mono text-2xl font-semibold tabular-nums">
+                    {selectedValue.toLocaleString("tr-TR")}
+                  </div>
+                </div>
+                <div className="mt-2 text-[10px] text-muted-foreground">
+                  Lat {selectedGeo.lat.toFixed(2)} · Lng{" "}
+                  {selectedGeo.lng.toFixed(2)}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Top-5 ülke chip listesi (kart altında) */}
+        {topCountries.length > 0 && !loading && (
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            {topCountries.map(([cc, v]) => {
+              const g = getCountryGeo(cc);
+              return (
+                <button
+                  key={cc}
+                  type="button"
+                  onClick={() => setSelected(cc)}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-md border bg-muted/40 px-2 py-1 font-mono tabular-nums transition-colors hover:bg-accent",
+                    selected === cc && "ring-1 ring-primary",
+                  )}
+                >
+                  <span className="font-semibold">{cc}</span>
+                  <span className="text-muted-foreground">
+                    {g?.name ?? cc}
+                  </span>
+                  <span>· {compact(v)}</span>
+                </button>
+              );
+            })}
           </div>
         )}
       </CardContent>

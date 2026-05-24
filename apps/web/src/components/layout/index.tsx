@@ -1,10 +1,10 @@
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { useGetIdentity, useLogout } from "@refinedev/core";
+import { useKBar } from "@refinedev/kbar";
 import { Link, Outlet, useLocation } from "react-router";
 import {
   Activity,
   Bell,
-  Check,
   ChevronsUpDown,
   Filter,
   History,
@@ -14,12 +14,14 @@ import {
   LogOut,
   Mail,
   Megaphone,
-  Palette,
+  Moon,
   Plug,
   ScrollText,
+  Search,
   Send,
   Settings,
   Star,
+  Sun,
   Tag,
   TrendingUp,
   Users,
@@ -48,11 +50,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ProjectSwitcher } from "./project-switcher";
+import { RightRail } from "./right-rail";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 
 type IUser = { id: string; name?: string };
@@ -111,10 +112,28 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   },
 ];
 
+/** Dark/Light tek toggle — sidebar footer'da NavUser üstünde. */
+const ModeToggle = () => {
+  const { theme, toggleMode } = useHelmTheme();
+  const isDark = theme.mode === "dark";
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          onClick={toggleMode}
+          tooltip={isDark ? "Aydınlık moda geç" : "Karanlık moda geç"}
+        >
+          {isDark ? <Sun /> : <Moon />}
+          <span>{isDark ? "Aydınlık" : "Karanlık"}</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+};
+
 const NavUser = () => {
   const { data: user } = useGetIdentity<IUser>();
   const { mutate: logout } = useLogout();
-  const { themeKey, setThemeKey, themes } = useHelmTheme();
 
   const name = user?.name ?? "Misafir";
   const initial = name[0]?.toUpperCase() ?? "?";
@@ -140,23 +159,6 @@ const NavUser = () => {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="right" align="end" className="w-56">
-            <DropdownMenuLabel className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <Palette className="size-3.5" /> Tema
-            </DropdownMenuLabel>
-            {themes.map((t) => (
-              <DropdownMenuItem
-                key={t.key}
-                onClick={() => setThemeKey(t.key)}
-              >
-                {t.key === themeKey ? (
-                  <Check className="size-4" />
-                ) : (
-                  <span className="size-4" />
-                )}
-                {t.label}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()}>
               <LogOut className="size-4" /> Çıkış yap
             </DropdownMenuItem>
@@ -219,6 +221,7 @@ const AppSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter>
+        <ModeToggle />
         <NavUser />
       </SidebarFooter>
       <SidebarRail />
@@ -226,29 +229,104 @@ const AppSidebar = () => {
   );
 };
 
-const HeaderBar = () => (
-  <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
-    <SidebarTrigger />
-    <Separator orientation="vertical" className="h-5" />
-  </header>
-);
+/** Aktif route'a göre breadcrumb başlığını NAV_GROUPS'tan al. */
+const useBreadcrumb = () => {
+  const { pathname } = useLocation();
+  return useMemo(() => {
+    if (pathname === "/") return "Cockpit";
+    for (const g of NAV_GROUPS) {
+      for (const it of g.items) {
+        if (it.url && it.url !== "/" && pathname.startsWith(it.url)) {
+          return it.title;
+        }
+      }
+    }
+    return "";
+  }, [pathname]);
+};
 
-export const HelmLayout = () => (
-  <SidebarProvider>
-    <AppSidebar />
-    <SidebarInset>
-      <HeaderBar />
-      <main className="p-4 lg:p-6">
-        <Suspense
-          fallback={
-            <div className="grid place-items-center py-24">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" />
-            </div>
-          }
+const HeaderBar = () => {
+  const title = useBreadcrumb();
+  const { data: user } = useGetIdentity<IUser>();
+  const initial = (user?.name ?? "?")[0]?.toUpperCase() ?? "?";
+  const { query } = useKBar();
+  return (
+    <header
+      data-slot="helm-header"
+      className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/70 px-3 lg:px-4"
+    >
+      <SidebarTrigger />
+      <Separator orientation="vertical" className="h-5" />
+      {title && (
+        <h2 className="text-sm font-medium tracking-tight">{title}</h2>
+      )}
+
+      {/* Orta — Command/Search trigger (⌘K) */}
+      <button
+        type="button"
+        onClick={() => query.toggle()}
+        className="ml-2 hidden md:flex flex-1 max-w-md items-center gap-2 rounded-md border bg-muted/40 px-3 py-1.5 text-sm text-muted-foreground ring-1 ring-foreground/5 transition-colors hover:bg-muted/60"
+      >
+        <Search className="size-4" />
+        <span>Hızlı arama…</span>
+        <kbd className="ml-auto rounded bg-background/60 px-1.5 py-0.5 font-mono text-[10px] ring-1 ring-foreground/10">
+          ⌘K
+        </kbd>
+      </button>
+
+      <div className="ml-auto flex items-center gap-1">
+        <Link
+          to="/alerts"
+          aria-label="Uyarılar"
+          className="grid size-9 place-items-center rounded-md text-muted-foreground ring-1 ring-foreground/5 transition-colors hover:bg-accent hover:text-foreground"
         >
-          <Outlet />
-        </Suspense>
-      </main>
-    </SidebarInset>
-  </SidebarProvider>
-);
+          <Bell className="size-4" />
+        </Link>
+        <Link
+          to="/settings"
+          aria-label="Ayarlar"
+          className="grid size-9 place-items-center rounded-md ring-1 ring-foreground/5 transition-colors hover:bg-accent"
+        >
+          <Avatar className="size-7 rounded-md">
+            <AvatarFallback className="rounded-md bg-primary text-primary-foreground text-[11px]">
+              {initial}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
+      </div>
+    </header>
+  );
+};
+
+export const HelmLayout = () => {
+  const { pathname } = useLocation();
+  const isDashboard = pathname === "/";
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <HeaderBar />
+        <main className="p-4 lg:p-6">
+          <Suspense
+            fallback={
+              <div className="grid place-items-center py-24">
+                <Loader2 className="size-6 animate-spin text-muted-foreground" />
+              </div>
+            }
+          >
+            {isDashboard ? (
+              <div className="flex gap-6">
+                <div className="min-w-0 flex-1">
+                  <Outlet />
+                </div>
+                <RightRail />
+              </div>
+            ) : (
+              <Outlet />
+            )}
+          </Suspense>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+};

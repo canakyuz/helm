@@ -50,13 +50,14 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   helm tema sistemi — her tema bir [data-helm-theme] bloğu.
-   Yeni tema = bir blok + presets.ts'te bir dizi girdisi.
+   helm tema sistemi — Liquid Glass, iki mod (dark + light).
+   Tek tema yapısı, sadece mod değişir. CSS efektleri (blur, bloom)
+   ortak — bkz. src/styles/glass.css ([data-helm-theme^="glass"]).
    ───────────────────────────────────────────────────────────── */
 
-/* glass — varsayılan (liquid glass) */
+/* glass-dark — varsayılan (Liquid Glass karanlık) */
 :root,
-[data-helm-theme="glass"] {
+[data-helm-theme="glass-dark"] {
   --background: #07070a;
   --foreground: #f4f4f5;
   --card: rgba(255, 255, 255, 0.045);
@@ -91,148 +92,41 @@
   --sidebar-ring: #a3e635;
 }
 
-/* terminal — teal, teknik */
-[data-helm-theme="terminal"] {
-  --background: #0a0e0d;
-  --foreground: #e8eceb;
-  --card: #111614;
-  --card-foreground: #e8eceb;
-  --popover: #111614;
-  --popover-foreground: #e8eceb;
-  --primary: #14b8a6;
-  --primary-foreground: #042f2a;
-  --secondary: #1a221f;
-  --secondary-foreground: #e8eceb;
-  --muted: #161c1a;
-  --muted-foreground: #7d8c88;
-  --accent: #1a221f;
-  --accent-foreground: #e8eceb;
-  --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #14b8a6;
-  --radius: 0.5rem;
-  --chart-1: #2dd4bf;
-  --chart-2: #22d3ee;
-  --chart-3: #facc15;
-  --chart-4: #fb923c;
-  --chart-5: #a3e635;
-  --sidebar: #0d1211;
-  --sidebar-foreground: #b9c2bf;
-  --sidebar-primary: #14b8a6;
-  --sidebar-primary-foreground: #042f2a;
-  --sidebar-accent: #1a221f;
-  --sidebar-accent-foreground: #e8eceb;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: #14b8a6;
-}
-
-/* helm-dark — indigo */
-[data-helm-theme="helm-dark"] {
-  --background: #0b0b0f;
-  --foreground: #f4f4f5;
-  --card: #15151b;
-  --card-foreground: #f4f4f5;
-  --popover: #15151b;
-  --popover-foreground: #f4f4f5;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #1f1f29;
-  --secondary-foreground: #f4f4f5;
-  --muted: #1a1a22;
-  --muted-foreground: #8a8a96;
-  --accent: #1f1f29;
-  --accent-foreground: #f4f4f5;
-  --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #6366f1;
-  --radius: 0.65rem;
-  --chart-1: #818cf8;
-  --chart-2: #38bdf8;
-  --chart-3: #f59e0b;
-  --chart-4: #ec4899;
-  --chart-5: #34d399;
-  --sidebar: #101015;
-  --sidebar-foreground: #c8c8d0;
-  --sidebar-primary: #6366f1;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1f1f29;
-  --sidebar-accent-foreground: #f4f4f5;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: #6366f1;
-}
-
-/* helm-light — açık */
-[data-helm-theme="helm-light"] {
-  --background: #f5f5f7;
+/* glass-light — Liquid Glass aydınlık.
+   Card yoğun beyaz (rgba 0.6) → backdrop-blur okunabilirliği korur. */
+[data-helm-theme="glass-light"] {
+  --background: #f6f7fa;
   --foreground: #18181b;
-  --card: #ffffff;
+  --card: rgba(255, 255, 255, 0.6);
   --card-foreground: #18181b;
   --popover: #ffffff;
   --popover-foreground: #18181b;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #ececef;
+  --primary: #65a30d;
+  --primary-foreground: #f7fee7;
+  --secondary: rgba(0, 0, 0, 0.04);
   --secondary-foreground: #18181b;
-  --muted: #f0f0f2;
-  --muted-foreground: #6b6b73;
-  --accent: #ececef;
+  --muted: rgba(0, 0, 0, 0.03);
+  --muted-foreground: #71717a;
+  --accent: rgba(0, 0, 0, 0.05);
   --accent-foreground: #18181b;
   --destructive: #dc2626;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #6366f1;
-  --radius: 0.65rem;
-  --chart-1: #6366f1;
-  --chart-2: #0ea5e9;
-  --chart-3: #f59e0b;
-  --chart-4: #ec4899;
-  --chart-5: #10b981;
-  --sidebar: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --input: rgba(0, 0, 0, 0.08);
+  --ring: #65a30d;
+  --radius: 0.85rem;
+  --chart-1: #65a30d;
+  --chart-2: #0284c7;
+  --chart-3: #d97706;
+  --chart-4: #db2777;
+  --chart-5: #0891b2;
+  --sidebar: rgba(255, 255, 255, 0.55);
   --sidebar-foreground: #3f3f46;
-  --sidebar-primary: #6366f1;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0f0f2;
+  --sidebar-primary: #65a30d;
+  --sidebar-primary-foreground: #f7fee7;
+  --sidebar-accent: rgba(0, 0, 0, 0.05);
   --sidebar-accent-foreground: #18181b;
-  --sidebar-border: #e4e4e7;
-  --sidebar-ring: #6366f1;
-}
-
-/* midnight — violet */
-[data-helm-theme="midnight"] {
-  --background: #0c0a14;
-  --foreground: #f3f1f9;
-  --card: #16131f;
-  --card-foreground: #f3f1f9;
-  --popover: #16131f;
-  --popover-foreground: #f3f1f9;
-  --primary: #8b5cf6;
-  --primary-foreground: #f5f3ff;
-  --secondary: #221d31;
-  --secondary-foreground: #f3f1f9;
-  --muted: #1b1726;
-  --muted-foreground: #8b85a0;
-  --accent: #221d31;
-  --accent-foreground: #f3f1f9;
-  --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #8b5cf6;
-  --radius: 0.75rem;
-  --chart-1: #a78bfa;
-  --chart-2: #22d3ee;
-  --chart-3: #fbbf24;
-  --chart-4: #f472b6;
-  --chart-5: #34d399;
-  --sidebar: #110e1a;
-  --sidebar-foreground: #cbc6da;
-  --sidebar-primary: #8b5cf6;
-  --sidebar-primary-foreground: #f5f3ff;
-  --sidebar-accent: #221d31;
-  --sidebar-accent-foreground: #f3f1f9;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: #8b5cf6;
+  --sidebar-border: rgba(0, 0, 0, 0.06);
+  --sidebar-ring: #65a30d;
 }
 
 @layer base {

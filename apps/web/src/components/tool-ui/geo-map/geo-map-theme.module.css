@@ -42,6 +42,40 @@
   background: var(--geo-map-canvas-bg);
 }
 
+/* Liquid Glass overlay — sol-üst lime + sağ-alt cyan radial bloom.
+   Marker'ları pointer-event'lerden uzak tut (pointer-events: none). */
+.root[data-slot="geo-map"] :global(.leaflet-container)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      color-mix(in oklch, var(--primary) 14%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      color-mix(in oklch, var(--chart-2) 12%, transparent),
+      transparent 50%
+    );
+  z-index: 400;
+  mix-blend-mode: screen;
+}
+
+/* Dark modda tile'ları biraz tona ada (carto dark_nolabels yumuşaması). */
+:global([data-helm-theme="glass-dark"])
+  .root[data-slot="geo-map"]
+  :global(.leaflet-tile-pane) {
+  filter: saturate(0.7) brightness(0.92);
+}
+:global([data-helm-theme="glass-light"])
+  .root[data-slot="geo-map"]
+  :global(.leaflet-tile-pane) {
+  filter: saturate(0.7) brightness(1.02);
+}
+
 .root[data-slot="geo-map"] :global(.leaflet-control-zoom) {
   border: 1px solid var(--geo-map-zoom-border);
   box-shadow: var(--geo-map-zoom-shadow);

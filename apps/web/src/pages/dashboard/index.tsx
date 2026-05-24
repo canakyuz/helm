@@ -23,6 +23,14 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { RangeSelect } from "@/components/range-select";
 import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
@@ -463,59 +471,61 @@ export const DashboardPage = () => {
         </CardContent>
       </Card>
 
-      {/* Kullanıcı dağılımı — dünya haritası (App Store + PostHog) */}
-      <Suspense
-        fallback={
-          <Card>
-            <CardHeader>
-              <CardTitle>Kullanıcı Dağılımı — Ülkelere Göre</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[320px] animate-pulse rounded-lg bg-muted/40" />
-            </CardContent>
-          </Card>
-        }
-      >
-        <UsersGeoMap scope={scope} isAll={isAll} days={range} />
-      </Suspense>
-
-      {/* İstatistik kartları */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title={isAll ? "Toplam MRR" : "MRR"}
-          value={formatMoney(mrrDisplay, displayCcy)}
-          icon={<DollarSign />}
-          loading={loading}
-        />
-        <StatCard
-          title="Reklam Geliri (son gün)"
-          value={formatMoney(adRevenueDisplay, displayCcy)}
-          icon={<Wallet />}
-          delta={deltaPct(adRevenueSeries)}
-          loading={loading}
-        />
-        <StatCard
-          title={isAll ? "Toplam DAU" : "DAU"}
-          value={compact(latest(metrics, "dau"))}
-          icon={<Users />}
-          delta={deltaPct(dauSeries)}
-          loading={loading}
-        />
-        {isAll ? (
+      {/* MarineX 12-col: solda 4 stat (2x2), sağda büyük harita */}
+      <div className="grid gap-4 xl:grid-cols-12">
+        <div className="grid grid-cols-2 gap-4 xl:col-span-5 self-start">
           <StatCard
-            title="Aktif Abone"
-            value={compact(latest(metrics, "active_subs"))}
+            title={isAll ? "Toplam MRR" : "MRR"}
+            value={formatMoney(mrrDisplay, displayCcy)}
+            icon={<DollarSign />}
             loading={loading}
           />
-        ) : (
           <StatCard
-            title="Toplam Kullanıcı"
-            value={compact(latest(metrics, "total_users"))}
-            icon={<UserPlus />}
-            delta={deltaPct(series(metrics, "total_users"))}
+            title="Reklam Geliri (son gün)"
+            value={formatMoney(adRevenueDisplay, displayCcy)}
+            icon={<Wallet />}
+            delta={deltaPct(adRevenueSeries)}
             loading={loading}
           />
-        )}
+          <StatCard
+            title={isAll ? "Toplam DAU" : "DAU"}
+            value={compact(latest(metrics, "dau"))}
+            icon={<Users />}
+            delta={deltaPct(dauSeries)}
+            loading={loading}
+          />
+          {isAll ? (
+            <StatCard
+              title="Aktif Abone"
+              value={compact(latest(metrics, "active_subs"))}
+              loading={loading}
+            />
+          ) : (
+            <StatCard
+              title="Toplam Kullanıcı"
+              value={compact(latest(metrics, "total_users"))}
+              icon={<UserPlus />}
+              delta={deltaPct(series(metrics, "total_users"))}
+              loading={loading}
+            />
+          )}
+        </div>
+        <div className="xl:col-span-7">
+          <Suspense
+            fallback={
+              <Card>
+                <CardHeader>
+                  <CardTitle>Kullanıcı Dağılımı — Ülkelere Göre</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[320px] animate-pulse rounded-lg bg-muted/40" />
+                </CardContent>
+              </Card>
+            }
+          >
+            <UsersGeoMap scope={scope} isAll={isAll} days={range} />
+          </Suspense>
+        </div>
       </div>
 
       {/* Projeye özel ek kartlar */}
@@ -593,7 +603,7 @@ export const DashboardPage = () => {
         )}
       </div>
 
-      {/* Tüm Projeler: proje kartları ızgarası */}
+      {/* Tüm Projeler: operasyon tablosu (MarineX referansı) */}
       {isAll && (
         <Card>
           <CardHeader>
@@ -605,67 +615,73 @@ export const DashboardPage = () => {
                 Henüz proje yok — sidebar'dan "Proje ekle".
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {projects.map((p) => {
-                  const mrrMap = latestByProject(metrics, "mrr");
-                  const ad = latestByProject(metrics, "ad_revenue");
-                  const dau = latestByProject(metrics, "dau");
-                  const mrrConverted =
-                    (mrrMap.get(p.id as string)?.value ?? 0) * rateOf("USD");
-                  const adConverted =
-                    (ad.get(p.id as string)?.value ?? 0) *
-                    rateOf(projAdCurrency(p.id as string));
-                  const health = projectHealth(
-                    integrations.filter((i) => i.project_id === p.id),
-                  );
-                  return (
-                    <button
-                      type="button"
-                      key={p.id}
-                      onClick={() => setScope(p.id as string)}
-                      className="rounded-lg border bg-card p-4 text-left ring-1 ring-foreground/5 transition-colors hover:ring-foreground/20"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "size-2 rounded-full",
-                            health === "ok" && "bg-emerald-500",
-                            health === "error" && "bg-red-500",
-                            health === "pending" && "bg-muted-foreground/40",
-                          )}
-                        />
-                        <span className="font-medium">{p.name}</span>
-                      </div>
-                      <div className="mt-3 grid grid-cols-3 gap-2">
-                        <div>
-                          <div className="text-xs text-muted-foreground">
-                            MRR
-                          </div>
-                          <div className="text-sm font-medium">
-                            {formatMoney(mrrConverted, displayCcy)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-muted-foreground">
-                            Reklam
-                          </div>
-                          <div className="text-sm font-medium">
-                            {formatMoney(adConverted, displayCcy)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-muted-foreground">
-                            DAU
-                          </div>
-                          <div className="text-sm font-medium">
-                            {compact(dau.get(p.id as string)?.value ?? 0)}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-8" />
+                    <TableHead>Proje</TableHead>
+                    <TableHead className="text-right">MRR</TableHead>
+                    <TableHead className="text-right">Reklam</TableHead>
+                    <TableHead className="text-right">DAU</TableHead>
+                    <TableHead className="w-20 text-right">Detay</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {projects.map((p) => {
+                    const mrrMap = latestByProject(metrics, "mrr");
+                    const ad = latestByProject(metrics, "ad_revenue");
+                    const dau = latestByProject(metrics, "dau");
+                    const mrrConverted =
+                      (mrrMap.get(p.id as string)?.value ?? 0) * rateOf("USD");
+                    const adConverted =
+                      (ad.get(p.id as string)?.value ?? 0) *
+                      rateOf(projAdCurrency(p.id as string));
+                    const health = projectHealth(
+                      integrations.filter((i) => i.project_id === p.id),
+                    );
+                    return (
+                      <TableRow
+                        key={p.id}
+                        className="cursor-pointer"
+                        onClick={() => setScope(p.id as string)}
+                      >
+                        <TableCell>
+                          <span
+                            className={cn(
+                              "block size-2 rounded-full",
+                              health === "ok" && "bg-emerald-500 shadow-[0_0_8px_-1px_rgb(16,185,129)]",
+                              health === "error" && "bg-red-500 shadow-[0_0_8px_-1px_rgb(239,68,68)]",
+                              health === "pending" && "bg-muted-foreground/40",
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">{p.name}</TableCell>
+                        <TableCell className="text-right font-mono tabular-nums">
+                          {formatMoney(mrrConverted, displayCcy)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono tabular-nums">
+                          {formatMoney(adConverted, displayCcy)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono tabular-nums">
+                          {compact(dau.get(p.id as string)?.value ?? 0)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Link to={`/users`} onClick={() => setScope(p.id as string)}>
+                              Aç
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             )}
           </CardContent>
         </Card>

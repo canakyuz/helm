@@ -6,7 +6,9 @@ import {
   Database,
   LogOut,
   Mail,
+  Moon,
   Server,
+  Sun,
   XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useDisplayCurrency } from "@/context/currency";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import type { SyncRun } from "@/types";
@@ -41,8 +44,9 @@ interface Identity {
 }
 
 export const SettingsPage = () => {
-  const { themeKey, setThemeKey, themes } = useHelmTheme();
+  const { theme, toggleMode } = useHelmTheme();
   const { mutate: logout } = useLogout();
+  const isDark = theme.mode === "dark";
   const { currency, setCurrency } = useDisplayCurrency();
   const { data: identity } = useGetIdentity<Identity>();
 
@@ -66,20 +70,21 @@ export const SettingsPage = () => {
           <CardHeader>
             <CardTitle>Görünüm</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Label>Tema</Label>
-            <Select value={themeKey} onValueChange={setThemeKey}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {themes.map((t) => (
-                  <SelectItem key={t.key} value={t.key}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <CardContent className="space-y-3">
+            <Label className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2">
+                {isDark ? (
+                  <Moon className="size-4" />
+                ) : (
+                  <Sun className="size-4" />
+                )}
+                <span>Tema modu</span>
+              </span>
+              <Switch checked={!isDark} onCheckedChange={toggleMode} />
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Liquid Glass — {isDark ? "karanlık" : "aydınlık"} mod.
+            </p>
           </CardContent>
         </Card>
 

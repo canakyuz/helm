@@ -15,6 +15,7 @@ interface StatCardProps {
 }
 
 // Başlık + büyük değer + trend göstergeli istatistik kartı.
+// Glass orb: ikonun arkasında bulanık primary halka — MarineX/Haulix referansı.
 export const StatCard = ({
   title,
   value,
@@ -40,36 +41,49 @@ export const StatCard = ({
   const positive = (delta ?? 0) >= 0;
 
   return (
-    <Card className="h-full">
+    <Card className="relative h-full overflow-hidden">
+      {/* Glass orb — ikonun arkasında soft primary glow */}
+      {icon && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-4 -top-4 size-20 rounded-full bg-primary/10 blur-2xl"
+        />
+      )}
       <CardContent>
         <div className="mb-2.5 flex items-center gap-2 text-muted-foreground">
           {icon && <span className="[&_svg]:size-4">{icon}</span>}
           <span className="text-[13px]">{title}</span>
         </div>
 
-        <div className="text-2xl font-semibold tracking-tight">{value}</div>
+        <div className="font-mono text-3xl font-semibold tracking-tight tabular-nums">
+          {value}
+        </div>
 
         {/* Trend satırı her zaman yer kaplar — kartlar aynı boyda kalsın. */}
-        <div className="mt-1.5 min-h-5 text-xs">
+        <div className="mt-1.5 min-h-5 text-sm">
           {hasDelta ? (
             <>
               <span
                 className={cn(
-                  "font-medium",
-                  positive ? "text-emerald-500" : "text-red-500",
+                  "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 font-mono text-xs font-medium tabular-nums",
+                  positive
+                    ? "bg-emerald-500/15 text-emerald-500 ring-1 ring-emerald-500/30"
+                    : "bg-red-500/15 text-red-500 ring-1 ring-red-500/30",
                 )}
               >
                 {positive ? (
-                  <ArrowUp className="inline size-3" />
+                  <ArrowUp className="size-3" />
                 ) : (
-                  <ArrowDown className="inline size-3" />
-                )}{" "}
+                  <ArrowDown className="size-3" />
+                )}
                 {Math.abs(delta as number).toFixed(1)}%
               </span>{" "}
-              <span className="text-muted-foreground">{deltaLabel}</span>
+              <span className="text-xs text-muted-foreground">
+                {deltaLabel}
+              </span>
             </>
           ) : (
-            <span className="text-muted-foreground">—</span>
+            <span className="text-xs text-muted-foreground">—</span>
           )}
         </div>
       </CardContent>
