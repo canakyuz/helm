@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { CronHealthCard } from "@/components/settings/cron-health-card";
 import { useDisplayCurrency } from "@/context/currency";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import type { SyncRun } from "@/types";
@@ -197,6 +198,8 @@ export const SettingsPage = () => {
           )}
         </CardContent>
       </Card>
+
+      <CronHealthCard />
 
       <Card>
         <CardHeader>
