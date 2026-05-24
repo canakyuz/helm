@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import {
   type CrudFilter,
   useInvalidate,
@@ -26,6 +26,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RangeSelect } from "@/components/range-select";
 import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
+// Leaflet ağır (~150KB gzip); ayrı chunk'a koy, ilk dashboard renderı bloklamasın.
+const UsersGeoMap = lazy(() =>
+  import("@/components/users-geo-map").then((m) => ({
+    default: m.UsersGeoMap,
+  })),
+);
 import { supabaseClient } from "@/providers/supabase-client";
 import { useScope } from "@/context/scope";
 import { useDisplayCurrency } from "@/context/currency";
@@ -456,6 +462,22 @@ export const DashboardPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Kullanıcı dağılımı — dünya haritası (App Store + PostHog) */}
+      <Suspense
+        fallback={
+          <Card>
+            <CardHeader>
+              <CardTitle>Kullanıcı Dağılımı — Ülkelere Göre</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[320px] animate-pulse rounded-lg bg-muted/40" />
+            </CardContent>
+          </Card>
+        }
+      >
+        <UsersGeoMap scope={scope} isAll={isAll} days={range} />
+      </Suspense>
 
       {/* İstatistik kartları */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

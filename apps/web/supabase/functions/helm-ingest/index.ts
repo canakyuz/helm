@@ -96,7 +96,11 @@ Deno.serve(async (req) => {
       const connector = CONNECTORS[it.provider];
       if (!connector) throw new Error(`Bilinmeyen sağlayıcı: ${it.provider}`);
 
-      const points = await connector(it.config ?? {});
+      const result = await connector(it.config ?? {});
+      // Geriye uyumluluk: connector ya düz dizi ya da {points, byCountry} döner.
+      const points = Array.isArray(result) ? result : result.points;
+      const byCountry = Array.isArray(result) ? [] : (result.byCountry ?? []);
+
       const rows = points.map((p) => ({
         project_id: it.project_id,
         date: p.date,
@@ -112,7 +116,25 @@ Deno.serve(async (req) => {
         if (upErr) throw new Error(upErr.message);
       }
 
-      ingested += rows.length;
+      // Ülke kırılımı — metrics_country tablosuna.
+      if (byCountry.length > 0) {
+        const countryRows = byCountry.map((p) => ({
+          project_id: it.project_id,
+          date: p.date,
+          source: it.provider,
+          metric: p.metric,
+          country_code: p.country_code,
+          value: p.value,
+        }));
+        const { error: ccErr } = await hub
+          .from("metrics_country")
+          .upsert(countryRows, {
+            onConflict: "project_id,date,source,metric,country_code",
+          });
+        if (ccErr) throw new Error(ccErr.message);
+      }
+
+      ingested += rows.length + byCountry.length;
       okCount++;
       await hub
         .from("project_integrations")
@@ -127,6 +149,7 @@ Deno.serve(async (req) => {
         provider: it.provider,
         project_id: it.project_id,
         points: rows.length,
+        country_points: byCountry.length,
       });
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);

@@ -1,4 +1,9 @@
-import { type Connector, type MetricPoint, today } from "./types.ts";
+import {
+  type Connector,
+  type CountryMetricPoint,
+  type MetricPoint,
+  today,
+} from "./types.ts";
 
 // PostHog — HogQL query API. Günlük DAU serisi + anlık WAU.
 // config: { project_id, api_key, host }
@@ -62,5 +67,38 @@ export const fetchPostHog: Connector = async (config) => {
     value: Number(wauRows[0]?.[0] ?? 0),
   });
 
-  return points;
+  // Ülke kırılımı — son 30 gün DAU. PostHog otomatik geoip_country_code yakalar
+  // (kişi properties veya event properties). Boş/null olanları atla.
+  const byCountry: CountryMetricPoint[] = [];
+  try {
+    const countryRows = await hogql(
+      host,
+      pid,
+      key,
+      `SELECT
+         toDate(timestamp) AS day,
+         upper(coalesce(
+           nullIf(properties.$geoip_country_code, ''),
+           nullIf(person.properties.$geoip_country_code, '')
+         )) AS cc,
+         uniq(person_id) AS users
+       FROM events
+       WHERE timestamp >= now() - INTERVAL 30 DAY
+         AND cc IS NOT NULL
+         AND length(cc) = 2
+       GROUP BY day, cc
+       ORDER BY day`,
+    );
+    for (const r of countryRows) {
+      const date = String(r[0]).slice(0, 10);
+      const cc = String(r[1] ?? "").trim().toUpperCase();
+      const value = Number(r[2] ?? 0);
+      if (!cc || cc.length !== 2 || value === 0) continue;
+      byCountry.push({ date, metric: "dau", country_code: cc, value });
+    }
+  } catch {
+    // PostHog projesinde $geoip_country_code yoksa breakdown atlanır.
+  }
+
+  return { points, byCountry };
 };

@@ -1,4 +1,8 @@
-import { type Connector, type MetricPoint } from "./types.ts";
+import {
+  type Connector,
+  type CountryMetricPoint,
+  type MetricPoint,
+} from "./types.ts";
 
 // App Store Connect — Sales Reports (daily summary).
 // JWT ES256 ile auth → günlük satış raporu (gzip TSV).
@@ -117,6 +121,7 @@ interface ReportRow {
   productType: string;
   units: number;
   proceeds: number;
+  countryCode: string; // ISO 3166-1 alpha-2; boş ise ""
 }
 
 function parseTsv(tsv: string): ReportRow[] {
@@ -127,6 +132,7 @@ function parseTsv(tsv: string): ReportRow[] {
   const iType = idx("Product Type Identifier");
   const iUnits = idx("Units");
   const iProc = idx("Developer Proceeds");
+  const iCountry = idx("Country Code");
   if (iType < 0 || iUnits < 0 || iProc < 0) return [];
 
   const rows: ReportRow[] = [];
@@ -136,6 +142,7 @@ function parseTsv(tsv: string): ReportRow[] {
       productType: cols[iType] ?? "",
       units: Number(cols[iUnits] ?? 0),
       proceeds: Number(cols[iProc] ?? 0),
+      countryCode: iCountry >= 0 ? (cols[iCountry] ?? "").trim() : "",
     });
   }
   return rows;
@@ -155,6 +162,7 @@ export const fetchAppStoreConnect: Connector = async (config) => {
   const vendor = String(config.vendor_number);
 
   const points: MetricPoint[] = [];
+  const byCountry: CountryMetricPoint[] = [];
   const today = new Date();
   // Apple's DAILY reports T-1 (dünden başla geriye).
   for (let i = 1; i <= DAYS_BACK; i++) {
@@ -165,12 +173,40 @@ export const fetchAppStoreConnect: Connector = async (config) => {
     const rows = parseTsv(tsv);
     let downloads = 0;
     let revenue = 0;
+    // Ülke bazlı toplam — Country Code yoksa "??" altında topla.
+    const dlByCountry = new Map<string, number>();
+    const revByCountry = new Map<string, number>();
     for (const r of rows) {
-      if (isDownloadType(r.productType)) downloads += r.units;
-      revenue += r.proceeds * r.units; // proceeds per unit × units
+      const cc = (r.countryCode || "??").toUpperCase();
+      if (isDownloadType(r.productType)) {
+        downloads += r.units;
+        dlByCountry.set(cc, (dlByCountry.get(cc) ?? 0) + r.units);
+      }
+      const rev = r.proceeds * r.units; // proceeds per unit × units
+      revenue += rev;
+      revByCountry.set(cc, (revByCountry.get(cc) ?? 0) + rev);
     }
     points.push({ date, metric: "app_downloads", value: downloads });
     points.push({ date, metric: "app_revenue", value: revenue });
+
+    for (const [cc, v] of dlByCountry) {
+      if (cc === "??" || v === 0) continue;
+      byCountry.push({
+        date,
+        metric: "app_downloads",
+        country_code: cc,
+        value: v,
+      });
+    }
+    for (const [cc, v] of revByCountry) {
+      if (cc === "??" || v === 0) continue;
+      byCountry.push({
+        date,
+        metric: "app_revenue",
+        country_code: cc,
+        value: v,
+      });
+    }
   }
-  return points;
+  return { points, byCountry };
 };

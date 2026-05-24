@@ -85,6 +85,17 @@ export interface Metric {
   ingested_at: string;
 }
 
+/** metrics_country — günlük metrik ülke kırılımı (ISO 3166-1 alpha-2). */
+export interface MetricCountry {
+  project_id: string;
+  date: string;
+  source: ProviderName;
+  metric: string;
+  country_code: string;
+  value: number;
+  ingested_at: string;
+}
+
 export interface SyncRun {
   id: number;
   started_at: string;
