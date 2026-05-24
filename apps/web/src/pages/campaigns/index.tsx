@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { Mail, Send } from "lucide-react";
+import { Mail, MousePointerClick, Send, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -79,17 +79,61 @@ export const CampaignsPage = () => {
     id ? projResult.data.find((p) => p.id === id)?.name ?? "—" : "—";
 
   const campaigns = result.data;
+
+  // Campaign events — open/click tracking
+  interface CampaignEvent {
+    campaign_id: number | null;
+    event: "sent" | "delivered" | "opened" | "clicked" | "bounced" | "complained";
+    email_id: string;
+  }
+  const { result: eventsResult } = useList<CampaignEvent>({
+    resource: "campaign_events",
+    pagination: { mode: "off" },
+  });
+  const events = eventsResult.data;
+
+  // Her campaign için unique opens/clicks
+  const statsByCampaign = useMemo(() => {
+    const map = new Map<
+      number,
+      { opened: Set<string>; clicked: Set<string>; delivered: Set<string> }
+    >();
+    for (const e of events) {
+      if (e.campaign_id === null) continue;
+      let s = map.get(e.campaign_id);
+      if (!s) {
+        s = { opened: new Set(), clicked: new Set(), delivered: new Set() };
+        map.set(e.campaign_id, s);
+      }
+      if (e.event === "opened") s.opened.add(e.email_id);
+      else if (e.event === "clicked") s.clicked.add(e.email_id);
+      else if (e.event === "delivered") s.delivered.add(e.email_id);
+    }
+    return map;
+  }, [events]);
+
   const totals = useMemo(() => {
     let recipients = 0;
     let sent = 0;
     let failed = 0;
+    let opened = 0;
+    let clicked = 0;
     for (const c of campaigns) {
       recipients += c.recipients;
       sent += c.sent;
       failed += c.failed;
+      const s = statsByCampaign.get(c.id);
+      if (s) {
+        opened += s.opened.size;
+        clicked += s.clicked.size;
+      }
     }
-    return { recipients, sent, failed };
-  }, [campaigns]);
+    return { recipients, sent, failed, opened, clicked };
+  }, [campaigns, statsByCampaign]);
+  const openRate =
+    totals.sent > 0 ? (totals.opened / totals.sent) * 100 : 0;
+  const clickRate =
+    totals.sent > 0 ? (totals.clicked / totals.sent) * 100 : 0;
 
   return (
     <div className="space-y-4">
@@ -98,31 +142,31 @@ export const CampaignsPage = () => {
       </h1>
 
       {campaigns.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-          <div className="rounded-lg border bg-card p-3">
-            <div className="text-xs text-muted-foreground">Kampanya</div>
-            <div className="mt-1 font-mono text-2xl tabular-nums">
-              {campaigns.length}
-            </div>
-          </div>
-          <div className="rounded-lg border bg-card p-3">
-            <div className="text-xs text-muted-foreground">Toplam alıcı</div>
-            <div className="mt-1 font-mono text-2xl tabular-nums">
-              {totals.recipients}
-            </div>
-          </div>
-          <div className="rounded-lg border bg-card p-3">
-            <div className="text-xs text-muted-foreground">Gönderildi</div>
-            <div className="mt-1 font-mono text-2xl tabular-nums text-emerald-500">
-              {totals.sent}
-            </div>
-          </div>
-          <div className="rounded-lg border bg-card p-3">
-            <div className="text-xs text-muted-foreground">Hata</div>
-            <div className="mt-1 font-mono text-2xl tabular-nums text-destructive">
-              {totals.failed}
-            </div>
-          </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <SummaryCard label="Kampanya" value={campaigns.length} />
+          <SummaryCard label="Toplam alıcı" value={totals.recipients} />
+          <SummaryCard
+            label="Gönderildi"
+            value={totals.sent}
+            tone="emerald"
+          />
+          <SummaryCard
+            label="Açılma"
+            value={`${totals.opened} · %${openRate.toFixed(1)}`}
+            tone="primary"
+            icon={<Eye className="size-3" />}
+          />
+          <SummaryCard
+            label="Tıklama"
+            value={`${totals.clicked} · %${clickRate.toFixed(1)}`}
+            tone="primary"
+            icon={<MousePointerClick className="size-3" />}
+          />
+          <SummaryCard
+            label="Hata"
+            value={totals.failed}
+            tone="destructive"
+          />
         </div>
       )}
 
@@ -158,50 +202,133 @@ export const CampaignsPage = () => {
                   <TableHead>Kanal</TableHead>
                   {isAll && <TableHead>Proje</TableHead>}
                   <TableHead>Konu</TableHead>
-                  <TableHead className="text-right">Alıcı</TableHead>
                   <TableHead className="text-right">Gönderildi</TableHead>
+                  <TableHead className="text-right">Açılma</TableHead>
+                  <TableHead className="text-right">Tıklama</TableHead>
                   <TableHead className="text-right">Hata</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {campaigns.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="whitespace-nowrap text-xs">
-                      {fmt(c.sent_at)}
-                    </TableCell>
-                    <TableCell>
-                      <ChannelBadge channel={c.channel} />
-                    </TableCell>
-                    {isAll && (
-                      <TableCell className="text-xs">
-                        {projectName(c.project_id)}
+                {campaigns.map((c) => {
+                  const s = statsByCampaign.get(c.id);
+                  const opens = s?.opened.size ?? 0;
+                  const clicks = s?.clicked.size ?? 0;
+                  const openPct =
+                    c.sent > 0 ? (opens / c.sent) * 100 : 0;
+                  const clickPct =
+                    c.sent > 0 ? (clicks / c.sent) * 100 : 0;
+                  return (
+                    <TableRow key={c.id}>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {fmt(c.sent_at)}
                       </TableCell>
-                    )}
-                    <TableCell className="font-medium">
-                      {c.subject ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-right font-mono tabular-nums">
-                      {c.recipients}
-                    </TableCell>
-                    <TableCell className="text-right font-mono tabular-nums">
-                      <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
-                        {c.sent}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-mono tabular-nums">
-                      {c.failed > 0 ? (
-                        <Badge variant="destructive">{c.failed}</Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">0</span>
+                      <TableCell>
+                        <ChannelBadge channel={c.channel} />
+                      </TableCell>
+                      {isAll && (
+                        <TableCell className="text-xs">
+                          {projectName(c.project_id)}
+                        </TableCell>
                       )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell className="font-medium">
+                        {c.subject ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                          {c.sent} / {c.recipients}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {c.channel === "mail" ? (
+                          opens > 0 ? (
+                            <span className="text-foreground">
+                              {opens}{" "}
+                              <span className="text-xs text-muted-foreground">
+                                %{openPct.toFixed(0)}
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              —
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            —
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {c.channel === "mail" ? (
+                          clicks > 0 ? (
+                            <span className="text-foreground">
+                              {clicks}{" "}
+                              <span className="text-xs text-muted-foreground">
+                                %{clickPct.toFixed(0)}
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              —
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            —
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {c.failed > 0 ? (
+                          <Badge variant="destructive">{c.failed}</Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            0
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+};
+
+const SummaryCard = ({
+  label,
+  value,
+  tone,
+  icon,
+}: {
+  label: string;
+  value: number | string;
+  tone?: "emerald" | "destructive" | "primary";
+  icon?: React.ReactNode;
+}) => {
+  const toneCls =
+    tone === "emerald"
+      ? "text-emerald-500"
+      : tone === "destructive"
+        ? "text-destructive"
+        : tone === "primary"
+          ? "text-primary"
+          : "";
+  return (
+    <div className="rounded-lg border bg-card p-3">
+      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        {icon}
+        {label}
+      </div>
+      <div
+        className={`mt-1 font-mono text-2xl tabular-nums ${toneCls}`}
+      >
+        {value}
+      </div>
     </div>
   );
 };

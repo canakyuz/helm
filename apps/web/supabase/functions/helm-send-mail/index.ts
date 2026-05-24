@@ -174,11 +174,29 @@ Deno.serve(async (req) => {
     ? `${resendCfg.from_name} <${resendCfg.from_email}>`
     : resendCfg.from_email;
 
+  // Campaign önce yarat — id'yi tag olarak gönderime ekle (webhook'tan dönecek)
+  const { data: camp } = await hub
+    .from("campaigns")
+    .insert({
+      project_id,
+      segment_id,
+      channel: "mail",
+      subject,
+      body: body_html.slice(0, 4000),
+      recipients: recipients.length,
+      sent: 0,
+      failed: 0,
+    })
+    .select("id")
+    .single();
+  const campaignId = camp?.id as number | undefined;
+
   // Resend "batch" endpoint (100/req limit). Chunk'lara böl.
   const CHUNK = 100;
   let sent = 0;
   let failed = 0;
   const errors: string[] = [];
+  const sentEmailIds: string[] = [];
 
   for (let i = 0; i < recipients.length; i += CHUNK) {
     const chunk = recipients.slice(i, i + CHUNK);
@@ -188,6 +206,14 @@ Deno.serve(async (req) => {
       subject,
       html: body_html,
       ...(body_text ? { text: body_text } : {}),
+      ...(campaignId
+        ? {
+            tags: [
+              { name: "helm_campaign_id", value: String(campaignId) },
+              { name: "helm_channel", value: "mail" },
+            ],
+          }
+        : {}),
     }));
     try {
       const res = await fetch("https://api.resend.com/emails/batch", {
@@ -204,6 +230,11 @@ Deno.serve(async (req) => {
         errors.push(`chunk ${i}: ${res.status} ${errText.slice(0, 200)}`);
       } else {
         sent += chunk.length;
+        const result = await res.json();
+        const items: Array<{ id?: string }> = result?.data ?? [];
+        for (const it of items) {
+          if (it.id) sentEmailIds.push(it.id);
+        }
       }
     } catch (e) {
       failed += chunk.length;
@@ -211,28 +242,34 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Campaign log
-  const { data: camp } = await hub
-    .from("campaigns")
-    .insert({
-      project_id,
-      segment_id,
-      channel: "mail",
-      subject,
-      body: body_html.slice(0, 4000),
-      recipients: recipients.length,
-      sent,
-      failed,
-      error: errors.length > 0 ? errors.join("\n").slice(0, 2000) : null,
-    })
-    .select("id")
-    .single();
+  // Campaign güncelle (sent/failed)
+  if (campaignId) {
+    await hub
+      .from("campaigns")
+      .update({
+        sent,
+        failed,
+        error: errors.length > 0 ? errors.join("\n").slice(0, 2000) : null,
+      })
+      .eq("id", campaignId);
+
+    // Initial "sent" event'leri yaz (delivered/opened/clicked sonra webhook)
+    if (sentEmailIds.length > 0) {
+      const sentRows = sentEmailIds.map((id, idx) => ({
+        campaign_id: campaignId,
+        email_id: id,
+        event: "sent" as const,
+        recipient: recipients[idx] ?? null,
+      }));
+      await hub.from("campaign_events").insert(sentRows);
+    }
+  }
 
   return json({
     recipients: recipients.length,
     sent,
     failed,
-    campaign_id: camp?.id ?? null,
+    campaign_id: campaignId ?? null,
     errors: errors.length > 0 ? errors : undefined,
   });
 });
