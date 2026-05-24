@@ -76,6 +76,46 @@ export const VersionsPage = () => {
     }
   };
 
+  // KPI: en son iOS + en son Android + son güncelleme + cross-platform property sayısı
+  const latestIos = useMemo(
+    () =>
+      versions
+        .filter((v) => v.source === "ios")
+        .sort((a, b) => {
+          const ad = a.release_date ? new Date(a.release_date).getTime() : 0;
+          const bd = b.release_date ? new Date(b.release_date).getTime() : 0;
+          return bd - ad;
+        })[0],
+    [versions],
+  );
+  const latestAndroid = useMemo(
+    () =>
+      versions
+        .filter((v) => v.source === "android")
+        .sort((a, b) => {
+          const ad = a.release_date ? new Date(a.release_date).getTime() : 0;
+          const bd = b.release_date ? new Date(b.release_date).getTime() : 0;
+          return bd - ad;
+        })[0],
+    [versions],
+  );
+  const lastUpdate = useMemo(() => {
+    const dates = versions
+      .map((v) => v.release_date ?? v.fetched_at)
+      .filter(Boolean)
+      .map((d) => new Date(d!).getTime());
+    return dates.length > 0 ? Math.max(...dates) : null;
+  }, [versions]);
+  const lastUpdateRel = lastUpdate
+    ? (() => {
+        const days = Math.floor((Date.now() - lastUpdate) / 86_400_000);
+        if (days === 0) return "bugün";
+        if (days === 1) return "dün";
+        if (days < 30) return `${days} g`;
+        return `${Math.floor(days / 30)} ay`;
+      })()
+    : "—";
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -86,6 +126,32 @@ export const VersionsPage = () => {
           />
           Yenile
         </Button>
+      </div>
+
+      {/* KPI cluster */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <VerKpi
+          label="iOS Toplam"
+          value={iosCount}
+          icon={<Apple className="size-3.5" />}
+        />
+        <VerKpi
+          label="Android Toplam"
+          value={androidCount}
+          icon={<Smartphone className="size-3.5" />}
+          tone="emerald"
+        />
+        <VerKpi
+          label="En Yeni iOS"
+          value={latestIos?.version ? `v${latestIos.version}` : "—"}
+          icon={<Package className="size-3.5" />}
+        />
+        <VerKpi
+          label={`Son Güncelleme (${lastUpdateRel})`}
+          value={latestAndroid?.version ? `v${latestAndroid.version}` : "—"}
+          icon={<Package className="size-3.5" />}
+          tone="primary"
+        />
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Source)}>
@@ -205,5 +271,35 @@ const SourceBadge = ({ source }: { source: "ios" | "android" }) => {
       <Smartphone className="size-3" />
       <span className="ml-1">Android</span>
     </Badge>
+  );
+};
+
+const VerKpi = ({
+  label,
+  value,
+  icon,
+  tone,
+}: {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  tone?: "emerald" | "primary";
+}) => {
+  const toneCls =
+    tone === "emerald"
+      ? "text-emerald-500"
+      : tone === "primary"
+        ? "text-primary"
+        : "text-foreground";
+  return (
+    <div className="rounded-lg border bg-card/40 p-3">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {label}
+      </div>
+      <div className={`mt-1 font-mono text-2xl tabular-nums ${toneCls}`}>
+        {value}
+      </div>
+    </div>
   );
 };
