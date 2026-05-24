@@ -81,9 +81,10 @@ export const HeroGhost = ({
       <div className="helm-hero-number relative text-[clamp(2.25rem,4.8cqw,3rem)] leading-none">
         {value}
       </div>
-      {/* Alt — sub (kartın en altına) */}
+      {/* Alt — sub (kartın en altına). Dashboard çoğunlukla SubStatGrid geçiyor;
+       *  text size override edilebilir. */}
       {sub && (
-        <div className="relative mt-auto pt-2 text-[10px] text-muted-foreground">
+        <div className="relative mt-auto pt-2 text-xs text-muted-foreground">
           {sub}
         </div>
       )}

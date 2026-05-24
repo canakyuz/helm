@@ -29,6 +29,7 @@ import {
 import { RangeSelect } from "@/components/range-select";
 import { TrendChart, type TrendPoint } from "@/components/trend-chart";
 import { HeroGhost } from "@/components/hero-ghost";
+import { ErrorsPanel } from "@/components/cockpit/errors-panel";
 import { KpiCell, KpiPlaceholder } from "@/components/kpi-cell";
 import { useIsModuleEnabled } from "@/hooks/use-enabled-modules";
 // Leaflet ağır (~150KB gzip); ayrı chunk'a koy, ilk dashboard renderı bloklamasın.
@@ -459,25 +460,19 @@ export const DashboardPage = () => {
               spark={adRevenueSeriesDisplay}
               sparkColor={theme.chart.revenue}
               sub={
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span>
-                    Dün{" "}
-                    <span className="font-mono font-medium text-foreground tabular-nums">
-                      {formatMoney(totalEarnings.yesterday, displayCcy)}
-                    </span>
-                  </span>
-                  <span>
-                    Bu ay{" "}
-                    <span className="font-mono font-medium text-foreground tabular-nums">
-                      {formatMoney(totalEarnings.thisMonth, displayCcy)}
-                    </span>
-                  </span>
-                  <span>
-                    Geçen{" "}
-                    <span className="font-mono font-medium text-foreground tabular-nums">
-                      {formatMoney(totalEarnings.prevMonth, displayCcy)}
-                    </span>
-                  </span>
+                <div className="grid grid-cols-3 gap-3 border-t border-foreground/10 pt-2">
+                  <SubStat
+                    label="Dün"
+                    value={formatMoney(totalEarnings.yesterday, displayCcy)}
+                  />
+                  <SubStat
+                    label="Bu ay"
+                    value={formatMoney(totalEarnings.thisMonth, displayCcy)}
+                  />
+                  <SubStat
+                    label="Geçen ay"
+                    value={formatMoney(totalEarnings.prevMonth, displayCcy)}
+                  />
                 </div>
               }
             />
@@ -582,8 +577,47 @@ export const DashboardPage = () => {
             />
           </Suspense>
         </Card>
-        {/* Side panel — 4 col (Projeler tablosu) */}
-        <Card className="overflow-hidden lg:col-span-4">
+        {/* Side panel — 4 col: Hatalar tablo (tıklayınca detay dialog) */}
+        <ErrorsPanel
+          hasSentry={hasSentry}
+          projectName={(id) =>
+            projects.find((p) => p.id === id)?.name ?? id.slice(0, 8)
+          }
+          isAll={isAll}
+        />
+      </div>
+
+      {/* ════════ ZONE C — 3 trend chart (Projeler ZONE B yan'a taşındı) ════════ */}
+      <div className="grid min-h-0 grid-cols-1 gap-3 md:grid-cols-3">
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">
+              Reklam Geliri · {range}g
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[calc(100%-2.5rem)] p-2">
+            <TrendChart
+              data={adRevenueSeriesDisplay}
+              color={theme.chart.revenue}
+              height={150}
+              format={(v) => formatMoney(v, displayCcy)}
+            />
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">DAU · {range}g</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[calc(100%-2.5rem)] p-2">
+            <TrendChart
+              data={dauSeries}
+              color={theme.chart.users}
+              height={150}
+              format={compact}
+            />
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between text-sm">
               <span>Projeler</span>
@@ -676,53 +710,17 @@ export const DashboardPage = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* ════════ ZONE C — 3 trend chart (Projeler ZONE B yan'a taşındı) ════════ */}
-      <div className="grid min-h-0 grid-cols-1 gap-3 md:grid-cols-3">
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">
-              Reklam Geliri · {range}g
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[calc(100%-2.5rem)] p-2">
-            <TrendChart
-              data={adRevenueSeriesDisplay}
-              color={theme.chart.revenue}
-              height={150}
-              format={(v) => formatMoney(v, displayCcy)}
-            />
-          </CardContent>
-        </Card>
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">DAU · {range}g</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[calc(100%-2.5rem)] p-2">
-            <TrendChart
-              data={dauSeries}
-              color={theme.chart.users}
-              height={150}
-              format={compact}
-            />
-          </CardContent>
-        </Card>
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">
-              {hasSentry ? `Hatalar · ${range}g` : `MRR · ${range}g`}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[calc(100%-2.5rem)] p-2">
-            <TrendChart
-              data={hasSentry ? errorSeries : mrrSpark}
-              color={hasSentry ? "#ef4444" : theme.chart.revenue}
-              height={150}
-              format={hasSentry ? compact : (v) => formatMoney(v, displayCcy)}
-            />
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
+
+const SubStat = ({ label, value }: { label: string; value: string }) => (
+  <div className="min-w-0">
+    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+      {label}
+    </div>
+    <div className="truncate font-mono text-sm font-medium tabular-nums text-foreground">
+      {value}
+    </div>
+  </div>
+);
