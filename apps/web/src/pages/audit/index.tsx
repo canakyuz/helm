@@ -86,11 +86,68 @@ export const AuditPage = () => {
     );
   }, [logs, q]);
 
+  // KPI hesapları
+  const stats = useMemo(() => {
+    const monthAgo = Date.now() - 30 * 86_400_000;
+    const recent = logs.filter(
+      (l) => new Date(l.created_at).getTime() >= monthAgo,
+    );
+    // Aksiyon türü dağılımı
+    const byAction = new Map<string, number>();
+    for (const l of logs) {
+      byAction.set(l.action, (byAction.get(l.action) ?? 0) + 1);
+    }
+    const topAction = [...byAction.entries()].sort((a, b) => b[1] - a[1])[0];
+    // En aktif yönetici
+    const byActor = new Map<string, number>();
+    for (const l of logs) {
+      const a = l.actor_email ?? "sistem";
+      byActor.set(a, (byActor.get(a) ?? 0) + 1);
+    }
+    const topActor = [...byActor.entries()].sort((a, b) => b[1] - a[1])[0];
+    // Benzersiz hedef kullanıcı
+    const uniqueTargets = new Set(
+      logs.map((l) => l.target_user).filter(Boolean),
+    ).size;
+    return {
+      total: logs.length,
+      lastMonth: recent.length,
+      topActionLabel: topAction
+        ? `${ACTION_LABELS[topAction[0]] ?? topAction[0]}`
+        : "—",
+      topActionCount: topAction?.[1] ?? 0,
+      topActor: topActor?.[0] ?? "—",
+      topActorCount: topActor?.[1] ?? 0,
+      uniqueTargets,
+    };
+  }, [logs]);
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold tracking-tight">
         Müdahale Geçmişi
       </h1>
+
+      {/* KPI cluster */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <AuditKpi
+          label="Toplam Aksiyon"
+          value={stats.total}
+        />
+        <AuditKpi
+          label="Son 30g"
+          value={stats.lastMonth}
+          tone="primary"
+        />
+        <AuditKpi
+          label={`En Çok: ${stats.topActionLabel}`}
+          value={stats.topActionCount}
+        />
+        <AuditKpi
+          label={`En Aktif: ${stats.topActor.slice(0, 16)}${stats.topActor.length > 16 ? "…" : ""}`}
+          value={stats.topActorCount}
+        />
+      </div>
 
       <Card>
         <CardHeader>
@@ -197,3 +254,24 @@ export const AuditPage = () => {
     </div>
   );
 };
+
+const AuditKpi = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number | string;
+  tone?: "primary";
+}) => (
+  <div className="rounded-lg border bg-card/40 p-3">
+    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+      {label}
+    </div>
+    <div
+      className={`mt-1 font-mono text-2xl tabular-nums ${tone === "primary" ? "text-primary" : "text-foreground"}`}
+    >
+      {value}
+    </div>
+  </div>
+);
