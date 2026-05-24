@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useCreate, useDelete, useList } from "@refinedev/core";
-import { ExternalLink, Plus, Trash2, UserCheck, Users } from "lucide-react";
+import { ExternalLink, Layers, Plus, Trash2, UserCheck, Users } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { supabaseClient } from "@/providers/supabase-client";
@@ -247,9 +248,12 @@ export const SegmentsPage = () => {
         </CardHeader>
         <CardContent>
           {segments.length === 0 && !query.isLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Henüz segment yok
-            </div>
+            <EmptyState
+              icon={<Layers className="size-6" />}
+              title="Henüz segment yok"
+              description="Segment = kural ile tanımlanmış kullanıcı grubu. Mail ve Push'a hedef olur. Üstteki + ile başla — örn. 'Aktif kullanıcılar (son 7g giriş)'."
+              compact
+            />
           ) : (
             <Table>
               <TableHeader>

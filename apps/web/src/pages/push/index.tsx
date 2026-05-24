@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { Bell, Eye, Info, Send } from "lucide-react";
+import { Bell, Eye, Send } from "lucide-react";
 import { toast } from "sonner";
+import { ErrorBanner } from "@/components/error-banner";
+import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,33 +162,28 @@ export const PushPage = () => {
       <h1 className="text-2xl font-semibold tracking-tight">Push</h1>
 
       {isAll && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
-          <span>
-            Push göndermek için sidebar'dan bir proje seç.
-          </span>
-        </div>
+        <ErrorBanner variant="warning">
+          Push göndermek için sidebar'dan bir proje seç.
+        </ErrorBanner>
       )}
 
       {!isAll && !supaIntg && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
-          <span>
-            Bu projede Supabase entegrasyonu yok. Push token'ları proje DB'sinden
-            okunur — Entegrasyonlar → Supabase bağla.
-          </span>
-        </div>
+        <ErrorBanner
+          variant="warning"
+          title="Supabase entegrasyonu yok"
+        >
+          Push token'ları proje DB'sinden okunur — Entegrasyonlar →{" "}
+          <strong>Supabase</strong> bağla.
+        </ErrorBanner>
       )}
 
       {!isAll && supaIntg && !supaCfg.push_token_table && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
-          <span>
-            Push token tablosu config'i tanımlı değil. Varsayılanlar
-            kullanılacak: <code>profiles.expo_push_token</code> (user_col:{" "}
-            <code>id</code>). Farklıysa Supabase entegrasyonunu Düzenle.
-          </span>
-        </div>
+        <ErrorBanner variant="info" title="Varsayılan token config">
+          Push token tablosu config'i tanımlı değil. Varsayılanlar
+          kullanılacak: <code>profiles.expo_push_token</code> (user_col:{" "}
+          <code>id</code>). Farklıysa Supabase entegrasyonunu{" "}
+          <strong>Düzenle</strong>.
+        </ErrorBanner>
       )}
 
       <Card>
@@ -288,9 +285,12 @@ export const PushPage = () => {
         </CardHeader>
         <CardContent>
           {campaigns.length === 0 && !campQuery.isLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Henüz bildirim gönderilmedi
-            </div>
+            <EmptyState
+              icon={<Bell className="size-6" />}
+              title="Henüz bildirim gönderilmedi"
+              description="Üstteki form ile bir segmente push gönder. Geçmiş ve teslim oranı burada birikir."
+              compact
+            />
           ) : (
             <Table>
               <TableHeader>

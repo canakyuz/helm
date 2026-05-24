@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { Eye, Info, Send } from "lucide-react";
+import { Eye, Mail as MailIcon, Send } from "lucide-react";
 import { toast } from "sonner";
+import { ErrorBanner } from "@/components/error-banner";
+import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -155,23 +157,17 @@ export const MailPage = () => {
       <h1 className="text-2xl font-semibold tracking-tight">Mail</h1>
 
       {isAll && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
-          <span>
-            Mail göndermek için sidebar'dan bir proje seç (segment ve Resend
-            entegrasyonu proje düzeyinde).
-          </span>
-        </div>
+        <ErrorBanner variant="warning">
+          Mail göndermek için sidebar'dan bir proje seç (segment ve Resend
+          entegrasyonu proje düzeyinde).
+        </ErrorBanner>
       )}
 
       {!isAll && !resendConnected && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
-          <span>
-            Bu projeye Resend bağlanmadı. Entegrasyonlar → "+" → Resend (Mail)
-            → API key + from_email.
-          </span>
-        </div>
+        <ErrorBanner variant="warning" title="Resend bağlı değil">
+          Entegrasyonlar → <strong>+</strong> → <strong>Resend (Mail)</strong>{" "}
+          → API key + from_email.
+        </ErrorBanner>
       )}
 
       <Card>
@@ -263,9 +259,12 @@ export const MailPage = () => {
         </CardHeader>
         <CardContent>
           {campaigns.length === 0 && !campQuery.isLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Henüz mail gönderilmedi
-            </div>
+            <EmptyState
+              icon={<MailIcon className="size-6" />}
+              title="Henüz mail gönderilmedi"
+              description="Üstteki forma segment + konu + mesaj yaz, Önizle ile alıcı sayısını gör, sonra Gönder. Geçmiş burada birikir."
+              compact
+            />
           ) : (
             <Table>
               <TableHeader>
