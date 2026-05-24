@@ -1,6 +1,6 @@
-# Logs
+# Logs (root-level only; src/pages/logs is source code, not log files)
 
-logs
+/logs
 _.log
 npm-debug.log_
 yarn-debug.log*
