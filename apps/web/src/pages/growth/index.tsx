@@ -1,6 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { CalendarDays, Globe, Sparkles, UserPlus, Users } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  Globe,
+  MapPin,
+  Sparkles,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import { supabaseClient } from "@/providers/supabase-client";
+import type { ProjectIntegration } from "@/types";
 import {
   Card,
   CardAction,
@@ -202,6 +213,9 @@ export const GrowthPage = () => {
         </CardContent>
       </Card>
 
+      {/* PostHog geo breakdown — IP tabanlı, izinsiz */}
+      <PostHogGeoCard scope={scope} isAll={isAll} days={range} />
+
       {/* Ülke kırılımı — metrics_country tablosundan */}
       <Card>
         <CardHeader>
@@ -281,5 +295,234 @@ export const GrowthPage = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+/* ───────────────────────── PostHog Geo Card ───────────────────────── */
+
+interface CountryRow {
+  country: string;
+  country_name: string | null;
+  users: number;
+}
+interface RegionRow {
+  region: string;
+  city: string;
+  users: number;
+}
+
+const PostHogGeoCard = ({
+  scope,
+  isAll,
+  days,
+}: {
+  scope: string;
+  isAll: boolean;
+  days: number;
+}) => {
+  const [countries, setCountries] = useState<CountryRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [regions, setRegions] = useState<Record<string, RegionRow[]>>({});
+  const [regionLoading, setRegionLoading] = useState<string | null>(null);
+
+  // PostHog bağlı mı?
+  const { result: integResult } = useList<ProjectIntegration>({
+    resource: "project_integrations",
+    filters: isAll
+      ? []
+      : [{ field: "project_id", operator: "eq", value: scope }],
+    pagination: { mode: "off" },
+  });
+  const phConnected = integResult.data.some(
+    (i) => i.provider === "posthog" && i.enabled,
+  );
+
+  useEffect(() => {
+    if (isAll || !phConnected) {
+      setCountries([]);
+      setError(null);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    setExpanded(null);
+    setRegions({});
+    supabaseClient.functions
+      .invoke("helm-geo-breakdown", {
+        body: { project_id: scope, days },
+      })
+      .then(({ data, error: fnErr }) => {
+        if (cancelled) return;
+        if (fnErr) throw fnErr;
+        if (data?.error) throw new Error(data.error);
+        setCountries((data?.rows as CountryRow[]) ?? []);
+        setTotal(data?.total ?? 0);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [scope, isAll, days, phConnected]);
+
+  const toggleCountry = async (code: string) => {
+    if (expanded === code) {
+      setExpanded(null);
+      return;
+    }
+    setExpanded(code);
+    if (regions[code]) return; // cache
+    setRegionLoading(code);
+    try {
+      const { data, error: fnErr } = await supabaseClient.functions.invoke(
+        "helm-geo-breakdown",
+        { body: { project_id: scope, days, country: code } },
+      );
+      if (fnErr) throw fnErr;
+      if (data?.error) throw new Error(data.error);
+      setRegions((r) => ({ ...r, [code]: (data?.rows as RegionRow[]) ?? [] }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRegionLoading(null);
+    }
+  };
+
+  if (isAll) {
+    return null; // proje seçilince görünür (PostHog proje-bağımlı)
+  }
+  if (!phConnected) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MapPin className="size-4" />
+          Coğrafi Dağılım — son {days} gün
+          <span className="text-xs font-normal text-muted-foreground">
+            PostHog · IP tabanlı · izinsiz
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {error ? (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        ) : loading ? (
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            Yükleniyor…
+          </div>
+        ) : countries.length === 0 ? (
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            PostHog'tan coğrafi veri gelmedi. Event'lerde{" "}
+            <code>$geoip_country_code</code> property'si olmalı (autocapture
+            varsayılan).
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <div className="grid grid-cols-[24px_1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+              <span />
+              <span>Ülke</span>
+              <span className="text-right">Kullanıcı</span>
+              <span className="text-right">Pay</span>
+            </div>
+            {countries.slice(0, 30).map((c) => {
+              const pct = total > 0 ? (c.users / total) * 100 : 0;
+              const isOpen = expanded === c.country;
+              const sub = regions[c.country];
+              return (
+                <div key={c.country}>
+                  <button
+                    type="button"
+                    onClick={() => toggleCountry(c.country)}
+                    className="grid w-full grid-cols-[24px_1fr_80px_60px] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted/50"
+                  >
+                    {isOpen ? (
+                      <ChevronDown className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="size-3.5 text-muted-foreground" />
+                    )}
+                    <span className="flex items-center gap-2 truncate">
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {c.country}
+                      </span>
+                      <span className="truncate font-medium">
+                        {c.country_name ?? c.country}
+                      </span>
+                    </span>
+                    <span className="text-right font-mono text-sm tabular-nums">
+                      {compact(c.users)}
+                    </span>
+                    <span className="text-right font-mono text-xs tabular-nums text-muted-foreground">
+                      %{pct.toFixed(1)}
+                    </span>
+                  </button>
+
+                  {/* Drill-down: eyalet + şehir */}
+                  {isOpen && (
+                    <div className="ml-6 mb-2 mt-1 rounded-md border bg-muted/20 p-2">
+                      {regionLoading === c.country ? (
+                        <div className="py-2 text-center text-xs text-muted-foreground">
+                          Yükleniyor…
+                        </div>
+                      ) : !sub || sub.length === 0 ? (
+                        <div className="py-2 text-center text-xs text-muted-foreground">
+                          Bu ülke için eyalet/şehir verisi yok
+                        </div>
+                      ) : (
+                        <div className="space-y-0.5">
+                          <div className="grid grid-cols-[1fr_1fr_70px] gap-2 px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                            <span>Eyalet</span>
+                            <span>Şehir</span>
+                            <span className="text-right">Kullanıcı</span>
+                          </div>
+                          {sub.slice(0, 20).map((r, i) => (
+                            <div
+                              key={i}
+                              className="grid grid-cols-[1fr_1fr_70px] gap-2 px-1 py-0.5 text-xs"
+                            >
+                              <span className="truncate font-medium">
+                                {r.region}
+                              </span>
+                              <span className="truncate text-muted-foreground">
+                                {r.city}
+                              </span>
+                              <span className="text-right font-mono tabular-nums">
+                                {compact(r.users)}
+                              </span>
+                            </div>
+                          ))}
+                          {sub.length > 20 && (
+                            <div className="px-1 pt-1 text-center text-[10px] text-muted-foreground">
+                              +{sub.length - 20} satır daha
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {countries.length > 30 && (
+              <p className="pt-2 text-center text-xs text-muted-foreground">
+                +{countries.length - 30} ülke daha
+              </p>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
