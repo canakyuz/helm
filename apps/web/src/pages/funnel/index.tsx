@@ -36,6 +36,8 @@ interface FunnelStep {
   overall_pct: number;
   step_pct: number;
   drop: number;
+  prev_count?: number;
+  delta_pct?: number | null;
 }
 
 interface FunnelResponse {
@@ -44,6 +46,9 @@ interface FunnelResponse {
   total_entered: number;
   total_converted: number;
   overall_conversion: number;
+  prev_total_entered?: number;
+  prev_total_converted?: number;
+  prev_overall_conversion?: number;
 }
 
 interface PHEvent {
@@ -432,9 +437,52 @@ export const FunnelPage = () => {
                   <TrendingDown />
                 )
               }
+              delta={
+                data.prev_overall_conversion !== undefined &&
+                data.prev_overall_conversion > 0
+                  ? ((data.overall_conversion -
+                      data.prev_overall_conversion) /
+                      data.prev_overall_conversion) *
+                    100
+                  : null
+              }
               loading={loading}
             />
           </div>
+
+          {/* Önceki periyot karşılaştırma şeridi */}
+          {data.prev_total_entered !== undefined &&
+            data.prev_total_entered > 0 && (
+              <div className="rounded-lg border bg-card/40 p-3 text-xs">
+                <div className="flex flex-wrap items-center gap-4">
+                  <span className="text-muted-foreground">
+                    Önceki {data.days}g ile karşılaştırma:
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Girenler</span>
+                    <ChangeBadge
+                      current={data.total_entered}
+                      prev={data.prev_total_entered}
+                    />
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Sonuna ulaşan</span>
+                    <ChangeBadge
+                      current={data.total_converted}
+                      prev={data.prev_total_converted ?? 0}
+                    />
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Dönüşüm %</span>
+                    <ChangeBadge
+                      current={data.overall_conversion}
+                      prev={data.prev_overall_conversion ?? 0}
+                      suffix="pp"
+                    />
+                  </span>
+                </div>
+              </div>
+            )}
 
           {data.steps.length > 6 && (
             <ErrorBanner variant="warning">
@@ -616,6 +664,18 @@ const FunnelTable = ({ steps }: { steps: FunnelStep[] }) => (
                   </span>
                 </>
               )}
+              {s.delta_pct !== null && s.delta_pct !== undefined && (
+                <span
+                  className={cn(
+                    "font-mono",
+                    s.delta_pct >= 0 ? "text-emerald-500" : "text-destructive",
+                  )}
+                  title={`Önceki periyot ile: ${s.prev_count ?? 0}`}
+                >
+                  ({s.delta_pct >= 0 ? "+" : ""}
+                  {s.delta_pct.toFixed(0)}%)
+                </span>
+              )}
             </div>
           </div>
           <span
@@ -634,3 +694,43 @@ const FunnelTable = ({ steps }: { steps: FunnelStep[] }) => (
     })}
   </div>
 );
+
+const ChangeBadge = ({
+  current,
+  prev,
+  suffix,
+}: {
+  current: number;
+  prev: number;
+  suffix?: string;
+}) => {
+  if (prev === 0) {
+    return (
+      <span className="font-mono text-xs text-muted-foreground">
+        {compact(current)} (önceki: 0)
+      </span>
+    );
+  }
+  const diff = current - prev;
+  const pct = suffix === "pp" ? diff : (diff / prev) * 100;
+  const positive = diff >= 0;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 font-mono text-xs tabular-nums",
+        positive ? "text-emerald-500" : "text-destructive",
+      )}
+    >
+      <span>
+        {suffix === "pp"
+          ? `${current.toFixed(1)} vs ${prev.toFixed(1)}`
+          : `${compact(current)} vs ${compact(prev)}`}
+      </span>
+      <span>
+        ({positive ? "+" : ""}
+        {pct.toFixed(suffix === "pp" ? 1 : 0)}
+        {suffix === "pp" ? " pp" : "%"})
+      </span>
+    </span>
+  );
+};

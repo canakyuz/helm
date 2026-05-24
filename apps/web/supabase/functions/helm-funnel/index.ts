@@ -94,16 +94,58 @@ Deno.serve(async (req) => {
     },
   };
 
-  let res: Response;
-  try {
-    res = await fetch(`${host}/api/projects/${phProjectId}/query/`, {
+  // Helper: bir tarih aralığı için funnel hesabı
+  const fetchFunnel = async (dateFrom: string, dateTo?: string) => {
+    const series = stepsRaw.map((event) => ({
+      kind: "EventsNode",
+      event,
+      math: "dau",
+    }));
+    const dateRange: { date_from: string; date_to?: string } = {
+      date_from: dateFrom,
+    };
+    if (dateTo) dateRange.date_to = dateTo;
+    const reqBody = {
+      query: {
+        kind: "FunnelsQuery",
+        dateRange,
+        series,
+        funnelsFilter: { funnelOrderType: "ordered" },
+      },
+    };
+    const r = await fetch(`${host}/api/projects/${phProjectId}/query/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${cfg.api_key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(reqBody),
     });
+    if (!r.ok) {
+      throw new Error(
+        `PostHog ${r.status}: ${(await r.text()).slice(0, 300)}`,
+      );
+    }
+    const d = await r.json();
+    const results: Array<{ name?: string; count?: number; order?: number }> =
+      d?.results?.results ?? d?.results ?? [];
+    return stepsRaw.map((event, i) => {
+      const match = results.find(
+        (rr) => rr.order === i || rr.name === event,
+      );
+      return { event, order: i, count: Number(match?.count ?? 0) };
+    });
+  };
+
+  // Mevcut periyot
+  let steps: Array<{ event: string; order: number; count: number }>;
+  // Önceki periyot (karşılaştırma)
+  let prevSteps: Array<{ event: string; order: number; count: number }> | null =
+    null;
+  try {
+    steps = await fetchFunnel(`-${days}d`);
+    // Önceki periyot — N gün öncesi, N gün uzunluğunda
+    prevSteps = await fetchFunnel(`-${days * 2}d`, `-${days}d`);
   } catch (e) {
     return json(
       { error: e instanceof Error ? e.message : String(e) },
@@ -111,59 +153,43 @@ Deno.serve(async (req) => {
     );
   }
 
-  if (!res.ok) {
-    return json(
-      {
-        error: `PostHog ${res.status}: ${(await res.text()).slice(0, 500)}`,
-      },
-      500,
-    );
-  }
-
-  const data = await res.json();
-  // FunnelsQuery yanıtı:
-  // { results: [{ name, count, order, ... }, ...] }
-  // Bazı sürümlerde results doğrudan dizi; bazılarında { results: { results: [...] } }.
-  const results: Array<{ name?: string; count?: number; order?: number }> =
-    data?.results?.results ?? data?.results ?? [];
-
-  const steps = stepsRaw.map((event, i) => {
-    const match = results.find(
-      (r) => r.order === i || r.name === event,
-    );
-    return {
-      event,
-      order: i,
-      count: Number(match?.count ?? 0),
-    };
-  });
-
   const first = steps[0]?.count ?? 0;
+  const prevFirst = prevSteps?.[0]?.count ?? 0;
   const enriched = steps.map((s, i) => {
     const overall = first > 0 ? (s.count / first) * 100 : 0;
     const prev = i > 0 ? steps[i - 1].count : s.count;
     const step = prev > 0 ? (s.count / prev) * 100 : 0;
     const drop = i > 0 ? prev - s.count : 0;
+    const prevCount = prevSteps?.[i]?.count ?? 0;
+    const deltaPct =
+      prevCount > 0 ? ((s.count - prevCount) / prevCount) * 100 : null;
     return {
       ...s,
       overall_pct: Number(overall.toFixed(2)),
       step_pct: Number(step.toFixed(2)),
       drop,
+      prev_count: prevCount,
+      delta_pct: deltaPct === null ? null : Number(deltaPct.toFixed(1)),
     };
   });
+
+  const lastCount = enriched[enriched.length - 1]?.count ?? 0;
+  const prevLastCount = prevSteps?.[prevSteps.length - 1]?.count ?? 0;
+  const overallConversion =
+    first > 0 ? Number(((lastCount / first) * 100).toFixed(2)) : 0;
+  const prevOverallConversion =
+    prevFirst > 0
+      ? Number(((prevLastCount / prevFirst) * 100).toFixed(2))
+      : 0;
 
   return json({
     days,
     steps: enriched,
     total_entered: first,
-    total_converted: enriched[enriched.length - 1]?.count ?? 0,
-    overall_conversion:
-      first > 0
-        ? Number(
-            ((enriched[enriched.length - 1]?.count ?? 0) / first * 100).toFixed(
-              2,
-            ),
-          )
-        : 0,
+    total_converted: lastCount,
+    overall_conversion: overallConversion,
+    prev_total_entered: prevFirst,
+    prev_total_converted: prevLastCount,
+    prev_overall_conversion: prevOverallConversion,
   });
 });
