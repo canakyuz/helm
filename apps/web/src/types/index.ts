@@ -191,6 +191,7 @@ export interface AuditLog {
   target_user: string | null;
   action: string;
   detail: string | null;
+  actor_email: string | null;
   created_at: string;
 }
 

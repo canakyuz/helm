@@ -60,6 +60,19 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  // Actor — JWT'den email çıkar (audit log için)
+  let actorEmail: string | null = null;
+  const authHeader = req.headers.get("Authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const jwt = authHeader.slice(7);
+    try {
+      const { data } = await hub.auth.getUser(jwt);
+      actorEmail = data?.user?.email ?? null;
+    } catch {
+      // anonim/anon-key — actor null kalır
+    }
+  }
   const { data: integ, error: integErr } = await hub
     .from("project_integrations")
     .select("config")
@@ -141,6 +154,7 @@ Deno.serve(async (req) => {
     target_user: user_id,
     action,
     detail,
+    actor_email: actorEmail,
   });
 
   return json({ ok: true, action, detail });

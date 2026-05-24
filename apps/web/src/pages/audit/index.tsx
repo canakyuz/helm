@@ -133,6 +133,7 @@ export const AuditPage = () => {
                 <TableRow>
                   <TableHead>Zaman</TableHead>
                   {isAll && <TableHead>Proje</TableHead>}
+                  <TableHead>Yapan</TableHead>
                   <TableHead>Aksiyon</TableHead>
                   <TableHead>Kullanıcı</TableHead>
                   <TableHead>Detay</TableHead>
@@ -150,6 +151,11 @@ export const AuditPage = () => {
                         {projectName(l.project_id)}
                       </TableCell>
                     )}
+                    <TableCell className="text-xs">
+                      {l.actor_email ?? (
+                        <span className="text-muted-foreground">sistem</span>
+                      )}
+                    </TableCell>
                     <TableCell>{actionBadge(l.action)}</TableCell>
                     <TableCell className="font-mono text-xs">
                       {l.target_user ?? "—"}
