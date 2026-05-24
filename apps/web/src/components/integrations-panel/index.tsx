@@ -114,6 +114,12 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       placeholder: "https://xxxx.supabase.co",
     },
     { key: "service_role_key", label: "Service Role Key", secret: true },
+    {
+      key: "crm_tables",
+      label: "CRM tabloları (virgülle ayır, opsiyonel `tablo:kolon`)",
+      placeholder: "profiles:id, gems, subscriptions",
+      optional: true,
+    },
   ],
   stripe: [{ key: "secret_key", label: "Stripe Secret Key", secret: true }],
   plausible: [

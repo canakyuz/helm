@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
   const cfg = integ.config as {
     project_url?: string;
     service_role_key?: string;
+    crm_tables?: string;
   };
   if (!cfg.project_url || !cfg.service_role_key) {
     return json({ error: "Supabase entegrasyon config'i eksik" }, 400);
@@ -68,6 +69,45 @@ Deno.serve(async (req) => {
   if (!data?.user) return json({ error: "Kullanıcı bulunamadı" }, 404);
 
   const u = data.user;
+
+  // CRM tabloları — `profiles:id, gems, subscriptions` → her biri için
+  // user UUID ile eşleşen satırları çek.
+  const tableSpecs = (cfg.crm_tables ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => {
+      const [name, col] = s.split(":");
+      return { name: name.trim(), user_col: (col?.trim() || "user_id") };
+    });
+
+  const tables: Array<{
+    name: string;
+    user_col: string;
+    rows: Record<string, unknown>[] | null;
+    error?: string;
+  }> = [];
+  for (const spec of tableSpecs) {
+    try {
+      const { data: rows, error: tblErr } = await admin
+        .from(spec.name)
+        .select("*")
+        .eq(spec.user_col, userId)
+        .limit(50);
+      if (tblErr) {
+        tables.push({ ...spec, rows: null, error: tblErr.message });
+      } else {
+        tables.push({ ...spec, rows: rows ?? [] });
+      }
+    } catch (e) {
+      tables.push({
+        ...spec,
+        rows: null,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
   return json({
     user: {
       id: u.id,
@@ -84,5 +124,6 @@ Deno.serve(async (req) => {
       user_metadata: u.user_metadata ?? {},
       identities: u.identities ?? [],
     },
+    tables,
   });
 });

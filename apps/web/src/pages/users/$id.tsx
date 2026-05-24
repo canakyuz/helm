@@ -61,6 +61,13 @@ interface UserDetail {
   }>;
 }
 
+interface CrmTable {
+  name: string;
+  user_col: string;
+  rows: Record<string, unknown>[] | null;
+  error?: string;
+}
+
 const fmt = (value: string | null) =>
   value ? new Date(value).toLocaleString("tr-TR") : "—";
 
@@ -75,6 +82,7 @@ export const UserDetailPage = () => {
   const invalidate = useInvalidate();
   const { scope, isAll } = useScope();
   const [user, setUser] = useState<UserDetail | null>(null);
+  const [tables, setTables] = useState<CrmTable[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [acting, setActing] = useState<string | null>(null);
@@ -97,6 +105,7 @@ export const UserDetailPage = () => {
         if (fnError) throw fnError;
         if (data?.error) throw new Error(data.error);
         setUser(data?.user ?? null);
+        setTables((data?.tables as CrmTable[]) ?? []);
       })
       .catch((e) => {
         if (!cancelled) {
@@ -487,8 +496,73 @@ export const UserDetailPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Proje-spesifik CRM tabloları */}
+      {tables.length > 0 && (
+        <div className="space-y-4">
+          {tables.map((t) => (
+            <Card key={t.name}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <span className="font-mono">{t.name}</span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    .{t.user_col} = user.id
+                  </span>
+                  {t.rows && (
+                    <Badge variant="secondary">{t.rows.length} satır</Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {t.error ? (
+                  <div className="text-sm text-destructive">{t.error}</div>
+                ) : !t.rows || t.rows.length === 0 ? (
+                  <div className="py-4 text-center text-sm text-muted-foreground">
+                    Bu tabloda kayıt yok
+                  </div>
+                ) : (
+                  <div className="overflow-auto rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          {Object.keys(t.rows[0]).map((col) => (
+                            <TableHead key={col} className="whitespace-nowrap">
+                              {col}
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {t.rows.map((row, i) => (
+                          <TableRow key={i}>
+                            {Object.keys(t.rows![0]).map((col) => (
+                              <TableCell
+                                key={col}
+                                className="whitespace-nowrap font-mono text-xs"
+                              >
+                                {formatCell(row[col])}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
+};
+
+const formatCell = (v: unknown): string => {
+  if (v === null || v === undefined) return "—";
+  if (typeof v === "object") return JSON.stringify(v);
+  if (typeof v === "boolean") return v ? "✓" : "✗";
+  return String(v);
 };
 
 const BackBar = () => (
