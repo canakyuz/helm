@@ -41,6 +41,7 @@ import { GeoMap } from "@/components/tool-ui/geo-map";
 import { useScope } from "@/context/scope";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import { getCountryGeo } from "@/lib/country-geo";
+import { cn } from "@/lib/utils";
 import { compact, deltaPct, latest, series } from "@/lib/metrics";
 import type { Metric, MetricCountry } from "@/types";
 
@@ -215,6 +216,9 @@ export const GrowthPage = () => {
 
       {/* PostHog geo breakdown — IP tabanlı, izinsiz */}
       <PostHogGeoCard scope={scope} isAll={isAll} days={range} />
+
+      {/* Acquisition source breakdown */}
+      <AcquisitionCard scope={scope} isAll={isAll} days={range} />
 
       {/* Ülke kırılımı — metrics_country tablosundan */}
       <Card>
@@ -521,6 +525,201 @@ const PostHogGeoCard = ({
               </p>
             )}
           </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+/* ───────────────────────── Acquisition Source Card ───────────────────────── */
+
+interface AcqRow {
+  source: string;
+  type: string;
+  users: number;
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  direct: "Doğrudan",
+  search: "Arama",
+  social: "Sosyal",
+  store: "Mağaza",
+  referral: "Referans",
+};
+
+const TYPE_COLORS: Record<string, string> = {
+  direct: "bg-muted text-foreground",
+  search: "bg-blue-500/15 text-blue-500",
+  social: "bg-purple-500/15 text-purple-500",
+  store: "bg-emerald-500/15 text-emerald-500",
+  referral: "bg-amber-500/15 text-amber-500",
+};
+
+const AcquisitionCard = ({
+  scope,
+  isAll,
+  days,
+}: {
+  scope: string;
+  isAll: boolean;
+  days: number;
+}) => {
+  const [rows, setRows] = useState<AcqRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { result: integResult } = useList<ProjectIntegration>({
+    resource: "project_integrations",
+    filters: isAll
+      ? []
+      : [{ field: "project_id", operator: "eq", value: scope }],
+    pagination: { mode: "off" },
+  });
+  const phConnected = integResult.data.some(
+    (i) => i.provider === "posthog" && i.enabled,
+  );
+
+  useEffect(() => {
+    if (isAll || !phConnected) {
+      setRows([]);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    supabaseClient.functions
+      .invoke("helm-acquisition", { body: { project_id: scope, days } })
+      .then(({ data, error: fnErr }) => {
+        if (cancelled) return;
+        if (fnErr) throw fnErr;
+        if (data?.error) throw new Error(data.error);
+        setRows((data?.rows as AcqRow[]) ?? []);
+        setTotal(data?.total ?? 0);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [scope, isAll, days, phConnected]);
+
+  // Tip bazlı topla
+  const byType = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of rows) {
+      map.set(r.type, (map.get(r.type) ?? 0) + r.users);
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  }, [rows]);
+
+  if (isAll || !phConnected) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="size-4" />
+          Edinme Kaynakları — son {days} gün
+          <span className="text-xs font-normal text-muted-foreground">
+            PostHog · $initial_referrer
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {error ? (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        ) : loading ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            Yükleniyor…
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            PostHog'tan referrer verisi yok. Event'lerde{" "}
+            <code>$initial_referrer</code> property'si olmalı.
+          </div>
+        ) : (
+          <>
+            {/* Tip bazlı özet — yatay bar */}
+            <div className="space-y-1">
+              <div className="flex h-3 overflow-hidden rounded-full">
+                {byType.map(([type, users]) => {
+                  const pct = (users / total) * 100;
+                  return (
+                    <div
+                      key={type}
+                      className={cn(
+                        "flex items-center justify-center",
+                        TYPE_COLORS[type] ?? "bg-muted",
+                      )}
+                      style={{ width: `${pct}%` }}
+                      title={`${TYPE_LABELS[type] ?? type}: ${users}`}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-2 text-[10px]">
+                {byType.map(([type, users]) => (
+                  <span
+                    key={type}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono",
+                      TYPE_COLORS[type] ?? "bg-muted",
+                    )}
+                  >
+                    {TYPE_LABELS[type] ?? type} {users}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Top 20 referrer */}
+            <div className="space-y-1">
+              <div className="grid grid-cols-[1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                <span>Kaynak</span>
+                <span className="text-right">Kullanıcı</span>
+                <span className="text-right">Pay</span>
+              </div>
+              {rows.slice(0, 20).map((r) => {
+                const pct = (r.users / total) * 100;
+                return (
+                  <div
+                    key={r.source}
+                    className="grid grid-cols-[1fr_80px_60px] items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted/50"
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <span
+                        className={cn(
+                          "rounded px-1.5 py-0.5 text-[10px] font-mono",
+                          TYPE_COLORS[r.type] ?? "bg-muted",
+                        )}
+                      >
+                        {TYPE_LABELS[r.type] ?? r.type}
+                      </span>
+                      <span className="truncate font-medium">{r.source}</span>
+                    </div>
+                    <span className="text-right font-mono text-sm tabular-nums">
+                      {compact(r.users)}
+                    </span>
+                    <span className="text-right font-mono text-xs tabular-nums text-muted-foreground">
+                      %{pct.toFixed(1)}
+                    </span>
+                  </div>
+                );
+              })}
+              {rows.length > 20 && (
+                <p className="pt-1 text-center text-[10px] text-muted-foreground">
+                  +{rows.length - 20} kaynak daha
+                </p>
+              )}
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
