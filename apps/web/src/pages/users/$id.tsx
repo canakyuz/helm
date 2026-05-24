@@ -1,15 +1,30 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
-import { useList } from "@refinedev/core";
+import { Link, useNavigate, useParams } from "react-router";
+import { useInvalidate, useList } from "@refinedev/core";
 import {
   ArrowLeft,
   Ban,
   CheckCircle2,
+  KeyRound,
   Mail,
   Shield,
   ShieldOff,
+  Sparkles,
+  Trash2,
   User as UserIcon,
 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,10 +71,14 @@ const isBanned = (u: UserDetail) => {
 
 export const UserDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const invalidate = useInvalidate();
   const { scope, isAll } = useScope();
   const [user, setUser] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acting, setActing] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (isAll || !id) {
@@ -91,7 +110,39 @@ export const UserDetailPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [scope, isAll, id]);
+  }, [scope, isAll, id, reloadKey]);
+
+  const runAction = async (
+    action: string,
+    params?: Record<string, unknown>,
+    opts: { successMsg?: string; afterDelete?: boolean } = {},
+  ) => {
+    if (!id) return;
+    setActing(action);
+    try {
+      const { data, error: fnError } = await supabaseClient.functions.invoke(
+        "helm-action",
+        { body: { project_id: scope, user_id: id, action, params } },
+      );
+      if (fnError) throw fnError;
+      if (data?.error) throw new Error(data.error);
+      toast.success(opts.successMsg ?? "Tamam", {
+        description: data?.detail,
+      });
+      invalidate({ resource: "audit_log", invalidates: ["list"] });
+      if (opts.afterDelete) {
+        navigate("/users");
+      } else {
+        setReloadKey((k) => k + 1);
+      }
+    } catch (e) {
+      toast.error("Aksiyon başarısız", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setActing(null);
+    }
+  };
 
   // Bu kullanıcıya yönelik audit log
   const { result: auditResult } = useList<AuditLog>({
@@ -153,6 +204,10 @@ export const UserDetailPage = () => {
   }
 
   const banned = isBanned(user);
+  const isPremium = Boolean(
+    (user.app_metadata as { premium?: unknown })?.premium,
+  );
+  const busy = acting !== null;
 
   return (
     <div className="space-y-4">
@@ -161,7 +216,7 @@ export const UserDetailPage = () => {
       {/* Üst bilgi şeridi */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
               <CardTitle className="flex items-center gap-2">
                 <UserIcon className="size-5" />
@@ -180,6 +235,11 @@ export const UserDetailPage = () => {
                     <CheckCircle2 className="mr-1 size-3" /> aktif
                   </Badge>
                 )}
+                {isPremium && (
+                  <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500">
+                    <Sparkles className="mr-1 size-3" /> premium
+                  </Badge>
+                )}
                 {user.email_confirmed_at && (
                   <Badge variant="secondary">
                     <Mail className="mr-1 size-3" /> e-posta onaylı
@@ -192,25 +252,127 @@ export const UserDetailPage = () => {
                 )}
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              {banned ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={busy}
+                  onClick={() =>
+                    runAction("unban", undefined, {
+                      successMsg: "Banı kaldırıldı",
+                    })
+                  }
+                >
+                  <ShieldOff className="size-4" />
+                  <span className="ml-2">Banı kaldır</span>
+                </Button>
+              ) : (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={busy}>
+                      <Ban className="size-4" />
+                      <span className="ml-2">Banla</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {user.email} banlansın mı?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Kullanıcı 100 yıl boyunca banlanır (kalıcı). Banı
+                        sonradan kaldırabilirsin.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() =>
+                          runAction("ban", undefined, {
+                            successMsg: "Banlandı",
+                          })
+                        }
+                      >
+                        Banla
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
               <Button
                 variant="outline"
                 size="sm"
-                disabled
-                title="C katmanı — yakında"
+                disabled={busy}
+                onClick={() =>
+                  runAction(
+                    "set_metadata",
+                    { scope: "app", patch: { premium: !isPremium } },
+                    {
+                      successMsg: isPremium
+                        ? "Premium kapatıldı"
+                        : "Premium açıldı",
+                    },
+                  )
+                }
               >
-                {banned ? <ShieldOff className="size-4" /> : <Ban className="size-4" />}
-                <span className="ml-2">{banned ? "Banı kaldır" : "Banla"}</span>
+                <Sparkles className="size-4" />
+                <span className="ml-2">
+                  {isPremium ? "Premium kapat" : "Premium aç"}
+                </span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                disabled
-                title="C katmanı — yakında"
+                disabled={busy || !user.email}
+                onClick={() =>
+                  runAction("send_password_reset", undefined, {
+                    successMsg: "Şifre sıfırlama linki gönderildi",
+                  })
+                }
+                title={!user.email ? "Kullanıcının e-postası yok" : undefined}
               >
-                <Shield className="size-4" />
-                <span className="ml-2">Premium</span>
+                <KeyRound className="size-4" />
+                <span className="ml-2">Şifre sıfırla</span>
               </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={busy}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="size-4" />
+                    <span className="ml-2">Sil</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {user.email} silinsin mi?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Bu işlem geri alınamaz. Kullanıcının auth kaydı
+                      tamamen silinir. Uygulamadaki bağlı satırlar (profiles
+                      vb.) cascade ayarına göre etkilenir.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        runAction("delete_user", undefined, {
+                          successMsg: "Kullanıcı silindi",
+                          afterDelete: true,
+                        })
+                      }
+                    >
+                      Sil
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </CardHeader>
