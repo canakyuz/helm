@@ -7,7 +7,7 @@ interface HeroGhostProps {
   label: string;
   /** Büyük hero rakamı (formatlanmış string). */
   value: string;
-  /** Sub satır (opsiyonel). */
+  /** Sub satır (opsiyonel) — hero rakamın hemen altında doğal akışta render edilir. */
   sub?: React.ReactNode;
   /** Arkada ghost olarak çizilecek son N gün serisi. */
   spark?: TrendPoint[];
@@ -17,8 +17,8 @@ interface HeroGhostProps {
 }
 
 /** Hero number + arkada ghost sparkline.
- *  Helm-özgü detay: rakam ön planda, son 30g trend hafif silüet.
- *  ZONE A sol-üst cell için. */
+ *  Layout: label / hero rakam / (opsiyonel) sub. Doğal akış — sub her zaman görünür.
+ *  Sparkline arkada absolute, içeriğe karışmaz. */
 export const HeroGhost = ({
   label,
   value,
@@ -41,15 +41,14 @@ export const HeroGhost = ({
       const y = H - ((p.value - min) / span) * H;
       return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
     });
-    // Alan için altta zemin
     const area = `${pts.join(" ")} L${W},${H} L0,${H} Z`;
     const line = pts.join(" ");
     return { area, line };
   }, [spark]);
 
   return (
-    <div className={cn("relative flex h-full flex-col gap-1.5", className)}>
-      {/* Ghost sparkline — daha belirgin (opacity .35) → hayalet değil "atmosfer". */}
+    <div className={cn("relative flex flex-col gap-2", className)}>
+      {/* Ghost sparkline — arka plan, içeriğe karışmaz */}
       {path && (
         <svg
           aria-hidden
@@ -73,21 +72,16 @@ export const HeroGhost = ({
           />
         </svg>
       )}
-      {/* Üst — label + hero number (KpiCell label ile AYNI tipografi) */}
-      <div className="relative flex items-center justify-between text-[10px] uppercase tracking-wide text-muted-foreground">
-        <span>{label}</span>
+      {/* Üst — label */}
+      <div className="relative text-[10px] uppercase tracking-wide text-muted-foreground">
+        {label}
       </div>
-      {/* Orta — hero sayı (KpiCell ile aynı clamp, 1.6x büyük) */}
-      <div className="helm-hero-number relative text-[clamp(2.25rem,4.8cqw,3rem)] leading-none">
+      {/* Orta — hero sayı */}
+      <div className="helm-hero-number relative text-[clamp(2rem,4.4cqw,2.75rem)] leading-none">
         {value}
       </div>
-      {/* Alt — sub (kartın en altına). Dashboard çoğunlukla SubStatGrid geçiyor;
-       *  text size override edilebilir. */}
-      {sub && (
-        <div className="relative mt-auto pt-2 text-xs text-muted-foreground">
-          {sub}
-        </div>
-      )}
+      {/* Alt — sub doğal akışta hemen altta */}
+      {sub && <div className="relative text-xs">{sub}</div>}
     </div>
   );
 };

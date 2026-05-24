@@ -450,7 +450,7 @@ export const DashboardPage = () => {
       >
         {/* Cell 1: Hero ₺ (col-span-2 for prominence) */}
         <Card className="xl:col-span-1 col-span-2 overflow-hidden">
-          <CardContent className="h-full p-4">
+          <CardContent className="p-4">
             <HeroGhost
               label={
                 "Bugün şimdiye kadar · " +
