@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCreate, useDelete, useList } from "@refinedev/core";
 import {
+  Activity,
   AlertOctagon,
+  CheckCircle2,
+  Clock,
   Copy,
   ExternalLink,
+  Heart,
   Plus,
   RefreshCw,
   Trash2,
   Users as UsersIcon,
+  XCircle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { supabaseClient } from "@/providers/supabase-client";
 import { toast } from "sonner";
 import {
@@ -264,11 +270,130 @@ export const SystemPage = () => {
     toast.success("Ping URL kopyalandı");
   };
 
+  // KPI hesapları — operasyon merkezi özeti
+  const sysStats = useMemo(() => {
+    const totalInteg = integrations.length;
+    const ok = integrations.filter((i) => i.last_sync_status === "ok").length;
+    const err = integrations.filter(
+      (i) => i.last_sync_status === "error",
+    ).length;
+    const healthPct =
+      totalInteg > 0 ? Math.round((ok / totalInteg) * 100) : 0;
+
+    const lastRun = runs[0];
+    const cronStale =
+      !lastRun?.started_at ||
+      Date.now() - new Date(lastRun.started_at).getTime() > 3 * 3_600_000;
+    const lastRunRel = lastRun?.started_at
+      ? (() => {
+          const m = (Date.now() - new Date(lastRun.started_at).getTime()) / 60_000;
+          if (m < 1) return "az önce";
+          if (m < 60) return `${Math.round(m)} dk`;
+          if (m < 1440) return `${Math.round(m / 60)} sa`;
+          return `${Math.round(m / 1440)} g`;
+        })()
+      : "hiç";
+
+    const last24h = Date.now() - 24 * 3_600_000;
+    const recent = runs.filter(
+      (r) => new Date(r.started_at).getTime() >= last24h,
+    );
+    const recentOk = recent.filter((r) => r.error_count === 0).length;
+    const recentRate =
+      recent.length > 0 ? Math.round((recentOk / recent.length) * 100) : 0;
+
+    const hbAlive = heartbeats.filter((h) => hbStatus(h) === "ok").length;
+
+    const sentryCount = errorLatest;
+
+    return {
+      healthPct,
+      totalInteg,
+      ok,
+      err,
+      cronStale,
+      lastRunRel,
+      recentRate,
+      recentCount: recent.length,
+      hbAlive,
+      hbTotal: heartbeats.length,
+      sentryCount,
+    };
+  }, [integrations, runs, heartbeats, errorLatest]);
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold tracking-tight">
         Senkron & Sağlık
       </h1>
+
+      {/* KPI cluster — 6'lı operasyon özeti */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <SysKpi
+          label="Sistem Sağlığı"
+          value={`%${sysStats.healthPct}`}
+          icon={
+            sysStats.healthPct >= 80 ? (
+              <CheckCircle2 className="size-3.5" />
+            ) : (
+              <XCircle className="size-3.5" />
+            )
+          }
+          tone={
+            sysStats.healthPct >= 80
+              ? "emerald"
+              : sysStats.healthPct >= 50
+                ? "amber"
+                : "destructive"
+          }
+        />
+        <SysKpi
+          label="Kaynak OK"
+          value={`${sysStats.ok} / ${sysStats.totalInteg}`}
+          icon={<Activity className="size-3.5" />}
+          tone={sysStats.err > 0 ? "amber" : "emerald"}
+        />
+        <SysKpi
+          label="Cron son"
+          value={sysStats.lastRunRel}
+          icon={<Clock className="size-3.5" />}
+          tone={sysStats.cronStale ? "destructive" : "emerald"}
+        />
+        <SysKpi
+          label="Senkron başarı (24s)"
+          value={
+            sysStats.recentCount > 0
+              ? `%${sysStats.recentRate}`
+              : "—"
+          }
+          icon={<RefreshCw className="size-3.5" />}
+          tone={
+            sysStats.recentCount === 0
+              ? undefined
+              : sysStats.recentRate >= 90
+                ? "emerald"
+                : "amber"
+          }
+        />
+        <SysKpi
+          label="Heartbeat"
+          value={`${sysStats.hbAlive} / ${sysStats.hbTotal}`}
+          icon={<Heart className="size-3.5" />}
+          tone={
+            sysStats.hbTotal === 0
+              ? undefined
+              : sysStats.hbAlive === sysStats.hbTotal
+                ? "emerald"
+                : "destructive"
+          }
+        />
+        <SysKpi
+          label="Hata (son gün)"
+          value={compact(sysStats.sentryCount)}
+          icon={<AlertOctagon className="size-3.5" />}
+          tone={sysStats.sentryCount > 0 ? "destructive" : "emerald"}
+        />
+      </div>
 
       {/* Hatalar (Sentry) — sadece bağlı projeler için göster */}
       {hasSentry && (
@@ -820,6 +945,38 @@ export const SystemPage = () => {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+};
+
+const SysKpi = ({
+  label,
+  value,
+  icon,
+  tone,
+}: {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+  tone?: "emerald" | "amber" | "destructive";
+}) => {
+  const toneCls =
+    tone === "emerald"
+      ? "text-emerald-500"
+      : tone === "amber"
+        ? "text-amber-500"
+        : tone === "destructive"
+          ? "text-destructive"
+          : "text-foreground";
+  return (
+    <div className="rounded-lg border bg-card/40 p-3">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {label}
+      </div>
+      <div className={cn("mt-1 font-mono text-2xl tabular-nums", toneCls)}>
+        {value}
+      </div>
     </div>
   );
 };
