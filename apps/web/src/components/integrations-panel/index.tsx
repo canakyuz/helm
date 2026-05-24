@@ -106,6 +106,12 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "project_id", label: "PostHog Project ID", placeholder: "12345" },
     { key: "api_key", label: "Personal API Key", secret: true },
     { key: "host", label: "Host", placeholder: "https://eu.posthog.com" },
+    {
+      key: "funnel_steps",
+      label: "Huni adımları (virgülle ayır, event adları)",
+      placeholder: "app_opened, signup, onboarding_complete, purchase",
+      optional: true,
+    },
   ],
   supabase: [
     {
