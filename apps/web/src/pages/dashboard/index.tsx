@@ -448,9 +448,9 @@ export const DashboardPage = () => {
             : "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]",
         )}
       >
-        {/* Cell 1: Hero ₺ (col-span-2 for prominence) */}
-        <Card className="xl:col-span-1 col-span-2 overflow-hidden">
-          <CardContent className="p-4">
+        {/* Cell 1: Hero ₺ (col-span-2 for prominence) — Sub Card içinde ayrı blok */}
+        <Card className="xl:col-span-1 col-span-2">
+          <CardContent className="space-y-3 p-4">
             <HeroGhost
               label={
                 "Bugün şimdiye kadar · " +
@@ -459,23 +459,21 @@ export const DashboardPage = () => {
               value={formatMoney(totalEarnings.today, displayCcy)}
               spark={adRevenueSeriesDisplay}
               sparkColor={theme.chart.revenue}
-              sub={
-                <div className="grid grid-cols-3 gap-3 border-t border-foreground/10 pt-2">
-                  <SubStat
-                    label="Dün"
-                    value={formatMoney(totalEarnings.yesterday, displayCcy)}
-                  />
-                  <SubStat
-                    label="Bu ay"
-                    value={formatMoney(totalEarnings.thisMonth, displayCcy)}
-                  />
-                  <SubStat
-                    label="Geçen ay"
-                    value={formatMoney(totalEarnings.prevMonth, displayCcy)}
-                  />
-                </div>
-              }
             />
+            <div className="grid grid-cols-3 gap-3 border-t border-foreground/10 pt-3">
+              <SubStat
+                label="Dün"
+                value={formatMoney(totalEarnings.yesterday, displayCcy)}
+              />
+              <SubStat
+                label="Bu ay"
+                value={formatMoney(totalEarnings.thisMonth, displayCcy)}
+              />
+              <SubStat
+                label="Geçen ay"
+                value={formatMoney(totalEarnings.prevMonth, displayCcy)}
+              />
+            </div>
           </CardContent>
         </Card>
 
