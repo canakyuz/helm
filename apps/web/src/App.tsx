@@ -9,7 +9,7 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { liveProvider } from "@refinedev/supabase";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
 
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -83,9 +83,8 @@ const CampaignsPage = lazy(() =>
 const AuditPage = lazy(() =>
   import("@/pages/audit").then((m) => ({ default: m.AuditPage })),
 );
-const ProjectCreate = lazy(() =>
-  import("@/pages/projects").then((m) => ({ default: m.ProjectCreate })),
-);
+// ProjectCreate kaldırıldı — /projects/create artık /properties/create'e redirect olur.
+// ProjectEdit korunuyor (CMS publish targets paralel iş edit.tsx'i kullanıyor).
 const ProjectEdit = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectEdit })),
 );
@@ -202,10 +201,11 @@ function App() {
                   meta: { label: "Ayarlar" },
                 },
                 {
+                  // `projects` resource'u CMS publish targets edit'i için
+                  // /projects/edit/:id'de kalıyor; create artık properties'e gider.
                   name: "projects",
-                  create: "/projects/create",
                   edit: "/projects/edit/:id",
-                  meta: { label: "Proje (eski)" },
+                  meta: { label: "Proje (legacy CMS edit)" },
                 },
                 {
                   name: "properties",
@@ -278,8 +278,11 @@ function App() {
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route
                       path="/projects/create"
-                      element={<ProjectCreate />}
+                      element={<Navigate to="/properties/create" replace />}
                     />
+                    {/* Legacy projects/edit: ProjectEdit korunuyor — kullanıcının
+                        paralel CMS publish targets işine dokunulmuyor. Yeni Property
+                        UI'sı için /properties/edit/:id açıkça çağrılır. */}
                     <Route
                       path="/projects/edit/:id"
                       element={<ProjectEdit />}
