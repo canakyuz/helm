@@ -29,7 +29,8 @@ import {
 import { RangeSelect } from "@/components/range-select";
 import { TrendChart, type TrendPoint } from "@/components/trend-chart";
 import { HeroGhost } from "@/components/hero-ghost";
-import { KpiCell } from "@/components/kpi-cell";
+import { KpiCell, KpiPlaceholder } from "@/components/kpi-cell";
+import { useIsModuleEnabled } from "@/hooks/use-enabled-modules";
 // Leaflet ağır (~150KB gzip); ayrı chunk'a koy, ilk dashboard renderı bloklamasın.
 const UsersGeoMap = lazy(() =>
   import("@/components/users-geo-map").then((m) => ({
@@ -93,6 +94,10 @@ const projectHealth = (integrations: ProjectIntegration[]) => {
 
 export const DashboardPage = () => {
   const { scope, setScope, isAll } = useScope();
+  const subsEnabled = useIsModuleEnabled("subscriptions");
+  const adsEnabled = useIsModuleEnabled("ads");
+  const usersEnabled = useIsModuleEnabled("users");
+  const analyticsEnabled = useIsModuleEnabled("analytics");
   const { theme } = useHelmTheme();
   const { edit } = useNavigation();
   const invalidate = useInvalidate();
@@ -479,32 +484,44 @@ export const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        {/* Cell 2: MRR */}
-        <KpiCell
-          label={isAll ? "Toplam MRR" : "MRR"}
-          value={formatMoney(mrrDisplay, displayCcy)}
-          hint="Aylık tekrarlı gelir"
-          loading={loading}
-        />
-
-        {/* Cell 3: DAU + delta */}
-        <KpiCell
-          label={isAll ? "Toplam DAU" : "DAU"}
-          value={compact(latest(metrics, "dau"))}
-          delta={deltaPct(dauSeries)}
-          hint="Günlük aktif"
-          loading={loading}
-        />
-
-        {/* Cell 4: isAll → Aktif Abone | proje → eCPM */}
-        {isAll ? (
+        {/* Cell 2: MRR — subscriptions */}
+        {subsEnabled ? (
           <KpiCell
-            label="Aktif Abone"
-            value={compact(latest(metrics, "active_subs"))}
-            hint="RevenueCat"
+            label={isAll ? "Toplam MRR" : "MRR"}
+            value={formatMoney(mrrDisplay, displayCcy)}
+            hint="Aylık tekrarlı gelir"
             loading={loading}
           />
         ) : (
+          <KpiPlaceholder label={isAll ? "Toplam MRR" : "MRR"} module="Abonelik" />
+        )}
+
+        {/* Cell 3: DAU — analytics */}
+        {analyticsEnabled ? (
+          <KpiCell
+            label={isAll ? "Toplam DAU" : "DAU"}
+            value={compact(latest(metrics, "dau"))}
+            delta={deltaPct(dauSeries)}
+            hint="Günlük aktif"
+            loading={loading}
+          />
+        ) : (
+          <KpiPlaceholder label={isAll ? "Toplam DAU" : "DAU"} module="Analitik" />
+        )}
+
+        {/* Cell 4: isAll → Aktif Abone (subscriptions) | proje → eCPM (ads) */}
+        {isAll ? (
+          subsEnabled ? (
+            <KpiCell
+              label="Aktif Abone"
+              value={compact(latest(metrics, "active_subs"))}
+              hint="RevenueCat"
+              loading={loading}
+            />
+          ) : (
+            <KpiPlaceholder label="Aktif Abone" module="Abonelik" />
+          )
+        ) : adsEnabled ? (
           <KpiCell
             label="eCPM"
             value={formatMoney2(
@@ -514,23 +531,32 @@ export const DashboardPage = () => {
             hint="Etkili CPM"
             loading={loading}
           />
+        ) : (
+          <KpiPlaceholder label="eCPM" module="Reklam" />
         )}
 
-        {/* Cell 5: isAll → Toplam Kullanıcı | proje → WAU */}
-        {isAll ? (
-          <KpiCell
-            label="Toplam Kullanıcı"
-            value={compact(latest(metrics, "total_users"))}
-            delta={deltaPct(series(metrics, "total_users"))}
-            hint="Supabase"
-            loading={loading}
-          />
+        {/* Cell 5: isAll → Toplam Kullanıcı | proje → WAU (users) */}
+        {usersEnabled ? (
+          isAll ? (
+            <KpiCell
+              label="Toplam Kullanıcı"
+              value={compact(latest(metrics, "total_users"))}
+              delta={deltaPct(series(metrics, "total_users"))}
+              hint="Supabase"
+              loading={loading}
+            />
+          ) : (
+            <KpiCell
+              label="WAU"
+              value={compact(latest(metrics, "wau"))}
+              hint="Haftalık aktif"
+              loading={loading}
+            />
+          )
         ) : (
-          <KpiCell
-            label="WAU"
-            value={compact(latest(metrics, "wau"))}
-            hint="Haftalık aktif"
-            loading={loading}
+          <KpiPlaceholder
+            label={isAll ? "Toplam Kullanıcı" : "WAU"}
+            module="Müşteriler"
           />
         )}
 
