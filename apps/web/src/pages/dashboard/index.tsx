@@ -38,7 +38,10 @@ import {
   formatMoney,
   formatMoney2,
   latest,
+  moneyRanges,
   series,
+  sumInRange,
+  valueOnDate,
 } from "@/lib/metrics";
 import type {
   AlertEvent,
@@ -238,6 +241,48 @@ export const DashboardPage = () => {
   const hasSentry = integrations.some(
     (i) => i.provider === "sentry" && i.enabled,
   );
+  const hasAppStore = integrations.some(
+    (i) => i.provider === "app_store_connect" && i.enabled,
+  );
+
+  // App Store Connect proceeds currency (Revenue sayfasındaki aynı mantık).
+  const appCurrency = useMemo(() => {
+    const apps = integrations.filter(
+      (i) => i.provider === "app_store_connect",
+    );
+    if (!isAll) {
+      const cfg = apps.find((i) => i.project_id === scope)?.config as
+        | { currency?: string }
+        | undefined;
+      return cfg?.currency || "USD";
+    }
+    const codes = new Set(
+      apps.map(
+        (i) => ((i.config as { currency?: string })?.currency) || "USD",
+      ),
+    );
+    return codes.size === 1 ? [...codes][0] : "USD";
+  }, [integrations, scope, isAll]);
+
+  // AdMob konsoluna paralel: Bugün / Dün / Bu ay / Geçen ay toplam kazanç
+  // (Reklam + Mağaza, display currency).
+  const ranges = useMemo(() => moneyRanges(), []);
+  const totalEarnings = useMemo(() => {
+    const ar = rateOf(adCurrency);
+    const apr = rateOf(appCurrency);
+    const pick = (date: string) =>
+      valueOnDate(metrics, "ad_revenue", date) * ar +
+      valueOnDate(metrics, "app_revenue", date) * apr;
+    const pickRange = (s: string, e: string) =>
+      sumInRange(metrics, "ad_revenue", s, e) * ar +
+      sumInRange(metrics, "app_revenue", s, e) * apr;
+    return {
+      today: pick(ranges.today),
+      yesterday: pick(ranges.yesterday),
+      thisMonth: pickRange(ranges.thisMonthStart, ranges.thisMonthEnd),
+      prevMonth: pickRange(ranges.prevMonthStart, ranges.prevMonthEnd),
+    };
+  }, [metrics, ranges, fxRates, adCurrency, appCurrency]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -365,6 +410,52 @@ export const DashboardPage = () => {
           </Link>
         )}
       </div>
+
+      {/* Toplam Tahmini Kazanç — AdMob konsoluna paralel detay */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Toplam Tahmini Kazanç
+            {hasAppStore ? " (Reklam + Mağaza)" : " (Reklam)"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Bugün şimdiye kadar
+              </div>
+              <div className="mt-1 font-mono text-3xl font-semibold tabular-nums">
+                {formatMoney(totalEarnings.today, displayCcy)}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Dün
+              </div>
+              <div className="mt-1 font-mono text-3xl font-semibold tabular-nums">
+                {formatMoney(totalEarnings.yesterday, displayCcy)}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Bu ay şimdiye kadar
+              </div>
+              <div className="mt-1 font-mono text-3xl font-semibold tabular-nums">
+                {formatMoney(totalEarnings.thisMonth, displayCcy)}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Geçen ay
+              </div>
+              <div className="mt-1 font-mono text-3xl font-semibold tabular-nums">
+                {formatMoney(totalEarnings.prevMonth, displayCcy)}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* İstatistik kartları */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

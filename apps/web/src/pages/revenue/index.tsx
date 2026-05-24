@@ -180,6 +180,10 @@ export const RevenuePage = () => {
     };
   }, [metrics, ranges, fxRates, appCurrency]);
 
+  const hasRevenueCat = integrations.some(
+    (i) => i.provider === "revenuecat" && i.enabled,
+  );
+
   const appRevDisplay = latest(metrics, "app_revenue") * rateOf(appCurrency);
   const appRevSeriesDisplay = useMemo(
     () =>
@@ -216,6 +220,14 @@ export const RevenuePage = () => {
         </TabsList>
 
         <TabsContent value="subscription" className="space-y-4">
+          {!hasRevenueCat && (
+            <Card className="border-amber-500/30 bg-amber-500/5">
+              <CardContent className="py-4 text-sm text-amber-600 dark:text-amber-400">
+                RevenueCat bağlanmadı. Abonelik geliri akmıyor — Entegrasyonlar
+                sekmesinden RevenueCat'i bağla (v2 secret key + project_id).
+              </CardContent>
+            </Card>
+          )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
               title="MRR"
