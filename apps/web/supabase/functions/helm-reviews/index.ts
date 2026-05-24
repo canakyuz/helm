@@ -91,7 +91,13 @@ Deno.serve(async (req) => {
         const res = await fetch(url);
         if (!res.ok) throw new Error(`RSS ${res.status}`);
         const feed = await res.json();
-        const entries: Array<Record<string, any>> = feed.feed?.entry ?? [];
+        // Apple quirk: tek entry varsa obje, çoklu entry'de array — normalize et.
+        const raw = feed.feed?.entry;
+        const entries: Array<Record<string, any>> = Array.isArray(raw)
+          ? raw
+          : raw
+            ? [raw]
+            : [];
 
         const rows = entries
           .filter((e) => e["im:rating"]) // ilk girdi app meta — atla
