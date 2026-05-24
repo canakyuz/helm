@@ -57,6 +57,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProjectSwitcher } from "./project-switcher";
 import { useHelmTheme } from "@/theme/ThemeProvider";
+import { useEnabledModules } from "@/hooks/use-enabled-modules";
+import type { ModuleKey } from "@/lib/modules";
 
 type IUser = { id: string; name?: string };
 
@@ -65,50 +67,73 @@ type NavItem = {
   icon: typeof LayoutDashboard;
   url?: string;
   soon?: boolean;
+  // Item bu modüle (veya verilen modüllerden HERHANGI BIRINE) bağlı.
+  // Hiçbiri açık değilse sidebar'da gizlenir. requires yoksa her zaman görünür.
+  requires?: ModuleKey | ModuleKey[];
+};
+
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+  // alwaysVisible grup, child filtrelerinden bağımsız her zaman görünür (sistem işleri).
+  alwaysVisible?: boolean;
 };
 
 // Sidebar modül haritası — gruplu. Yeni modül = buraya bir girdi.
-const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+// Detay: .docs/MODULES.md §6
+const NAV_GROUPS: NavGroup[] = [
   {
     label: "Genel",
+    alwaysVisible: true,
     items: [{ title: "Cockpit", icon: LayoutDashboard, url: "/" }],
+  },
+  {
+    label: "İçerik (CMS)",
+    items: [
+      { title: "Şemalar", icon: Layers, url: "/cms/collections", requires: "content" },
+      { title: "İçerikler", icon: FileText, url: "/cms/entries", requires: "content" },
+      { title: "Medya", icon: ImageIcon, url: "/cms/assets", requires: "content" },
+    ],
   },
   {
     label: "CRM",
     items: [
-      { title: "Kullanıcılar", icon: Users, url: "/users" },
-      { title: "Segmentler", icon: Filter, url: "/segments" },
-      { title: "Yorumlar", icon: Star, url: "/reviews" },
+      { title: "Kullanıcılar", icon: Users, url: "/users", requires: "users" },
+      { title: "Segmentler", icon: Filter, url: "/segments", requires: "users" },
+      { title: "Yorumlar", icon: Star, url: "/reviews", requires: "reviews" },
       { title: "Müdahale Geçmişi", icon: History, url: "/audit" },
     ],
   },
   {
     label: "Analitik",
     items: [
-      { title: "Gelir & Reklam", icon: TrendingUp, url: "/revenue" },
-      { title: "Büyüme", icon: LineChart, url: "/growth" },
-      { title: "Huni", icon: Workflow, url: "/funnel" },
+      {
+        title: "Gelir & Reklam",
+        icon: TrendingUp,
+        url: "/revenue",
+        requires: ["subscriptions", "ads"],
+      },
+      { title: "Büyüme", icon: LineChart, url: "/growth", requires: "analytics" },
+      { title: "Huni", icon: Workflow, url: "/funnel", requires: "funnel" },
       { title: "Uyarılar", icon: Bell, url: "/alerts" },
     ],
   },
   {
     label: "İletişim",
     items: [
-      { title: "Mail", icon: Mail, url: "/mail" },
-      { title: "Push", icon: Send, url: "/push" },
-      { title: "Kampanya Geçmişi", icon: Megaphone, url: "/campaigns" },
-    ],
-  },
-  {
-    label: "İçerik (CMS)",
-    items: [
-      { title: "Şemalar", icon: Layers, url: "/cms/collections" },
-      { title: "İçerikler", icon: FileText, url: "/cms/entries" },
-      { title: "Medya", icon: ImageIcon, url: "/cms/assets" },
+      { title: "Mail", icon: Mail, url: "/mail", requires: "mail" },
+      { title: "Push", icon: Send, url: "/push", requires: "push" },
+      {
+        title: "Kampanya Geçmişi",
+        icon: Megaphone,
+        url: "/campaigns",
+        requires: ["mail", "push"],
+      },
     ],
   },
   {
     label: "DevOps",
+    alwaysVisible: true,
     items: [
       { title: "Entegrasyonlar", icon: Plug, url: "/integrations" },
       { title: "Senkron & Sağlık", icon: Activity, url: "/system" },
@@ -118,9 +143,16 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   },
   {
     label: "Sistem",
+    alwaysVisible: true,
     items: [{ title: "Ayarlar", icon: Settings, url: "/settings" }],
   },
 ];
+
+function itemVisible(item: NavItem, enabled: ModuleKey[]): boolean {
+  if (!item.requires) return true;
+  const reqs = Array.isArray(item.requires) ? item.requires : [item.requires];
+  return reqs.some((r) => enabled.includes(r));
+}
 
 /** Dark/Light tek toggle — sidebar footer'da NavUser üstünde. */
 const ModeToggle = () => {
@@ -183,6 +215,16 @@ const AppSidebar = () => {
   const { pathname } = useLocation();
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname.startsWith(url);
+  const enabledModules = useEnabledModules();
+
+  const visibleGroups = useMemo(
+    () =>
+      NAV_GROUPS.map((g) => ({
+        ...g,
+        items: g.items.filter((it) => itemVisible(it, enabledModules)),
+      })).filter((g) => g.alwaysVisible || g.items.length > 0),
+    [enabledModules],
+  );
 
   return (
     <Sidebar variant="floating">
@@ -191,7 +233,7 @@ const AppSidebar = () => {
       </SidebarHeader>
 
       <SidebarContent>
-        {NAV_GROUPS.map((group) => (
+        {visibleGroups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
