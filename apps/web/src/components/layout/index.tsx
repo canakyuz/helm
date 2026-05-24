@@ -308,14 +308,15 @@ const HeaderBar = ({ scrolled }: { scrolled: boolean }) => {
       data-slot="helm-header"
       data-scrolled={scrolled ? "true" : "false"}
       className={cn(
-        "sticky top-0 z-10 flex h-14 items-center gap-3 px-3 lg:px-4 transition-[background-color,backdrop-filter,border-color] duration-200",
+        "sticky top-0 z-10 flex h-14 items-center gap-3 border-2 rounded-2xl m-1 px-3 lg:px-4 transition-[background-color,backdrop-filter,border-color] duration-200",
+        "sticky top-0 z-10 flex h-14 items-center gap-3 border-2 rounded-2xl m-1 px-3 lg:px-4 transition-[background-color,backdrop-filter,border-color] duration-200",
         scrolled
           ? "border-b border-border bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60"
           : "border-b border-transparent bg-transparent backdrop-blur-0",
       )}
     >
       <SidebarTrigger />
-      <Separator orientation="vertical" className="h-5" />
+
       {title && (
         <h2 className="text-sm font-medium tracking-tight">{title}</h2>
       )}

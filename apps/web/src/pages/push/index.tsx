@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { Bell, Eye, Send } from "lucide-react";
+import { Bell, Eye, Send, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { ErrorBanner } from "@/components/error-banner";
 import { EmptyState } from "@/components/empty-state";
@@ -190,7 +190,8 @@ export const PushPage = () => {
         <CardHeader>
           <CardTitle>Yeni Bildirim</CardTitle>
         </CardHeader>
-        <CardContent className="max-w-2xl space-y-4">
+        <CardContent className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
+          <div className="space-y-4">
           <div className="space-y-2">
             <Label>Hedef segment</Label>
             <Select
@@ -270,6 +271,35 @@ export const PushPage = () => {
               Gönder
             </Button>
           </div>
+
+          {/* Şablonlar */}
+          <div className="space-y-2">
+            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              Hızlı şablon
+            </div>
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {PUSH_TEMPLATES.map((t) => (
+                <button
+                  key={t.label}
+                  type="button"
+                  onClick={() => {
+                    setTitle(t.title);
+                    setBody(t.body);
+                  }}
+                  className="rounded-md border bg-card/40 px-3 py-2 text-left text-xs hover:bg-card/80"
+                >
+                  <div className="font-medium">{t.label}</div>
+                  <div className="truncate text-[10px] text-muted-foreground">
+                    {t.title}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Telefon mockup preview */}
+        <PhonePreview title={title} body={body} />
         </CardContent>
       </Card>
 
@@ -331,6 +361,86 @@ export const PushPage = () => {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+};
+
+const PUSH_TEMPLATES = [
+  {
+    label: "Yeni içerik",
+    title: "Yeni sezon başladı! 🎮",
+    body: "En sevdiğin karakterler için yeni içerikler ekledik. Şimdi gel keşfet!",
+  },
+  {
+    label: "Geri çağırma",
+    title: "Seni özledik 👋",
+    body: "Bir süredir uğramadın. Sürpriz bir hediyemiz var — gel al!",
+  },
+  {
+    label: "Günlük ödül",
+    title: "Günlük ödülün hazır 🎁",
+    body: "Bugünün hediyesini almayı unutma. Streak'i kaybetme!",
+  },
+  {
+    label: "İndirim",
+    title: "Sadece bugün — %50 indirim",
+    body: "Premium aboneliğe bugün başlayan herkes için %50 indirim.",
+  },
+];
+
+const PhonePreview = ({ title, body }: { title: string; body: string }) => {
+  const now = new Date();
+  const time = now.toLocaleTimeString("tr-TR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return (
+    <div className="flex justify-center lg:justify-start">
+      <div className="relative w-full max-w-[260px]">
+        <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2 text-center">
+          Telefonda nasıl görünür
+        </div>
+        {/* Telefon çerçevesi */}
+        <div className="rounded-[2rem] border-4 border-foreground/20 bg-gradient-to-b from-slate-900 to-slate-800 p-3 shadow-2xl">
+          {/* Status bar */}
+          <div className="mb-3 flex items-center justify-between text-[9px] text-white/80">
+            <span className="font-medium">{time}</span>
+            <span>●●● 5G ▮</span>
+          </div>
+          {/* Bildirim kartı */}
+          <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-sm">
+            <div className="flex items-start gap-2">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/80">
+                <Smartphone className="size-3.5 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-[10px] font-semibold uppercase text-white/90">
+                    Uygulamanız
+                  </span>
+                  <span className="text-[9px] text-white/60">şimdi</span>
+                </div>
+                <div className="mt-0.5 text-[11px] font-semibold leading-tight text-white">
+                  {title || (
+                    <span className="text-white/40">Başlık önizleme</span>
+                  )}
+                </div>
+                <div className="mt-0.5 text-[11px] leading-tight text-white/80 line-clamp-3">
+                  {body || (
+                    <span className="text-white/40">
+                      Mesaj burada görünür…
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Boş alan + home indicator */}
+          <div className="mt-12 flex justify-center">
+            <div className="h-1 w-12 rounded-full bg-white/30" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
