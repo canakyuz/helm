@@ -1,6 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCreate, useDelete, useList } from "@refinedev/core";
-import { AlertOctagon, Copy, Plus, Trash2 } from "lucide-react";
+import {
+  AlertOctagon,
+  Copy,
+  ExternalLink,
+  Plus,
+  RefreshCw,
+  Trash2,
+  Users as UsersIcon,
+} from "lucide-react";
+import { supabaseClient } from "@/providers/supabase-client";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -130,6 +139,74 @@ export const SystemPage = () => {
     (it) => it.provider === "sentry" && it.enabled,
   );
 
+  // Top issues — on-demand çek
+  type SentryIssue = {
+    id: string;
+    short_id: string;
+    title: string;
+    culprit: string | null;
+    level: string;
+    count: number;
+    user_count: number;
+    first_seen: string;
+    last_seen: string;
+    permalink: string;
+    status: string;
+    type: string | null;
+    value: string | null;
+  };
+  type IssueProject = {
+    project_id: string;
+    ok: boolean;
+    issues?: SentryIssue[];
+    error?: string;
+  };
+  const [issueProjects, setIssueProjects] = useState<IssueProject[]>([]);
+  const [issuesLoading, setIssuesLoading] = useState(false);
+  const [issuesError, setIssuesError] = useState<string | null>(null);
+
+  const loadIssues = useMemo(
+    () => async () => {
+      if (!hasSentry) return;
+      setIssuesLoading(true);
+      setIssuesError(null);
+      try {
+        const { data, error } = await supabaseClient.functions.invoke(
+          "helm-sentry-issues",
+          { body: {} },
+        );
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        setIssueProjects((data?.projects as IssueProject[]) ?? []);
+      } catch (e) {
+        setIssuesError(e instanceof Error ? e.message : String(e));
+      } finally {
+        setIssuesLoading(false);
+      }
+    },
+    [hasSentry],
+  );
+
+  useEffect(() => {
+    if (hasSentry) loadIssues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSentry]);
+
+  // Tüm projelerin issue'larını birleştirip count'a göre sırala
+  const topIssues = useMemo(() => {
+    const all: Array<SentryIssue & { project_id: string }> = [];
+    for (const p of issueProjects) {
+      if (p.ok && p.issues) {
+        for (const i of p.issues) {
+          all.push({ ...i, project_id: p.project_id });
+        }
+      }
+    }
+    return all.sort((a, b) => b.count - a.count).slice(0, 15);
+  }, [issueProjects]);
+
+  const issueErrors = issueProjects.filter((p) => !p.ok);
+
   const { mutate: create, mutation: createMutation } = useCreate();
   const { mutate: remove } = useDelete();
 
@@ -240,6 +317,125 @@ export const SystemPage = () => {
                       </TableCell>
                       <TableCell className="text-right font-mono">
                         {compact(total)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Sentry top issues (on-demand, son 14g sıklığa göre) */}
+      {hasSentry && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertOctagon className="size-4" />
+              Açık Hatalar — Top {topIssues.length || "—"} (son 14g)
+            </CardTitle>
+            <CardAction>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadIssues}
+                disabled={issuesLoading}
+              >
+                <RefreshCw
+                  className={`size-4 ${issuesLoading ? "animate-spin" : ""}`}
+                />
+                <span className="ml-2">Yenile</span>
+              </Button>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            {issuesError && (
+              <div className="mb-3 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                {issuesError}
+              </div>
+            )}
+            {issueErrors.length > 0 && (
+              <div className="mb-3 space-y-1 text-xs text-amber-500">
+                {issueErrors.map((p, i) => (
+                  <div key={i}>
+                    <span className="font-medium">
+                      {projectName(p.project_id)}:
+                    </span>{" "}
+                    {p.error}
+                  </div>
+                ))}
+              </div>
+            )}
+            {issuesLoading && topIssues.length === 0 ? (
+              <div className="py-6 text-center text-sm text-muted-foreground">
+                Yükleniyor…
+              </div>
+            ) : topIssues.length === 0 ? (
+              <div className="py-6 text-center text-sm text-muted-foreground">
+                Açık hata yok
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Lvl</TableHead>
+                    <TableHead>Hata</TableHead>
+                    {projectsResult.data.length > 1 && (
+                      <TableHead>Proje</TableHead>
+                    )}
+                    <TableHead className="text-right">Olay</TableHead>
+                    <TableHead className="text-right">Kullanıcı</TableHead>
+                    <TableHead>Son görüldü</TableHead>
+                    <TableHead className="w-12" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topIssues.map((i) => (
+                    <TableRow key={i.id}>
+                      <TableCell>
+                        <LevelBadge level={i.level} />
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{i.title}</div>
+                        {i.culprit && (
+                          <div className="font-mono text-xs text-muted-foreground">
+                            {i.culprit}
+                          </div>
+                        )}
+                      </TableCell>
+                      {projectsResult.data.length > 1 && (
+                        <TableCell className="text-xs">
+                          {projectName(i.project_id)}
+                        </TableCell>
+                      )}
+                      <TableCell className="text-right font-mono">
+                        {compact(i.count)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        <span className="inline-flex items-center gap-1">
+                          <UsersIcon className="size-3" />
+                          {compact(i.user_count)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {new Date(i.last_seen).toLocaleString("tr-TR")}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Sentry'de aç"
+                        >
+                          <a
+                            href={i.permalink}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <ExternalLink className="size-4" />
+                          </a>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -497,4 +693,18 @@ export const SystemPage = () => {
       </Card>
     </div>
   );
+};
+
+const LevelBadge = ({ level }: { level: string }) => {
+  if (level === "fatal" || level === "error") {
+    return <Badge variant="destructive">{level}</Badge>;
+  }
+  if (level === "warning") {
+    return (
+      <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500">
+        {level}
+      </Badge>
+    );
+  }
+  return <Badge variant="secondary">{level}</Badge>;
 };
