@@ -18,18 +18,25 @@ as $$
     j.active,
     coalesce(
       (
-        select jsonb_agg(jsonb_build_object(
-          'runid', r.runid,
-          'job_pid', r.job_pid,
-          'start_time', r.start_time,
-          'end_time', r.end_time,
-          'status', r.status,
-          'return_message', r.return_message
-        ) order by r.start_time desc)
-        from cron.job_run_details r
-        where r.jobid = j.jobid
-        order by r.start_time desc
-        limit limit_runs
+        -- Önce iç subquery ORDER+LIMIT, sonra jsonb_agg toparlar
+        select jsonb_agg(
+          jsonb_build_object(
+            'runid', r.runid,
+            'job_pid', r.job_pid,
+            'start_time', r.start_time,
+            'end_time', r.end_time,
+            'status', r.status,
+            'return_message', r.return_message
+          )
+          order by r.start_time desc
+        )
+        from (
+          select runid, job_pid, start_time, end_time, status, return_message
+          from cron.job_run_details
+          where jobid = j.jobid
+          order by start_time desc
+          limit limit_runs
+        ) r
       ),
       '[]'::jsonb
     ) as last_runs
