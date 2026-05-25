@@ -72,6 +72,29 @@ Deno.serve(async (req) => {
 
   // CRM tabloları — `profiles:id, gems, subscriptions` → her biri için
   // user UUID ile eşleşen satırları çek.
+  //
+  // GÜVENLİK:
+  //   - Tablo adı yalnızca [a-z0-9_] içerebilir (SQL injection guard)
+  //   - Kolon adı yalnızca [a-z0-9_] (SQL injection guard)
+  //   - Sistem tabloları yasak: auth.*, storage.*, vault.*, pg_*, information_schema.*
+  //   - Sadece public schema (kullanıcı schema-prefix yazmamalı; yazarsa reddet)
+  const SAFE_NAME = /^[a-z_][a-z0-9_]{0,62}$/i;
+  const BLOCKED_TABLE_PREFIXES = ["pg_", "auth_", "storage_", "vault_"];
+  const BLOCKED_EXACT = new Set([
+    "users",        // auth.users değil ama public.users de kullanıcının olabilir;
+                    // helm güvenliği için bunu engellemiyoruz, dev kararı
+  ]);
+
+  const isSafeName = (s: string) => SAFE_NAME.test(s);
+  const isBlockedTable = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes(".")) return true; // schema prefix yasak
+    if (BLOCKED_TABLE_PREFIXES.some((p) => lower.startsWith(p))) return true;
+    // BLOCKED_EXACT şu an boş; reserved tutuyoruz
+    if (BLOCKED_EXACT.has(lower)) return true;
+    return false;
+  };
+
   const tableSpecs = (cfg.crm_tables ?? "")
     .split(",")
     .map((s) => s.trim())
@@ -79,6 +102,15 @@ Deno.serve(async (req) => {
     .map((s) => {
       const [name, col] = s.split(":");
       return { name: name.trim(), user_col: (col?.trim() || "user_id") };
+    })
+    .filter((spec) => {
+      // Güvenli olmayan adları sessizce at — config tek dosya, kullanıcı
+      // hatayı integration formundan görür.
+      return (
+        isSafeName(spec.name) &&
+        isSafeName(spec.user_col) &&
+        !isBlockedTable(spec.name)
+      );
     });
 
   const tables: Array<{

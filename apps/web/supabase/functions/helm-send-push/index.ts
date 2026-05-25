@@ -136,9 +136,33 @@ Deno.serve(async (req) => {
     return json({ error: "Segment projesinde Supabase entegrasyonu yok" }, 400);
   }
 
-  const tokenTable = cfg.push_token_table || "profiles";
-  const tokenCol = cfg.push_token_column || "expo_push_token";
-  const userCol = cfg.push_user_column || "id";
+  // Güvenlik: tablo/kolon adları yalnızca identifier karakterleri.
+  // user-provided string olduğu için SQL injection guard zorunlu.
+  const SAFE = /^[a-z_][a-z0-9_]{0,62}$/i;
+  const rawTokenTable = cfg.push_token_table || "profiles";
+  const rawTokenCol = cfg.push_token_column || "expo_push_token";
+  const rawUserCol = cfg.push_user_column || "id";
+  if (!SAFE.test(rawTokenTable) || rawTokenTable.includes(".")) {
+    return json({ error: `push_token_table güvenli değil: ${rawTokenTable}` }, 400);
+  }
+  if (!SAFE.test(rawTokenCol)) {
+    return json({ error: `push_token_column güvenli değil: ${rawTokenCol}` }, 400);
+  }
+  if (!SAFE.test(rawUserCol)) {
+    return json({ error: `push_user_column güvenli değil: ${rawUserCol}` }, 400);
+  }
+  // Sistem tabloları yasak
+  if (
+    rawTokenTable.toLowerCase().startsWith("pg_") ||
+    rawTokenTable.toLowerCase().startsWith("auth_") ||
+    rawTokenTable.toLowerCase().startsWith("vault_") ||
+    rawTokenTable.toLowerCase().startsWith("storage_")
+  ) {
+    return json({ error: `Sistem tabloları yasak: ${rawTokenTable}` }, 400);
+  }
+  const tokenTable = rawTokenTable;
+  const tokenCol = rawTokenCol;
+  const userCol = rawUserCol;
 
   let users: AuthUser[];
   try {

@@ -49,14 +49,84 @@ interface ResendPayload {
   };
 }
 
+// Svix HMAC SHA256 doğrulama — Resend webhook'larında imza svix headers ile gelir.
+// İlgili docs: https://docs.svix.com/receiving/verifying-payloads/how-manual
+// Secret format: "whsec_xxx" (base64 sonrası); raw secret base64 decode edilir.
+async function verifySvixSignature(
+  signingSecret: string,
+  msgId: string,
+  msgTimestamp: string,
+  body: string,
+  receivedSignatures: string,
+): Promise<boolean> {
+  // "whsec_" prefix'i kaldır
+  const cleanSecret = signingSecret.replace(/^whsec_/, "");
+  const keyBytes = Uint8Array.from(atob(cleanSecret), (c) => c.charCodeAt(0));
+  const toSign = `${msgId}.${msgTimestamp}.${body}`;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyBytes,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = new Uint8Array(
+    await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(toSign)),
+  );
+  let sigB64 = "";
+  for (const b of sig) sigB64 += String.fromCharCode(b);
+  const expected = btoa(sigB64);
+  // Header birden fazla imza içerebilir, space-separated: "v1,base64 v1,base64"
+  const sigs = receivedSignatures
+    .split(/\s+/)
+    .map((s) => s.split(",")[1])
+    .filter(Boolean);
+  return sigs.some((s) => s === expected);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: cors });
   }
 
+  // Webhook signature doğrulama — RESEND_WEBHOOK_SECRET set'liyse zorunlu
+  const secret = Deno.env.get("RESEND_WEBHOOK_SECRET");
+  const rawBody = await req.text();
+
+  if (secret) {
+    const svixId = req.headers.get("svix-id");
+    const svixTs = req.headers.get("svix-timestamp");
+    const svixSig = req.headers.get("svix-signature");
+    if (!svixId || !svixTs || !svixSig) {
+      return json({ error: "svix-* header eksik" }, 401);
+    }
+    // Replay koruması — 5 dk dışı reddet
+    const tsMs = Number(svixTs) * 1000;
+    if (Math.abs(Date.now() - tsMs) > 5 * 60_000) {
+      return json({ error: "Timestamp eski/gelecekten" }, 401);
+    }
+    try {
+      const ok = await verifySvixSignature(
+        secret,
+        svixId,
+        svixTs,
+        rawBody,
+        svixSig,
+      );
+      if (!ok) return json({ error: "İmza geçersiz" }, 401);
+    } catch (e) {
+      return json(
+        { error: `İmza doğrulanamadı: ${e instanceof Error ? e.message : e}` },
+        401,
+      );
+    }
+  }
+  // secret yoksa: warning logla ama yine de kabul et (dev mode için)
+  // Production: RESEND_WEBHOOK_SECRET MUTLAKA set'lenmeli.
+
   let payload: ResendPayload = {};
   try {
-    payload = (await req.json()) as ResendPayload;
+    payload = JSON.parse(rawBody) as ResendPayload;
   } catch {
     return json({ error: "Geçersiz JSON" }, 400);
   }
