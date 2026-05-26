@@ -511,7 +511,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
             <Button size="sm" onClick={() => setOpen(true)}>
               <Plus className="size-4" /> Bağla
             </Button>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="flex max-h-[85vh] max-w-2xl flex-col overflow-hidden">
               <DialogHeader>
                 <DialogTitle>
                   {editingId
@@ -520,7 +520,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="space-y-4 py-2">
+              <div className="flex-1 space-y-4 overflow-y-auto py-2 pr-1">
                 <div className="space-y-2">
                   <Label>Sağlayıcı</Label>
                   <Select
