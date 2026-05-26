@@ -30,7 +30,13 @@
     "preview": {
       "ios": {
         "appleId": "canakyuz23@gmail.com",
-        "ascAppId": "TBD-after-app-store-connect-creation"
+        "ascAppId": "6773156495"
+      }
+    },
+    "production": {
+      "ios": {
+        "appleId": "canakyuz23@gmail.com",
+        "ascAppId": "6773156495"
       }
     }
   }
