@@ -183,13 +183,27 @@ export interface UserSegment {
   created_at: string;
 }
 
+export type AppVersionStatus =
+  | "live"
+  | "in_review"
+  | "ready"
+  | "testflight"
+  | "rejected"
+  | "expired"
+  | "removed"
+  | "unknown";
+
 export interface AppVersion {
   id: number;
   project_id: string;
   source: "ios" | "android";
   version: string;
+  build_number?: string | null;
+  status?: AppVersionStatus | null;
   release_date: string | null;
   release_notes: string | null;
+  expires_at?: string | null;
+  state_changed_at?: string | null;
   fetched_at: string;
 }
 

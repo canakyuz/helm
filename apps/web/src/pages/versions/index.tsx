@@ -224,31 +224,48 @@ export const VersionsPage = () => {
                 />
               ) : (
                 <div className="divide-y">
-                  {filtered.map((v) => (
-                    <div key={v.id} className="py-3 first:pt-0 last:pb-0">
-                      <div className="flex items-center gap-2">
-                        <SourceBadge source={v.source} />
-                        <Badge variant="secondary">v{v.version}</Badge>
-                        {isAll && (
-                          <span className="text-sm font-medium">
-                            {projectName(v.project_id)}
+                  {filtered.map((v) => {
+                    const expiresInDays = v.expires_at
+                      ? Math.ceil(
+                          (new Date(v.expires_at).getTime() - Date.now()) /
+                            86_400_000,
+                        )
+                      : null;
+                    return (
+                      <div key={v.id} className="py-3 first:pt-0 last:pb-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <SourceBadge source={v.source} />
+                          <Badge variant="secondary">
+                            v{v.version}
+                            {v.build_number ? ` (${v.build_number})` : ""}
+                          </Badge>
+                          <StatusBadge status={v.status} />
+                          {isAll && (
+                            <span className="text-sm font-medium">
+                              {projectName(v.project_id)}
+                            </span>
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {v.release_date
+                              ? new Date(v.release_date).toLocaleDateString(
+                                  "tr-TR",
+                                )
+                              : ""}
                           </span>
+                          {expiresInDays !== null && expiresInDays > 0 && (
+                            <span className="text-xs text-amber-500">
+                              {expiresInDays}g sonra dolar
+                            </span>
+                          )}
+                        </div>
+                        {v.release_notes && (
+                          <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">
+                            {v.release_notes}
+                          </p>
                         )}
-                        <span className="text-xs text-muted-foreground">
-                          {v.release_date
-                            ? new Date(v.release_date).toLocaleDateString(
-                                "tr-TR",
-                              )
-                            : ""}
-                        </span>
                       </div>
-                      {v.release_notes && (
-                        <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">
-                          {v.release_notes}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
@@ -257,6 +274,22 @@ export const VersionsPage = () => {
       </Tabs>
     </div>
   );
+};
+
+const StatusBadge = ({ status }: { status: AppVersion["status"] }) => {
+  if (!status) return null;
+  const config: Record<string, { label: string; cls: string }> = {
+    live: { label: "CANLI", cls: "border-emerald-500/30 bg-emerald-500/15 text-emerald-500" },
+    in_review: { label: "İNCELEMEDE", cls: "border-amber-500/30 bg-amber-500/15 text-amber-500" },
+    ready: { label: "HAZIR", cls: "border-blue-500/30 bg-blue-500/15 text-blue-500" },
+    testflight: { label: "TESTFLIGHT", cls: "border-violet-500/30 bg-violet-500/15 text-violet-500" },
+    rejected: { label: "RED", cls: "border-destructive/30 bg-destructive/15 text-destructive" },
+    expired: { label: "SÜRE DOLDU", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
+    removed: { label: "KALDIRILDI", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
+    unknown: { label: "—", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
+  };
+  const c = config[status] ?? config.unknown;
+  return <Badge className={`${c.cls} text-[10px]`}>{c.label}</Badge>;
 };
 
 const SourceBadge = ({ source }: { source: "ios" | "android" }) => {
