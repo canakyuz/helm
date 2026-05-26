@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 
 import type { Review } from "~/hooks/use-reviews";
 import { formatRelativeTime } from "~/lib/format";
@@ -24,7 +24,12 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-export function ReviewRow({ review }: { review: Review }) {
+interface ReviewRowProps {
+  review: Review;
+  onReply?: (review: Review) => void;
+}
+
+export function ReviewRow({ review, onReply }: ReviewRowProps) {
   const platformLabel = review.source === "appstore" ? "iOS" : "ANDROID";
   const platformColor =
     review.source === "appstore" ? colors.accentInfo : colors.accent;
@@ -153,6 +158,85 @@ export function ReviewRow({ review }: { review: Review }) {
         >
           — {review.author}
         </Text>
+      ) : null}
+
+      {/* Reply block */}
+      {review.developer_response ? (
+        <View
+          style={{
+            marginTop: 8,
+            borderLeftWidth: 2,
+            borderLeftColor: colors.accent,
+            paddingLeft: 10,
+            paddingVertical: 6,
+            backgroundColor: `${colors.accent}10`,
+            borderRadius: 6,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "GeistMono-600",
+                fontSize: 9,
+                letterSpacing: 1,
+                color: colors.accent,
+              }}
+            >
+              YANIT
+            </Text>
+            <Pressable onPress={() => onReply?.(review)} hitSlop={6}>
+              <Text
+                style={{
+                  fontFamily: "GeistMono-500",
+                  fontSize: 10,
+                  color: colors.accentInfo,
+                }}
+              >
+                DÜZENLE
+              </Text>
+            </Pressable>
+          </View>
+          <Text
+            style={{
+              fontFamily: "Geist-400",
+              fontSize: 13,
+              color: colors.fgPrimary,
+              marginTop: 4,
+            }}
+          >
+            {review.developer_response}
+          </Text>
+        </View>
+      ) : review.source_method !== "rss" ? (
+        <Pressable
+          onPress={() => onReply?.(review)}
+          style={{
+            marginTop: 8,
+            borderColor: colors.border,
+            borderWidth: 1,
+            borderRadius: 8,
+            paddingVertical: 6,
+            paddingHorizontal: 12,
+            alignSelf: "flex-start",
+          }}
+          hitSlop={4}
+        >
+          <Text
+            style={{
+              fontFamily: "Geist-500",
+              fontSize: 12,
+              color: colors.fgPrimary,
+            }}
+          >
+            Yanıtla
+          </Text>
+        </Pressable>
       ) : null}
     </View>
   );
