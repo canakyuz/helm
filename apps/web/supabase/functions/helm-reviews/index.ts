@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
   const [{ data: projects, error: pErr }, { data: integrations, error: iErr }] =
     await Promise.all([
       hub
-        .from("projects")
+        .from("properties")
         .select("id, app_store_id, app_store_country, google_play_id"),
       hub
         .from("project_integrations")

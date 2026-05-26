@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
     let packageName = cfg.package_name ?? "";
     if (!packageName) {
       const { data: proj } = await hub
-        .from("projects")
+        .from("properties")
         .select("google_play_id")
         .eq("id", review.project_id)
         .maybeSingle();
