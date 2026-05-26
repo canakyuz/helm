@@ -511,7 +511,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
             <Button size="sm" onClick={() => setOpen(true)}>
               <Plus className="size-4" /> Bağla
             </Button>
-            <DialogContent>
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>
                   {editingId
@@ -560,7 +560,11 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                         onChange={(e) =>
                           setConfig((c) => ({ ...c, [f.key]: e.target.value }))
                         }
-                        className={f.secret ? "font-mono text-xs" : undefined}
+                        wrap="soft"
+                        className={cn(
+                          "w-full max-w-full resize-y break-all whitespace-pre-wrap [field-sizing:fixed]",
+                          f.secret ? "font-mono text-xs" : undefined,
+                        )}
                       />
                     ) : (
                       <Input
