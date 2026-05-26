@@ -130,6 +130,7 @@ export const SOURCE_TO_MODULE: Record<ProviderName, ModuleKey> = {
   resend: "mail",
   sentry: "analytics", // hata oranı = analytics altı
   rest: "analytics", // genel
+  google_play_developer: "reviews",
 };
 
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {

@@ -243,6 +243,26 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       optional: true,
     },
   ],
+  google_play_developer: [
+    {
+      key: "service_account_json",
+      label: "Service Account JSON (IAM rolü: androidpublisher)",
+      placeholder: '{"type":"service_account","client_email":"...","private_key":"..."}',
+      secret: true,
+    },
+    {
+      key: "package_name",
+      label: "Package Name (opsiyonel — boşsa property'den okunur)",
+      placeholder: "com.example.app",
+      optional: true,
+    },
+    {
+      key: "language_codes",
+      label: "Yorum dilleri (virgülle ayır)",
+      placeholder: "en,tr",
+      optional: true,
+    },
+  ],
 };
 
 const PROVIDERS = Object.keys(PROVIDER_LABELS) as ProviderName[];

@@ -78,6 +78,12 @@ export const PROVIDER_META: Record<ProviderName, ProviderMeta> = {
     icon: "Webhook",
     description: "Özel REST endpoint · jsonb config",
   },
+  google_play_developer: {
+    category: "revenue",
+    icon: "PlayCircle",
+    description: "Android yorum · puan · yanıt · service account",
+    docs: "https://developers.google.com/android-publisher",
+  },
 };
 
 export const CATEGORY_LABELS: Record<ProviderCategory, string> = {
