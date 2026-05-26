@@ -19,6 +19,77 @@ const PLATFORM_META = {
   android: { label: "AND", color: colors.accent },
 } as const;
 
+const STATUS_META: Record<
+  NonNullable<AppVersion["status"]>,
+  { label: string; color: string }
+> = {
+  live: { label: "CANLI", color: colors.accent },
+  in_review: { label: "İNCELEME", color: colors.accentWarn },
+  ready: { label: "HAZIR", color: colors.accentInfo },
+  testflight: { label: "TESTFLIGHT", color: colors.accentViolet },
+  rejected: { label: "RED", color: colors.accentDanger },
+  expired: { label: "DOLDU", color: colors.fgSubtle },
+  removed: { label: "KALDIRILDI", color: colors.fgSubtle },
+  unknown: { label: "—", color: colors.fgSubtle },
+};
+
+function StatusPill({
+  status,
+  expiresAt,
+}: {
+  status: AppVersion["status"];
+  expiresAt: string | null;
+}) {
+  if (!status) return null;
+  const meta = STATUS_META[status];
+  return (
+    <View
+      style={{
+        backgroundColor: `${meta.color}15`,
+        borderWidth: 1,
+        borderColor: `${meta.color}40`,
+        paddingHorizontal: 6,
+        paddingVertical: 1,
+        borderRadius: 4,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: "GeistMono-600",
+          fontSize: 9,
+          color: meta.color,
+          letterSpacing: 1.3,
+        }}
+      >
+        {meta.label}
+      </Text>
+      {status === "testflight" && expiresAt
+        ? (() => {
+            const days = Math.ceil(
+              (new Date(expiresAt).getTime() - Date.now()) / 86_400_000,
+            );
+            if (days <= 0) return null;
+            return (
+              <Text
+                style={{
+                  fontFamily: "GeistMono-500",
+                  fontSize: 9,
+                  color: meta.color,
+                  opacity: 0.7,
+                }}
+              >
+                {days}g
+              </Text>
+            );
+          })()
+        : null}
+    </View>
+  );
+}
+
 function LatestHero({
   latestIos,
   latestAndroid,
@@ -172,6 +243,7 @@ function VersionRow({ version }: { version: AppVersion }) {
             }}
           >
             {version.version}
+            {version.buildNumber ? ` (${version.buildNumber})` : ""}
           </Text>
           <View
             style={{
@@ -194,6 +266,7 @@ function VersionRow({ version }: { version: AppVersion }) {
               {meta.label}
             </Text>
           </View>
+          <StatusPill status={version.status} expiresAt={version.expiresAt} />
           <View style={{ flex: 1 }} />
           {version.releaseDate ? (
             <Text
