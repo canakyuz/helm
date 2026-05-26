@@ -85,14 +85,20 @@ interface PreReleaseVersionAttrs {
   version?: string;
   platform?: string; // IOS | MAC_OS | TV_OS
 }
-interface PreReleaseVersionResource {
+
+interface BuildResource {
   id: string;
-  attributes?: PreReleaseVersionAttrs;
-  relationships?: { builds?: { data?: Array<{ id: string }> } };
+  attributes?: AscBuildAttrs;
+  relationships?: { preReleaseVersion?: { data?: { id: string } } };
 }
-interface PreReleaseVersionsPage {
-  data?: PreReleaseVersionResource[];
-  included?: AscIncluded[];
+interface PreReleaseIncluded {
+  id: string;
+  type: string;
+  attributes?: PreReleaseVersionAttrs;
+}
+interface BuildsPage {
+  data?: BuildResource[];
+  included?: PreReleaseIncluded[];
 }
 
 export interface AscFetchInput {
@@ -178,48 +184,52 @@ export async function fetchAscVersions(
     diag.appStoreVersionsError = e instanceof Error ? e.message : String(e);
   }
 
-  // 2. Pre-release versions (TestFlight) + altlarındaki builds
+  // 2. Builds (TestFlight) — top-level /v1/builds?filter[app]=...&include=preReleaseVersion
+  //    Relationship endpoint /v1/apps/{id}/preReleaseVersions ?include= parametresini
+  //    reddediyor (PARAMETER_ERROR.ILLEGAL); top-level collection ile filter + include
+  //    tek call'da build + parent version verir.
   try {
     const url =
-      `https://api.appstoreconnect.apple.com/v1/apps/${input.appId}/preReleaseVersions` +
-      `?limit=20&include=builds`;
+      `https://api.appstoreconnect.apple.com/v1/builds` +
+      `?filter[app]=${input.appId}&include=preReleaseVersion&limit=50&sort=-uploadedDate`;
     const res = await fetchWithTimeout(url, { headers });
     diag.preReleaseStatus = res.status;
     if (!res.ok) {
       diag.preReleaseError = `${res.status}: ${(await res.text()).slice(0, 200)}`;
     } else {
-      const page = (await res.json()) as PreReleaseVersionsPage;
-      const buildById = new Map<string, AscBuildAttrs>();
+      const page = (await res.json()) as BuildsPage;
+      const preReleaseById = new Map<string, PreReleaseVersionAttrs>();
       for (const inc of page.included ?? []) {
-        if (inc.type === "builds" && inc.attributes) buildById.set(inc.id, inc.attributes);
+        if (inc.type === "preReleaseVersions" && inc.attributes) {
+          preReleaseById.set(inc.id, inc.attributes);
+        }
       }
       let count = 0;
-      for (const v of page.data ?? []) {
-        const attrs = v.attributes ?? {};
-        if (!attrs.version || attrs.platform !== "IOS") continue;
-        const buildIds = v.relationships?.builds?.data ?? [];
-        for (const ref of buildIds) {
-          const build = buildById.get(ref.id);
-          if (!build?.version) continue;
-          const alreadyInStore = rows.some(
-            (r) => r.version === attrs.version && r.build_number === build.version,
-          );
-          if (alreadyInStore) continue;
-          const isExpired =
-            build.expirationDate && new Date(build.expirationDate).getTime() < Date.now();
-          rows.push({
-            project_id: input.projectId,
-            source: "ios",
-            version: attrs.version,
-            build_number: build.version,
-            status: isExpired ? "expired" : "testflight",
-            release_date: build.uploadedDate ?? null,
-            release_notes: null,
-            expires_at: build.expirationDate ?? null,
-            state_changed_at: build.uploadedDate ?? null,
-          });
-          count++;
-        }
+      for (const b of page.data ?? []) {
+        const build = b.attributes ?? {};
+        if (!build.version) continue;
+        const prvId = b.relationships?.preReleaseVersion?.data?.id;
+        const prv = prvId ? preReleaseById.get(prvId) : undefined;
+        const semver = prv?.version;
+        if (!semver || prv?.platform !== "IOS") continue;
+        const alreadyInStore = rows.some(
+          (r) => r.version === semver && r.build_number === build.version,
+        );
+        if (alreadyInStore) continue;
+        const isExpired =
+          build.expirationDate && new Date(build.expirationDate).getTime() < Date.now();
+        rows.push({
+          project_id: input.projectId,
+          source: "ios",
+          version: semver,
+          build_number: build.version,
+          status: isExpired ? "expired" : "testflight",
+          release_date: build.uploadedDate ?? null,
+          release_notes: null,
+          expires_at: build.expirationDate ?? null,
+          state_changed_at: build.uploadedDate ?? null,
+        });
+        count++;
       }
       diag.preReleaseCount = count;
     }
