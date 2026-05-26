@@ -295,16 +295,29 @@ export const ReviewsPage = () => {
                   <div key={r.id} className="py-3 first:pt-0 last:pb-0">
                     <div className="flex items-baseline justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className={starColor(r.rating)}>
-                          {stars(r.rating)}
-                        </span>
+                        <span className={starColor(r.rating)}>{stars(r.rating)}</span>
                         <span className="font-medium">{r.title ?? ""}</span>
                       </div>
-                      {isAll && (
-                        <Badge variant="secondary" className="text-xs">
-                          {projectName(r.project_id)}
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="outline" className="text-[10px] uppercase">
+                          {r.source === "appstore" ? "iOS" : "Android"}
                         </Badge>
-                      )}
+                        {r.app_version && (
+                          <Badge variant="secondary" className="text-[10px] font-mono">
+                            v{r.app_version}
+                          </Badge>
+                        )}
+                        {r.territory && (
+                          <Badge variant="secondary" className="text-[10px] uppercase">
+                            {r.territory}
+                          </Badge>
+                        )}
+                        {isAll && (
+                          <Badge variant="secondary" className="text-xs">
+                            {projectName(r.project_id)}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     {r.body && (
                       <p className="mt-1 text-sm text-muted-foreground">
