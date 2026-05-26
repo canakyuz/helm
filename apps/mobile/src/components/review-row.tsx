@@ -25,7 +25,7 @@ function Stars({ rating }: { rating: number }) {
 }
 
 export function ReviewRow({ review }: { review: Review }) {
-  const platformLabel = review.source === "appstore" ? "iOS" : "AND";
+  const platformLabel = review.source === "appstore" ? "iOS" : "ANDROID";
   const platformColor =
     review.source === "appstore" ? colors.accentInfo : colors.accent;
 
@@ -42,7 +42,7 @@ export function ReviewRow({ review }: { review: Review }) {
     >
       {/* Top — stars + platform chip + relative time */}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <Stars rating={review.rating} />
+        <Stars rating={review.rating ?? 0} />
         <View
           style={{
             backgroundColor: `${platformColor}15`,
@@ -65,7 +65,7 @@ export function ReviewRow({ review }: { review: Review }) {
           </Text>
         </View>
         <View style={{ flex: 1 }} />
-        {review.reviewDate ? (
+        {review.review_date ? (
           <Text
             style={{
               fontFamily: "GeistMono-500",
@@ -73,7 +73,7 @@ export function ReviewRow({ review }: { review: Review }) {
               color: colors.fgSubtle,
             }}
           >
-            {formatRelativeTime(review.reviewDate)}
+            {formatRelativeTime(review.review_date)}
           </Text>
         ) : null}
       </View>
@@ -92,6 +92,39 @@ export function ReviewRow({ review }: { review: Review }) {
           {review.title}
         </Text>
       ) : null}
+
+      {/* Badges — source / version / territory */}
+      <View style={{ flexDirection: "row", gap: 4, marginTop: 4 }}>
+        <View style={{
+          backgroundColor: colors.bgHigher,
+          borderRadius: 4,
+          paddingHorizontal: 6,
+          paddingVertical: 2,
+        }}>
+          <Text style={{
+            fontFamily: "GeistMono-600",
+            fontSize: 9,
+            color: colors.fgMuted,
+            letterSpacing: 1,
+          }}>
+            {review.source === "appstore" ? "iOS" : "ANDROID"}
+          </Text>
+        </View>
+        {review.app_version ? (
+          <View style={{ backgroundColor: colors.bgHigher, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 }}>
+            <Text style={{ fontFamily: "GeistMono-500", fontSize: 9, color: colors.fgMuted }}>
+              v{review.app_version}
+            </Text>
+          </View>
+        ) : null}
+        {review.territory ? (
+          <View style={{ backgroundColor: colors.bgHigher, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 }}>
+            <Text style={{ fontFamily: "GeistMono-600", fontSize: 9, color: colors.fgMuted, letterSpacing: 1 }}>
+              {review.territory.toUpperCase()}
+            </Text>
+          </View>
+        ) : null}
+      </View>
 
       {/* Body */}
       {review.body ? (

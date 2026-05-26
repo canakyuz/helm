@@ -7,16 +7,22 @@ export type ReviewSource = "appstore" | "playstore";
 export type RatingFilter = "all" | 1 | 2 | 3 | 4 | 5;
 export type PlatformFilter = "all" | ReviewSource;
 
-export type Review = {
+export interface Review {
   id: number;
-  propertyId: string;
-  source: ReviewSource;
+  project_id: string;
+  source: "appstore" | "playstore";
+  source_method?: "asc" | "rss" | "play" | null;
+  external_id?: string | null;
   author: string | null;
-  rating: number;
+  rating: number | null;
   title: string | null;
   body: string | null;
-  reviewDate: string | null;
-};
+  territory?: string | null;
+  app_version?: string | null;
+  developer_response?: string | null;
+  responded_at?: string | null;
+  review_date: string | null;
+}
 
 export type ReviewsBundle = {
   reviews: Review[];
@@ -31,10 +37,16 @@ type Row = {
   id: number;
   project_id: string;
   source: string;
+  source_method: string | null;
+  external_id: string | null;
   author: string | null;
   rating: number | null;
   title: string | null;
   body: string | null;
+  territory: string | null;
+  app_version: string | null;
+  developer_response: string | null;
+  responded_at: string | null;
   review_date: string | null;
 };
 
@@ -45,7 +57,7 @@ async function fetchReviews(
 ): Promise<ReviewsBundle> {
   let q = supabase
     .from("reviews")
-    .select("id, project_id, source, author, rating, title, body, review_date")
+    .select("id, project_id, source, source_method, external_id, author, rating, title, body, territory, app_version, developer_response, responded_at, review_date")
     .order("review_date", { ascending: false })
     .limit(200);
 
@@ -59,13 +71,19 @@ async function fetchReviews(
   const rows = (data ?? []) as Row[];
   const reviews: Review[] = rows.map((row) => ({
     id: row.id,
-    propertyId: row.project_id,
+    project_id: row.project_id,
     source: (row.source === "playstore" ? "playstore" : "appstore") as ReviewSource,
+    source_method: (row.source_method as Review["source_method"]) ?? null,
+    external_id: row.external_id,
     author: row.author,
-    rating: row.rating ?? 0,
+    rating: row.rating,
     title: row.title,
     body: row.body,
-    reviewDate: row.review_date,
+    territory: row.territory,
+    app_version: row.app_version,
+    developer_response: row.developer_response,
+    responded_at: row.responded_at,
+    review_date: row.review_date,
   }));
 
   // Distribution + averaj her zaman tüm reviews üzerinden hesaplanır (filter'den bağımsız).
@@ -78,10 +96,11 @@ async function fetchReviews(
   let playstoreCount = 0;
 
   for (const r of reviews) {
-    const star = Math.max(1, Math.min(5, Math.round(r.rating))) as 1 | 2 | 3 | 4 | 5;
+    const ratingVal = r.rating ?? 0;
+    const star = Math.max(1, Math.min(5, Math.round(ratingVal))) as 1 | 2 | 3 | 4 | 5;
     distribution[star]++;
     total++;
-    sum += r.rating;
+    sum += ratingVal;
     if (r.source === "appstore") appstoreCount++;
     else if (r.source === "playstore") playstoreCount++;
   }
