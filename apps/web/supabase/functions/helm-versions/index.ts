@@ -1,11 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { fetchAscVersions, type AscVersionRow } from "./asc.ts";
+import { fetchPlayVersions, type PlayVersionRow } from "./play.ts";
 
 // helm-versions — App Store + Play Store sürümlerini çeker.
 // Apple sırası:
-//   1) app_store_connect integration enabled + key varsa  → ASC API (canlı + TestFlight + status)
+//   1) app_store_connect integration enabled + key varsa  → ASC API (canlı + TestFlight)
 //   2) yoksa → iTunes lookup fallback (sadece canlı)
-// Google Play: Play Store sayfa HTML scrape (key gerekmez)
+// Google Play sırası:
+//   1) google_play_developer integration + service_account varsa → tracks API (production + internal/alpha/beta)
+//   2) yoksa → Play Store HTML scrape (sadece canlı)
 // app_versions tablosuna idempotent upsert (PK: project_id, source, version, build_number).
 
 const cors = {
@@ -252,7 +255,44 @@ Deno.serve(async (req) => {
     }
 
     try {
-      if (p.google_play_id) {
+      const hasPlayKey = !!(playCfg.service_account_json && p.google_play_id);
+      if (hasPlayKey) {
+        const playRes = await fetchPlayVersions({
+          projectId: p.id,
+          packageName: p.google_play_id!,
+          serviceAccountJson: playCfg.service_account_json!,
+        });
+        if (playRes.ok) {
+          let upserted = 0;
+          for (const row of playRes.rows) {
+            const insert: VersionInsert = row as PlayVersionRow;
+            const { error: e } = await hub
+              .from("app_versions")
+              .upsert(insert, {
+                onConflict: "project_id,source,version,build_number",
+              });
+            if (!e) {
+              androidCount++;
+              upserted++;
+            } else {
+              errors.push(`android ${p.id} ${row.version}/${row.build_number}: ${e.message}`);
+            }
+          }
+          propResult.android = {
+            method: "play-api",
+            rows: playRes.rows.length,
+            upserted,
+            diag: playRes.diag,
+          };
+        } else {
+          errors.push(`android ${p.id} Play API: ${playRes.message}`);
+          propResult.android = {
+            method: "play-api",
+            error: playRes.message,
+            status: playRes.status,
+          };
+        }
+      } else if (p.google_play_id) {
         const play = await fetchPlay(p);
         if (play) {
           const { error: e } = await hub
