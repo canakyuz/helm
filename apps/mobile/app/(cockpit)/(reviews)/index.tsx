@@ -7,8 +7,10 @@ import {
   useReviews,
   type PlatformFilter,
   type RatingFilter,
+  type Review,
 } from "~/hooks/use-reviews";
 import { ReviewRow } from "~/components/review-row";
+import { ReviewReplySheet } from "~/components/review-reply-sheet";
 import { RatingHistogram } from "~/components/rating-histogram";
 import { SegmentedControl } from "~/components/segmented-control";
 import { FilterChip } from "~/components/filter-chip";
@@ -20,6 +22,7 @@ import { colors } from "~/theme/tokens";
 export default function Reviews() {
   const [platform, setPlatform] = useState<PlatformFilter>("all");
   const [rating, setRating] = useState<RatingFilter>("all");
+  const [replyTarget, setReplyTarget] = useState<Review | null>(null);
   const reviews = useReviews(platform, rating);
 
   const segments = useMemo(
@@ -203,11 +206,17 @@ export default function Reviews() {
         ) : (
           <View style={{ gap: 8, paddingTop: 4 }}>
             {data.reviews.map((review) => (
-              <ReviewRow key={`${review.source}-${review.id}`} review={review} />
+              <ReviewRow key={`${review.source}-${review.id}`} review={review} onReply={setReplyTarget} />
             ))}
           </View>
         )}
       </ScrollView>
+
+      <ReviewReplySheet
+        review={replyTarget}
+        visible={replyTarget !== null}
+        onClose={() => setReplyTarget(null)}
+      />
     </SafeAreaView>
   );
 }
