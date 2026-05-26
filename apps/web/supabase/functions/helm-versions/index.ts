@@ -115,21 +115,53 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  // properties (eski projects view ile uyumlu — gerekli alanlar her ikisinde de var)
-  const { data: properties, error } = await hub
-    .from("properties")
-    .select(
-      "id, app_store_id, app_store_country, google_play_id, google_play_country",
-    )
-    .or("app_store_id.not.is.null,google_play_id.not.is.null");
-  if (error) return json({ error: error.message }, 500);
+  // properties + integration config fallback. ASC config app_store_id veriyorsa
+  // properties.app_store_id null olsa bile geçerli (helm-reviews ile aynı pattern).
+  const [{ data: properties, error: pErr }, { data: integrations, error: iErr }] =
+    await Promise.all([
+      hub
+        .from("properties")
+        .select(
+          "id, app_store_id, app_store_country, google_play_id, google_play_country",
+        ),
+      hub
+        .from("project_integrations")
+        .select("project_id, provider, config")
+        .in("provider", ["app_store_connect", "google_play_developer"])
+        .eq("enabled", true),
+    ]);
+  if (pErr) return json({ error: pErr.message }, 500);
+  if (iErr) return json({ error: iErr.message }, 500);
+
+  const ascByProj = new Map<string, Record<string, string | undefined>>();
+  const playByProj = new Map<string, Record<string, string | undefined>>();
+  for (const it of (integrations ?? []) as Array<{
+    project_id: string;
+    provider: string;
+    config: Record<string, string | undefined> | null;
+  }>) {
+    const cfg = (it.config ?? {}) as Record<string, string | undefined>;
+    if (it.provider === "app_store_connect") ascByProj.set(it.project_id, cfg);
+    else if (it.provider === "google_play_developer") playByProj.set(it.project_id, cfg);
+  }
 
   let iosCount = 0;
   let androidCount = 0;
   const errors: string[] = [];
 
   for (const raw of properties ?? []) {
-    const p = raw as PropertyRow;
+    const baseProp = raw as PropertyRow;
+    const ascCfg = ascByProj.get(baseProp.id) ?? {};
+    const playCfg = playByProj.get(baseProp.id) ?? {};
+    const p: PropertyRow = {
+      id: baseProp.id,
+      app_store_id: ascCfg.app_store_id || baseProp.app_store_id,
+      app_store_country: ascCfg.app_store_country || baseProp.app_store_country,
+      google_play_id: playCfg.package_name || baseProp.google_play_id,
+      google_play_country: baseProp.google_play_country,
+    };
+    if (!p.app_store_id && !p.google_play_id) continue;
+
     try {
       const apple = await fetchApple(p);
       if (apple) {
