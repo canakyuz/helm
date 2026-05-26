@@ -12,8 +12,12 @@
     "gen:types": "supabase gen types typescript --project-id $HELM_SUPABASE_PROJECT_ID --schema public > src/types/database.ts",
     "build:preview": "eas build -p ios --profile preview",
     "submit:preview": "eas submit -p ios --latest",
-    "update:preview": "eas update --branch preview"
+    "update:preview": "eas update --branch preview",
+    "postinstall": "install-skia"
   },
+  "trustedDependencies": [
+    "@shopify/react-native-skia"
+  ],
   "dependencies": {
     "@expo-google-fonts/geist": "^0.4.2",
     "@expo-google-fonts/geist-mono": "^0.4.2",
