@@ -25,6 +25,7 @@ import { StatCard } from "@/components/stat-card";
 import { supabaseClient } from "@/providers/supabase-client";
 import { useScope } from "@/context/scope";
 import type { Project, Review } from "@/types";
+import { ReplyModal } from "./reply-modal";
 
 const PAGE = 25;
 
@@ -47,6 +48,8 @@ export const ReviewsPage = () => {
   const [q, setQ] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
+
+  const [replyTarget, setReplyTarget] = useState<Review | null>(null);
 
   // A) Platform state
   const [platform, setPlatform] = useState<"all" | "appstore" | "playstore">("all");
@@ -330,6 +333,41 @@ export const ReviewsPage = () => {
                         ? new Date(r.review_date).toLocaleDateString("tr-TR")
                         : ""}
                     </p>
+                    {r.developer_response ? (
+                      <div className="mt-2 rounded-md border-l-2 border-emerald-500/60 bg-emerald-500/5 p-2 text-sm">
+                        <div className="flex items-baseline justify-between">
+                          <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                            Yanıt
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={() => setReplyTarget(r)}
+                          >
+                            Düzenle
+                          </Button>
+                        </div>
+                        <p className="mt-1">{r.developer_response}</p>
+                        {r.responded_at && (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {new Date(r.responded_at).toLocaleString("tr-TR")}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setReplyTarget(r)}
+                          disabled={r.source_method === "rss"}
+                          title={r.source_method === "rss" ? "RSS yorumlarına yanıt yazılamaz" : undefined}
+                        >
+                          Yanıtla
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -370,6 +408,13 @@ export const ReviewsPage = () => {
           )}
         </CardContent>
       </Card>
+
+      <ReplyModal
+        review={replyTarget}
+        open={replyTarget !== null}
+        onOpenChange={(open) => !open && setReplyTarget(null)}
+        onReplied={() => invalidate({ resource: "reviews", invalidates: ["list"] })}
+      />
     </div>
   );
 };
