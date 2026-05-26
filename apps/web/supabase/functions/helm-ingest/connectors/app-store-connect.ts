@@ -3,6 +3,7 @@ import {
   type CountryMetricPoint,
   type MetricPoint,
 } from "./types.ts";
+import { makeAscJwt } from "../../_shared/asc-jwt.ts";
 
 // App Store Connect — Sales Reports (daily summary).
 // JWT ES256 ile auth → günlük satış raporu (gzip TSV).
@@ -13,71 +14,6 @@ import {
 //   currency: developer proceeds para birimi (vendor varsayılanı; çoğu hesapta USD).
 
 const DAYS_BACK = 7;
-
-const b64url = (data: ArrayBuffer | Uint8Array | string): string => {
-  let bytes: Uint8Array;
-  if (typeof data === "string") {
-    bytes = new TextEncoder().encode(data);
-  } else if (data instanceof Uint8Array) {
-    bytes = data;
-  } else {
-    bytes = new Uint8Array(data);
-  }
-  let str = "";
-  for (let i = 0; i < bytes.length; i++) {
-    str += String.fromCharCode(bytes[i]);
-  }
-  return btoa(str)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-};
-
-const pemToDer = (pem: string): Uint8Array => {
-  const cleaned = pem
-    .replace(/-----BEGIN [^-]+-----/g, "")
-    .replace(/-----END [^-]+-----/g, "")
-    .replace(/\s+/g, "");
-  const bin = atob(cleaned);
-  const der = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) der[i] = bin.charCodeAt(i);
-  return der;
-};
-
-async function makeJwt(config: Record<string, string>): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: "ES256", kid: config.key_id, typ: "JWT" };
-  // Team Key → iss = issuer_id (UUID)
-  // Individual API Key → iss yok, sub: "user"
-  const payload: Record<string, unknown> = {
-    iat: now,
-    exp: now + 1199, // < 20 min (Apple limit)
-    aud: "appstoreconnect-v1",
-  };
-  if (config.issuer_id && config.issuer_id.trim().length > 0) {
-    payload.iss = config.issuer_id;
-  } else {
-    payload.sub = "user";
-  }
-  const headerB64 = b64url(JSON.stringify(header));
-  const payloadB64 = b64url(JSON.stringify(payload));
-  const signingInput = `${headerB64}.${payloadB64}`;
-
-  const der = pemToDer(config.private_key);
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    der,
-    { name: "ECDSA", namedCurve: "P-256" },
-    false,
-    ["sign"],
-  );
-  const sig = await crypto.subtle.sign(
-    { name: "ECDSA", hash: "SHA-256" },
-    key,
-    new TextEncoder().encode(signingInput),
-  );
-  return `${signingInput}.${b64url(sig)}`;
-}
 
 const ymd = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -158,7 +94,7 @@ const isDownloadType = (t: string) =>
   t === "1" || t === "1F" || t === "1T" || t === "1TP";
 
 export const fetchAppStoreConnect: Connector = async (config) => {
-  const jwt = await makeJwt(config as Record<string, string>);
+  const jwt = await makeAscJwt(config as unknown as { key_id: string; issuer_id?: string; private_key: string });
   const vendor = String(config.vendor_number);
 
   const points: MetricPoint[] = [];
