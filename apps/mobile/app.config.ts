@@ -13,7 +13,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: false,
     bundleIdentifier: "com.canakyuz.helmmobile",
-    buildNumber: "1",
+    buildNumber: "2",
     icon: {
       light: "./assets/icon.png",
       dark: "./assets/icon-dark.png",
