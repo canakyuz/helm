@@ -101,9 +101,19 @@ export interface AscFetchInput {
   ascKey: ASCKeyConfig;
 }
 
+export interface AscDiag {
+  appStoreVersionsStatus?: number;
+  appStoreVersionsCount?: number;
+  appStoreVersionsError?: string;
+  preReleaseStatus?: number;
+  preReleaseCount?: number;
+  preReleaseError?: string;
+}
+
 export interface AscFetchResult {
   ok: true;
   rows: AscVersionRow[];
+  diag: AscDiag;
 }
 export interface AscFetchError {
   ok: false;
@@ -123,6 +133,7 @@ export async function fetchAscVersions(
 
   const headers = { Authorization: `Bearer ${jwt}` };
   const rows: AscVersionRow[] = [];
+  const diag: AscDiag = {};
 
   // 1. App Store versions (canlı + review + ready durumları)
   try {
@@ -130,15 +141,19 @@ export async function fetchAscVersions(
       `https://api.appstoreconnect.apple.com/v1/apps/${input.appId}/appStoreVersions` +
       `?limit=20&include=build`;
     const res = await fetchWithTimeout(url, { headers });
+    diag.appStoreVersionsStatus = res.status;
     if (res.status === 401) {
-      return { ok: false, status: 401, message: "ASC 401 — Customer Reviews/Apps scope yok olabilir" };
+      return { ok: false, status: 401, message: "ASC 401 — App Manager/Admin scope gerekli (appStoreVersions için)" };
     }
-    if (res.ok) {
+    if (!res.ok) {
+      diag.appStoreVersionsError = `${res.status}: ${(await res.text()).slice(0, 200)}`;
+    } else {
       const page = (await res.json()) as AppStoreVersionsPage;
       const buildById = new Map<string, AscBuildAttrs>();
       for (const inc of page.included ?? []) {
         if (inc.type === "builds" && inc.attributes) buildById.set(inc.id, inc.attributes);
       }
+      let count = 0;
       for (const v of page.data ?? []) {
         const attrs = v.attributes ?? {};
         if (!attrs.versionString) continue;
@@ -151,15 +166,16 @@ export async function fetchAscVersions(
           build_number: build?.version ?? null,
           status: mapAppStoreState(attrs.appStoreState),
           release_date: attrs.createdDate ?? null,
-          release_notes: null, // localizations'tan ayrı çağrı gerekir, skip
+          release_notes: null,
           expires_at: build?.expirationDate ?? null,
           state_changed_at: attrs.createdDate ?? null,
         });
+        count++;
       }
+      diag.appStoreVersionsCount = count;
     }
   } catch (e) {
-    // Network/timeout — sessizce geç; preReleaseVersions yine denenir
-    console.warn(`ASC appStoreVersions: ${e instanceof Error ? e.message : String(e)}`);
+    diag.appStoreVersionsError = e instanceof Error ? e.message : String(e);
   }
 
   // 2. Pre-release versions (TestFlight) + altlarındaki builds
@@ -168,12 +184,16 @@ export async function fetchAscVersions(
       `https://api.appstoreconnect.apple.com/v1/apps/${input.appId}/preReleaseVersions` +
       `?limit=20&include=builds`;
     const res = await fetchWithTimeout(url, { headers });
-    if (res.ok) {
+    diag.preReleaseStatus = res.status;
+    if (!res.ok) {
+      diag.preReleaseError = `${res.status}: ${(await res.text()).slice(0, 200)}`;
+    } else {
       const page = (await res.json()) as PreReleaseVersionsPage;
       const buildById = new Map<string, AscBuildAttrs>();
       for (const inc of page.included ?? []) {
         if (inc.type === "builds" && inc.attributes) buildById.set(inc.id, inc.attributes);
       }
+      let count = 0;
       for (const v of page.data ?? []) {
         const attrs = v.attributes ?? {};
         if (!attrs.version || attrs.platform !== "IOS") continue;
@@ -181,7 +201,6 @@ export async function fetchAscVersions(
         for (const ref of buildIds) {
           const build = buildById.get(ref.id);
           if (!build?.version) continue;
-          // App Store version'da zaten varsa skip (aynı build_number)
           const alreadyInStore = rows.some(
             (r) => r.version === attrs.version && r.build_number === build.version,
           );
@@ -199,12 +218,14 @@ export async function fetchAscVersions(
             expires_at: build.expirationDate ?? null,
             state_changed_at: build.uploadedDate ?? null,
           });
+          count++;
         }
       }
+      diag.preReleaseCount = count;
     }
   } catch (e) {
-    console.warn(`ASC preReleaseVersions: ${e instanceof Error ? e.message : String(e)}`);
+    diag.preReleaseError = e instanceof Error ? e.message : String(e);
   }
 
-  return { ok: true, rows };
+  return { ok: true, rows, diag };
 }

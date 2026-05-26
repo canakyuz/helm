@@ -163,6 +163,7 @@ Deno.serve(async (req) => {
   let iosCount = 0;
   let androidCount = 0;
   const errors: string[] = [];
+  const results: Array<Record<string, unknown>> = [];
 
   for (const raw of properties ?? []) {
     const baseProp = raw as PropertyRow;
@@ -175,12 +176,15 @@ Deno.serve(async (req) => {
       google_play_id: playCfg.package_name || baseProp.google_play_id,
       google_play_country: baseProp.google_play_country,
     };
-    if (!p.app_store_id && !p.google_play_id) continue;
+    if (!p.app_store_id && !p.google_play_id) {
+      results.push({ projectId: p.id, ios: "skip-no-id", android: "skip-no-id" });
+      continue;
+    }
+
+    const propResult: Record<string, unknown> = { projectId: p.id };
 
     try {
-      // iOS sırası: ASC API key varsa → çoklu satır (canlı + TestFlight + builds)
-      //              yoksa → iTunes lookup (sadece canlı, fallback)
-      const hasAscKey = ascCfg.key_id && ascCfg.private_key && p.app_store_id;
+      const hasAscKey = !!(ascCfg.key_id && ascCfg.private_key && p.app_store_id);
       if (hasAscKey) {
         const ascRes = await fetchAscVersions({
           projectId: p.id,
@@ -192,6 +196,7 @@ Deno.serve(async (req) => {
           },
         });
         if (ascRes.ok) {
+          let upserted = 0;
           for (const row of ascRes.rows) {
             const insert: VersionInsert = {
               ...(row as AscVersionRow),
@@ -202,13 +207,28 @@ Deno.serve(async (req) => {
               .upsert(insert, {
                 onConflict: "project_id,source,version,build_number",
               });
-            if (!e) iosCount++;
-            else errors.push(`ios ${p.id} ${row.version}/${row.build_number}: ${e.message}`);
+            if (!e) {
+              iosCount++;
+              upserted++;
+            } else {
+              errors.push(`ios ${p.id} ${row.version}/${row.build_number}: ${e.message}`);
+            }
           }
+          propResult.ios = {
+            method: "asc",
+            rows: ascRes.rows.length,
+            upserted,
+            diag: ascRes.diag,
+          };
         } else {
           errors.push(`ios ${p.id} ASC: ${ascRes.message}`);
+          propResult.ios = {
+            method: "asc",
+            error: ascRes.message,
+            status: ascRes.status,
+          };
         }
-      } else {
+      } else if (p.app_store_id) {
         const apple = await fetchApple(p);
         if (apple) {
           const { error: e } = await hub
@@ -218,28 +238,44 @@ Deno.serve(async (req) => {
             });
           if (!e) iosCount++;
           else errors.push(`ios ${p.id}: ${e.message}`);
+          propResult.ios = { method: "itunes", upserted: e ? 0 : 1 };
+        } else {
+          propResult.ios = { method: "itunes", error: "iTunes lookup boş" };
         }
+      } else {
+        propResult.ios = "skip-no-app-id";
       }
     } catch (e) {
-      errors.push(`ios ${p.id}: ${e instanceof Error ? e.message : String(e)}`);
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(`ios ${p.id}: ${msg}`);
+      propResult.ios = { error: msg };
     }
 
     try {
-      const play = await fetchPlay(p);
-      if (play) {
-        const { error: e } = await hub
-          .from("app_versions")
-          .upsert(play, {
-            onConflict: "project_id,source,version,build_number",
-          });
-        if (!e) androidCount++;
-        else errors.push(`android ${p.id}: ${e.message}`);
+      if (p.google_play_id) {
+        const play = await fetchPlay(p);
+        if (play) {
+          const { error: e } = await hub
+            .from("app_versions")
+            .upsert(play, {
+              onConflict: "project_id,source,version,build_number",
+            });
+          if (!e) androidCount++;
+          else errors.push(`android ${p.id}: ${e.message}`);
+          propResult.android = { method: "scrape", upserted: e ? 0 : 1 };
+        } else {
+          propResult.android = { method: "scrape", error: "Play scrape boş" };
+        }
+      } else {
+        propResult.android = "skip-no-package-id";
       }
     } catch (e) {
-      errors.push(
-        `android ${p.id}: ${e instanceof Error ? e.message : String(e)}`,
-      );
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(`android ${p.id}: ${msg}`);
+      propResult.android = { error: msg };
     }
+
+    results.push(propResult);
   }
 
   return json({
@@ -248,5 +284,6 @@ Deno.serve(async (req) => {
     android: androidCount,
     versions: iosCount + androidCount,
     errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
+    results,
   });
 });
