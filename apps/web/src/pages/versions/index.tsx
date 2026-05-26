@@ -208,11 +208,13 @@ export const VersionsPage = () => {
                   description={
                     versions.length === 0 ? (
                       <>
-                        Property → <strong>Düzenle</strong> ile{" "}
-                        <code>app_store_id</code> ve/veya{" "}
-                        <code>google_play_id</code> gir, sonra{" "}
-                        <strong>Yenile</strong>. iOS = iTunes lookup, Android =
-                        Play Store sayfası scrape.
+                        <strong>Settings → Integrations</strong> → App Store
+                        Connect veya Google Play Developer bağla, ya da Property
+                        → <strong>Düzenle</strong> ile{" "}
+                        <code>app_store_id</code> /{" "}
+                        <code>google_play_id</code> gir. Sonra{" "}
+                        <strong>Yenile</strong> — iOS iTunes lookup, Android
+                        Play Store scrape.
                       </>
                     ) : (
                       "Diğer tab'da olabilir veya bu mağazada bağlantı yok."
