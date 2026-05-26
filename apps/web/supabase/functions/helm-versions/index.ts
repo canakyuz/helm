@@ -1,9 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { fetchAscVersions, type AscVersionRow } from "./asc.ts";
 
-// helm-versions — App Store + Play Store güncel uygulama sürümlerini çeker.
-// Apple: iTunes lookup (public)
-// Google Play: Play Store sayfa HTML scrape (no API key gerekmez)
-// app_versions tablosuna idempotent upsert (PK: project_id, source, version).
+// helm-versions — App Store + Play Store sürümlerini çeker.
+// Apple sırası:
+//   1) app_store_connect integration enabled + key varsa  → ASC API (canlı + TestFlight + status)
+//   2) yoksa → iTunes lookup fallback (sadece canlı)
+// Google Play: Play Store sayfa HTML scrape (key gerekmez)
+// app_versions tablosuna idempotent upsert (PK: project_id, source, version, build_number).
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -30,8 +33,12 @@ interface VersionInsert {
   project_id: string;
   source: "ios" | "android";
   version: string;
+  build_number: string | null;
+  status: string;
   release_date: string | null;
   release_notes: string | null;
+  expires_at: string | null;
+  state_changed_at: string | null;
 }
 
 async function fetchApple(p: PropertyRow): Promise<VersionInsert | null> {
@@ -48,8 +55,12 @@ async function fetchApple(p: PropertyRow): Promise<VersionInsert | null> {
     project_id: p.id,
     source: "ios",
     version: String(app.version),
+    build_number: null,
+    status: "live",
     release_date: app.currentVersionReleaseDate ?? null,
     release_notes: app.releaseNotes ?? null,
+    expires_at: null,
+    state_changed_at: app.currentVersionReleaseDate ?? null,
   };
 }
 
@@ -100,8 +111,12 @@ async function fetchPlay(p: PropertyRow): Promise<VersionInsert | null> {
     project_id: p.id,
     source: "android",
     version,
+    build_number: null,
+    status: "live",
     release_date: releaseDate,
     release_notes: releaseNotes,
+    expires_at: null,
+    state_changed_at: releaseDate,
   };
 }
 
@@ -163,13 +178,47 @@ Deno.serve(async (req) => {
     if (!p.app_store_id && !p.google_play_id) continue;
 
     try {
-      const apple = await fetchApple(p);
-      if (apple) {
-        const { error: e } = await hub
-          .from("app_versions")
-          .upsert(apple, { onConflict: "project_id,source,version" });
-        if (!e) iosCount++;
-        else errors.push(`ios ${p.id}: ${e.message}`);
+      // iOS sırası: ASC API key varsa → çoklu satır (canlı + TestFlight + builds)
+      //              yoksa → iTunes lookup (sadece canlı, fallback)
+      const hasAscKey = ascCfg.key_id && ascCfg.private_key && p.app_store_id;
+      if (hasAscKey) {
+        const ascRes = await fetchAscVersions({
+          projectId: p.id,
+          appId: p.app_store_id!,
+          ascKey: {
+            key_id: ascCfg.key_id!,
+            issuer_id: ascCfg.issuer_id,
+            private_key: ascCfg.private_key!,
+          },
+        });
+        if (ascRes.ok) {
+          for (const row of ascRes.rows) {
+            const insert: VersionInsert = {
+              ...(row as AscVersionRow),
+              release_notes: null,
+            };
+            const { error: e } = await hub
+              .from("app_versions")
+              .upsert(insert, {
+                onConflict: "project_id,source,version,build_number",
+              });
+            if (!e) iosCount++;
+            else errors.push(`ios ${p.id} ${row.version}/${row.build_number}: ${e.message}`);
+          }
+        } else {
+          errors.push(`ios ${p.id} ASC: ${ascRes.message}`);
+        }
+      } else {
+        const apple = await fetchApple(p);
+        if (apple) {
+          const { error: e } = await hub
+            .from("app_versions")
+            .upsert(apple, {
+              onConflict: "project_id,source,version,build_number",
+            });
+          if (!e) iosCount++;
+          else errors.push(`ios ${p.id}: ${e.message}`);
+        }
       }
     } catch (e) {
       errors.push(`ios ${p.id}: ${e instanceof Error ? e.message : String(e)}`);
@@ -180,7 +229,9 @@ Deno.serve(async (req) => {
       if (play) {
         const { error: e } = await hub
           .from("app_versions")
-          .upsert(play, { onConflict: "project_id,source,version" });
+          .upsert(play, {
+            onConflict: "project_id,source,version,build_number",
+          });
         if (!e) androidCount++;
         else errors.push(`android ${p.id}: ${e.message}`);
       }
