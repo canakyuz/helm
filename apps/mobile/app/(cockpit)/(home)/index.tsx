@@ -303,58 +303,97 @@ export default function Cockpit() {
                     : alert.severity === "warn"
                     ? colors.accentWarn
                     : colors.accentInfo;
+                const isLast = idx === topAlerts.length - 1;
                 return (
                   <View
                     key={alert.id}
                     style={{
                       flexDirection: "row",
-                      alignItems: "center",
-                      gap: 10,
-                      padding: 14,
-                      borderTopWidth: idx === 0 ? 0 : 1,
-                      borderTopColor: colors.border,
+                      borderBottomWidth: isLast ? 0 : 1,
+                      borderBottomColor: colors.border,
                     }}
                   >
                     <View
                       style={{
-                        width: 3,
-                        height: 24,
-                        borderRadius: 2,
+                        width: 4,
                         backgroundColor: sevColor,
+                        opacity: alert.severity === "critical" ? 1 : 0.7,
                       }}
                     />
-                    <View className="flex-1">
+                    <View
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        paddingVertical: 12,
+                        paddingHorizontal: 12,
+                        gap: 4,
+                      }}
+                    >
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontFamily: "Geist-600",
+                            fontSize: 13,
+                            color: colors.fgPrimary,
+                            letterSpacing: -0.2,
+                            flex: 1,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {alert.ruleName}
+                        </Text>
+                        {alert.severity === "critical" ? (
+                          <View
+                            style={{
+                              backgroundColor: colors.accentDanger,
+                              paddingHorizontal: 5,
+                              paddingVertical: 1,
+                              borderRadius: 3,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontFamily: "GeistMono-600",
+                                fontSize: 8,
+                                color: colors.bgBase,
+                                letterSpacing: 1.4,
+                              }}
+                            >
+                              CRIT
+                            </Text>
+                          </View>
+                        ) : null}
+                        <Text
+                          style={{
+                            fontFamily: "GeistMono-500",
+                            fontSize: 10,
+                            color: colors.fgSubtle,
+                            flexShrink: 0,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {formatRelativeTime(alert.triggeredAt)}
+                        </Text>
+                      </View>
                       <Text
                         style={{
-                          fontFamily: "Geist-500",
-                          fontSize: 13,
-                          color: colors.fgPrimary,
+                          fontFamily: "GeistMono-500",
+                          fontSize: 10,
+                          color: colors.fgMuted,
+                          letterSpacing: 0.8,
                         }}
                         numberOfLines={1}
                       >
-                        {alert.ruleName}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: "GeistMono-400",
-                          fontSize: 10,
-                          color: colors.fgMuted,
-                          marginTop: 2,
-                          letterSpacing: 0.5,
-                        }}
-                      >
-                        {alert.metric.toUpperCase()} · {alert.condition}
+                        {alert.metric.toUpperCase()} ·{" "}
+                        {alert.condition.toUpperCase()}
                       </Text>
                     </View>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-500",
-                        fontSize: 10,
-                        color: colors.fgSubtle,
-                      }}
-                    >
-                      {formatRelativeTime(alert.triggeredAt)}
-                    </Text>
                   </View>
                 );
               })}
@@ -429,7 +468,6 @@ export default function Cockpit() {
                     }}
                     style={({ pressed }) => ({
                       flexDirection: "row",
-                      alignItems: "center",
                       backgroundColor: pressed
                         ? colors.bgHigher
                         : "transparent",
@@ -437,68 +475,67 @@ export default function Cockpit() {
                       borderBottomColor: colors.border,
                     })}
                   >
-                    {/* Severity stripe — full height */}
+                    {/* Severity stripe */}
                     <View
                       style={{
-                        width: 3,
-                        alignSelf: "stretch",
+                        width: 4,
                         backgroundColor: sevColor,
+                        opacity: issue.level === "fatal" ? 1 : 0.7,
                       }}
                     />
 
-                    {/* Content */}
+                    {/* Content — title+time row 1, meta row 2 */}
                     <View
                       style={{
                         flex: 1,
-                        gap: 3,
+                        gap: 4,
                         paddingVertical: 12,
                         paddingHorizontal: 12,
                         minWidth: 0,
                       }}
                     >
-                      <Text
+                      <View
                         style={{
-                          fontFamily: "Geist-600",
-                          fontSize: 13,
-                          color: colors.fgPrimary,
-                          letterSpacing: -0.2,
-                        }}
-                        numberOfLines={1}
-                      >
-                        {issue.title}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: "GeistMono-500",
-                          fontSize: 9,
-                          color: colors.fgMuted,
-                          letterSpacing: 1,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 10,
                         }}
                       >
-                        {formatInteger(issue.count)} OLAY ·{" "}
-                        {formatInteger(issue.userCount)} KİŞİ
-                      </Text>
-                    </View>
-
-                    {/* Right — relative time, fixed width slot */}
-                    <View
-                      style={{
-                        paddingHorizontal: 14,
-                        paddingVertical: 12,
-                        minWidth: 78,
-                        flexShrink: 0,
-                        alignItems: "flex-end",
-                      }}
-                    >
+                        <Text
+                          style={{
+                            fontFamily: "Geist-600",
+                            fontSize: 13,
+                            color: colors.fgPrimary,
+                            letterSpacing: -0.2,
+                            flex: 1,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {issue.title}
+                        </Text>
+                        <Text
+                          style={{
+                            fontFamily: "GeistMono-500",
+                            fontSize: 10,
+                            color: colors.fgSubtle,
+                            flexShrink: 0,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {formatRelativeTime(issue.lastSeen)}
+                        </Text>
+                      </View>
                       <Text
                         style={{
                           fontFamily: "GeistMono-500",
                           fontSize: 10,
-                          color: colors.fgSubtle,
+                          color: colors.fgMuted,
+                          letterSpacing: 0.8,
                         }}
                         numberOfLines={1}
                       >
-                        {formatRelativeTime(issue.lastSeen)}
+                        {formatInteger(issue.count)} OLAY ·{" "}
+                        {formatInteger(issue.userCount)} KİŞİ
                       </Text>
                     </View>
                   </Pressable>
