@@ -286,7 +286,7 @@ export const ReviewsPage = () => {
               }
               description={
                 reviews.length === 0
-                  ? "Property → Düzenle → App Store ID gir → Yenile. App Store RSS son 50 yorumu çeker."
+                  ? "Property → Düzenle → App Store ID / Package ID gir, Settings → Integrations → App Store Connect veya Google Play Developer bağla. Cron 30dk'da bir çeker; hemen istersen 'Yenile'."
                   : "Filtre/aramayı gevşet."
               }
               compact
