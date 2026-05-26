@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-users — bir projenin Supabase kullanıcılarını listeler.
+// helm-users — bir projenin Supabase kullanıcılarını + profiles join'i listeler.
+// auth.users (admin API) + public.profiles (username, country, city, location)
 // service_role key sunucuda kalır; panel sadece sonucu alır.
 
 const corsHeaders = {
@@ -15,6 +16,17 @@ const json = (body: unknown, status = 200) =>
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+
+type ProfileRow = {
+  id: string;
+  username?: string | null;
+  display_name?: string | null;
+  country?: string | null;
+  country_code?: string | null;
+  city?: string | null;
+  location?: string | null;
+  avatar_url?: string | null;
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -56,23 +68,44 @@ Deno.serve(async (req) => {
     return json({ error: "Supabase entegrasyon config'i eksik" }, 400);
   }
 
-  // Hedef projenin auth kullanıcılarını çek.
   const admin = createClient(cfg.project_url, cfg.service_role_key, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
-  const { data, error: usersError } = await admin.auth.admin.listUsers({
-    page: 1,
-    perPage: 200,
-  });
+
+  // 1. Auth kullanıcılarını çek (ilk 200).
+  const { data: authData, error: usersError } = await admin.auth.admin.listUsers(
+    { page: 1, perPage: 200 },
+  );
   if (usersError) return json({ error: usersError.message }, 500);
 
-  const users = data.users.map((u) => {
+  const userIds = authData.users.map((u) => u.id);
+
+  // 2. profiles tablosundan username + lokasyon (tolerant — tablo yoksa boş bırak).
+  const profileMap = new Map<string, ProfileRow>();
+  if (userIds.length > 0) {
+    try {
+      const { data: profiles } = await admin
+        .from("profiles")
+        .select(
+          "id, username, display_name, country, country_code, city, location, avatar_url",
+        )
+        .in("id", userIds);
+      for (const p of (profiles ?? []) as ProfileRow[]) {
+        profileMap.set(p.id, p);
+      }
+    } catch {
+      // profiles tablosu yoksa veya kolon eksikse — username/location null kalır.
+    }
+  }
+
+  const users = authData.users.map((u) => {
     const meta = (u as { banned_until?: string }).banned_until ?? null;
-    const isBanned =
-      meta !== null && new Date(meta).getTime() > Date.now();
+    const isBanned = meta !== null && new Date(meta).getTime() > Date.now();
     const premium = Boolean(
       (u.app_metadata as { premium?: unknown })?.premium,
     );
+    const profile = profileMap.get(u.id);
+
     return {
       id: u.id,
       email: u.email ?? null,
@@ -82,6 +115,14 @@ Deno.serve(async (req) => {
       banned: isBanned,
       premium,
       providers: (u.identities ?? []).map((i) => i.provider).filter(Boolean),
+      // profiles join
+      username: profile?.username ?? null,
+      display_name: profile?.display_name ?? null,
+      country: profile?.country ?? null,
+      country_code: profile?.country_code ?? null,
+      city: profile?.city ?? null,
+      location: profile?.location ?? null,
+      avatar_url: profile?.avatar_url ?? null,
     };
   });
 
