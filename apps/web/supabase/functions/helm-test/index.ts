@@ -8,6 +8,7 @@ import { fetchStripe } from "../helm-ingest/connectors/stripe.ts";
 import { fetchPlausible } from "../helm-ingest/connectors/plausible.ts";
 import { fetchRest } from "../helm-ingest/connectors/rest.ts";
 import { fetchSentry } from "../helm-ingest/connectors/sentry.ts";
+import { getPlayAccessToken } from "../_shared/play-oauth.ts";
 
 // helm-test — tek bir entegrasyonu çalıştırır, sonucu DB'ye YAZMADAN döner.
 // Panel "Test" butonu için: gelen veriyi gözle inceleyebilmek.
@@ -67,12 +68,46 @@ Deno.serve(async (req) => {
   if (error) return json({ error: error.message }, 500);
   if (!integ) return json({ error: "Entegrasyon bulunamadı" }, 404);
 
+  const t0 = Date.now();
+
+  // Non-metric provider'lar için özel "ping" testleri — connector mantığı yok,
+  // sadece auth/erişim doğrulanır.
+  if (integ.provider === "google_play_developer") {
+    const cfg = (integ.config ?? {}) as Record<string, string | undefined>;
+    if (!cfg.service_account_json) {
+      return json({
+        ok: false,
+        provider: integ.provider,
+        duration_ms: Date.now() - t0,
+        error: "service_account_json eksik",
+      });
+    }
+    try {
+      await getPlayAccessToken(cfg.service_account_json);
+      return json({
+        ok: true,
+        provider: integ.provider,
+        duration_ms: Date.now() - t0,
+        count: 0,
+        points: [],
+        message:
+          "OAuth token başarılı. Yorumlar helm-reviews, sürümler helm-versions tarafından çekilir.",
+      });
+    } catch (e) {
+      return json({
+        ok: false,
+        provider: integ.provider,
+        duration_ms: Date.now() - t0,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
   const connector = CONNECTORS[integ.provider as string];
   if (!connector) {
     return json({ error: `Bilinmeyen sağlayıcı: ${integ.provider}` }, 400);
   }
 
-  const t0 = Date.now();
   try {
     const points = await connector(integ.config ?? {});
     const ms = Date.now() - t0;
