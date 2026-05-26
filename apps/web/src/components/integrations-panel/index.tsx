@@ -40,6 +40,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -82,6 +83,7 @@ interface FieldDef {
   secret?: boolean;
   placeholder?: string;
   optional?: boolean;
+  multiline?: boolean;
 }
 
 // Her sağlayıcının "bağla" formunda istediği alanlar.
@@ -230,6 +232,8 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       key: "private_key",
       label: "Private Key (.p8 içeriği — BEGIN/END dahil)",
       secret: true,
+      multiline: true,
+      placeholder: "-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY-----",
     },
     {
       key: "vendor_number",
@@ -246,19 +250,20 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   google_play_developer: [
     {
       key: "service_account_json",
-      label: "Service Account JSON (IAM rolü: androidpublisher)",
-      placeholder: '{"type":"service_account","client_email":"...","private_key":"..."}',
+      label: "Service Account JSON (Google Cloud → IAM → Service Accounts → Keys → CREATE → JSON; içeriğin TAMAMINI yapıştır)",
+      placeholder: '{\n  "type": "service_account",\n  "project_id": "...",\n  "private_key_id": "...",\n  "private_key": "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n",\n  "client_email": "helm@your-project.iam.gserviceaccount.com",\n  ...\n}',
       secret: true,
+      multiline: true,
     },
     {
       key: "package_name",
-      label: "Package Name (opsiyonel — boşsa property'den okunur)",
+      label: "Package Name (opsiyonel — boşsa properties.google_play_id'den okunur)",
       placeholder: "com.example.app",
       optional: true,
     },
     {
       key: "language_codes",
-      label: "Yorum dilleri (virgülle ayır)",
+      label: "Yorum çeviri dilleri (virgülle, opsiyonel — reviews için, versions etkilenmez)",
       placeholder: "en,tr",
       optional: true,
     },
@@ -547,14 +552,26 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                 {fields.map((f) => (
                   <div key={f.key} className="space-y-2">
                     <Label>{f.label}</Label>
-                    <Input
-                      type={f.secret ? "password" : "text"}
-                      placeholder={f.placeholder}
-                      value={config[f.key] ?? ""}
-                      onChange={(e) =>
-                        setConfig((c) => ({ ...c, [f.key]: e.target.value }))
-                      }
-                    />
+                    {f.multiline ? (
+                      <Textarea
+                        placeholder={f.placeholder}
+                        rows={f.secret ? 8 : 4}
+                        value={config[f.key] ?? ""}
+                        onChange={(e) =>
+                          setConfig((c) => ({ ...c, [f.key]: e.target.value }))
+                        }
+                        className={f.secret ? "font-mono text-xs" : undefined}
+                      />
+                    ) : (
+                      <Input
+                        type={f.secret ? "password" : "text"}
+                        placeholder={f.placeholder}
+                        value={config[f.key] ?? ""}
+                        onChange={(e) =>
+                          setConfig((c) => ({ ...c, [f.key]: e.target.value }))
+                        }
+                      />
+                    )}
                   </div>
                 ))}
               </div>
