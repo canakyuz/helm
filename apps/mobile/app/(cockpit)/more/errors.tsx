@@ -47,120 +47,103 @@ function IssueRow({
   isLast: boolean;
 }) {
   const meta = LEVEL_META[issue.level];
+  // FATAL stripe daha bold (alpha 100), ERROR ve diğerleri stripe %70 — vurgu sırası
+  const stripeColor = issue.level === "fatal" ? colors.accentDanger : meta.color;
 
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
         flexDirection: "row",
-        alignItems: "center",
         backgroundColor: pressed ? colors.bgHigher : "transparent",
         borderBottomWidth: isLast ? 0 : 1,
         borderBottomColor: colors.border,
       })}
     >
-      {/* Sol: severity stripe — satır boyunca uzanır */}
+      {/* Sol severity stripe — satır boyunca */}
       <View
         style={{
-          width: 3,
-          alignSelf: "stretch",
-          backgroundColor: meta.color,
+          width: 4,
+          backgroundColor: stripeColor,
+          opacity: issue.level === "fatal" ? 1 : 0.7,
         }}
       />
 
-      {/* Orta: content */}
+      {/* Content — title+time satır 1, meta satır 2 */}
       <View
         style={{
           flex: 1,
           minWidth: 0,
           paddingVertical: 12,
           paddingHorizontal: 12,
-          gap: 5,
+          gap: 4,
         }}
       >
+        {/* Row 1: title + time */}
         <View
-          style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+          }}
         >
-          <View
-            style={{
-              backgroundColor: `${meta.color}15`,
-              borderWidth: 1,
-              borderColor: `${meta.color}40`,
-              paddingHorizontal: 6,
-              paddingVertical: 1,
-              borderRadius: 4,
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "GeistMono-600",
-                fontSize: 9,
-                color: meta.color,
-                letterSpacing: 1.2,
-              }}
-            >
-              {meta.label}
-            </Text>
-          </View>
           <Text
             style={{
               fontFamily: "Geist-600",
               fontSize: 13,
               color: colors.fgPrimary,
-              flex: 1,
               letterSpacing: -0.2,
+              flex: 1,
             }}
             numberOfLines={1}
           >
             {issue.title}
           </Text>
+          {issue.level === "fatal" ? (
+            <View
+              style={{
+                backgroundColor: colors.accentDanger,
+                paddingHorizontal: 5,
+                paddingVertical: 1,
+                borderRadius: 3,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "GeistMono-600",
+                  fontSize: 8,
+                  color: colors.bgBase,
+                  letterSpacing: 1.4,
+                }}
+              >
+                FATAL
+              </Text>
+            </View>
+          ) : null}
+          <Text
+            style={{
+              fontFamily: "GeistMono-500",
+              fontSize: 10,
+              color: colors.fgSubtle,
+              flexShrink: 0,
+            }}
+            numberOfLines={1}
+          >
+            {formatRelativeTime(issue.lastSeen)}
+          </Text>
         </View>
+
+        {/* Row 2: meta */}
         <Text
           style={{
             fontFamily: "GeistMono-500",
-            fontSize: 9,
+            fontSize: 10,
             color: colors.fgMuted,
             letterSpacing: 0.8,
           }}
           numberOfLines={1}
         >
-          {issue.propertyName?.toUpperCase() ?? "—"} ·{" "}
-          {formatRelativeTime(issue.lastSeen).toUpperCase()}
-        </Text>
-      </View>
-
-      {/* Sağ: stats — sabit width, shrink olmaz */}
-      <View
-        style={{
-          alignItems: "flex-end",
-          gap: 2,
-          paddingHorizontal: 14,
-          paddingVertical: 12,
-          minWidth: 78,
-          flexShrink: 0,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "GeistMono-600",
-            fontSize: 16,
-            color: colors.fgPrimary,
-            fontVariant: ["tabular-nums"],
-            letterSpacing: -0.3,
-          }}
-          numberOfLines={1}
-        >
-          {formatInteger(issue.count)}
-        </Text>
-        <Text
-          style={{
-            fontFamily: "GeistMono-500",
-            fontSize: 9,
-            color: colors.fgSubtle,
-            letterSpacing: 0.8,
-          }}
-          numberOfLines={1}
-        >
+          {formatInteger(issue.count)} OLAY ·{" "}
           {formatInteger(issue.userCount)} KİŞİ
         </Text>
       </View>
