@@ -50,14 +50,19 @@ export interface Property {
 export interface Review {
   id: number;
   project_id: string;
-  source: string;
-  external_id: string | null;
+  source: "appstore" | "playstore";
+  source_method?: "asc" | "rss" | "play" | null;
+  external_id?: string | null;
   author: string | null;
   rating: number | null;
   title: string | null;
   body: string | null;
+  territory?: string | null;
+  app_version?: string | null;
+  developer_response?: string | null;
+  responded_at?: string | null;
   review_date: string | null;
-  fetched_at: string;
+  fetched_at?: string;
 }
 
 /** Sağlayıcıya özel bağlantı konfigürasyonu. v1'de jsonb içinde tutulur. */

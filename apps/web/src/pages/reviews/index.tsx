@@ -48,6 +48,9 @@ export const ReviewsPage = () => {
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
 
+  // A) Platform state
+  const [platform, setPlatform] = useState<"all" | "appstore" | "playstore">("all");
+
   const filters: CrudFilter[] = [];
   if (!isAll) {
     filters.push({ field: "project_id", operator: "eq", value: scope });
@@ -67,7 +70,14 @@ export const ReviewsPage = () => {
   const projectName = (id: string) =>
     projResult.data.find((p) => p.id === id)?.name ?? "—";
 
-  const rated = reviews.filter((r) => r.rating != null);
+  // A) platformFiltered
+  const platformFiltered = useMemo(
+    () => (platform === "all" ? reviews : reviews.filter((r) => r.source === platform)),
+    [reviews, platform],
+  );
+
+  // B) rated / avg / distribution — all from platformFiltered
+  const rated = platformFiltered.filter((r) => r.rating != null);
   const avg = rated.length
     ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
     : 0;
@@ -82,12 +92,21 @@ export const ReviewsPage = () => {
   }, [rated]);
   const distMax = Math.max(1, ...distribution);
 
+  // C) iOS + Android avg — always from full reviews, platform-filter independent
+  const iosRated = reviews.filter((r) => r.source === "appstore" && r.rating != null);
+  const androidRated = reviews.filter((r) => r.source === "playstore" && r.rating != null);
+  const iosAvg = iosRated.length
+    ? iosRated.reduce((s, r) => s + (r.rating ?? 0), 0) / iosRated.length
+    : 0;
+  const androidAvg = androidRated.length
+    ? androidRated.reduce((s, r) => s + (r.rating ?? 0), 0) / androidRated.length
+    : 0;
+
+  // G) filtered — built from platformFiltered
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return reviews.filter((r) => {
-      if (ratingFilter !== "all" && r.rating !== Number(ratingFilter)) {
-        return false;
-      }
+    return platformFiltered.filter((r) => {
+      if (ratingFilter !== "all" && r.rating !== Number(ratingFilter)) return false;
       if (needle) {
         const hay =
           (r.title ?? "").toLowerCase() +
@@ -99,9 +118,9 @@ export const ReviewsPage = () => {
       }
       return true;
     });
-  }, [reviews, ratingFilter, q]);
+  }, [platformFiltered, ratingFilter, q]);
 
-  useEffect(() => setPage(0), [q, ratingFilter, scope, isAll]);
+  useEffect(() => setPage(0), [q, ratingFilter, scope, isAll, platform]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE));
   const pageData = filtered.slice(page * PAGE, (page + 1) * PAGE);
@@ -139,16 +158,27 @@ export const ReviewsPage = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {/* D) 5 stat cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
         <StatCard
-          title="Ortalama Puan"
+          title="Genel Ortalama"
           value={avg ? `${avg.toFixed(2)} / 5` : "—"}
           icon={<Star />}
           loading={query.isLoading}
         />
         <StatCard
+          title="iOS Ortalama"
+          value={iosAvg ? `${iosAvg.toFixed(2)}` : "—"}
+          loading={query.isLoading}
+        />
+        <StatCard
+          title="Android Ortalama"
+          value={androidAvg ? `${androidAvg.toFixed(2)}` : "—"}
+          loading={query.isLoading}
+        />
+        <StatCard
           title="Toplam Yorum"
-          value={reviews.length}
+          value={platformFiltered.length}
           loading={query.isLoading}
         />
         <StatCard
@@ -156,6 +186,23 @@ export const ReviewsPage = () => {
           value={distribution[0] + distribution[1]}
           loading={query.isLoading}
         />
+      </div>
+
+      {/* E) Platform segmented control */}
+      <div className="flex gap-1 rounded-md border bg-muted/30 p-1 w-fit">
+        {(["all", "appstore", "playstore"] as const).map((p) => (
+          <Button
+            key={p}
+            variant={platform === p ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setPlatform(p)}
+          >
+            {p === "all" ? "Tümü" : p === "appstore" ? "iOS" : "Android"}
+            <span className="ml-2 text-xs opacity-70">
+              {p === "all" ? reviews.length : reviews.filter((r) => r.source === p).length}
+            </span>
+          </Button>
+        ))}
       </div>
 
       <Card>
@@ -195,9 +242,10 @@ export const ReviewsPage = () => {
         </CardContent>
       </Card>
 
+      {/* F) Card başlığı "Yorumlar" */}
       <Card>
         <CardHeader>
-          <CardTitle>Yorumlar (App Store)</CardTitle>
+          <CardTitle>Yorumlar</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row">
