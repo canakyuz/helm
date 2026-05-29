@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { Text, View } from "react-native";
 
-import { colors } from "~/theme/tokens";
+import { colors, type } from "~/theme/tokens";
 import { AreaChart, Ring } from "~/components/liquid/charts";
 import { CountUp, Delta, Eyebrow } from "~/components/liquid/primitives";
 
@@ -31,7 +31,7 @@ export function MiniStat({ label, value, delta, invert }: HeroStat) {
   return (
     <View style={{ flex: 1, gap: 4 }}>
       <Eyebrow size={9}>{label}</Eyebrow>
-      <Text style={{ fontFamily: MONO_600, fontSize: 16, color: colors.fgPrimary, letterSpacing: -0.3 }}>
+      <Text style={{ fontFamily: MONO_600, fontSize: type.stat, lineHeight: 24, color: colors.fgPrimary, letterSpacing: -0.3 }}>
         {value}
       </Text>
       {delta != null ? <Delta value={delta} size={10} invert={invert ?? false} /> : null}
@@ -101,20 +101,22 @@ export function OpenHero({
         }}
       >
         <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 10 }}>
+          <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
             <CountUp
               value={value}
               format={format}
+              fitOneLine
               style={{
+                flexShrink: 1,
                 fontFamily: MONO_600,
-                fontSize: ring ? 46 : 56,
-                lineHeight: ring ? 50 : 60,
-                letterSpacing: -2,
+                fontSize: ring ? 34 : type.hero,
+                lineHeight: ring ? 38 : 44,
+                letterSpacing: -1,
                 color: colors.fgPrimary,
               }}
             />
             {delta != null ? (
-              <View style={{ marginBottom: ring ? 6 : 9 }}>
+              <View style={{ marginBottom: 6 }}>
                 <Delta value={delta} size={13} invert={deltaInvert ?? false} />
               </View>
             ) : null}

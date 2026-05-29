@@ -275,7 +275,7 @@ export default function Overview() {
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <LiquidHeader />
         <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 18 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -326,7 +326,7 @@ export default function Overview() {
           />
 
           {/* monthly goal — DEMO */}
-          <LiquidGlass padding={14}>
+          <LiquidGlass padding={12}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                 <Eyebrow>{demoData.goal.label}</Eyebrow>

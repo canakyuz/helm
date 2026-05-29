@@ -151,12 +151,14 @@ export function CountUp({
   value,
   format,
   style,
-  duration = 900,
+  duration = 800,
+  fitOneLine = false,
 }: {
   value: number;
   format: (n: number) => string;
   style?: object;
   duration?: number;
+  fitOneLine?: boolean;
 }) {
   const [v, setV] = useState(0);
   const raf = useRef<number | null>(null);
@@ -184,7 +186,15 @@ export function CountUp({
       clearTimeout(fb);
     };
   }, [value, duration]);
-  return <Text style={style}>{format(v)}</Text>;
+  return (
+    <Text
+      style={style}
+      numberOfLines={fitOneLine ? 1 : undefined}
+      adjustsFontSizeToFit={fitOneLine}
+    >
+      {format(v)}
+    </Text>
+  );
 }
 
 export function Seg<T extends string>({

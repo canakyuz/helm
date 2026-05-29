@@ -34,14 +34,40 @@ export const fonts = {
   monoSemibold: "GeistMono-600",
 } as const;
 
-// Liquid-glass design recipe (prototype: liquid.css :root)
+// Liquid-glass design recipe — see docs/superpowers/specs/2026-05-30-liquid-glass-ruleset.md
 export const glass = {
-  tint: "rgba(255,255,255,0.055)",
+  tint: "rgba(255,255,255,0.045)",
   border: "rgba(255,255,255,0.10)",
-  sheen: "rgba(255,255,255,0.12)",
-  hairline: "rgba(255,255,255,0.06)",
+  sheen: "rgba(255,255,255,0.08)",
+  hairline: "rgba(255,255,255,0.07)",
   blurIntensity: 60,
-  radius: 28,
-  radiusSm: 18,
-  gap: 13,
+  radius: 22,
+  radiusSm: 14,
+} as const;
+
+// 4pt spacing scale — the ONLY allowed spacing values (no arbitrary/half px).
+export const space = {
+  xs2: 2,
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+} as const;
+
+// Type scale — 6 steps, no half points.
+export const type = {
+  label: 10,
+  bodySm: 12,
+  body: 13,
+  emph: 15,
+  stat: 20,
+  hero: 40,
+} as const;
+
+// Corner radii.
+export const radius = {
+  lg: 22,
+  md: 14,
+  pill: 999,
 } as const;
