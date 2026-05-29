@@ -15,12 +15,20 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
+      "env": {
+        "EXPO_APPLE_TEAM_ID": "AZPJSKX9C9",
+        "EAS_BUILD_NO_EXPO_GO_WARNING": "true"
+      },
       "ios": {
         "resourceClass": "m-medium"
       }
     },
     "production": {
       "channel": "production",
+      "env": {
+        "EXPO_APPLE_TEAM_ID": "AZPJSKX9C9",
+        "EAS_BUILD_NO_EXPO_GO_WARNING": "true"
+      },
       "ios": {
         "resourceClass": "m-medium"
       }
