@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -83,7 +83,9 @@ export function CardSection({
 
 function Chevron({ open }: { open: boolean }) {
   const r = useSharedValue(open ? 90 : 0);
-  r.value = withTiming(open ? 90 : 0, { duration: 220 });
+  useEffect(() => {
+    r.value = withTiming(open ? 90 : 0, { duration: 220 });
+  }, [open, r]);
   const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${r.value}deg` }] }));
   return (
     <Animated.View style={style}>

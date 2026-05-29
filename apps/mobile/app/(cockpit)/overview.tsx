@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useAlerts, useAckAlert, type Alert } from "~/hooks/use-alerts";
-import { useProperties, type Property } from "~/hooks/use-properties";
+import { useProperties, type Property, type PropertyStatus } from "~/hooks/use-properties";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { demoData } from "~/lib/demo-data";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
@@ -37,11 +37,23 @@ const PROJECT_GLYPHS = ["◆", "✦", "❖", "◇", "●"];
 
 type Kind = "All" | "Games" | "Apps" | "Web";
 
-function statusColor(s: Property["status"]): string {
-  return s === "healthy" ? colors.green : s === "down" ? colors.accentDanger : colors.accentWarn;
+const STATUS_COLOR: Record<PropertyStatus, string> = {
+  healthy: colors.green,
+  stale: colors.accentWarn,
+  down: colors.accentDanger,
+  unknown: colors.fgSubtle,
+};
+const STATUS_LABEL: Record<PropertyStatus, string> = {
+  healthy: "Healthy",
+  stale: "Stale",
+  down: "Down",
+  unknown: "Unknown",
+};
+function statusColor(s: PropertyStatus): string {
+  return STATUS_COLOR[s];
 }
-function statusLabel(s: Property["status"]): string {
-  return s === "healthy" ? "Healthy" : s === "down" ? "Down" : "Watch";
+function statusLabel(s: PropertyStatus): string {
+  return STATUS_LABEL[s];
 }
 function matchesKind(p: Property, k: Kind): boolean {
   if (k === "All") return true;
@@ -146,13 +158,17 @@ function ProjectRows({
   );
 }
 
-function AlertRows() {
-  const alerts = useAlerts();
-  const ack = useAckAlert();
+function AlertRows({
+  list,
+  ack,
+  onDismiss,
+}: {
+  list: Alert[];
+  ack: ReturnType<typeof useAckAlert>;
+  onDismiss: (id: number) => void;
+}) {
   const [openId, setOpenId] = useState<number | null>(null);
-  const [dismissed, setDismissed] = useState<Record<number, boolean>>({});
 
-  const list = (alerts.data ?? []).filter((a) => !dismissed[a.id]);
   if (list.length === 0) return <EmptyHint>ALL CLEAR · NO OPEN ALERTS</EmptyHint>;
 
   return (
@@ -209,10 +225,10 @@ function AlertRows() {
                       onPress={() => {
                         haptic.tap();
                         ack.mutate(a.id);
-                        setDismissed((d) => ({ ...d, [a.id]: true }));
+                        onDismiss(a.id);
                       }}
                     />
-                    <ActionBtn label="MUTE" onPress={() => setDismissed((d) => ({ ...d, [a.id]: true }))} />
+                    <ActionBtn label="MUTE" onPress={() => onDismiss(a.id)} />
                   </View>
                 }
               />
@@ -230,8 +246,10 @@ export default function Overview() {
   const fmt = useFormatCurrency();
   const kpis = useCockpitKpis();
   const alerts = useAlerts();
+  const ack = useAckAlert();
   const properties = useProperties();
   const revenue = useMetricDetail("ad_revenue");
+  const [dismissedAlerts, setDismissedAlerts] = useState<Record<number, boolean>>({});
 
   if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
   if (kpis.isError || !kpis.data) return <ScreenStatus label="Cockpit yüklenemedi" tone="danger" />;
@@ -242,6 +260,8 @@ export default function Overview() {
   const yest = revenue.data?.yesterday ?? 0;
   const revDelta = yest > 0 ? ((today - yest) / yest) * 100 : 0;
   const goalPct = Math.round((demoData.goal.current / demoData.goal.target) * 100);
+  const openAlerts = (alerts.data ?? []).filter((a) => !dismissedAlerts[a.id]);
+  const dismissAlert = (id: number) => setDismissedAlerts((d) => ({ ...d, [id]: true }));
 
   const stats: HeroStat[] = [
     { label: "DAU", value: formatInteger(data.dau), delta: data.dauDelta ?? undefined },
@@ -265,6 +285,7 @@ export default function Overview() {
                 haptic.tap();
                 kpis.refetch();
                 alerts.refetch();
+                properties.refetch();
                 revenue.refetch();
               }}
             />
@@ -331,8 +352,8 @@ export default function Overview() {
               <ProjectRows properties={properties} fmt={fmt} />
             </CardSection>
             <FullDivider />
-            <CardSection index="02" title="Needs attention" count={(alerts.data ?? []).length}>
-              <AlertRows />
+            <CardSection index="02" title="Needs attention" count={openAlerts.length}>
+              <AlertRows list={openAlerts} ack={ack} onDismiss={dismissAlert} />
               <View style={{ height: 4 }} />
             </CardSection>
           </LiquidGlass>

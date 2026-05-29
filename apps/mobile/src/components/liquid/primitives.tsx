@@ -158,7 +158,7 @@ export function CountUp({
   style?: object;
   duration?: number;
 }) {
-  const [v, setV] = useState(value);
+  const [v, setV] = useState(0);
   const raf = useRef<number | null>(null);
   useEffect(() => {
     let start: number | null = null;
