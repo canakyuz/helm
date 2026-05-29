@@ -14,6 +14,8 @@ export {
   SearchInput,
   EmptyHint,
   DemoChip,
+  Stars,
+  Toggle,
 } from "./primitives";
 export { OpenHero, MiniStat, Sep } from "./hero";
 export type { HeroStat } from "./hero";
