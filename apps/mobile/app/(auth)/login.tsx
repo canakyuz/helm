@@ -1,12 +1,24 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { supabase } from "~/lib/supabase";
 import { Icon } from "~/components/ui/icon";
-import { colors } from "~/theme/tokens";
+import { colors, type } from "~/theme/tokens";
+import { LiquidBackground, LiquidGlass, Eyebrow } from "~/components/liquid";
 
 type Status = "idle" | "signing" | "error";
+
+const FIELD = {
+  backgroundColor: "rgba(255,255,255,0.04)",
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.08)",
+  borderRadius: 14,
+} as const;
+
+function FieldLabel({ children }: { children: string }) {
+  return <Eyebrow size={9}>{children}</Eyebrow>;
+}
 
 export default function Login() {
   const [email, setEmail] = useState("canakyuz23@gmail.com");
@@ -33,226 +45,136 @@ export default function Login() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgBase, paddingHorizontal: 24 }}>
-      <View style={{ flex: 1, justifyContent: "center", gap: 28 }}>
-        {/* Hero */}
-        <View style={{ gap: 10 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <View
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: colors.accent,
-                shadowColor: colors.accent,
-                shadowOpacity: 1,
-                shadowRadius: 10,
-                shadowOffset: { width: 0, height: 0 },
-              }}
-            />
-            <Text
-              style={{
-                fontFamily: "GeistMono-500",
-                fontSize: 10,
-                letterSpacing: 2,
-                color: colors.fgMuted,
-              }}
-            >
-              FOUNDER'S BRIDGE · LIVE
-            </Text>
-          </View>
-          <Text
-            style={{
-              fontFamily: "Geist-700",
-              fontSize: 56,
-              color: colors.fgPrimary,
-              letterSpacing: -3,
-              lineHeight: 60,
-            }}
-          >
-            helm
-          </Text>
-          <Text
-            style={{
-              fontFamily: "Geist-400",
-              fontSize: 14,
-              color: colors.fgMuted,
-              letterSpacing: -0.2,
-              lineHeight: 20,
-            }}
-          >
-            Cockpit'in cep yoldaşı. Portföyün, kuruşuna kadar.
-          </Text>
-        </View>
-
-        {/* Form */}
-        <View style={{ gap: 14 }}>
-          <View style={{ gap: 6 }}>
-            <Text
-              style={{
-                fontFamily: "GeistMono-500",
-                fontSize: 9,
-                letterSpacing: 1.8,
-                color: colors.fgMuted,
-              }}
-            >
-              E-POSTA
-            </Text>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="can@example.com"
-              placeholderTextColor={colors.fgSubtle}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              style={{
-                backgroundColor: colors.bgElevated,
-                color: colors.fgPrimary,
-                borderWidth: 1,
-                borderColor: colors.border,
-                borderRadius: 12,
-                paddingHorizontal: 14,
-                paddingVertical: 13,
-                fontFamily: "Geist-500",
-                fontSize: 15,
-              }}
-            />
-          </View>
-
-          <View style={{ gap: 6 }}>
-            <Text
-              style={{
-                fontFamily: "GeistMono-500",
-                fontSize: 9,
-                letterSpacing: 1.8,
-                color: colors.fgMuted,
-              }}
-            >
-              ŞİFRE
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: colors.bgElevated,
-                borderWidth: 1,
-                borderColor: colors.border,
-                borderRadius: 12,
-              }}
-            >
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="••••••••"
-                placeholderTextColor={colors.fgSubtle}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onSubmitEditing={signIn}
-                returnKeyType="go"
-                style={{
-                  flex: 1,
-                  color: colors.fgPrimary,
-                  paddingHorizontal: 14,
-                  paddingVertical: 13,
-                  fontFamily: "Geist-500",
-                  fontSize: 15,
-                }}
-              />
-              <Pressable
-                onPress={() => setShowPassword((v) => !v)}
-                hitSlop={10}
-                style={{ paddingHorizontal: 14, paddingVertical: 13 }}
-              >
-                <Icon
-                  name={showPassword ? "eyeOff" : "eye"}
-                  size={16}
-                  color={colors.fgMuted}
-                />
-              </Pressable>
+    <View style={{ flex: 1, backgroundColor: colors.bgBase }}>
+      <LiquidBackground />
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1, justifyContent: "center", paddingHorizontal: 24, gap: 24 }}>
+          {/* Brand */}
+          <View style={{ gap: 12 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <View style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: colors.accent }} />
+              <Eyebrow>Founder's bridge · live</Eyebrow>
             </View>
-          </View>
-
-          <Pressable
-            onPress={signIn}
-            disabled={status === "signing"}
-            style={{
-              backgroundColor: colors.accent,
-              borderRadius: 12,
-              paddingVertical: 15,
-              alignItems: "center",
-              flexDirection: "row",
-              justifyContent: "center",
-              gap: 10,
-              opacity: status === "signing" ? 0.5 : 1,
-              marginTop: 4,
-            }}
-          >
-            {status === "signing" ? (
-              <ActivityIndicator color={colors.bgBase} />
-            ) : (
-              <>
-                <Text
-                  style={{
-                    fontFamily: "GeistMono-600",
-                    fontSize: 12,
-                    color: colors.bgBase,
-                    letterSpacing: 2,
-                  }}
-                >
-                  GİRİŞ YAP
-                </Text>
-                <Icon name="chevronRight" size={14} color={colors.bgBase} />
-              </>
-            )}
-          </Pressable>
-
-          {status === "error" && errorMsg ? (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                paddingVertical: 4,
-              }}
-            >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View
                 style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 3,
-                  backgroundColor: colors.accentDanger,
-                }}
-              />
-              <Text
-                style={{
-                  fontFamily: "GeistMono-500",
-                  fontSize: 11,
-                  color: colors.accentDanger,
-                  letterSpacing: 0.3,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  backgroundColor: colors.accent,
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                {errorMsg}
+                <Text style={{ fontFamily: "GeistMono-600", fontSize: 24, color: colors.accentInk }}>h</Text>
+              </View>
+              <Text style={{ fontFamily: "Geist-700", fontSize: 44, color: colors.fgPrimary, letterSpacing: -2, lineHeight: 46 }}>
+                helm
               </Text>
             </View>
-          ) : null}
-        </View>
+            <Text style={{ fontFamily: "Geist-400", fontSize: type.body, color: colors.fgMuted, lineHeight: 19 }}>
+              Cockpit'in cep yoldaşı. Portföyün, kuruşuna kadar.
+            </Text>
+          </View>
 
-        {/* Footer */}
-        <View style={{ alignItems: "center", paddingTop: 8 }}>
-          <Text
-            style={{
-              fontFamily: "GeistMono-500",
-              fontSize: 9,
-              letterSpacing: 1.5,
-              color: colors.fgSubtle,
-            }}
-          >
-            v0.1.0 · TESTFLIGHT
-          </Text>
+          {/* Form card */}
+          <LiquidGlass padding={20}>
+            <View style={{ gap: 16 }}>
+              <View style={{ gap: 8 }}>
+                <FieldLabel>E-POSTA</FieldLabel>
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="can@example.com"
+                  placeholderTextColor={colors.fgSubtle}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                  style={{
+                    ...FIELD,
+                    color: colors.fgPrimary,
+                    paddingHorizontal: 14,
+                    paddingVertical: 13,
+                    fontFamily: "Geist-500",
+                    fontSize: 15,
+                  }}
+                />
+              </View>
+
+              <View style={{ gap: 8 }}>
+                <FieldLabel>ŞİFRE</FieldLabel>
+                <View style={{ ...FIELD, flexDirection: "row", alignItems: "center" }}>
+                  <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="••••••••"
+                    placeholderTextColor={colors.fgSubtle}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onSubmitEditing={signIn}
+                    returnKeyType="go"
+                    style={{
+                      flex: 1,
+                      color: colors.fgPrimary,
+                      paddingHorizontal: 14,
+                      paddingVertical: 13,
+                      fontFamily: "Geist-500",
+                      fontSize: 15,
+                    }}
+                  />
+                  <Pressable onPress={() => setShowPassword((v) => !v)} hitSlop={10} style={{ paddingHorizontal: 14, paddingVertical: 13 }}>
+                    <Icon name={showPassword ? "eyeOff" : "eye"} size={16} color={colors.fgMuted} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <Pressable
+                onPress={signIn}
+                disabled={status === "signing"}
+                style={{
+                  backgroundColor: colors.accent,
+                  borderRadius: 14,
+                  paddingVertical: 15,
+                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 8,
+                  opacity: status === "signing" ? 0.5 : 1,
+                  marginTop: 4,
+                }}
+              >
+                {status === "signing" ? (
+                  <ActivityIndicator color={colors.accentInk} />
+                ) : (
+                  <>
+                    <Text style={{ fontFamily: "GeistMono-600", fontSize: type.bodySm, color: colors.accentInk, letterSpacing: 1.6 }}>
+                      GİRİŞ YAP
+                    </Text>
+                    <Icon name="chevronRight" size={14} color={colors.accentInk} />
+                  </>
+                )}
+              </Pressable>
+
+              {status === "error" && errorMsg ? (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accentDanger }} />
+                  <Text style={{ fontFamily: "GeistMono-500", fontSize: type.bodySm, color: colors.accentDanger, letterSpacing: 0.3 }}>
+                    {errorMsg}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </LiquidGlass>
+
+          {/* Footer */}
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontFamily: "GeistMono-500", fontSize: 9, letterSpacing: 1.5, color: colors.fgSubtle }}>
+              v1.0.0 · TESTFLIGHT
+            </Text>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
