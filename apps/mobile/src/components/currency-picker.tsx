@@ -1,6 +1,8 @@
 import { View, Text, Pressable } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { usePreferences, preferences, type Currency } from "~/lib/preferences";
+import { pushWidgetSnapshot } from "~/lib/push-widget-snapshot";
 import { useFxRates } from "~/hooks/use-fx-rates";
 import { haptic } from "~/lib/haptics";
 import { colors } from "~/theme/tokens";
@@ -13,6 +15,7 @@ const CURRENCIES: Array<{ code: Currency; symbol: string }> = [
 ];
 
 export function CurrencyPicker() {
+  const queryClient = useQueryClient();
   const { currency } = usePreferences();
   const { data: rates, isLoading } = useFxRates();
 
@@ -66,6 +69,7 @@ export function CurrencyPicker() {
               onPress={() => {
                 haptic.selection();
                 preferences.setCurrency(c.code);
+                pushWidgetSnapshot(queryClient);
               }}
               style={{
                 flex: 1,
