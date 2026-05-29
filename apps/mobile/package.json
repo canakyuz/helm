@@ -3,9 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "main": "expo-router/entry",
+  "expo": {
+    "autolinking": {
+      "nativeModulesDir": "./modules"
+    }
+  },
   "scripts": {
     "start": "expo start",
     "ios": "expo run:ios",
+    "ios:codegen": "bash ./scripts/ios-codegen.sh",
+    "prebuild:ios": "node ./plugins/patch-extension-storage-file.js && expo prebuild -p ios --clean && node ./plugins/sync-ios-app-group-entitlements.js && node ./plugins/patch-ios-app-groups-build.js && node ./plugins/patch-ios-widget-scheme.js && node ./plugins/fix-cocoapods-modulemaps.js",
+    "ios:verify-widget": "bash ./scripts/verify-widget-embedded.sh",
+    "widget:preview": "open targets/widget/preview.html",
     "android": "expo run:android",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
@@ -13,12 +22,16 @@
     "build:preview": "eas build -p ios --profile preview",
     "submit:preview": "eas submit -p ios --latest",
     "update:preview": "eas update --branch preview",
-    "postinstall": "install-skia"
+    "postinstall": "install-skia && node ./plugins/patch-extension-storage-file.js && node ./plugins/fix-cocoapods-modulemaps.js",
+    "pod:fix": "node ./plugins/fix-cocoapods-modulemaps.js",
+    "patch:ios-app-groups": "node ./plugins/patch-ios-app-groups-build.js",
+    "patch:widget-storage": "node ./plugins/patch-extension-storage-file.js"
   },
   "trustedDependencies": [
     "@shopify/react-native-skia"
   ],
   "dependencies": {
+    "@bacons/apple-targets": "^4.0.7",
     "@expo-google-fonts/geist": "^0.4.2",
     "@expo-google-fonts/geist-mono": "^0.4.2",
     "@gorhom/bottom-sheet": "^5.2.14",
@@ -27,14 +40,15 @@
     "@supabase/supabase-js": "^2.45.0",
     "@tanstack/react-query": "^5.59.0",
     "burnt": "^0.13.0",
+    "helm-app-group": "file:./modules/helm-app-group",
     "expo": "^56.0.4",
     "expo-blur": "~56.0.3",
     "expo-constants": "~56.0.15",
     "expo-font": "^56.0.5",
+    "expo-glass-effect": "~56.0.4",
     "expo-haptics": "~56.0.3",
     "expo-image": "~56.0.9",
     "expo-linking": "~56.0.11",
-    "expo-maps": "~56.0.6",
     "expo-notifications": "~56.0.13",
     "expo-router": "~56.2.6",
     "expo-secure-store": "~56.0.4",
