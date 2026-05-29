@@ -10,9 +10,10 @@ web-build/
 .env.local
 .env.*.local
 
-# Build artifacts
-ios/
-android/
+# Build artifacts (root prebuild only; keep expo module native sources)
+/ios/
+/android/
+!modules/**/ios/
 *.ipa
 *.apk
 *.aab
