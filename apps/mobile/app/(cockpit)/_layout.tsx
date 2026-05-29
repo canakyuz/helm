@@ -13,42 +13,38 @@ export default function CockpitLayout() {
 
   return (
     <NativeTabs
-      labelStyle={{
-        fontFamily: "GeistMono-500",
-        fontSize: 10,
-      }}
-      tintColor={colors.fgPrimary}
+      labelStyle={{ fontFamily: "GeistMono-500", fontSize: 10 }}
+      tintColor={colors.accent}
       blurEffect="systemChromeMaterialDark"
     >
-      <NativeTabs.Trigger name="(home)">
+      <NativeTabs.Trigger name="overview">
         <NativeTabs.Trigger.Icon
           sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis" }}
         />
-        <NativeTabs.Trigger.Label>Cockpit</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Overview</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="(growth)">
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "person.2", selected: "person.2.fill" }}
-        />
-        <NativeTabs.Trigger.Label>Growth</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="revenue">
+        <NativeTabs.Trigger.Icon sf={{ default: "creditcard", selected: "creditcard.fill" }} />
+        <NativeTabs.Trigger.Label>Revenue</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="(reviews)">
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "star", selected: "star.fill" }}
-        />
-        <NativeTabs.Trigger.Label>Reviews</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="analytics">
+        <NativeTabs.Trigger.Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
+        <NativeTabs.Trigger.Label>Analytics</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="more">
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "square.grid.2x2", selected: "square.grid.2x2.fill" }}
-        />
-        <NativeTabs.Trigger.Label>Daha</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="health">
+        <NativeTabs.Trigger.Icon sf={{ default: "heart", selected: "heart.fill" }} />
+        <NativeTabs.Trigger.Label>Health</NativeTabs.Trigger.Label>
         {openCount > 0 ? (
           <NativeTabs.Trigger.Badge>{String(openCount)}</NativeTabs.Trigger.Badge>
         ) : null}
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Icon sf={{ default: "gearshape", selected: "gearshape.fill" }} />
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
