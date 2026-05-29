@@ -28,9 +28,10 @@ export function SparkLine({ data, width, height, color = "#22c55e" }: Props) {
 
     const line = Skia.Path.Make();
     const area = Skia.Path.Make();
-    line.moveTo(points[0]!.x, points[0]!.y);
-    area.moveTo(points[0]!.x, height);
-    area.lineTo(points[0]!.x, points[0]!.y);
+    const first = points[0]!;
+    line.moveTo(first.x, first.y);
+    area.moveTo(first.x, height);
+    area.lineTo(first.x, first.y);
 
     for (let i = 1; i < points.length; i++) {
       const prev = points[i - 1]!;
