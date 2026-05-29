@@ -13,6 +13,7 @@ bun install
 cp .env.example .env
 # EXPO_PUBLIC_HELM_SUPABASE_URL = helm hub URL
 # EXPO_PUBLIC_HELM_SUPABASE_ANON_KEY = helm hub anon key
+# EXPO_APPLE_TEAM_ID = Apple Developer Team ID (widget prebuild için)
 
 # Tipleri üret (opsiyonel ama önerilir)
 bun run gen:types
@@ -42,8 +43,17 @@ eas device:create          # kendi iPhone'unu kaydet
 Build + submit:
 
 ```bash
-bun run build:preview      # eas build -p ios --profile preview
-bun run submit:preview     # TestFlight'a yükler
+bun run build:preview      # eas build -p ios --profile preview (cloud — aylık kota)
+bun run submit:preview     # son cloud build → TestFlight
+```
+
+Cloud kotası doluysa **yerel build + submit** (kota harcamaz):
+
+```bash
+make ios-local-release              # preview → dist/helm-ios-preview.ipa → TestFlight
+make ios-local-build                # sadece IPA
+make ios-submit IPA=./dist/foo.ipa  # mevcut IPA yükle
+make EAS_PROFILE=production ios-local-release
 ```
 
 JS-only OTA update (build yok, doğrudan kullanıcıya):
@@ -51,6 +61,53 @@ JS-only OTA update (build yok, doğrudan kullanıcıya):
 ```bash
 bun run update:preview -- --message "WES-XXX neden"
 ```
+
+## iOS Home Widget (WidgetKit)
+
+Bu proje `@bacons/apple-targets` ile iOS home widget extension üretir.
+
+İlk kurulum:
+
+```bash
+# Native iOS proje üret (widget target dahil)
+npx expo prebuild -p ios --clean
+
+# iOS build
+bun ios
+```
+
+Widget veri kaynağı:
+- App tarafı payload yazımı: `src/lib/widget-sync.ts`
+- Widget target config: `targets/widget/expo-target.config.js`
+- Widget Swift kaynakları: `targets/widget/*`
+- App Group: `group.com.canakyuz.helmmobile.shared` (main app + extension — `app.config.ts` `ios.entitlements`)
+- Widget sizes (home): **Small / Medium / Large** = dark glass total revenue board
+- Lock screen: **Inline** (`helm · ₺… · Δ%`) · **Rectangular** (total + ad/pay) · **Circular** (compact total + gauge)
+- Add lock screen: long-press lock screen → Customize → Lock Screen → add **helm** widget
+- Sync: `useWidgetSync()` in `app/(cockpit)/_layout.tsx` (any cockpit tab + app foreground)
+
+### EAS build (app + widget extension)
+
+Widget eklentisi ikinci bir iOS target olduğu için **ilk kez** credential kurulumu interaktif yapılmalı:
+
+```bash
+# 1) İki target için provisioning (helm + HelmWidgetExtension)
+eas credentials -p ios
+
+# veya doğrudan ilk production build (non-interactive OLMADAN)
+eas build -p ios --profile production
+```
+
+Credential’lar hazır olduktan sonra CI/non-interactive çalışır:
+
+```bash
+eas build -p ios --profile production --non-interactive
+eas submit -p ios --profile production --latest --non-interactive
+```
+
+`ios.appleTeamId` EAS ile aynı team: `AZPJSKX9C9`.
+
+Apple Developer → Identifiers → **App Groups** (App IDs değil) → `group.com.canakyuz.helmmobile.shared` oluştur → `com.canakyuz.helmmobile` ve `com.canakyuz.helmmobile.helmwidgetextension` App ID’lerine bağla.
 
 ## Mimari
 
