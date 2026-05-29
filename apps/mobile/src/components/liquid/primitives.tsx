@@ -352,6 +352,42 @@ export function EmptyHint({ children }: { children: string }) {
   );
 }
 
+// star rating row (reviews)
+export function Stars({ n, size = 11 }: { n: number; size?: number }) {
+  return (
+    <View style={{ flexDirection: "row", gap: 1.5 }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Text
+          key={i}
+          style={{ fontSize: size, color: i <= n ? colors.accentWarn : colors.fgSubtle, lineHeight: size + 2 }}
+        >
+          {i <= n ? "★" : "☆"}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
+// settings toggle
+export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <Pressable
+      onPress={() => onChange(!on)}
+      style={{
+        width: 44,
+        height: 26,
+        borderRadius: 99,
+        backgroundColor: on ? colors.accent : "rgba(255,255,255,0.13)",
+        padding: 3,
+        flexDirection: "row",
+        justifyContent: on ? "flex-end" : "flex-start",
+      }}
+    >
+      <View style={{ width: 20, height: 20, borderRadius: 99, backgroundColor: "#fff" }} />
+    </Pressable>
+  );
+}
+
 // small DEMO chip — required next to any demo-sourced value
 export function DemoChip() {
   return (
