@@ -42,7 +42,6 @@ export function RichMetricTile({
 
   const nowValue = isLoading ? "—" : formatNumber(data?.today ?? 0);
 
-  // Delta vs dün — yüzde + yön
   const delta = useMemo(() => {
     if (!data || data.yesterday === 0) return null;
     return ((data.today - data.yesterday) / data.yesterday) * 100;
@@ -60,7 +59,6 @@ export function RichMetricTile({
         overflow: "hidden",
       }}
     >
-      {/* Skia background — gradient mesh + accent corner glow */}
       <Canvas
         style={{
           position: "absolute",
@@ -78,7 +76,6 @@ export function RichMetricTile({
               colors={[colors.bgElevated, colors.bgSurface]}
             />
           </RoundedRect>
-          {/* Sağ üst köşede accent glow */}
           <RoundedRect x={0} y={0} width={width} height={CARD_HEIGHT} r={CARD_RADIUS}>
             <LinearGradient
               start={vec(width, 0)}
@@ -89,7 +86,6 @@ export function RichMetricTile({
         </Group>
       </Canvas>
 
-      {/* İnce border */}
       <View
         pointerEvents="none"
         style={{
@@ -102,8 +98,13 @@ export function RichMetricTile({
       />
 
       <View style={{ flex: 1, padding: 18, justifyContent: "space-between" }}>
-        {/* Header */}
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <View
               style={{
@@ -111,10 +112,6 @@ export function RichMetricTile({
                 height: 6,
                 borderRadius: 3,
                 backgroundColor: accent,
-                shadowColor: accent,
-                shadowOpacity: 0.8,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 0 },
               }}
             />
             <Text
@@ -162,10 +159,11 @@ export function RichMetricTile({
           </View>
         </View>
 
-        {/* Hero number + delta */}
         <View style={{ gap: 6 }}>
           <Text
             numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.45}
             style={{
               fontFamily: "GeistMono-600",
               fontSize: 44,
@@ -208,7 +206,6 @@ export function RichMetricTile({
           ) : null}
         </View>
 
-        {/* Sparkline */}
         {data && data.series.length > 1 ? (
           <SparkLine
             data={data.series}
@@ -220,7 +217,6 @@ export function RichMetricTile({
           <View style={{ height: SPARK_HEIGHT }} />
         )}
 
-        {/* Footer — 3 period cell */}
         <View
           style={{
             flexDirection: "row",

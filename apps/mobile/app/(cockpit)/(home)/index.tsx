@@ -21,6 +21,7 @@ import { RichMetricTile } from "~/components/rich-metric-tile";
 import { ProjectsBreakdown } from "~/components/projects-breakdown";
 import { Icon } from "~/components/ui/icon";
 import { ScreenStatus } from "~/components/screen-status";
+import { LiquidGlassPanel } from "~/components/ui/liquid-glass";
 import { formatRelativeTime, formatInteger } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { tilesForModules, type ModuleId, type TileDef } from "~/lib/modules";
@@ -168,57 +169,59 @@ export default function Cockpit() {
           />
         ) : null}
 
-        {/* Sync status strip */}
-        <View
-          style={{
-            backgroundColor: colors.bgElevated,
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: `${syncColor}30`,
-            padding: 14,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 12,
-          }}
+        <LiquidGlassPanel
+          tone={
+            data.lastSyncStatus === "error"
+              ? "danger"
+              : data.syncRunning
+                ? "info"
+                : "lime"
+          }
+          radius={18}
+          padding={14}
         >
-          <View
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              backgroundColor: `${syncColor}18`,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name={syncIcon} size={16} color={syncColor} />
-          </View>
-          <View className="flex-1">
-            <Text
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View
               style={{
-                fontFamily: "GeistMono-600",
-                fontSize: 11,
-                letterSpacing: 1.5,
-                color: syncColor,
+                width: 34,
+                height: 34,
+                borderRadius: 12,
+                backgroundColor: `${syncColor}18`,
+                borderWidth: 1,
+                borderColor: `${syncColor}35`,
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {syncLabel}
-            </Text>
-            <Text
-              style={{
-                fontFamily: "Geist-400",
-                fontSize: 12,
-                color: colors.fgMuted,
-                marginTop: 2,
-              }}
-            >
-              {data.lastSyncAt ? formatRelativeTime(data.lastSyncAt) : "kayıt yok"}
-              {data.syncIngested > 0
-                ? ` · ${formatInteger(data.syncIngested)} satır`
-                : ""}
-            </Text>
+              <Icon name={syncIcon} size={16} color={syncColor} />
+            </View>
+            <View className="flex-1">
+              <Text
+                style={{
+                  fontFamily: "GeistMono-600",
+                  fontSize: 11,
+                  letterSpacing: 1.5,
+                  color: syncColor,
+                }}
+              >
+                {syncLabel}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "Geist-400",
+                  fontSize: 12,
+                  color: colors.fgMuted,
+                  marginTop: 2,
+                }}
+              >
+                {data.lastSyncAt ? formatRelativeTime(data.lastSyncAt) : "kayıt yok"}
+                {data.syncIngested > 0
+                  ? ` · ${formatInteger(data.syncIngested)} satır`
+                  : ""}
+              </Text>
+            </View>
           </View>
-        </View>
+        </LiquidGlassPanel>
 
         <SectionLabel suffix={`${tiles.length} METRİK`}>Anlık</SectionLabel>
 
@@ -287,15 +290,7 @@ export default function Cockpit() {
               </Pressable>
             </View>
 
-            <View
-              style={{
-                backgroundColor: colors.bgElevated,
-                borderRadius: 14,
-                borderWidth: 1,
-                borderColor: colors.border,
-                overflow: "hidden",
-              }}
-            >
+            <LiquidGlassPanel radius={18} padding={0}>
               {topAlerts.map((alert, idx) => {
                 const sevColor =
                   alert.severity === "critical"
@@ -397,7 +392,7 @@ export default function Cockpit() {
                   </View>
                 );
               })}
-            </View>
+            </LiquidGlassPanel>
           </>
         ) : null}
 
@@ -442,15 +437,7 @@ export default function Cockpit() {
               </Pressable>
             </View>
 
-            <View
-              style={{
-                backgroundColor: colors.bgElevated,
-                borderRadius: 14,
-                borderWidth: 1,
-                borderColor: colors.border,
-                overflow: "hidden",
-              }}
-            >
+            <LiquidGlassPanel radius={18} padding={0}>
               {topIssues.map((issue, idx) => {
                 const sevColor =
                   issue.level === "fatal" || issue.level === "error"
@@ -541,7 +528,7 @@ export default function Cockpit() {
                   </Pressable>
                 );
               })}
-            </View>
+            </LiquidGlassPanel>
           </>
         ) : null}
       </ScrollView>

@@ -183,3 +183,49 @@ export function useMrrSpark() {
     staleTime: 60_000,
   });
 }
+
+function normalizeSparkline(values: number[]): number[] {
+  const max = Math.max(...values, 1);
+  return values.map((v) => Math.max(0.08, v / max));
+}
+
+async function fetchTotalRevenueSpark(
+  propertyId: SelectedPropertyId,
+): Promise<number[]> {
+  const sinceIso = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+
+  let q = supabase
+    .from("metrics")
+    .select("date, metric, value")
+    .in("metric", ["mrr", "ad_revenue"])
+    .gte("date", sinceIso)
+    .order("date", { ascending: true });
+  if (propertyId !== "all") q = q.eq("project_id", propertyId);
+
+  const { data, error } = await q;
+  if (error) throw error;
+
+  const byDate = new Map<string, number>();
+  for (const row of (data ?? []) as MetricRow[]) {
+    if (row.metric !== "mrr" && row.metric !== "ad_revenue") continue;
+    byDate.set(row.date, (byDate.get(row.date) ?? 0) + Number(row.value));
+  }
+
+  const sorted = [...byDate.entries()].sort(([a], [b]) =>
+    a < b ? -1 : a > b ? 1 : 0,
+  );
+  const last7 = sorted.slice(-7).map(([, v]) => v);
+  while (last7.length < 7) last7.unshift(0);
+  return normalizeSparkline(last7);
+}
+
+export function useTotalRevenueSpark() {
+  const { selectedPropertyId } = usePreferences();
+  return useQuery({
+    queryKey: ["cockpit-spark", "total-revenue", selectedPropertyId],
+    queryFn: () => fetchTotalRevenueSpark(selectedPropertyId),
+    staleTime: 60_000,
+  });
+}
