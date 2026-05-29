@@ -72,9 +72,9 @@ export function LiquidGlass({
         top: 0,
         left: 0,
         right: 0,
-        height: "30%",
+        height: "22%",
         backgroundColor: glass.sheen,
-        opacity: 0.5,
+        opacity: 0.4,
       }}
     />
   );

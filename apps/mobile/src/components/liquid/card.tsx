@@ -6,7 +6,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { colors } from "~/theme/tokens";
+import { colors, type } from "~/theme/tokens";
 
 const FONT_600 = "Geist-600";
 const MONO_500 = "GeistMono-500";
@@ -22,7 +22,7 @@ export function CardSection({
   count,
   action,
   onAction,
-  pt = 15,
+  pt = 16,
   children,
 }: {
   index?: string;
@@ -39,9 +39,9 @@ export function CardSection({
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 9,
+          gap: 8,
           paddingTop: pt,
-          paddingBottom: 10,
+          paddingBottom: 8,
           paddingHorizontal: 16,
         }}
       >
@@ -50,7 +50,7 @@ export function CardSection({
             {index}
           </Text>
         ) : null}
-        <Text style={{ fontFamily: FONT_600, fontSize: 12.5, color: colors.fgPrimary, letterSpacing: -0.2 }}>
+        <Text style={{ fontFamily: FONT_600, fontSize: type.emph, color: colors.fgPrimary, letterSpacing: -0.2 }}>
           {title}
         </Text>
         {count != null ? (
