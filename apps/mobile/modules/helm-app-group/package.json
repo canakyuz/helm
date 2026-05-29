@@ -1,0 +1,5 @@
+{
+  "name": "helm-app-group",
+  "version": "1.0.0",
+  "main": "index.ts"
+}
