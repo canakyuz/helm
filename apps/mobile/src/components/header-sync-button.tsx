@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "~/lib/supabase";
 import { Icon } from "~/components/ui/icon";
 import { haptic } from "~/lib/haptics";
+import { pushWidgetSnapshot } from "~/lib/push-widget-snapshot";
 import { toast } from "~/lib/toast";
 import { colors } from "~/theme/tokens";
 
@@ -50,8 +51,17 @@ export function HeaderSyncButton() {
 
       // 2. Mobile cache invalidate — tüm görünür data yenilenir.
       await queryClient.invalidateQueries();
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ["cockpit-kpis"] }),
+        queryClient.refetchQueries({ queryKey: ["cockpit-spark", "total-revenue"] }),
+      ]);
 
-      toast.success("Senkronize edildi");
+      const widgetOk = pushWidgetSnapshot(queryClient);
+
+      toast.success(
+        "Senkronize edildi",
+        widgetOk ? undefined : "Widget güncellenemedi — Ayarlar → Widget sync",
+      );
     } catch (err) {
       console.warn("[sync] error", err);
       toast.error("Senkron başarısız");

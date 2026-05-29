@@ -3,12 +3,35 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 
 import { useAuth } from "~/hooks/use-auth";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
+import { usePreferences } from "~/lib/preferences";
+import { pushWidgetSnapshot } from "~/lib/push-widget-snapshot";
+import {
+  getLastWidgetWriteResult,
+  getWidgetStorageDiagnostics,
+  isWidgetStorageAvailable,
+} from "~/lib/widget-sync";
 import { supabase } from "~/lib/supabase";
 import { Icon } from "~/components/ui/icon";
 import { CurrencyPicker } from "~/components/currency-picker";
 import { haptic } from "~/lib/haptics";
 import { toast } from "~/lib/toast";
 import { colors } from "~/theme/tokens";
+
+function formatWidgetBridgeHint(
+  diag: NonNullable<ReturnType<typeof getWidgetStorageDiagnostics>>,
+  build: string,
+): string {
+  if (!diag.helmAppGroupModule && !diag.extensionStorageModule) {
+    return `Native köprü yok (build ${build}) — EAS iOS build 12+ gerekir, OTA yetmez`;
+  }
+  if (!diag.appGroupContainerReachable) {
+    return `Modül var ama ${diag.appGroup} container açılmıyor — Apple Developer’da App Group + profil, sonra yeni build`;
+  }
+  return "App Group kullanılamıyor";
+}
 
 function SectionLabel({
   children,
@@ -56,6 +79,30 @@ function SectionLabel({
 
 export default function Settings() {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const kpis = useCockpitKpis();
+  const widgetReady = isWidgetStorageAvailable();
+  const widgetDiag = getWidgetStorageDiagnostics();
+
+  async function syncWidgetNow() {
+    haptic.tap();
+    if (!kpis.data) {
+      await queryClient.refetchQueries({ queryKey: ["cockpit-kpis"] });
+    }
+    const ok = pushWidgetSnapshot(queryClient);
+    if (ok) {
+      toast.success(
+        "Widget güncellendi",
+        "Ana ekran veya kilit ekranında helm widget'ını kontrol et",
+      );
+    } else {
+      const detail = getLastWidgetWriteResult()?.reason;
+      toast.error(
+        "Widget sync başarısız",
+        detail ?? "App Groups veya native modül — yeniden build gerekir",
+      );
+    }
+  }
 
   async function logout() {
     haptic.press();
@@ -150,6 +197,46 @@ export default function Settings() {
         <SectionLabel>Tercihler</SectionLabel>
 
         <CurrencyPicker />
+
+        <SectionLabel accent={colors.accentInfo}>Widget</SectionLabel>
+
+        <Pressable
+          onPress={syncWidgetNow}
+          disabled={!widgetReady}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? colors.bgHigher : colors.bgElevated,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: colors.border,
+            padding: 14,
+            opacity: widgetReady ? 1 : 0.5,
+          })}
+        >
+          <Text
+            style={{
+              fontFamily: "Geist-600",
+              fontSize: 14,
+              color: colors.fgPrimary,
+            }}
+          >
+            Widget&apos;ları güncelle
+          </Text>
+          <Text
+            style={{
+              fontFamily: "GeistMono-500",
+              fontSize: 10,
+              color: colors.fgMuted,
+              marginTop: 4,
+              letterSpacing: 0.6,
+            }}
+          >
+            {widgetReady
+              ? "Ana ekran + kilit ekranı (total gelir) — App Group'a yazar"
+              : widgetDiag
+                ? formatWidgetBridgeHint(widgetDiag, build)
+                : "App Group kullanılamıyor"}
+          </Text>
+        </Pressable>
 
         <SectionLabel>Sürüm</SectionLabel>
 

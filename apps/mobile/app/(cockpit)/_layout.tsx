@@ -1,9 +1,13 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 import { useAlerts } from "~/hooks/use-alerts";
+import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
+import { useWidgetSync } from "~/hooks/use-widget-sync";
 import { colors } from "~/theme/tokens";
 
 export default function CockpitLayout() {
+  const kpis = useCockpitKpis();
+  useWidgetSync(kpis.data);
   const alerts = useAlerts();
   const openCount = (alerts.data ?? []).filter((a) => !a.delivered).length;
 
