@@ -496,7 +496,7 @@ export default function Analytics() {
             value={heroValue}
             format={formatInteger}
             {...(dauDelta !== undefined ? { delta: dauDelta } : {})}
-            caption="MAU 1.2M"
+            caption={`MAU ${formatInteger(kpis.data?.totalUsers ?? 0)}`}
             chartWidth={chartW}
             chartEl={
               <Bars

@@ -165,7 +165,7 @@ function CrashRows({ issues }: { issues: SentryIssue[] }) {
                         <ActionBtn
                           label="OPEN IN SENTRY"
                           onPress={() => {
-                            if (c.permalink) Linking.openURL(c.permalink);
+                            if (c.permalink) Linking.openURL(c.permalink).catch(() => {});
                           }}
                         />
                       </View>
@@ -341,8 +341,10 @@ function ReviewRows({ items, reply }: { items: ReviewItem[]; reply: ReturnType<t
                           const body = draft[r.id];
                           if (!body || !body.trim()) return;
                           haptic.tap();
-                          reply.mutate({ review_id: r.id, body });
-                          setReplied((s) => ({ ...s, [r.id]: true }));
+                          reply.mutate(
+                            { review_id: r.id, body },
+                            { onSuccess: () => setReplied((s) => ({ ...s, [r.id]: true })) },
+                          );
                         }}
                       />
                     </View>
@@ -505,7 +507,7 @@ export default function Health() {
             <CardSection index="05" title="Reviews & ratings" action="App Store">
               <View style={{ flexDirection: "row", alignItems: "center", gap: 16, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 12 }}>
                 <View style={{ alignItems: "center" }}>
-                  <Text style={{ fontFamily: MONO_600, fontSize: 32, color: colors.fgPrimary, letterSpacing: -1, lineHeight: 34 }}>
+                  <Text style={{ fontFamily: MONO_600, fontSize: type.stat, lineHeight: 24, color: colors.fgPrimary, letterSpacing: -0.5 }}>
                     {ratingAvg.toFixed(1)}
                   </Text>
                   <Stars n={Math.round(ratingAvg)} size={11} />
