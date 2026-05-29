@@ -10,8 +10,8 @@ const MONO_600 = "GeistMono-600";
 export type HeroStat = {
   label: string;
   value: string;
-  delta?: number;
-  invert?: boolean;
+  delta?: number | undefined;
+  invert?: boolean | undefined;
 };
 
 export function Sep() {
