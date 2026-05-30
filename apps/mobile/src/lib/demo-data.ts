@@ -26,24 +26,11 @@ export const demoData = {
   arpu: 0.42,
   conversion: 7.2,
   refundRate: 1.4,
-  revenueSplit: [
-    { label: "Subscriptions", value: 61_800, pct: 49, color: colors.accentViolet },
-    { label: "In-app purchase", value: 38_400, pct: 31, color: colors.accent },
-    { label: "Ad revenue", value: 24_900, pct: 20, color: colors.blue },
-  ],
-  revTotal: 125_100,
   platformSplit: [
     { label: "iOS", value: 72_558, pct: 58, color: colors.accent },
     { label: "Android", value: 33_777, pct: 27, color: colors.accentViolet },
     { label: "Web", value: 18_765, pct: 15, color: colors.blue },
   ],
-  mrrMovement: [
-    { label: "New", value: 4200, color: colors.green, sign: 1 },
-    { label: "Expansion", value: 2100, color: colors.accent, sign: 1 },
-    { label: "Contraction", value: -900, color: colors.accentWarn, sign: -1 },
-    { label: "Churn", value: -2800, color: colors.accentDanger, sign: -1 },
-  ],
-  mrrNet: 2600,
   subs: { active: 3840, trial: 412, trialConv: 38, churnRate: 3.1, trend: series(30, 52_000, 1400, 320) },
   transactions: [
     { id: "t1", type: "Subscription", detail: "Pro · annual", project: "Lumen", amount: 71.88, kind: "sub", ago: "2dk önce" },
