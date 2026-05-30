@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import Animated, {
   Easing,
   cancelAnimation,
@@ -78,7 +78,11 @@ export function LiquidHeader({ showPicker = true }: { showPicker?: boolean }) {
             <PropertyPicker />
           </View>
         ) : (
-          <View style={{ flex: 1 }} />
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Text style={{ fontFamily: "GeistMono-500", fontSize: 11, letterSpacing: 2, color: colors.fgMuted }}>
+              SETTINGS
+            </Text>
+          </View>
         )}
 
         <HeaderAlertsButton />

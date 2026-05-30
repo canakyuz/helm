@@ -122,14 +122,16 @@ export function LiquidGlass({
       />
     );
 
-  // GlassView already supplies its own material; only tint the fallbacks.
-  const fill =
-    liquidAvailable && Platform.OS === "ios" ? null : (
-      <View
-        pointerEvents="none"
-        style={[StyleSheet.absoluteFill, { backgroundColor: glass.tint }]}
-      />
-    );
+  // Always lay a semi-opaque elevated surface so cards read as distinct
+  // panels on the near-black background — GlassView's material alone is too
+  // dark/transparent here and the cards vanish. Faithful to the prototype,
+  // whose .glass always carries a tint fill on top of the blur.
+  const fill = (
+    <View
+      pointerEvents="none"
+      style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.07)" }]}
+    />
+  );
 
   const content = (
     <>
