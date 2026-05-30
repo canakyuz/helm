@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
+import { usePropertyMetrics } from "~/hooks/use-property-metrics";
 import { usePayouts } from "~/hooks/use-payouts";
 import { useRevenueMix } from "~/hooks/use-revenue-mix";
 import { useMrrMovement } from "~/hooks/use-mrr-movement";
@@ -64,6 +65,7 @@ const KIND_COLOR: Record<string, string> = {
 
 function MixView({ fmt }: { fmt: (n: number) => string }) {
   const properties = useProperties();
+  const propMetrics = usePropertyMetrics();
   const mix = useRevenueMix();
   const segments = mix.data?.segments ?? [];
   const [openSplit, setOpenSplit] = useState<string | null>(null);
@@ -84,9 +86,15 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
     );
   }, [txSearch]);
 
-  const topProperties = (properties.data ?? []).slice(0, 4);
-  const earnerPcts = [87, 64, 51, 38];
-  const earnerRevs = [54200, 39800, 31600, 23600];
+  // Real per-project earnings: rank by ad_revenue + mrr from the metrics table.
+  const earners = useMemo(() => {
+    const m = propMetrics.data ?? {};
+    return (properties.data ?? [])
+      .map((p) => ({ p, rev: (m[p.id]?.adRevenue ?? 0) + (m[p.id]?.mrr ?? 0) }))
+      .sort((a, b) => b.rev - a.rev)
+      .slice(0, 4);
+  }, [properties.data, propMetrics.data]);
+  const maxEarn = earners[0]?.rev ?? 0;
 
   return (
     <>
@@ -246,19 +254,16 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
         pt={14}
       >
         <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Eyebrow size={9}>REVENUE PER PROJECT</Eyebrow>
-            <DemoChip />
-          </View>
+          <Eyebrow size={9}>REVENUE PER PROJECT · TODAY</Eyebrow>
         </View>
-        {topProperties.length === 0 ? (
+        {earners.length === 0 ? (
           <EmptyHint>NO PROJECTS FOUND</EmptyHint>
         ) : (
-          topProperties.map((prop, i) => {
+          earners.map(({ p: prop, rev }, i) => {
             const tint = GLYPH_TINTS[i % GLYPH_TINTS.length]!;
             const glyph = PROJECT_GLYPHS[i % PROJECT_GLYPHS.length]!;
-            const pct = earnerPcts[i] ?? 40;
-            const rev = earnerRevs[i] ?? 20000;
+            const pct = maxEarn > 0 ? Math.round((rev / maxEarn) * 100) : 0;
+            const m = propMetrics.data?.[prop.id];
             const open = openEarner === prop.id;
             return (
               <Row
@@ -268,7 +273,7 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
                   haptic.tap();
                   setOpenEarner(open ? null : prop.id);
                 }}
-                isLast={i === topProperties.length - 1}
+                isLast={i === earners.length - 1}
                 header={
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                     <Glyph glyph={glyph} tint={tint} size={28} />
@@ -298,10 +303,10 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
                 detail={
                   <KV
                     items={[
-                      { label: "Revenue", value: fmt(rev), color: tint },
-                      { label: "Share", value: `${pct}%` },
+                      { label: "Ad revenue", value: fmt(m?.adRevenue ?? 0), color: colors.accent },
+                      { label: "MRR", value: fmt(m?.mrr ?? 0), color: colors.accentViolet },
+                      { label: "DAU", value: formatInteger(m?.dau ?? 0), color: colors.blue },
                       { label: "Type", value: prop.type.replace("_", " ").toUpperCase() },
-                      { label: "MRR share", value: `${Math.round(pct * 0.6)}%` },
                     ]}
                   />
                 }
