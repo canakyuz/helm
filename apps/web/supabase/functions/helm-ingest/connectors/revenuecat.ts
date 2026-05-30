@@ -20,6 +20,7 @@ export const fetchRevenueCat: Connector = async (config) => {
   const points: MetricPoint[] = [
     { date, metric: "mrr", value: get("mrr") },
     { date, metric: "active_subs", value: get("active_subscriptions") },
+    { date, metric: "subs_trial", value: get("active_trials") },
     { date, metric: "revenue_28d", value: get("revenue") },
   ];
   return points;
