@@ -20,8 +20,6 @@ function series(n: number, base: number, vol: number, trend: number): number[] {
 export const demoData = {
   // ── Overview ──
   goal: { target: 150_000, current: 118_200, label: "May target" },
-  crashFree: 99.2,
-  crashFreeDelta: -1.8,
   projectDetail: { revToday: 1680, mrr: 14_100, crashFree: 99.5 },
 
   // ── Revenue ──
@@ -106,9 +104,6 @@ export const demoData = {
     { label: "Other", pct: 4 },
   ],
   analyticsStats: { stickiness: 32, avgSession: "6m 14s", newUsers: 2840, mau: 1_200_000 },
-
-  // ── Health ──
-  crashTrend: [99.5, 99.3, 99.4, 99.0, 98.7, 99.1, 99.3, 99.4, 99.2, 98.9, 99.0, 99.3, 99.5, 99.4, 99.2, 99.1, 98.8, 99.0, 99.2, 99.4, 99.3, 99.1, 99.2, 99.4, 99.5, 99.3, 99.0, 99.1, 99.3, 99.2],
 } as const;
 
 export type DemoData = typeof demoData;

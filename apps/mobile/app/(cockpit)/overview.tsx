@@ -249,6 +249,7 @@ export default function Overview() {
   const properties = useProperties();
   const propMetrics = usePropertyMetrics();
   const revenue = useMetricDetail("ad_revenue");
+  const crashFree = useMetricDetail("crash_free_sessions");
   const [dismissedAlerts, setDismissedAlerts] = useState<Record<number, boolean>>({});
 
   if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
@@ -259,13 +260,20 @@ export default function Overview() {
   const today = revenue.data?.today ?? data.adRevenue;
   const yest = revenue.data?.yesterday ?? 0;
   const revDelta = yest > 0 ? ((today - yest) / yest) * 100 : 0;
+  const cfSeries = (crashFree.data?.series ?? []).map((p) => p.value);
+  const cfHas = cfSeries.length > 0;
+  const cfNow = cfHas ? cfSeries[cfSeries.length - 1]! : null;
+  const cfDelta =
+    cfSeries.length > 1
+      ? Number((cfNow! - cfSeries[cfSeries.length - 2]!).toFixed(1))
+      : undefined;
   const goalPct = Math.round((demoData.goal.current / demoData.goal.target) * 100);
   const openAlerts = (alerts.data ?? []).filter((a) => !dismissedAlerts[a.id]);
   const dismissAlert = (id: number) => setDismissedAlerts((d) => ({ ...d, [id]: true }));
 
   const stats: HeroStat[] = [
     { label: "DAU", value: formatInteger(data.dau), delta: data.dauDelta ?? undefined },
-    { label: "Crash-free", value: demoData.crashFree + "%", delta: demoData.crashFreeDelta, invert: true },
+    { label: "Crash-free", value: cfHas ? cfNow!.toFixed(1) + "%" : "—", delta: cfDelta },
     { label: "MRR", value: fmt(data.mrr), delta: data.mrrDelta ?? undefined },
   ];
 
@@ -287,6 +295,7 @@ export default function Overview() {
                 alerts.refetch();
                 properties.refetch();
                 revenue.refetch();
+                crashFree.refetch();
               }}
             />
           }
