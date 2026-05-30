@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useProperties } from "~/hooks/use-properties";
 import { useSystemHealth } from "~/hooks/use-system-health";
 import { useAlertRulesCount } from "~/hooks/use-property-metrics";
+import { useRevenueGoal, useSetRevenueGoal } from "~/hooks/use-revenue-goal";
 import { formatRelativeTime } from "~/lib/format";
 import { usePreferences, preferences, type Currency } from "~/lib/preferences";
 import { supabase } from "~/lib/supabase";
@@ -110,6 +111,24 @@ export default function Settings() {
   const propertiesQuery = useProperties();
   const healthQuery = useSystemHealth();
   const alertRules = useAlertRulesCount();
+  const goal = useRevenueGoal();
+  const setGoal = useSetRevenueGoal();
+
+  function promptGoal() {
+    haptic.tap();
+    Alert.prompt(
+      "Monthly revenue target",
+      "Hedef tutarı gir (sayı). İlerleme ad revenue ay toplamından hesaplanır.",
+      (text) => {
+        const n = Number((text ?? "").replace(/[^\d.]/g, ""));
+        if (!Number.isFinite(n) || n < 0) return;
+        setGoal.mutate({ target: n, currency });
+      },
+      "plain-text",
+      goal.data?.target_amount != null ? String(goal.data.target_amount) : "",
+      "numeric",
+    );
+  }
   const lastSyncAt = healthQuery.data?.lastSyncRun?.finishedAt ?? null;
 
   // local toggle state
@@ -233,6 +252,16 @@ export default function Settings() {
                 label="Default project"
                 value="All projects"
                 onPress={() => haptic.tap()}
+              />
+              <SetRow
+                label="Monthly revenue target"
+                sub="ad revenue progress"
+                value={
+                  goal.data?.target_amount != null
+                    ? `${goal.data.target_amount.toLocaleString()} ${goal.data.currency}`
+                    : "Not set"
+                }
+                onPress={promptGoal}
               />
               <SetRow
                 label="Plan & billing"

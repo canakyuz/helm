@@ -8,7 +8,7 @@ import { useAlerts, useAckAlert, type Alert } from "~/hooks/use-alerts";
 import { useProperties, type Property, type PropertyStatus } from "~/hooks/use-properties";
 import { usePropertyMetrics } from "~/hooks/use-property-metrics";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
-import { demoData } from "~/lib/demo-data";
+import { useRevenueGoal } from "~/hooks/use-revenue-goal";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { colors } from "~/theme/tokens";
@@ -29,12 +29,12 @@ import {
   Glyph,
   Eyebrow,
   EmptyHint,
-  DemoChip,
 } from "~/components/liquid";
 import type { HeroStat } from "~/components/liquid";
 
 const PROJECT_TINTS = [colors.accent, colors.accentViolet, colors.blue, colors.green, colors.accentWarn];
 const PROJECT_GLYPHS = ["◆", "✦", "❖", "◇", "●"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 type Kind = "All" | "Games" | "Apps" | "Web";
 
@@ -250,6 +250,7 @@ export default function Overview() {
   const propMetrics = usePropertyMetrics();
   const revenue = useMetricDetail("ad_revenue");
   const crashFree = useMetricDetail("crash_free_sessions");
+  const goal = useRevenueGoal();
   const [dismissedAlerts, setDismissedAlerts] = useState<Record<number, boolean>>({});
 
   if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
@@ -267,7 +268,14 @@ export default function Overview() {
     cfSeries.length > 1
       ? Number((cfNow! - cfSeries[cfSeries.length - 2]!).toFixed(1))
       : undefined;
-  const goalPct = Math.round((demoData.goal.current / demoData.goal.target) * 100);
+  // Hedef gerçek tablodan; ilerleme gerçek gelirden (ad_revenue ay toplamı).
+  const goalTarget = goal.data?.target_amount ?? null;
+  const goalCurrent = revenue.data?.thisMonth ?? 0;
+  const goalPct =
+    goalTarget != null && goalTarget > 0
+      ? Math.round((goalCurrent / goalTarget) * 100)
+      : 0;
+  const goalLabel = `${MONTHS[new Date().getMonth()]} target`;
   const openAlerts = (alerts.data ?? []).filter((a) => !dismissedAlerts[a.id]);
   const dismissAlert = (id: number) => setDismissedAlerts((d) => ({ ...d, [id]: true }));
 
@@ -296,6 +304,7 @@ export default function Overview() {
                 properties.refetch();
                 revenue.refetch();
                 crashFree.refetch();
+                goal.refetch();
               }}
             />
           }
@@ -334,25 +343,36 @@ export default function Overview() {
             }
           />
 
-          {/* monthly goal — DEMO */}
+          {/* monthly revenue goal */}
           <LiquidGlass padding={12}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Eyebrow>{demoData.goal.label}</Eyebrow>
-                <DemoChip />
-              </View>
-              <Text style={{ fontFamily: "GeistMono-500", fontSize: 11.5, color: colors.fgSecondary }}>
-                <Text style={{ color: colors.fgPrimary, fontFamily: "GeistMono-600" }}>{fmt(demoData.goal.current)}</Text>
-                {" / "}
-                {fmt(demoData.goal.target)}
-              </Text>
+              <Eyebrow>{goalLabel}</Eyebrow>
+              {goalTarget != null ? (
+                <Text style={{ fontFamily: "GeistMono-500", fontSize: 11.5, color: colors.fgSecondary }}>
+                  <Text style={{ color: colors.fgPrimary, fontFamily: "GeistMono-600" }}>{fmt(goalCurrent)}</Text>
+                  {" / "}
+                  {fmt(goalTarget)}
+                </Text>
+              ) : (
+                <Text style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.fgSubtle, letterSpacing: 0.4 }}>
+                  SET IN SETTINGS
+                </Text>
+              )}
             </View>
-            <HBar pct={goalPct} color={colors.accent} height={8} />
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
-              <Text style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.accent, letterSpacing: 0.4 }}>
-                {goalPct}% REACHED
+            {goalTarget != null ? (
+              <>
+                <HBar pct={goalPct} color={colors.accent} height={8} />
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
+                  <Text style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.accent, letterSpacing: 0.4 }}>
+                    {goalPct}% REACHED
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <Text style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.fgSubtle, letterSpacing: 0.4 }}>
+                {fmt(goalCurrent)} THIS MONTH · NO TARGET YET
               </Text>
-            </View>
+            )}
           </LiquidGlass>
 
           {/* projects + needs attention */}
