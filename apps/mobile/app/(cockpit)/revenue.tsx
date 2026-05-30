@@ -7,6 +7,7 @@ import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
 import { usePayouts } from "~/hooks/use-payouts";
 import { useRevenueMix } from "~/hooks/use-revenue-mix";
+import { useMrrMovement } from "~/hooks/use-mrr-movement";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { usePreferences } from "~/lib/preferences";
 import { formatInteger } from "~/lib/format";
@@ -440,18 +441,22 @@ function SubsView({
   chartW,
   activeSubs,
   trial,
+  projectId,
 }: {
   fmt: (n: number) => string;
   chartW: number;
   activeSubs: number;
   trial: number | null;
+  projectId?: string | undefined;
 }) {
   const [openMrr, setOpenMrr] = useState<string | null>(null);
-
+  const mrr = useMrrMovement(projectId);
+  const moves = mrr.data?.segments ?? [];
   const maxAbs = useMemo(
-    () => Math.max(...demoData.mrrMovement.map((m) => Math.abs(m.value))),
-    [],
+    () => Math.max(1, ...moves.map((m) => Math.abs(m.value))),
+    [moves],
   );
+  const segColor = (v: number) => (v >= 0 ? colors.green : colors.accentDanger);
 
   return (
     <>
@@ -459,71 +464,77 @@ function SubsView({
       <CardSection
         index="01"
         title="MRR movement"
-        action={`net +${fmt(demoData.mrrNet)}`}
+        {...(mrr.data ? { action: `net ${mrr.data.net >= 0 ? "+" : ""}${fmt(mrr.data.net)}` } : {})}
         pt={14}
       >
-        <View style={{ paddingHorizontal: 16, marginBottom: 4 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-            <DemoChip />
-          </View>
-        </View>
-        {demoData.mrrMovement.map((m, i) => {
-          const open = openMrr === m.label;
-          const pct = Math.round((Math.abs(m.value) / maxAbs) * 100);
-          return (
-            <Row
-              key={m.label}
-              open={open}
-              onToggle={() => {
-                haptic.tap();
-                setOpenMrr(open ? null : m.label);
-              }}
-              isLast={i === demoData.mrrMovement.length - 1}
-              header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                  <Text
-                    style={{
-                      fontFamily: "Geist-600",
-                      fontSize: type.body,
-                      color: colors.fgPrimary,
-                      width: 88,
-                      letterSpacing: -0.2,
-                    }}
-                  >
-                    {m.label}
-                  </Text>
-                  <View style={{ flex: 1 }}>
-                    <HBar pct={pct} color={m.color} height={6} />
+        {!projectId ? (
+          <EmptyHint>SELECT A PROJECT</EmptyHint>
+        ) : mrr.isLoading ? (
+          <EmptyHint>LOADING…</EmptyHint>
+        ) : moves.length === 0 ? (
+          <EmptyHint>NO MRR MOVEMENT DATA</EmptyHint>
+        ) : (
+          moves.map((m, i) => {
+            const open = openMrr === m.label;
+            const pct = Math.round((Math.abs(m.value) / maxAbs) * 100);
+            const color = segColor(m.value);
+            return (
+              <Row
+                key={m.label}
+                open={open}
+                onToggle={() => {
+                  haptic.tap();
+                  setOpenMrr(open ? null : m.label);
+                }}
+                isLast={i === moves.length - 1}
+                header={
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                    <Text
+                      style={{
+                        fontFamily: "Geist-600",
+                        fontSize: type.body,
+                        color: colors.fgPrimary,
+                        width: 88,
+                        letterSpacing: -0.2,
+                        textTransform: "capitalize",
+                      }}
+                      numberOfLines={1}
+                    >
+                      {m.label}
+                    </Text>
+                    <View style={{ flex: 1 }}>
+                      <HBar pct={pct} color={color} height={6} />
+                    </View>
+                    <Text
+                      style={{
+                        fontFamily: "GeistMono-600",
+                        fontSize: type.body,
+                        color,
+                        width: 72,
+                        textAlign: "right",
+                      }}
+                    >
+                      {m.value > 0 ? "+" : ""}
+                      {fmt(m.value)}
+                    </Text>
                   </View>
-                  <Text
-                    style={{
-                      fontFamily: "GeistMono-600",
-                      fontSize: type.body,
-                      color: m.color,
-                      width: 72,
-                      textAlign: "right",
-                    }}
-                  >
-                    {m.value > 0 ? "+" : ""}
-                    {fmt(m.value)}
-                  </Text>
-                </View>
-              }
-              detail={
-                <KV
-                  items={[
-                    {
-                      label: "Amount",
-                      value: `${m.value > 0 ? "+" : ""}${fmt(m.value)}`,
-                      color: m.color,
-                    },
-                    { label: "Share of movement", value: `${pct}%` },
-                  ]}
-                />
-              }
-            />
-          );
-        })}
+                }
+                detail={
+                  <KV
+                    items={[
+                      {
+                        label: "Amount",
+                        value: `${m.value > 0 ? "+" : ""}${fmt(m.value)}`,
+                        color,
+                      },
+                      { label: "Share of movement", value: `${pct}%` },
+                    ]}
+                  />
+                }
+              />
+            );
+          })
+        )}
         <View style={{ height: 8 }} />
       </CardSection>
 
@@ -898,6 +909,7 @@ export default function Revenue() {
                 chartW={chartW}
                 activeSubs={kpis.data?.activeSubs ?? 0}
                 trial={trialVal}
+                projectId={projectId}
               />
             ) : (
               <PayoutsView fmt={fmt} projectId={projectId} />
