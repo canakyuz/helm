@@ -19,7 +19,6 @@ function series(n: number, base: number, vol: number, trend: number): number[] {
 
 export const demoData = {
   // ── Overview ──
-  goal: { target: 150_000, current: 118_200, label: "May target" },
   projectDetail: { revToday: 1680, mrr: 14_100, crashFree: 99.5 },
 
   // ── Revenue ──
