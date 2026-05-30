@@ -21,3 +21,4 @@ export { OpenHero, MiniStat, Sep } from "./hero";
 export type { HeroStat } from "./hero";
 export { CardSection, FullDivider, Row, KV } from "./card";
 export { LiquidHeader } from "./header";
+export { NativeSegmented } from "./native-segmented";

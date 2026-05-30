@@ -24,6 +24,7 @@ import {
   KV,
   HBar,
   Seg,
+  NativeSegmented,
   ActionBtn,
   StatusDot,
   Glyph,
@@ -84,14 +85,13 @@ function ProjectRows({
   return (
     <View>
       <View style={{ paddingHorizontal: 12, paddingBottom: 10 }}>
-        <Seg<Kind>
+        <NativeSegmented<Kind>
           value={filter}
           options={["All", "Games", "Apps", "Web"]}
           onChange={(v) => {
             setFilter(v);
             setOpenId(null);
           }}
-          full
         />
       </View>
       {list.length === 0 ? (
