@@ -5,7 +5,7 @@
 -- ─────────────────────────────────────────────────────────────
 create table if not exists public.revenue_goals (
   id            uuid primary key default gen_random_uuid(),
-  project_id    uuid references public.projects(id) on delete cascade, -- null = tüm projeler
+  project_id    uuid references public.properties(id) on delete cascade, -- null = tüm projeler
   month         date not null,                                          -- ayın ilk günü (YYYY-MM-01)
   target_amount numeric not null check (target_amount >= 0),
   currency      text not null default 'USD',

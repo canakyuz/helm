@@ -5,7 +5,7 @@
 -- ─────────────────────────────────────────────────────────────
 create table if not exists public.payouts (
   id           text primary key,        -- kaynak payout id (Stripe po_..., ASC/Play kendi id)
-  project_id   uuid references public.projects(id) on delete cascade,
+  project_id   uuid references public.properties(id) on delete cascade,
   source       text not null,           -- stripe | app_store_connect | google_play
   amount       numeric not null,        -- net ödeme (kaynak para biriminde)
   currency     text not null default 'USD',
