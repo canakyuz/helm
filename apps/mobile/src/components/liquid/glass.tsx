@@ -63,22 +63,6 @@ export function LiquidGlass({
     style,
   ];
 
-  // top specular sheen (prototype .glass::before, 176deg white→transparent)
-  const sheen = (
-    <View
-      pointerEvents="none"
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: "22%",
-        backgroundColor: glass.sheen,
-        opacity: 0.4,
-      }}
-    />
-  );
-
   const glowSpot = glow ? (
     <View
       pointerEvents="none"
@@ -97,7 +81,6 @@ export function LiquidGlass({
   const innerBody = (
     <>
       {glowSpot}
-      {sheen}
       {deco}
       <View style={{ padding, position: "relative" }}>{children}</View>
     </>

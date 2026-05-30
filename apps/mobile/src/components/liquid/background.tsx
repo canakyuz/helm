@@ -18,7 +18,7 @@ import { colors } from "~/theme/tokens";
 
 type Blob = { cx: number; cy: number; r: number; color: string };
 
-export function LiquidBackground({ glow = 0.45 }: { glow?: number }) {
+export function LiquidBackground({ glow = 0.28 }: { glow?: number }) {
   const { width, height } = useWindowDimensions();
 
   const blobs = useMemo<Blob[]>(
@@ -72,8 +72,8 @@ export function LiquidBackground({ glow = 0.45 }: { glow?: number }) {
           <LinearGradient
             start={vec(0, 0)}
             end={vec(0, height)}
-            colors={["rgba(7,7,10,0)", "rgba(7,7,10,0.65)", colors.bgBase]}
-            positions={[0, 0.4, 0.85]}
+            colors={["rgba(7,7,10,0)", "rgba(7,7,10,0.8)", colors.bgBase]}
+            positions={[0, 0.32, 0.7]}
           />
         </Rect>
       </Canvas>
