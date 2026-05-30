@@ -4,6 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useProperties } from "~/hooks/use-properties";
 import { useSystemHealth } from "~/hooks/use-system-health";
+import { useAlertRulesCount } from "~/hooks/use-property-metrics";
+import { formatRelativeTime } from "~/lib/format";
 import { usePreferences, preferences, type Currency } from "~/lib/preferences";
 import { supabase } from "~/lib/supabase";
 import { haptic } from "~/lib/haptics";
@@ -17,7 +19,6 @@ import {
   Seg,
   Toggle,
   StatusDot,
-  DemoChip,
 } from "~/components/liquid";
 
 // ─── local SetRow helper ──────────────────────────────────────────────────────
@@ -108,6 +109,8 @@ export default function Settings() {
   const { currency } = usePreferences();
   const propertiesQuery = useProperties();
   const healthQuery = useSystemHealth();
+  const alertRules = useAlertRulesCount();
+  const lastSyncAt = healthQuery.data?.lastSyncRun?.finishedAt ?? null;
 
   // local toggle state
   const [pushEnabled, setPushEnabled] = useState(true);
@@ -322,7 +325,7 @@ export default function Settings() {
             <LiquidGlass padding={0}>
               <SetRow
                 label="Alert rules"
-                value="3 active"
+                value={`${alertRules.data ?? 0} active`}
                 onPress={() => haptic.tap()}
               />
               <SetRow
@@ -421,21 +424,7 @@ export default function Settings() {
               />
               <SetRow
                 label="Last sync"
-                right={
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-500",
-                        fontSize: type.bodySm,
-                        color: colors.fgMuted,
-                        letterSpacing: 0.2,
-                      }}
-                    >
-                      2m ago
-                    </Text>
-                    <DemoChip />
-                  </View>
-                }
+                value={lastSyncAt ? formatRelativeTime(lastSyncAt) : "—"}
                 isLast
               />
             </LiquidGlass>

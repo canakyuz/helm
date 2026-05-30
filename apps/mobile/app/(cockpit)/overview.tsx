@@ -6,6 +6,7 @@ import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useAlerts, useAckAlert, type Alert } from "~/hooks/use-alerts";
 import { useProperties, type Property, type PropertyStatus } from "~/hooks/use-properties";
+import { usePropertyMetrics } from "~/hooks/use-property-metrics";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { demoData } from "~/lib/demo-data";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
@@ -64,9 +65,11 @@ function matchesKind(p: Property, k: Kind): boolean {
 
 function ProjectRows({
   properties,
+  metrics,
   fmt,
 }: {
   properties: ReturnType<typeof useProperties>;
+  metrics: ReturnType<typeof usePropertyMetrics>;
   fmt: (n: number) => string;
 }) {
   const [filter, setFilter] = useState<Kind>("All");
@@ -129,16 +132,12 @@ function ProjectRows({
               }
               detail={
                 <>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    <Eyebrow size={8}>METRICS</Eyebrow>
-                    <DemoChip />
-                  </View>
                   <KV
                     items={[
-                      { label: "Revenue today", value: fmt(demoData.projectDetail.revToday), color: colors.accent },
-                      { label: "MRR", value: fmt(demoData.projectDetail.mrr), color: colors.accentViolet },
+                      { label: "Revenue today", value: fmt(metrics.data?.[p.id]?.adRevenue ?? 0), color: colors.accent },
+                      { label: "MRR", value: fmt(metrics.data?.[p.id]?.mrr ?? 0), color: colors.accentViolet },
+                      { label: "DAU", value: formatInteger(metrics.data?.[p.id]?.dau ?? 0), color: colors.blue },
                       { label: "Status", value: statusLabel(p.status), color: statusColor(p.status) },
-                      { label: "Crash-free", value: demoData.projectDetail.crashFree + "%", color: colors.green },
                     ]}
                   />
                   <View style={{ flexDirection: "row", gap: 24, justifyContent: "center" }}>
@@ -248,6 +247,7 @@ export default function Overview() {
   const alerts = useAlerts();
   const ack = useAckAlert();
   const properties = useProperties();
+  const propMetrics = usePropertyMetrics();
   const revenue = useMetricDetail("ad_revenue");
   const [dismissedAlerts, setDismissedAlerts] = useState<Record<number, boolean>>({});
 
@@ -349,7 +349,7 @@ export default function Overview() {
           {/* projects + needs attention */}
           <LiquidGlass padding={0}>
             <CardSection index="01" title="Projects" count={(properties.data ?? []).length} pt={14}>
-              <ProjectRows properties={properties} fmt={fmt} />
+              <ProjectRows properties={properties} metrics={propMetrics} fmt={fmt} />
             </CardSection>
             <FullDivider />
             <CardSection index="02" title="Needs attention" count={openAlerts.length}>
