@@ -141,7 +141,7 @@ function ProjectRows({
                       { label: "Crash-free", value: demoData.projectDetail.crashFree + "%", color: colors.green },
                     ]}
                   />
-                  <View style={{ flexDirection: "row", gap: 8 }}>
+                  <View style={{ flexDirection: "row", gap: 24, justifyContent: "center" }}>
                     <ActionBtn label="OPEN DETAIL" tone="accent" onPress={() => haptic.tap()} />
                     <ActionBtn
                       label={muted[p.id] ? "ALERTS MUTED" : "MUTE ALERTS"}
@@ -275,7 +275,7 @@ export default function Overview() {
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <LiquidHeader />
         <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
+          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 120, gap: 12 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
