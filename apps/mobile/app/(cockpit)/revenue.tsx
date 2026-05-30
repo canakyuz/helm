@@ -6,6 +6,7 @@ import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
 import { usePayouts } from "~/hooks/use-payouts";
+import { useRevenueMix } from "~/hooks/use-revenue-mix";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { usePreferences } from "~/lib/preferences";
 import { formatInteger } from "~/lib/format";
@@ -62,6 +63,8 @@ const KIND_COLOR: Record<string, string> = {
 
 function MixView({ fmt }: { fmt: (n: number) => string }) {
   const properties = useProperties();
+  const mix = useRevenueMix();
+  const segments = mix.data?.segments ?? [];
   const [openSplit, setOpenSplit] = useState<string | null>(null);
   const [openPlatform, setOpenPlatform] = useState<string | null>(null);
   const [openEarner, setOpenEarner] = useState<string | null>(null);
@@ -89,84 +92,86 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
       {/* Revenue mix */}
       <CardSection index="01" title="Revenue mix" pt={14}>
         <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 8 }}>
-          <StackBar
-            segments={demoData.revenueSplit.map((s) => ({ pct: s.pct, color: s.color }))}
-            height={14}
-          />
-          {demoData.revenueSplit.map((s, i) => {
-            const open = openSplit === s.label;
-            return (
-              <Row
-                key={s.label}
-                open={open}
-                onToggle={() => {
-                  haptic.tap();
-                  setOpenSplit(open ? null : s.label);
-                }}
-                isLast={i === demoData.revenueSplit.length - 1}
-                header={
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <View
-                      style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: s.color }}
-                    />
-                    <Text
-                      style={{
-                        flex: 1,
-                        fontFamily: "Geist-600",
-                        fontSize: type.body,
-                        color: colors.fgPrimary,
-                        letterSpacing: -0.2,
-                      }}
-                      numberOfLines={1}
-                    >
-                      {s.label}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-600",
-                        fontSize: type.body,
-                        color: s.color,
-                      }}
-                    >
-                      {fmt(s.value)}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-500",
-                        fontSize: type.label,
-                        color: colors.fgMuted,
-                        width: 32,
-                        textAlign: "right",
-                      }}
-                    >
-                      {s.pct}%
-                    </Text>
-                  </View>
-                }
-                detail={
-                  <KV
-                    items={[
-                      { label: "This month", value: fmt(s.value), color: s.color },
-                      { label: "vs last month", value: "+12.4%" },
-                      { label: "Share", value: `${s.pct}%` },
-                      {
-                        label: "Paying users",
-                        value: String(Math.round(s.value / 14.2)),
-                      },
-                    ]}
-                  />
-                }
+          {mix.isLoading ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : (mix.data?.total ?? 0) === 0 ? (
+            <EmptyHint>NO REVENUE THIS MONTH</EmptyHint>
+          ) : (
+            <>
+              <StackBar
+                segments={segments.map((s) => ({ pct: s.pct, color: s.color }))}
+                height={14}
               />
-            );
-          })}
+              {segments.map((s, i) => {
+                const open = openSplit === s.label;
+                return (
+                  <Row
+                    key={s.label}
+                    open={open}
+                    onToggle={() => {
+                      haptic.tap();
+                      setOpenSplit(open ? null : s.label);
+                    }}
+                    isLast={i === segments.length - 1}
+                    header={
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                        <View
+                          style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: s.color }}
+                        />
+                        <Text
+                          style={{
+                            flex: 1,
+                            fontFamily: "Geist-600",
+                            fontSize: type.body,
+                            color: colors.fgPrimary,
+                            letterSpacing: -0.2,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {s.label}
+                        </Text>
+                        <Text
+                          style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: s.color }}
+                        >
+                          {fmt(s.value)}
+                        </Text>
+                        <Text
+                          style={{
+                            fontFamily: "GeistMono-500",
+                            fontSize: type.label,
+                            color: colors.fgMuted,
+                            width: 32,
+                            textAlign: "right",
+                          }}
+                        >
+                          {s.pct}%
+                        </Text>
+                      </View>
+                    }
+                    detail={
+                      <KV
+                        items={[
+                          { label: "This month", value: fmt(s.value), color: s.color },
+                          { label: "Share", value: `${s.pct}%` },
+                        ]}
+                      />
+                    }
+                  />
+                );
+              })}
+            </>
+          )}
         </View>
       </CardSection>
 
       <FullDivider />
 
-      {/* By platform */}
+      {/* By platform — DEMO: Android gelir kaynağı yok, türetilemiyor */}
       <CardSection index="02" title="By platform" pt={14}>
         <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 4 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
+            <DemoChip />
+          </View>
           {demoData.platformSplit.map((p, i) => {
             const open = openPlatform === p.label;
             return (
