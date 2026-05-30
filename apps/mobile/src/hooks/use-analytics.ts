@@ -71,6 +71,44 @@ export function useFunnel(projectId?: string) {
   });
 }
 
+// ── Retention (helm-retention) ──────────────────────────────────
+export type RetentionCohort = { day: string; pct: number };
+export type RetentionData = { cohorts: RetentionCohort[]; days: number };
+
+export function useRetention(projectId?: string) {
+  return useQuery({
+    queryKey: ["retention", projectId],
+    enabled: projectId != null,
+    staleTime: STALE,
+    queryFn: async (): Promise<RetentionData> => {
+      const { data, error } = await supabase.functions.invoke<RetentionData>("helm-retention", {
+        body: { project_id: projectId },
+      });
+      if (error) throw error;
+      return data ?? { cohorts: [], days: 30 };
+    },
+  });
+}
+
+// ── OS breakdown (helm-os-breakdown) ────────────────────────────
+export type OsRow = { os: string; version: string; users: number; pct: number };
+export type OsData = { rows: OsRow[]; total: number; days: number };
+
+export function useOsBreakdown(projectId?: string) {
+  return useQuery({
+    queryKey: ["os-breakdown", projectId],
+    enabled: projectId != null,
+    staleTime: STALE,
+    queryFn: async (): Promise<OsData> => {
+      const { data, error } = await supabase.functions.invoke<OsData>("helm-os-breakdown", {
+        body: { project_id: projectId },
+      });
+      if (error) throw error;
+      return data ?? { rows: [], total: 0, days: 30 };
+    },
+  });
+}
+
 // ── Geo breakdown (helm-geo-breakdown) ──────────────────────────
 export type GeoRow = { country: string; country_name: string | null; users: number };
 export type GeoData = { rows: GeoRow[]; total: number; days: number; country: string | null };

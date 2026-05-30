@@ -5,9 +5,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
-import { useAcquisition, useFunnel, useGeoBreakdown } from "~/hooks/use-analytics";
+import {
+  useAcquisition,
+  useFunnel,
+  useGeoBreakdown,
+  useRetention,
+  useOsBreakdown,
+} from "~/hooks/use-analytics";
 import { usePreferences } from "~/lib/preferences";
-import { demoData } from "~/lib/demo-data";
 import { formatInteger } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { colors, type } from "~/theme/tokens";
@@ -23,7 +28,6 @@ import {
   HBar,
   Bars,
   Seg,
-  DemoChip,
   EmptyHint,
 } from "~/components/liquid";
 import type { HeroStat } from "~/components/liquid";
@@ -34,52 +38,60 @@ type Metric = "DAU" | "WAU" | "MAU";
 
 // ─── Retention section ────────────────────────────────────────────────────────
 
-function RetentionSection() {
+function RetentionSection({ projectId }: { projectId?: string | undefined }) {
+  const q = useRetention(projectId);
+  const cohorts = q.data?.cohorts ?? [];
+
   return (
     <CardSection index="01" title="Retention" pt={14}>
       <View style={{ paddingHorizontal: 16, paddingBottom: 4, gap: 6 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-          <DemoChip />
-        </View>
-        {demoData.retention.map((r, i) => (
-          <View
-            key={r.day}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 12,
-              paddingVertical: 4,
-              borderBottomWidth: i === demoData.retention.length - 1 ? 0 : 1,
-              borderBottomColor: "rgba(255,255,255,0.05)",
-            }}
-          >
-            <Text
+        {!projectId ? (
+          <EmptyHint>SELECT A PROJECT</EmptyHint>
+        ) : q.isLoading ? (
+          <EmptyHint>LOADING…</EmptyHint>
+        ) : cohorts.length === 0 ? (
+          <EmptyHint>NO RETENTION DATA</EmptyHint>
+        ) : (
+          cohorts.map((r, i) => (
+            <View
+              key={r.day}
               style={{
-                fontFamily: "GeistMono-600",
-                fontSize: type.label,
-                color: colors.fgMuted,
-                width: 28,
-                letterSpacing: 0.4,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                paddingVertical: 4,
+                borderBottomWidth: i === cohorts.length - 1 ? 0 : 1,
+                borderBottomColor: "rgba(255,255,255,0.05)",
               }}
             >
-              {r.day}
-            </Text>
-            <View style={{ flex: 1 }}>
-              <HBar pct={r.pct} color={colors.blue} height={6} />
+              <Text
+                style={{
+                  fontFamily: "GeistMono-600",
+                  fontSize: type.label,
+                  color: colors.fgMuted,
+                  width: 28,
+                  letterSpacing: 0.4,
+                }}
+              >
+                {r.day}
+              </Text>
+              <View style={{ flex: 1 }}>
+                <HBar pct={r.pct} color={colors.blue} height={6} />
+              </View>
+              <Text
+                style={{
+                  fontFamily: "GeistMono-600",
+                  fontSize: type.bodySm,
+                  color: colors.blue,
+                  width: 36,
+                  textAlign: "right",
+                }}
+              >
+                {r.pct}%
+              </Text>
             </View>
-            <Text
-              style={{
-                fontFamily: "GeistMono-600",
-                fontSize: type.bodySm,
-                color: colors.blue,
-                width: 36,
-                textAlign: "right",
-              }}
-            >
-              {r.pct}%
-            </Text>
-          </View>
-        ))}
+          ))
+        )}
         <View style={{ height: 8 }} />
       </View>
     </CardSection>
@@ -373,75 +385,79 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
 
 // ─── OS versions section ──────────────────────────────────────────────────────
 
-function OsSection() {
+function OsSection({ projectId }: { projectId?: string | undefined }) {
   const [openLabel, setOpenLabel] = useState<string | null>(null);
+  const q = useOsBreakdown(projectId);
+  const rows = q.data?.rows ?? [];
+  const maxPct = rows.reduce((m, r) => Math.max(m, r.pct), 0);
 
   return (
     <CardSection index="05" title="OS versions" pt={14}>
-      <View style={{ paddingHorizontal: 16, marginBottom: 4 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-          <DemoChip />
-        </View>
-      </View>
-      {demoData.os.map((os, i) => {
-        const open = openLabel === os.label;
-        const barPct = Math.min(100, Math.round(os.pct * 1.7));
-        return (
-          <Row
-            key={os.label}
-            open={open}
-            onToggle={() => {
-              haptic.tap();
-              setOpenLabel(open ? null : os.label);
-            }}
-            isLast={i === demoData.os.length - 1}
-            header={
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                <Text
-                  style={{
-                    fontFamily: "Geist-600",
-                    fontSize: type.body,
-                    color: colors.fgPrimary,
-                    flex: 1,
-                    letterSpacing: -0.2,
-                  }}
-                  numberOfLines={1}
-                >
-                  {os.label}
-                </Text>
-                <View style={{ width: 72 }}>
-                  <HBar pct={barPct} color={colors.green} height={5} />
+      {!projectId ? (
+        <EmptyHint>SELECT A PROJECT</EmptyHint>
+      ) : q.isLoading ? (
+        <EmptyHint>LOADING…</EmptyHint>
+      ) : rows.length === 0 ? (
+        <EmptyHint>NO OS DATA</EmptyHint>
+      ) : (
+        rows.map((os, i) => {
+          const label = `${os.os}${os.version ? ` ${os.version}` : ""}`;
+          const open = openLabel === label;
+          const barPct = maxPct > 0 ? Math.round((os.pct / maxPct) * 100) : 0;
+          return (
+            <Row
+              key={label}
+              open={open}
+              onToggle={() => {
+                haptic.tap();
+                setOpenLabel(open ? null : label);
+              }}
+              isLast={i === rows.length - 1}
+              header={
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <Text
+                    style={{
+                      fontFamily: "Geist-600",
+                      fontSize: type.body,
+                      color: colors.fgPrimary,
+                      flex: 1,
+                      letterSpacing: -0.2,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {label}
+                  </Text>
+                  <View style={{ width: 72 }}>
+                    <HBar pct={barPct} color={colors.green} height={5} />
+                  </View>
+                  <Text
+                    style={{
+                      fontFamily: "GeistMono-500",
+                      fontSize: type.label,
+                      color: colors.fgMuted,
+                      width: 30,
+                      textAlign: "right",
+                      letterSpacing: 0.3,
+                    }}
+                  >
+                    {os.pct}%
+                  </Text>
                 </View>
-                <Text
-                  style={{
-                    fontFamily: "GeistMono-500",
-                    fontSize: type.label,
-                    color: colors.fgMuted,
-                    width: 30,
-                    textAlign: "right",
-                    letterSpacing: 0.3,
-                  }}
-                >
-                  {os.pct}%
-                </Text>
-              </View>
-            }
-            detail={
-              <KV
-                items={[
-                  { label: "Share", value: `${os.pct}%` },
-                  { label: "Crash-free", value: "99.2%" },
-                  { label: "Avg session", value: "6m 14s" },
-                  {
-                    label: "Users",
-                    value: formatInteger(Math.round((os.pct / 100) * demoData.analyticsStats.mau)),
-                  },
-                ]}
-              />
-            }
-          />
-        );
-      })}
+              }
+              detail={
+                <KV
+                  items={[
+                    { label: "Share", value: `${os.pct}%`, color: colors.green },
+                    { label: "Users", value: formatInteger(os.users) },
+                    { label: "OS", value: os.os },
+                    { label: "Window", value: `${q.data?.days ?? 30}d` },
+                  ]}
+                />
+              }
+            />
+          );
+        })
+      )}
       <View style={{ height: 8 }} />
     </CardSection>
   );
@@ -462,14 +478,26 @@ export default function Analytics() {
 
   const kpis = useCockpitKpis();
   const dauDetail = useMetricDetail("dau");
+  const mauDetail = useMetricDetail("mau");
+  const sessDetail = useMetricDetail("avg_session_sec");
   const dauSeries = (dauDetail.data?.series ?? []).map((p) => p.value);
 
   const heroValue = kpis.data?.dau ?? 0;
   const dauDelta: number | undefined = kpis.data?.dauDelta ?? undefined;
 
+  // Son mevcut gün değeri (mau/avg_session_sec günlük yazılır).
+  const latestVal = (d: typeof mauDetail): number | null => {
+    const s = d.data?.series ?? [];
+    return s.length > 0 ? s[s.length - 1]!.value : null;
+  };
+  const mauVal = latestVal(mauDetail);
+  const sessVal = latestVal(sessDetail);
+  const stickiness = mauVal != null && mauVal > 0 ? Math.round((heroValue / mauVal) * 100) : null;
+  const fmtSession = (sec: number) => `${Math.floor(sec / 60)}m ${Math.round(sec % 60)}s`;
+
   const heroStats: HeroStat[] = [
-    { label: "Stickiness", value: `${demoData.analyticsStats.stickiness}%` },
-    { label: "Avg session", value: demoData.analyticsStats.avgSession },
+    { label: "Stickiness", value: stickiness != null ? `${stickiness}%` : "—" },
+    { label: "Avg session", value: sessVal != null ? fmtSession(sessVal) : "—" },
     { label: "New users", value: formatInteger(kpis.data?.newUsers ?? 0) },
   ];
 
@@ -503,7 +531,7 @@ export default function Analytics() {
             chartWidth={chartW}
             chartEl={
               <Bars
-                data={dauSeries.length >= 2 ? dauSeries : [...demoData.dauSeries]}
+                data={dauSeries.length >= 2 ? dauSeries : [heroValue, heroValue]}
                 width={chartW}
                 height={84}
                 color={colors.blue}
@@ -514,27 +542,9 @@ export default function Analytics() {
             stats={heroStats}
           />
 
-          {/* Demo notice for hero stats */}
-          <View
-            style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 6 }}
-          >
-            <DemoChip />
-            <Text
-              style={{
-                fontFamily: "GeistMono-500",
-                fontSize: type.label,
-                color: colors.fgSubtle,
-                letterSpacing: 0.3,
-                flex: 1,
-              }}
-            >
-              Stickiness · avg session demo · DAU/new users · funnel · acquisition · geo real
-            </Text>
-          </View>
-
           {/* Analytics sections */}
           <LiquidGlass padding={0}>
-            <RetentionSection />
+            <RetentionSection projectId={projectId} />
             <FullDivider />
             <FunnelSection projectId={projectId} />
             <FullDivider />
@@ -542,7 +552,7 @@ export default function Analytics() {
             <FullDivider />
             <CountriesSection projectId={projectId} />
             <FullDivider />
-            <OsSection />
+            <OsSection projectId={projectId} />
           </LiquidGlass>
         </ScrollView>
       </SafeAreaView>

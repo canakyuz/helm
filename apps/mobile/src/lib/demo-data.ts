@@ -66,14 +66,6 @@ export const demoData = {
   ],
 
   // ── Analytics ──
-  dauSeries: series(30, 60_000, 4000, 1100),
-  retention: [
-    { day: "D1", pct: 48 },
-    { day: "D3", pct: 32 },
-    { day: "D7", pct: 24 },
-    { day: "D14", pct: 18 },
-    { day: "D30", pct: 13 },
-  ],
   funnel: [
     { label: "Install", value: 100_000 },
     { label: "Open", value: 78_400 },
@@ -95,14 +87,6 @@ export const demoData = {
     { code: "BR", name: "Brazil", pct: 8, dau: 5700 },
     { code: "JP", name: "Japan", pct: 6, dau: 4300 },
   ],
-  os: [
-    { label: "iOS 17", pct: 52 },
-    { label: "iOS 16", pct: 21 },
-    { label: "Android 14", pct: 15 },
-    { label: "Android 13", pct: 8 },
-    { label: "Other", pct: 4 },
-  ],
-  analyticsStats: { stickiness: 32, avgSession: "6m 14s", newUsers: 2840, mau: 1_200_000 },
 } as const;
 
 export type DemoData = typeof demoData;
