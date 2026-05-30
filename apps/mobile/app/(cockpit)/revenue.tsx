@@ -26,7 +26,7 @@ import {
   HBar,
   StackBar,
   AreaChart,
-  Seg,
+  NativeSegmented,
   ActionBtn,
   SearchInput,
   Glyph,
@@ -849,14 +849,16 @@ export default function Revenue() {
             eyebrow={`Total revenue · ${period}`}
             live
             right={
-              <Seg<Period>
-                value={period}
-                options={["7D", "30D", "90D"]}
-                onChange={(v) => {
-                  haptic.tap();
-                  setPeriod(v);
-                }}
-              />
+              <View style={{ width: 150 }}>
+                <NativeSegmented<Period>
+                  value={period}
+                  options={["7D", "30D", "90D"]}
+                  onChange={(v) => {
+                    haptic.tap();
+                    setPeriod(v);
+                  }}
+                />
+              </View>
             }
             value={heroValue}
             format={(n) => fmt(n)}
@@ -889,14 +891,13 @@ export default function Revenue() {
           {/* Tab card */}
           <LiquidGlass padding={0}>
             <View style={{ padding: 12 }}>
-              <Seg<TabView>
+              <NativeSegmented<TabView>
                 value={view}
                 options={["Mix", "Subs", "Payouts"]}
                 onChange={(v) => {
                   haptic.tap();
                   setView(v);
                 }}
-                full
               />
             </View>
             <FullDivider />
