@@ -67,6 +67,45 @@ export const fetchPostHog: Connector = async (config) => {
     value: Number(wauRows[0]?.[0] ?? 0),
   });
 
+  // Anlık MAU — son 30 günün tekil kullanıcısı (stickiness = dau/mau türetilir).
+  const mauRows = await hogql(
+    host,
+    pid,
+    key,
+    `SELECT uniq(person_id)
+     FROM events
+     WHERE timestamp >= now() - INTERVAL 30 DAY`,
+  );
+  points.push({
+    date: today(),
+    metric: "mau",
+    value: Number(mauRows[0]?.[0] ?? 0),
+  });
+
+  // Ortalama oturum süresi (sn) — son 7 gün, $session_id bazında. Bazı
+  // projelerde session property yok → graceful, dau/wau/mau'yu bloklamaz.
+  try {
+    const sessRows = await hogql(
+      host,
+      pid,
+      key,
+      `SELECT avg(dur) FROM (
+         SELECT dateDiff('second', min(timestamp), max(timestamp)) AS dur
+         FROM events
+         WHERE timestamp >= now() - INTERVAL 7 DAY
+           AND properties.$session_id IS NOT NULL
+         GROUP BY properties.$session_id
+         HAVING dur > 0
+       )`,
+    );
+    const avgSec = Number(sessRows[0]?.[0] ?? 0);
+    if (avgSec > 0) {
+      points.push({ date: today(), metric: "avg_session_sec", value: Math.round(avgSec) });
+    }
+  } catch {
+    // $session_id yoksa oturum süresi atlanır.
+  }
+
   // Ülke kırılımı — son 30 gün DAU. PostHog otomatik geoip_country_code yakalar
   // (kişi properties veya event properties). Boş/null olanları atla.
   const byCountry: CountryMetricPoint[] = [];
