@@ -93,6 +93,20 @@ function parseTsv(tsv: string): ReportRow[] {
 const isDownloadType = (t: string) =>
   t === "1" || t === "1F" || t === "1T" || t === "1TP";
 
+// Gelir sınıflandırması (Apple Product Type Identifier referansı, doğrulandı):
+//   sub  = auto-renewable: IAY, IAY-M
+//   iap  = IAP + non-renewing sub: IA1, IA1-M, FI1, IA9, IA9-M
+//   skip = re-download/update/restore: 3*, 7*, F7, IA3 (proceeds ~0, sayma)
+//   app  = kalan (paid app sales) — toplam app_revenue'ya girer ama mix'te ayrı tutulmaz
+type RevClass = "sub" | "iap" | "skip" | "app";
+function classifyRevenue(productType: string): RevClass {
+  const t = productType.toUpperCase();
+  if (t === "IAY" || t === "IAY-M") return "sub";
+  if (t === "IA1" || t === "IA1-M" || t === "FI1" || t === "IA9" || t === "IA9-M") return "iap";
+  if (t === "IA3" || t === "F7" || t.startsWith("3") || t.startsWith("7")) return "skip";
+  return "app";
+}
+
 export const fetchAppStoreConnect: Connector = async (config) => {
   const jwt = await makeAscJwt(config as unknown as { key_id: string; issuer_id?: string; private_key: string });
   const vendor = String(config.vendor_number);
@@ -109,6 +123,8 @@ export const fetchAppStoreConnect: Connector = async (config) => {
     const rows = parseTsv(tsv);
     let downloads = 0;
     let revenue = 0;
+    let subRev = 0;
+    let iapRev = 0;
     // Ülke bazlı toplam — Country Code yoksa "??" altında topla.
     const dlByCountry = new Map<string, number>();
     const revByCountry = new Map<string, number>();
@@ -121,9 +137,15 @@ export const fetchAppStoreConnect: Connector = async (config) => {
       const rev = r.proceeds * r.units; // proceeds per unit × units
       revenue += rev;
       revByCountry.set(cc, (revByCountry.get(cc) ?? 0) + rev);
+      // Gelir mix'i için sub/iap ayır (app_revenue toplam kalır).
+      const cls = classifyRevenue(r.productType);
+      if (cls === "sub") subRev += rev;
+      else if (cls === "iap") iapRev += rev;
     }
     points.push({ date, metric: "app_downloads", value: downloads });
     points.push({ date, metric: "app_revenue", value: revenue });
+    points.push({ date, metric: "subscription_revenue", value: subRev });
+    points.push({ date, metric: "iap_revenue", value: iapRev });
 
     for (const [cc, v] of dlByCountry) {
       if (cc === "??" || v === 0) continue;
