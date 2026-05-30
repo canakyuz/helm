@@ -41,7 +41,7 @@ function SetRow({ label, sub, value, valueColor, right, danger, onPress, isLast 
     <Pressable
       onPress={onPress}
       disabled={onPress == null}
-      style={({ pressed }) => ({
+      style={{
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -50,8 +50,7 @@ function SetRow({ label, sub, value, valueColor, right, danger, onPress, isLast 
         paddingVertical: 13,
         borderBottomWidth: isLast ? 0 : 1,
         borderBottomColor: "rgba(255,255,255,0.055)",
-        backgroundColor: pressed && onPress ? "rgba(255,255,255,0.03)" : "transparent",
-      })}
+      }}
     >
       {/* label + optional sub */}
       <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
