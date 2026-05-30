@@ -3,8 +3,10 @@ import { ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
+import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
+import { formatInteger } from "~/lib/format";
 import { demoData } from "~/lib/demo-data";
 import { haptic } from "~/lib/haptics";
 import { colors, type } from "~/theme/tokens";
@@ -41,13 +43,6 @@ type RefundedMap = Record<string, boolean>;
 
 const GLYPH_TINTS = [colors.accent, colors.accentViolet, colors.blue, colors.green];
 const PROJECT_GLYPHS = ["◆", "✦", "❖", "◇"];
-
-function sliceByPeriod(period: Period): number[] {
-  const base = [...demoData.revTrend];
-  if (period === "7D") return base.slice(-7);
-  if (period === "30D") return base;
-  return [...base, ...base, ...base];
-}
 
 function sumSeries(arr: number[]): number {
   let total = 0;
@@ -794,8 +789,19 @@ export default function Revenue() {
   const [period, setPeriod] = useState<Period>("30D");
   const [view, setView] = useState<TabView>("Mix");
 
-  const series = useMemo(() => sliceByPeriod(period), [period]);
+  const adRev = useMetricDetail("ad_revenue");
+  // Real ad_revenue daily series (~30d window). 7D = last 7; 30D/90D = full
+  // available window (metrics only holds ~30d, so we don't fabricate 90d).
+  const series = useMemo(() => {
+    const real = (adRev.data?.series ?? []).map((p) => p.value);
+    const base = real.length >= 2 ? real : [...demoData.revTrend];
+    return period === "7D" ? base.slice(-7) : base;
+  }, [adRev.data, period]);
   const heroValue = useMemo(() => sumSeries(series), [series]);
+
+  // ARPU derived from real KPIs (monthly recurring revenue per user).
+  const totalUsers = kpis.data?.totalUsers ?? 0;
+  const arpu = totalUsers > 0 ? (kpis.data?.mrr ?? 0) / totalUsers : 0;
 
   const heroStats: HeroStat[] = [
     {
@@ -803,8 +809,8 @@ export default function Revenue() {
       value: fmt(kpis.data?.mrr ?? 0),
       delta: kpis.data?.mrrDelta ?? undefined,
     },
-    { label: "ARPU", value: fmt(demoData.arpu) },
-    { label: "Conversion", value: demoData.conversion + "%" },
+    { label: "ARPU", value: fmt(arpu) },
+    { label: "Active subs", value: formatInteger(kpis.data?.activeSubs ?? 0) },
   ];
 
   return (
@@ -832,8 +838,7 @@ export default function Revenue() {
             }
             value={heroValue}
             format={(n) => fmt(n)}
-            delta={14.2}
-            caption="All projects · all channels"
+            caption="Ad revenue · all projects"
             chartWidth={chartW}
             chartData={series}
             color={colors.accent}
@@ -855,7 +860,7 @@ export default function Revenue() {
                 flex: 1,
               }}
             >
-              Revenue figures are demo — real MRR shown above
+              Hero (ad revenue · MRR · ARPU · subs) real · mix / subs / payouts demo
             </Text>
           </View>
 
