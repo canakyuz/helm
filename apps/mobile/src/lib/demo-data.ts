@@ -45,17 +45,6 @@ export const demoData = {
   ],
   mrrNet: 2600,
   subs: { active: 3840, trial: 412, trialConv: 38, churnRate: 3.1, trend: series(30, 52_000, 1400, 320) },
-  payouts: {
-    stripePending: 8420,
-    appStorePending: 12_180,
-    nextDate: "Jun 1",
-    recent: [
-      { source: "Stripe", amount: 7980, date: "May 24", status: "paid" },
-      { source: "App Store", amount: 11_240, date: "May 15", status: "paid" },
-      { source: "Stripe", amount: 7610, date: "May 17", status: "paid" },
-      { source: "Google Play", amount: 5320, date: "May 15", status: "paid" },
-    ],
-  },
   transactions: [
     { id: "t1", type: "Subscription", detail: "Pro · annual", project: "Lumen", amount: 71.88, kind: "sub", ago: "2dk önce" },
     { id: "t2", type: "IAP", detail: "500 gems", project: "Voxel Raiders", amount: 4.99, kind: "iap", ago: "6dk önce" },

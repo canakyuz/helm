@@ -5,7 +5,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
+import { usePayouts } from "~/hooks/use-payouts";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
+import { usePreferences } from "~/lib/preferences";
 import { formatInteger } from "~/lib/format";
 import { demoData } from "~/lib/demo-data";
 import { haptic } from "~/lib/haptics";
@@ -428,7 +430,17 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
 
 // ─── Subs tab ─────────────────────────────────────────────────────────────────
 
-function SubsView({ fmt, chartW }: { fmt: (n: number) => string; chartW: number }) {
+function SubsView({
+  fmt,
+  chartW,
+  activeSubs,
+  trial,
+}: {
+  fmt: (n: number) => string;
+  chartW: number;
+  activeSubs: number;
+  trial: number | null;
+}) {
   const [openMrr, setOpenMrr] = useState<string | null>(null);
 
   const maxAbs = useMemo(
@@ -530,8 +542,8 @@ function SubsView({ fmt, chartW }: { fmt: (n: number) => string; chartW: number 
         >
           {(
             [
-              { label: "Active subs", value: String(demoData.subs.active), color: colors.green },
-              { label: "Trials", value: String(demoData.subs.trial), color: colors.accentViolet },
+              { label: "Active subs", value: formatInteger(activeSubs), color: colors.green },
+              { label: "Trials", value: trial != null ? formatInteger(trial) : "—", color: colors.accentViolet },
               {
                 label: "Trial → paid",
                 value: demoData.subs.trialConv + "%",
@@ -617,160 +629,146 @@ function SubsView({ fmt, chartW }: { fmt: (n: number) => string; chartW: number 
 
 // ─── Payouts tab ──────────────────────────────────────────────────────────────
 
-function PayoutsView({ fmt }: { fmt: (n: number) => string }) {
+function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId?: string | undefined }) {
   const [openPayout, setOpenPayout] = useState<string | null>(null);
+  const q = usePayouts(projectId);
+  const pending = q.data?.pending ?? [];
+  const recent = q.data?.recent ?? [];
+
+  // Pending'i kaynağa göre topla.
+  const pendingBySource = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of pending) m.set(p.source, (m.get(p.source) ?? 0) + p.amount);
+    return [...m.entries()].map(([source, amount]) => ({ source, amount }));
+  }, [pending]);
+
+  const PENDING_COLORS = [colors.accent, colors.accentViolet, colors.blue];
 
   return (
     <>
       {/* Pending balance */}
-      <CardSection
-        index="01"
-        title="Pending balance"
-        action={`next ${demoData.payouts.nextDate}`}
-        pt={14}
-      >
+      <CardSection index="01" title="Pending balance" pt={14}>
         <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 8 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-            <DemoChip />
-          </View>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            {(
-              [
-                {
-                  label: "Stripe",
-                  value: demoData.payouts.stripePending,
-                  color: colors.accent,
-                },
-                {
-                  label: "App Store",
-                  value: demoData.payouts.appStorePending,
-                  color: colors.accentViolet,
-                },
-              ] as const
-            ).map((block) => (
-              <View
-                key={block.label}
-                style={{
-                  flex: 1,
-                  padding: 16,
-                  borderRadius: 16,
-                  backgroundColor: "rgba(255,255,255,0.04)",
-                  borderWidth: 1,
-                  borderColor: `${block.color}33`,
-                  gap: 8,
-                }}
-              >
-                <Eyebrow size={9} color={block.color}>
-                  {block.label}
-                </Eyebrow>
-                <Text
-                  style={{
-                    fontFamily: "GeistMono-600",
-                    fontSize: type.stat,
-                    color: block.color,
-                    letterSpacing: -0.5,
-                  }}
-                  adjustsFontSizeToFit
-                  numberOfLines={1}
-                >
-                  {fmt(block.value)}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: "GeistMono-500",
-                    fontSize: type.label,
-                    color: colors.fgMuted,
-                  }}
-                >
-                  PENDING
-                </Text>
-              </View>
-            ))}
-          </View>
+          {!projectId ? (
+            <EmptyHint>SELECT A PROJECT</EmptyHint>
+          ) : q.isLoading ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : pendingBySource.length === 0 ? (
+            <EmptyHint>NO PENDING PAYOUTS</EmptyHint>
+          ) : (
+            <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+              {pendingBySource.map((block, i) => {
+                const color = PENDING_COLORS[i % PENDING_COLORS.length]!;
+                return (
+                  <View
+                    key={block.source}
+                    style={{
+                      flex: 1,
+                      minWidth: "45%",
+                      padding: 16,
+                      borderRadius: 16,
+                      backgroundColor: "rgba(255,255,255,0.04)",
+                      borderWidth: 1,
+                      borderColor: `${color}33`,
+                      gap: 8,
+                    }}
+                  >
+                    <Eyebrow size={9} color={color}>
+                      {block.source}
+                    </Eyebrow>
+                    <Text
+                      style={{
+                        fontFamily: "GeistMono-600",
+                        fontSize: type.stat,
+                        color,
+                        letterSpacing: -0.5,
+                      }}
+                      adjustsFontSizeToFit
+                      numberOfLines={1}
+                    >
+                      {fmt(block.amount)}
+                    </Text>
+                    <Text
+                      style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgMuted }}
+                    >
+                      PENDING
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </View>
       </CardSection>
 
       <FullDivider />
 
       {/* Recent payouts */}
-      <CardSection
-        index="02"
-        title="Recent payouts"
-        count={demoData.payouts.recent.length}
-        pt={14}
-      >
-        <View style={{ paddingHorizontal: 16, marginBottom: 4 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-            <DemoChip />
-          </View>
-        </View>
-        {demoData.payouts.recent.map((p, i) => {
-          const key = `${p.source}-${p.date}`;
-          const open = openPayout === key;
-          const gross = p.amount;
-          const fees = Math.round(gross * 0.029 + 30);
-          const net = gross - fees;
-          return (
-            <Row
-              key={key}
-              open={open}
-              onToggle={() => {
-                haptic.tap();
-                setOpenPayout(open ? null : key);
-              }}
-              isLast={i === demoData.payouts.recent.length - 1}
-              header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <View
-                    style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: colors.green }}
-                  />
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text
-                      style={{
-                        fontFamily: "Geist-600",
-                        fontSize: type.body,
-                        color: colors.fgPrimary,
-                        letterSpacing: -0.2,
-                      }}
-                      numberOfLines={1}
-                    >
-                      {p.source}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-500",
-                        fontSize: type.label,
-                        color: colors.fgMuted,
-                        letterSpacing: 0.4,
-                      }}
-                    >
-                      {p.date} · PAID
+      <CardSection index="02" title="Recent payouts" {...(recent.length ? { count: recent.length } : {})} pt={14}>
+        {!projectId ? (
+          <EmptyHint>SELECT A PROJECT</EmptyHint>
+        ) : q.isLoading ? (
+          <EmptyHint>LOADING…</EmptyHint>
+        ) : recent.length === 0 ? (
+          <EmptyHint>NO RECENT PAYOUTS</EmptyHint>
+        ) : (
+          recent.map((p, i) => {
+            const key = `${p.source}-${p.arrival_date}-${i}`;
+            const open = openPayout === key;
+            return (
+              <Row
+                key={key}
+                open={open}
+                onToggle={() => {
+                  haptic.tap();
+                  setOpenPayout(open ? null : key);
+                }}
+                isLast={i === recent.length - 1}
+                header={
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <View style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: colors.green }} />
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text
+                        style={{
+                          fontFamily: "Geist-600",
+                          fontSize: type.body,
+                          color: colors.fgPrimary,
+                          letterSpacing: -0.2,
+                        }}
+                        numberOfLines={1}
+                      >
+                        {p.source}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: "GeistMono-500",
+                          fontSize: type.label,
+                          color: colors.fgMuted,
+                          letterSpacing: 0.4,
+                        }}
+                      >
+                        {p.arrival_date} · {p.status.toUpperCase()}
+                      </Text>
+                    </View>
+                    <Text style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: colors.green }}>
+                      +{fmt(p.net)}
                     </Text>
                   </View>
-                  <Text
-                    style={{
-                      fontFamily: "GeistMono-600",
-                      fontSize: type.body,
-                      color: colors.green,
-                    }}
-                  >
-                    +{fmt(p.amount)}
-                  </Text>
-                </View>
-              }
-              detail={
-                <KV
-                  items={[
-                    { label: "Gross", value: fmt(gross) },
-                    { label: "Fees", value: `-${fmt(fees)}`, color: colors.accentWarn },
-                    { label: "Net", value: fmt(net), color: colors.green },
-                    { label: "Arrival", value: p.date },
-                  ]}
-                />
-              }
-            />
-          );
-        })}
+                }
+                detail={
+                  <KV
+                    items={[
+                      { label: "Net", value: fmt(p.net), color: colors.green },
+                      { label: "Currency", value: p.currency },
+                      { label: "Status", value: p.status },
+                      { label: "Arrival", value: p.arrival_date },
+                    ]}
+                  />
+                }
+              />
+            );
+          })
+        )}
         <View style={{ height: 8 }} />
       </CardSection>
     </>
@@ -785,11 +783,19 @@ export default function Revenue() {
 
   const fmt = useFormatCurrency();
   const kpis = useCockpitKpis();
+  const { selectedPropertyId } = usePreferences();
+  const properties = useProperties();
+  // Payouts edge tek proje scope'lu — "all" ise ilk projeye düş.
+  const projectId =
+    selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
 
   const [period, setPeriod] = useState<Period>("30D");
   const [view, setView] = useState<TabView>("Mix");
 
   const adRev = useMetricDetail("ad_revenue");
+  const trialDetail = useMetricDetail("subs_trial");
+  const trialSeries = trialDetail.data?.series ?? [];
+  const trialVal = trialSeries.length > 0 ? trialSeries[trialSeries.length - 1]!.value : null;
   // Real ad_revenue daily series (~30d window). 7D = last 7; 30D/90D = full
   // available window (metrics only holds ~30d, so we don't fabricate 90d).
   const series = useMemo(() => {
@@ -860,7 +866,7 @@ export default function Revenue() {
                 flex: 1,
               }}
             >
-              Hero (ad revenue · MRR · ARPU · subs) real · mix / subs / payouts demo
+              Hero · payouts (Stripe) · active subs · trials real · mix / MRR movement / churn demo (API limiti)
             </Text>
           </View>
 
@@ -882,9 +888,14 @@ export default function Revenue() {
             {view === "Mix" ? (
               <MixView fmt={fmt} />
             ) : view === "Subs" ? (
-              <SubsView fmt={fmt} chartW={chartW} />
+              <SubsView
+                fmt={fmt}
+                chartW={chartW}
+                activeSubs={kpis.data?.activeSubs ?? 0}
+                trial={trialVal}
+              />
             ) : (
-              <PayoutsView fmt={fmt} />
+              <PayoutsView fmt={fmt} projectId={projectId} />
             )}
           </LiquidGlass>
         </ScrollView>
