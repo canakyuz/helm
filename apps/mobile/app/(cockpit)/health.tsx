@@ -8,7 +8,7 @@ import { useAppVersions } from "~/hooks/use-app-versions";
 import { useReviews } from "~/hooks/use-reviews";
 import { useReviewReply } from "~/hooks/use-review-reply";
 import { useProperties, type Property } from "~/hooks/use-properties";
-import { demoData } from "~/lib/demo-data";
+import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { colors, type } from "~/theme/tokens";
@@ -376,6 +376,7 @@ export default function Health() {
   const reviewsQuery = useReviews();
   const reply = useReviewReply();
   const properties = useProperties();
+  const crashFree = useMetricDetail("crash_free_sessions");
 
   const issues = issuesQuery.data ?? [];
   const integrations = (healthQuery.data?.integrations ?? []) as Integration[];
@@ -390,6 +391,15 @@ export default function Health() {
 
   const fatalCount = issues.filter((c) => c.level === "fatal").length;
   const totalEvents = issues.reduce((a, c) => a + c.count, 0);
+
+  // crash_free_sessions oran metriği — son mevcut gün = güncel %, puan-delta dünden.
+  const cfSeries = (crashFree.data?.series ?? []).map((p) => p.value);
+  const cfHas = cfSeries.length > 0;
+  const cfValue = cfHas ? cfSeries[cfSeries.length - 1]! : 0;
+  const cfDelta =
+    cfSeries.length > 1
+      ? Number((cfValue - cfSeries[cfSeries.length - 2]!).toFixed(1))
+      : undefined;
 
   const histMax = distribution
     ? Math.max(distribution[1], distribution[2], distribution[3], distribution[4], distribution[5], 1)
@@ -410,16 +420,14 @@ export default function Health() {
           <OpenHero
             eyebrow="Crash-free · sessions"
             live
-            value={demoData.crashFree}
-            format={(v) => v.toFixed(1) + "%"}
-            delta={demoData.crashFreeDelta}
-            deltaInvert
+            value={cfValue}
+            format={(v) => (cfHas ? v.toFixed(1) + "%" : "—")}
+            delta={cfDelta}
             chartWidth={chartW}
-            chartData={[...demoData.crashTrend]}
+            chartData={cfSeries.length >= 2 ? cfSeries : [cfValue, cfValue]}
             color={colors.green}
             chartH={86}
             stats={stats}
-            right={<DemoChip />}
           />
 
           <LiquidGlass padding={0}>

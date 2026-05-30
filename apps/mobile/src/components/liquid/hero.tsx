@@ -29,12 +29,11 @@ export function Sep() {
 
 export function MiniStat({ label, value, delta, invert }: HeroStat) {
   return (
-    <View style={{ flex: 1, gap: 4 }}>
+    <View style={{ flex: 1, flexDirection: "column", gap: 4 }}>
       <Eyebrow size={9}>{label}</Eyebrow>
       <Text style={{ fontFamily: MONO_600, fontSize: type.stat, lineHeight: 24, color: colors.fgPrimary, letterSpacing: -0.3 }}>
-        {value}
+        {value} {delta != null ? <View style={{ marginBottom: 6 }}><Delta value={delta} size={10} invert={invert ?? false} /></View> : null}
       </Text>
-      {delta != null ? <Delta value={delta} size={10} invert={invert ?? false} /> : null}
     </View>
   );
 }
@@ -61,7 +60,7 @@ export function OpenHero({
   right?: ReactNode;
   value: number;
   format: (n: number) => string;
-  delta?: number;
+  delta?: number | undefined;
   deltaInvert?: boolean;
   caption?: string;
   chartWidth: number;
