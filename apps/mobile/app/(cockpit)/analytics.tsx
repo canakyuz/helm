@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Canvas, Rect, LinearGradient, vec } from "@shopify/react-native-skia";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
@@ -526,10 +527,13 @@ export default function Analytics() {
           showsVerticalScrollIndicator={false}
         >
           {/* Full-bleed hero over live map background (map-as-background, web style) */}
-          <View
+          <Animated.View
+            entering={FadeIn.duration(420)}
             style={{
               height: 300,
               overflow: "hidden",
+              borderTopWidth: 1,
+              borderTopColor: "rgba(255,255,255,0.08)",
               borderBottomWidth: 1,
               borderBottomColor: "rgba(255,255,255,0.08)",
             }}
@@ -610,7 +614,7 @@ export default function Analytics() {
                 ))}
               </View>
             </View>
-          </View>
+          </Animated.View>
 
           {/* Analytics sections — audience layout */}
           <LiquidGlass padding={0} style={{ marginHorizontal: 16 }}>
