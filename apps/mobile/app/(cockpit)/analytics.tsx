@@ -36,11 +36,24 @@ import type { HeroStat } from "~/components/liquid";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Metric = "DAU" | "WAU" | "MAU";
+// Only DAU + MAU are real metrics (from the `metrics` table). WAU was a synthetic
+// midpoint with no backing data, so it's dropped — never show an unsourced number.
+type Metric = "DAU" | "MAU";
 
 const MONO_600 = "GeistMono-600";
 const MONO_500 = "GeistMono-500";
 const ACQ_COLORS = [colors.blue, colors.accentViolet, colors.green, colors.accentWarn, colors.accent];
+
+// Raw event / source keys → readable Title Case. "paywall_dismissed" → "Paywall
+// Dismissed"; already-spaced labels ("Application Became Active") pass through.
+function humanize(s: string): string {
+  if (!s.includes("_") && s !== s.toLowerCase()) return s;
+  return s
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
 
 // ─── 01 · Retention (vertical bars, per design) ───────────────────────────────
 
@@ -48,6 +61,7 @@ function RetentionSection({ projectId }: { projectId?: string | undefined }) {
   const q = useRetention(projectId);
   const cohorts = q.data?.cohorts ?? [];
   const maxPct = cohorts.reduce((m, c) => Math.max(m, c.pct), 0);
+  if (projectId && !q.isLoading && cohorts.length === 0) return null;
 
   return (
     <CardSection index="01" title="Retention" pt={14}>
@@ -55,8 +69,6 @@ function RetentionSection({ projectId }: { projectId?: string | undefined }) {
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
         <EmptyHint>LOADING…</EmptyHint>
-      ) : cohorts.length === 0 ? (
-        <EmptyHint>NO RETENTION DATA</EmptyHint>
       ) : (
         <View
           style={{
@@ -106,59 +118,73 @@ function RetentionSection({ projectId }: { projectId?: string | undefined }) {
 function FunnelSection({ projectId }: { projectId?: string | undefined }) {
   const q = useFunnel(projectId);
   const steps = q.data?.steps ?? [];
+  if (projectId && !q.isLoading && steps.length === 0) return null;
+
   const entry = steps[0]?.count ?? 0;
+  // Collapse the trailing all-zero tail into one muted summary line.
+  const lastReal = steps.reduce((acc, s, i) => (s.count > 0 ? i : acc), -1);
+  const visible = lastReal >= 0 ? steps.slice(0, lastReal + 1) : steps;
+  const zeroTail = steps.length - visible.length;
 
   return (
-    <CardSection
-      index="02"
-      title="Conversion funnel"
-      pt={14}
-      {...(q.data ? { action: `${Math.round(q.data.overall_conversion)}% conv` } : {})}
-    >
-      <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 13 }}>
-        {!projectId ? (
-          <EmptyHint>SELECT A PROJECT</EmptyHint>
-        ) : q.isLoading ? (
-          <EmptyHint>LOADING…</EmptyHint>
-        ) : steps.length === 0 ? (
-          <EmptyHint>NO FUNNEL CONFIGURED</EmptyHint>
-        ) : (
-          steps.map((step, i) => {
-            const pct = entry > 0 ? (step.count / entry) * 100 : 0;
-            const prev = steps[i - 1]?.count ?? step.count;
-            const drop = i > 0 && prev > 0 ? Math.round((1 - step.count / prev) * 100) : 0;
-            const last = i === steps.length - 1;
-            return (
-              <View key={`${step.event}-${step.order}`}>
-                <View
-                  style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}
-                >
-                  <Text
-                    style={{ flex: 1, fontFamily: "Geist-500", fontSize: type.bodySm, color: colors.fgSecondary, letterSpacing: -0.2 }}
-                    numberOfLines={1}
-                  >
-                    {step.event}
-                  </Text>
-                  <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8, marginLeft: 8 }}>
-                    <Text style={{ fontFamily: MONO_600, fontSize: 12, color: colors.fgPrimary }}>
-                      {formatInteger(step.count)}
-                    </Text>
-                    {i > 0 ? (
-                      <Text style={{ fontFamily: MONO_500, fontSize: 9.5, color: colors.accentDanger, width: 40, textAlign: "right" }}>
-                        −{drop}%
+    <>
+      <FullDivider />
+      <CardSection
+        index="02"
+        title="Conversion funnel"
+        pt={14}
+        {...(q.data ? { action: `${Math.round(q.data.overall_conversion)}% conv` } : {})}
+      >
+        <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 13 }}>
+          {!projectId ? (
+            <EmptyHint>SELECT A PROJECT</EmptyHint>
+          ) : q.isLoading ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : (
+            <>
+              {visible.map((step, i) => {
+                const pct = entry > 0 ? (step.count / entry) * 100 : 0;
+                const prev = steps[i - 1]?.count ?? step.count;
+                const drop = i > 0 && prev > 0 ? Math.round((1 - step.count / prev) * 100) : 0;
+                const last = i === visible.length - 1;
+                return (
+                  <View key={`${step.event}-${step.order}`}>
+                    <View
+                      style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}
+                    >
+                      <Text
+                        style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
+                        numberOfLines={1}
+                      >
+                        {humanize(step.event)}
                       </Text>
-                    ) : (
-                      <View style={{ width: 40 }} />
-                    )}
+                      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8, marginLeft: 8 }}>
+                        <Text style={{ fontFamily: MONO_600, fontSize: 12.5, color: colors.fgPrimary }}>
+                          {formatInteger(step.count)}
+                        </Text>
+                        {i > 0 ? (
+                          <Text style={{ fontFamily: MONO_500, fontSize: 10, color: colors.accentDanger, width: 42, textAlign: "right" }}>
+                            −{drop}%
+                          </Text>
+                        ) : (
+                          <View style={{ width: 42 }} />
+                        )}
+                      </View>
+                    </View>
+                    <HBar pct={pct} color={last ? colors.accent : colors.blue} height={8} />
                   </View>
-                </View>
-                <HBar pct={pct} color={last ? colors.accent : colors.blue} height={8} />
-              </View>
-            );
-          })
-        )}
-      </View>
-    </CardSection>
+                );
+              })}
+              {zeroTail > 0 ? (
+                <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgSubtle, letterSpacing: 0.3, paddingTop: 2 }}>
+                  + {zeroTail} more step{zeroTail > 1 ? "s" : ""} · no conversions
+                </Text>
+              ) : null}
+            </>
+          )}
+        </View>
+      </CardSection>
+    </>
   );
 }
 
@@ -169,60 +195,62 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
   const q = useAcquisition(projectId);
   const rows = q.data?.rows ?? [];
   const total = q.data?.total ?? 0;
+  if (projectId && !q.isLoading && rows.length === 0) return null;
 
   return (
-    <CardSection index="03" title="Acquisition" pt={14} {...(total > 0 ? { action: `${formatInteger(total)} · 30d` } : {})}>
-      {!projectId ? (
-        <EmptyHint>SELECT A PROJECT</EmptyHint>
-      ) : q.isLoading ? (
-        <EmptyHint>LOADING…</EmptyHint>
-      ) : rows.length === 0 ? (
-        <EmptyHint>NO ACQUISITION DATA</EmptyHint>
-      ) : (
-        rows.map((a, i) => {
-          const open = openId === a.source;
-          const color = ACQ_COLORS[i % ACQ_COLORS.length]!;
-          const pct = total > 0 ? Math.round((a.users / total) * 100) : 0;
-          return (
-            <Row
-              key={a.source}
-              open={open}
-              onToggle={() => {
-                haptic.tap();
-                setOpenId(open ? null : a.source);
-              }}
-              isLast={i === rows.length - 1}
-              header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
-                  <View style={{ width: 9, height: 9, borderRadius: 3, backgroundColor: color }} />
-                  <Text
-                    style={{ flex: 1, fontFamily: "Geist-500", fontSize: type.bodySm, color: colors.fgSecondary, letterSpacing: -0.2 }}
-                    numberOfLines={1}
-                  >
-                    {a.source}
-                  </Text>
-                  <Text style={{ fontFamily: MONO_500, fontSize: 11, color: colors.fgMuted }}>{formatInteger(a.users)}</Text>
-                  <Text style={{ fontFamily: MONO_500, fontSize: 10.5, color: colors.fgSubtle, width: 30, textAlign: "right" }}>
-                    {pct}%
-                  </Text>
-                </View>
-              }
-              detail={
-                <KV
-                  items={[
-                    { label: "Users", value: formatInteger(a.users), color },
-                    { label: "Share", value: `${pct}%` },
-                    { label: "Type", value: a.type },
-                    { label: "Window", value: `${q.data?.days ?? 30}d` },
-                  ]}
-                />
-              }
-            />
-          );
-        })
-      )}
-      <View style={{ height: 8 }} />
-    </CardSection>
+    <>
+      <FullDivider />
+      <CardSection index="03" title="Acquisition" pt={14} {...(total > 0 ? { action: `${formatInteger(total)} · 30d` } : {})}>
+        {!projectId ? (
+          <EmptyHint>SELECT A PROJECT</EmptyHint>
+        ) : q.isLoading ? (
+          <EmptyHint>LOADING…</EmptyHint>
+        ) : (
+          rows.map((a, i) => {
+            const open = openId === a.source;
+            const color = ACQ_COLORS[i % ACQ_COLORS.length]!;
+            const pct = total > 0 ? Math.round((a.users / total) * 100) : 0;
+            return (
+              <Row
+                key={a.source}
+                open={open}
+                onToggle={() => {
+                  haptic.tap();
+                  setOpenId(open ? null : a.source);
+                }}
+                isLast={i === rows.length - 1}
+                header={
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
+                    <View style={{ width: 9, height: 9, borderRadius: 3, backgroundColor: color }} />
+                    <Text
+                      style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
+                      numberOfLines={1}
+                    >
+                      {humanize(a.source)}
+                    </Text>
+                    <Text style={{ fontFamily: MONO_600, fontSize: 12, color: colors.fgSecondary }}>{formatInteger(a.users)}</Text>
+                    <Text style={{ fontFamily: MONO_500, fontSize: 10.5, color: colors.fgMuted, width: 32, textAlign: "right" }}>
+                      {pct}%
+                    </Text>
+                  </View>
+                }
+                detail={
+                  <KV
+                    items={[
+                      { label: "Users", value: formatInteger(a.users), color },
+                      { label: "Share", value: `${pct}%` },
+                      { label: "Type", value: a.type },
+                      { label: "Window", value: `${q.data?.days ?? 30}d` },
+                    ]}
+                  />
+                }
+              />
+            );
+          })
+        )}
+        <View style={{ height: 8 }} />
+      </CardSection>
+    </>
   );
 }
 
@@ -234,15 +262,16 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
   const rows = q.data?.rows ?? [];
   const total = q.data?.total ?? 0;
   const maxUsers = rows.reduce((m, r) => Math.max(m, r.users), 0);
+  if (projectId && !q.isLoading && rows.length === 0) return null;
 
   return (
+    <>
+    <FullDivider />
     <CardSection index="04" title="Top countries" pt={14} {...(rows.length ? { count: rows.length } : {})}>
       {!projectId ? (
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
         <EmptyHint>LOADING…</EmptyHint>
-      ) : rows.length === 0 ? (
-        <EmptyHint>NO GEO DATA</EmptyHint>
       ) : (
         rows.map((c, i) => {
           const open = openCode === c.country;
@@ -275,7 +304,7 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
                     {c.country}
                   </Text>
                   <Text
-                    style={{ flex: 1, fontFamily: "Geist-500", fontSize: type.bodySm, color: colors.fgSecondary, letterSpacing: -0.2 }}
+                    style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
                     numberOfLines={1}
                   >
                     {c.country_name ?? c.country}
@@ -304,6 +333,7 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
       )}
       <View style={{ height: 8 }} />
     </CardSection>
+    </>
   );
 }
 
@@ -314,18 +344,19 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
   const q = useOsBreakdown(projectId);
   const rows = q.data?.rows ?? [];
   const maxPct = rows.reduce((m, r) => Math.max(m, r.pct), 0);
+  if (projectId && !q.isLoading && rows.length === 0) return null;
 
   return (
+    <>
+    <FullDivider />
     <CardSection index="05" title="OS versions" pt={14}>
       {!projectId ? (
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
         <EmptyHint>LOADING…</EmptyHint>
-      ) : rows.length === 0 ? (
-        <EmptyHint>NO OS DATA</EmptyHint>
       ) : (
         rows.map((o, i) => {
-          const label = `${o.os}${o.version ? ` ${o.version}` : ""}`;
+          const label = `${humanize(o.os)}${o.version ? ` ${o.version}` : ""}`;
           const open = openLabel === label;
           const barPct = maxPct > 0 ? (o.pct / maxPct) * 100 : 0;
           return (
@@ -340,7 +371,7 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
               header={
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
                   <Text
-                    style={{ width: 92, fontFamily: "Geist-500", fontSize: type.bodySm, color: colors.fgSecondary, letterSpacing: -0.2 }}
+                    style={{ width: 92, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
                     numberOfLines={1}
                   >
                     {label}
@@ -369,6 +400,7 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
       )}
       <View style={{ height: 8 }} />
     </CardSection>
+    </>
   );
 }
 
@@ -405,9 +437,7 @@ export default function Analytics() {
 
   const dauVal = heroValue;
   const mau = mauVal ?? kpis.data?.totalUsers ?? 0;
-  // No WAU metric yet → approximate between DAU and MAU so the segment is responsive.
-  const wauVal = mau > 0 ? Math.round((dauVal + mau) / 2) : dauVal;
-  const metricValue = metric === "DAU" ? dauVal : metric === "MAU" ? mau : wauVal;
+  const metricValue = metric === "DAU" ? dauVal : mau;
   const metricDelta = metric === "DAU" ? dauDelta : undefined;
 
   const heroStats: HeroStat[] = [
@@ -428,10 +458,10 @@ export default function Analytics() {
               eyebrow="Active users · 30D"
               live
               right={
-                <View style={{ width: 168 }}>
+                <View style={{ width: 124 }}>
                   <NativeSegmented<Metric>
                     value={metric}
-                    options={["DAU", "WAU", "MAU"]}
+                    options={["DAU", "MAU"]}
                     onChange={(v) => {
                       haptic.tap();
                       setMetric(v);
@@ -460,13 +490,9 @@ export default function Analytics() {
           {/* One big compact card — sections in design order, fixed dividers. */}
           <LiquidGlass padding={0} style={{ marginHorizontal: 16 }}>
             <RetentionSection projectId={projectId} />
-            <FullDivider />
             <FunnelSection projectId={projectId} />
-            <FullDivider />
             <AcquisitionSection projectId={projectId} />
-            <FullDivider />
             <CountriesSection projectId={projectId} />
-            <FullDivider />
             <OsSection projectId={projectId} />
             <FullDivider />
             <ReviewsSection index="06" />
