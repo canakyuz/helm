@@ -538,7 +538,7 @@ export default function Analytics() {
               borderBottomColor: "rgba(255,255,255,0.08)",
             }}
           >
-            {geoRows.length > 0 ? <AudienceMap rows={geoRows} fill /> : null}
+            {geoRows.length > 0 ? <AudienceMap rows={geoRows} fill showPill={false} /> : null}
 
             {/* DAU trend bars sunk into the bottom strip of the map (faint) */}
             <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom: 0, opacity: 0.4 }}>
@@ -572,18 +572,6 @@ export default function Analytics() {
               <OpenHero
                 eyebrow={`${metric} · active users · 30D`}
                 live
-                right={
-                  <View pointerEvents="auto" style={{ width: 168 }}>
-                    <NativeSegmented<Metric>
-                      value={metric}
-                      options={["DAU", "WAU", "MAU"]}
-                      onChange={(v) => {
-                        haptic.tap();
-                        setMetric(v);
-                      }}
-                    />
-                  </View>
-                }
                 value={metricValue}
                 format={formatInteger}
                 {...(metricDelta !== undefined ? { delta: metricDelta } : {})}
@@ -594,10 +582,13 @@ export default function Analytics() {
 
               <View style={{ flex: 1 }} />
 
-              {/* stat strip on a faint glass plate, pinned above the sunk bars */}
+              {/* control deck: stat strip + metric segment on one glass plate,
+                 pinned above the sunk bars. Segment lives here (not the eyebrow
+                 row) so map markers + hero text never collide with it. */}
               <View
+                pointerEvents="box-none"
                 style={{
-                  flexDirection: "row",
+                  gap: 12,
                   paddingVertical: 12,
                   paddingHorizontal: 14,
                   borderRadius: 16,
@@ -606,12 +597,25 @@ export default function Analytics() {
                   borderColor: "rgba(255,255,255,0.08)",
                 }}
               >
-                {heroStats.map((s, i) => (
-                  <View key={s.label} style={{ flex: 1, flexDirection: "row" }}>
-                    {i > 0 ? <Sep /> : null}
-                    <MiniStat {...s} />
-                  </View>
-                ))}
+                <View style={{ flexDirection: "row" }}>
+                  {heroStats.map((s, i) => (
+                    <View key={s.label} style={{ flex: 1, flexDirection: "row" }}>
+                      {i > 0 ? <Sep /> : null}
+                      <MiniStat {...s} />
+                    </View>
+                  ))}
+                </View>
+                <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+                <View pointerEvents="auto">
+                  <NativeSegmented<Metric>
+                    value={metric}
+                    options={["DAU", "WAU", "MAU"]}
+                    onChange={(v) => {
+                      haptic.tap();
+                      setMetric(v);
+                    }}
+                  />
+                </View>
               </View>
             </View>
           </Animated.View>
