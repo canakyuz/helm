@@ -27,7 +27,9 @@ import {
   KV,
   HBar,
   Bars,
-  Seg,
+  NativeSegmented,
+  AudienceMap,
+  ReviewsSection,
   EmptyHint,
 } from "~/components/liquid";
 import type { HeroStat } from "~/components/liquid";
@@ -43,7 +45,7 @@ function RetentionSection({ projectId }: { projectId?: string | undefined }) {
   const cohorts = q.data?.cohorts ?? [];
 
   return (
-    <CardSection index="01" title="Retention" pt={14}>
+    <CardSection index="04" title="Retention" pt={14}>
       <View style={{ paddingHorizontal: 16, paddingBottom: 4, gap: 6 }}>
         {!projectId ? (
           <EmptyHint>SELECT A PROJECT</EmptyHint>
@@ -281,6 +283,26 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
   );
 }
 
+// ─── Where (map) section ──────────────────────────────────────────────────────
+
+function WhereSection({ projectId }: { projectId?: string | undefined }) {
+  const q = useGeoBreakdown(projectId);
+  const rows = q.data?.rows ?? [];
+  return (
+    <CardSection index="01" title="Where" pt={14} {...(rows.length ? { count: rows.length } : {})}>
+      {!projectId ? (
+        <EmptyHint>SELECT A PROJECT</EmptyHint>
+      ) : q.isLoading ? (
+        <EmptyHint>LOADING…</EmptyHint>
+      ) : rows.length === 0 ? (
+        <EmptyHint>NO GEO DATA</EmptyHint>
+      ) : (
+        <AudienceMap rows={rows} />
+      )}
+    </CardSection>
+  );
+}
+
 // ─── Countries section ────────────────────────────────────────────────────────
 
 function CountriesSection({ projectId }: { projectId?: string | undefined }) {
@@ -291,7 +313,7 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
   const maxUsers = rows.reduce((m, r) => Math.max(m, r.users), 0);
 
   return (
-    <CardSection index="04" title="Top countries" pt={14} {...(rows.length ? { count: rows.length } : {})}>
+    <CardSection title="Top countries" pt={14} {...(rows.length ? { count: rows.length } : {})}>
       {!projectId ? (
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
@@ -392,7 +414,7 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
   const maxPct = rows.reduce((m, r) => Math.max(m, r.pct), 0);
 
   return (
-    <CardSection index="05" title="OS versions" pt={14}>
+    <CardSection index="06" title="OS versions" pt={14}>
       {!projectId ? (
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
@@ -515,14 +537,16 @@ export default function Analytics() {
             eyebrow="Active users · 30D"
             live
             right={
-              <Seg<Metric>
-                value={metric}
-                options={["DAU", "WAU", "MAU"]}
-                onChange={(v) => {
-                  haptic.tap();
-                  setMetric(v);
-                }}
-              />
+              <View style={{ width: 150 }}>
+                <NativeSegmented<Metric>
+                  value={metric}
+                  options={["DAU", "WAU", "MAU"]}
+                  onChange={(v) => {
+                    haptic.tap();
+                    setMetric(v);
+                  }}
+                />
+              </View>
             }
             value={heroValue}
             format={formatInteger}
@@ -542,15 +566,18 @@ export default function Analytics() {
             stats={heroStats}
           />
 
-          {/* Analytics sections */}
+          {/* Analytics sections — audience layout */}
           <LiquidGlass padding={0}>
-            <RetentionSection projectId={projectId} />
+            <WhereSection projectId={projectId} />
+            <CountriesSection projectId={projectId} />
             <FullDivider />
             <FunnelSection projectId={projectId} />
             <FullDivider />
             <AcquisitionSection projectId={projectId} />
             <FullDivider />
-            <CountriesSection projectId={projectId} />
+            <RetentionSection projectId={projectId} />
+            <FullDivider />
+            <ReviewsSection index="05" />
             <FullDivider />
             <OsSection projectId={projectId} />
           </LiquidGlass>
