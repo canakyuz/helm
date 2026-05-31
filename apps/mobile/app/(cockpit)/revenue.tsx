@@ -12,7 +12,6 @@ import { useMrrMovement } from "~/hooks/use-mrr-movement";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { usePreferences } from "~/lib/preferences";
 import { formatInteger } from "~/lib/format";
-import { demoData } from "~/lib/demo-data";
 import { haptic } from "~/lib/haptics";
 import { colors, type } from "~/theme/tokens";
 import {
@@ -32,9 +31,11 @@ import {
   Eyebrow,
   Delta,
   EmptyHint,
-  DemoChip,
+  ShowMore,
 } from "~/components/liquid";
 import type { HeroStat } from "~/components/liquid";
+
+const TOP_N = 5; // glance-first lists: show the top few, total stays in the header
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -243,13 +244,23 @@ function SubsView({
   projectId?: string | undefined;
 }) {
   const [openMrr, setOpenMrr] = useState<string | null>(null);
+  const [showAllMoves, setShowAllMoves] = useState(false);
   const mrr = useMrrMovement(projectId);
   const moves = mrr.data?.segments ?? [];
+  const visibleMoves = showAllMoves ? moves : moves.slice(0, TOP_N);
   const maxAbs = useMemo(
     () => Math.max(1, ...moves.map((m) => Math.abs(m.value))),
     [moves],
   );
   const segColor = (v: number) => (v >= 0 ? colors.green : colors.accentDanger);
+
+  // Real daily MRR series (metrics table) → real trend chart + delta.
+  const mrrDetail = useMetricDetail("mrr");
+  const mrrSeries = (mrrDetail.data?.series ?? []).map((p) => p.value);
+  const mrrDelta =
+    mrrSeries.length >= 2 && mrrSeries[0]! > 0
+      ? Number((((mrrSeries[mrrSeries.length - 1]! - mrrSeries[0]!) / mrrSeries[0]!) * 100).toFixed(1))
+      : undefined;
 
   return (
     <>
@@ -267,7 +278,8 @@ function SubsView({
         ) : moves.length === 0 ? (
           <EmptyHint>NO MRR MOVEMENT DATA</EmptyHint>
         ) : (
-          moves.map((m, i) => {
+          <>
+          {visibleMoves.map((m, i) => {
             const open = openMrr === m.label;
             const pct = Math.round((Math.abs(m.value) / maxAbs) * 100);
             const color = segColor(m.value);
@@ -279,7 +291,7 @@ function SubsView({
                   haptic.tap();
                   setOpenMrr(open ? null : m.label);
                 }}
-                isLast={i === moves.length - 1}
+                isLast={i === visibleMoves.length - 1}
                 header={
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                     <Text
@@ -326,25 +338,30 @@ function SubsView({
                 }
               />
             );
-          })
+          })}
+          <ShowMore
+            hidden={moves.length - TOP_N}
+            expanded={showAllMoves}
+            onPress={() => {
+              haptic.tap();
+              setShowAllMoves((v) => !v);
+            }}
+          />
+          </>
         )}
         <View style={{ height: 8 }} />
       </CardSection>
 
       <FullDivider />
 
-      {/* Subscription stats */}
+      {/* Subscription stats — real only (active subs + trials) */}
       <CardSection index="02" title="Subscriptions" pt={14}>
-        <View style={{ paddingHorizontal: 16, marginBottom: 4 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-            <DemoChip />
-          </View>
-        </View>
         <View
           style={{
             flexDirection: "row",
             flexWrap: "wrap",
             paddingHorizontal: 16,
+            paddingTop: 4,
             paddingBottom: 16,
             gap: 8,
           }}
@@ -353,16 +370,6 @@ function SubsView({
             [
               { label: "Active subs", value: formatInteger(activeSubs), color: colors.green },
               { label: "Trials", value: trial != null ? formatInteger(trial) : "—", color: colors.accentViolet },
-              {
-                label: "Trial → paid",
-                value: demoData.subs.trialConv + "%",
-                color: colors.accent,
-              },
-              {
-                label: "Churn rate",
-                value: demoData.subs.churnRate + "%",
-                color: colors.accentDanger,
-              },
             ] as const
           ).map((stat) => (
             <View
@@ -395,41 +402,31 @@ function SubsView({
 
       <FullDivider />
 
-      {/* MRR trend */}
+      {/* MRR trend — real daily MRR series from the metrics table */}
       <CardSection index="03" title="MRR trend" pt={14}>
         <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 8 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <DemoChip />
-          </View>
-          <AreaChart
-            data={[...demoData.subs.trend]}
-            width={chartW - 8}
-            height={72}
-            color={colors.accentViolet}
-          />
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text
-              style={{
-                fontFamily: "GeistMono-500",
-                fontSize: type.label,
-                color: colors.fgSubtle,
-              }}
-            >
-              30 days
-            </Text>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-              <Delta value={8.4} size={10} invert={false} />
-              <Text
-                style={{
-                  fontFamily: "GeistMono-500",
-                  fontSize: type.label,
-                  color: colors.fgMuted,
-                }}
-              >
-                vs prev period
-              </Text>
-            </View>
-          </View>
+          {mrrDetail.isLoading ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : mrrSeries.length < 2 ? (
+            <EmptyHint>NO MRR DATA</EmptyHint>
+          ) : (
+            <>
+              <AreaChart data={mrrSeries} width={chartW - 8} height={72} color={colors.accentViolet} />
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle }}>
+                  {mrrSeries.length} days
+                </Text>
+                {mrrDelta != null ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Delta value={mrrDelta} size={10} invert={false} />
+                    <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgMuted }}>
+                      over window
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            </>
+          )}
         </View>
       </CardSection>
     </>
@@ -440,9 +437,11 @@ function SubsView({
 
 function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId?: string | undefined }) {
   const [openPayout, setOpenPayout] = useState<string | null>(null);
+  const [showAllRecent, setShowAllRecent] = useState(false);
   const q = usePayouts(projectId);
   const pending = q.data?.pending ?? [];
   const recent = q.data?.recent ?? [];
+  const visibleRecent = showAllRecent ? recent : recent.slice(0, TOP_N);
 
   // Pending'i kaynağa göre topla.
   const pendingBySource = useMemo(() => {
@@ -521,7 +520,8 @@ function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId
         ) : recent.length === 0 ? (
           <EmptyHint>NO RECENT PAYOUTS</EmptyHint>
         ) : (
-          recent.map((p, i) => {
+          <>
+          {visibleRecent.map((p, i) => {
             const key = `${p.source}-${p.arrival_date}-${i}`;
             const open = openPayout === key;
             return (
@@ -532,7 +532,7 @@ function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId
                   haptic.tap();
                   setOpenPayout(open ? null : key);
                 }}
-                isLast={i === recent.length - 1}
+                isLast={i === visibleRecent.length - 1}
                 header={
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                     <View style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: colors.green }} />
@@ -576,7 +576,16 @@ function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId
                 }
               />
             );
-          })
+          })}
+          <ShowMore
+            hidden={recent.length - TOP_N}
+            expanded={showAllRecent}
+            onPress={() => {
+              haptic.tap();
+              setShowAllRecent((v) => !v);
+            }}
+          />
+          </>
         )}
         <View style={{ height: 8 }} />
       </CardSection>
@@ -609,8 +618,7 @@ export default function Revenue() {
   // available window (metrics only holds ~30d, so we don't fabricate 90d).
   const series = useMemo(() => {
     const real = (adRev.data?.series ?? []).map((p) => p.value);
-    const base = real.length >= 2 ? real : [...demoData.revTrend];
-    return period === "7D" ? base.slice(-7) : base;
+    return period === "7D" ? real.slice(-7) : real;
   }, [adRev.data, period]);
   const heroValue = useMemo(() => sumSeries(series), [series]);
 
@@ -657,29 +665,11 @@ export default function Revenue() {
             format={(n) => fmt(n)}
             caption="Ad revenue · all projects"
             chartWidth={chartW}
-            chartData={series}
+            chartData={series.length >= 2 ? series : [heroValue, heroValue]}
             color={colors.accent}
             chartH={116}
             stats={heroStats}
           />
-
-          {/* Demo notice */}
-          <View
-            style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 6 }}
-          >
-            <DemoChip />
-            <Text
-              style={{
-                fontFamily: "GeistMono-500",
-                fontSize: type.label,
-                color: colors.fgSubtle,
-                letterSpacing: 0.3,
-                flex: 1,
-              }}
-            >
-              Hero · payouts (Stripe) · active subs · trials real · mix / MRR movement / churn demo (API limiti)
-            </Text>
-          </View>
 
           {/* Tab card */}
           <LiquidGlass padding={0}>
