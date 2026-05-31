@@ -17,10 +17,13 @@ export function AudienceMap({
   rows,
   height = 200,
   fill = false,
+  showPill = true,
 }: {
   rows: AudienceMapRow[];
   height?: number;
   fill?: boolean;
+  // Background-as-hero usage hides the pill so it never collides with hero text.
+  showPill?: boolean;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -40,14 +43,15 @@ export function AudienceMap({
     if (selected == null && placed.length > 0) setSelected(placed[0]!.r.country);
   }, [placed, selected]);
 
+  // No marker titles: Apple Maps renders them as floating labels that collide
+  // over the dark scrim. Rank-tint dots carry the hierarchy; detail lives in the
+  // pill (on tap) and the "Top countries" card below.
   const markers = useMemo(
     () =>
       placed.map(({ r, geo }, i) => ({
         id: r.country,
         coordinates: { latitude: geo.lat, longitude: geo.lng },
-        title: `${countryFlag(r.country)} ${r.country_name ?? geo.name} · ${formatInteger(r.users)} users`,
         tintColor: i < RANK_TINT.length ? RANK_TINT[i]! : TAIL_TINT,
-        monogram: countryFlag(r.country),
       })),
     [placed],
   );
@@ -119,7 +123,7 @@ export function AudienceMap({
       />
 
       {/* selected-country info pill — animates in/out + cross-fades on change */}
-      {active ? (
+      {showPill && active ? (
         <View pointerEvents="none" style={{ position: "absolute", left: 16, top: 16 }}>
           <Animated.View
             key={active.r.country}
