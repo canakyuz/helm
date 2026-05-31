@@ -19,14 +19,10 @@ import {
   FullDivider,
   Row,
   KV,
-  HBar,
   Seg,
   ActionBtn,
   SearchInput,
-  Stars,
   StatusDot,
-  Eyebrow,
-  DemoChip,
   EmptyHint,
   ReviewsSection,
 } from "~/components/liquid";
@@ -35,6 +31,21 @@ import type { HeroStat } from "~/components/liquid";
 const MONO_500 = "GeistMono-500";
 const MONO_600 = "GeistMono-600";
 const SANS_600 = "Geist-600";
+
+// Provider/source keys → proper brand casing for display.
+const BRAND: Record<string, string> = {
+  revenuecat: "RevenueCat",
+  admob: "AdMob",
+  posthog: "PostHog",
+  sentry: "Sentry",
+  appstore: "App Store",
+  playstore: "Play Store",
+  itunes: "iTunes",
+  ios: "iOS",
+  android: "Android",
+  web: "Web",
+};
+const brand = (k: string) => BRAND[k.toLowerCase()] ?? k;
 
 function levelColor(level: SentryLevel): string {
   if (level === "fatal" || level === "error") return colors.accentDanger;
@@ -217,8 +228,8 @@ function IntegrationRows({ items }: { items: Integration[] }) {
               <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
                 <View style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: c }} />
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={{ fontFamily: SANS_600, fontSize: type.bodySm, color: colors.fgPrimary }} numberOfLines={1}>
-                    {ig.provider}
+                  <Text style={{ fontFamily: SANS_600, fontSize: type.body, color: colors.fgPrimary }} numberOfLines={1}>
+                    {brand(ig.provider)}
                   </Text>
                   {ig.propertyName ? (
                     <Text style={{ fontFamily: MONO_500, fontSize: 9.5, color: colors.fgMuted, letterSpacing: 0.4 }} numberOfLines={1}>
@@ -235,7 +246,7 @@ function IntegrationRows({ items }: { items: Integration[] }) {
                   { label: "Status", value: statusLabel, color: c },
                   { label: "Last sync", value: ig.lastSyncedAt ? formatRelativeTime(ig.lastSyncedAt) : "—" },
                   { label: "Enabled", value: ig.enabled ? "Yes" : "No" },
-                  { label: "Provider", value: ig.provider },
+                  { label: "Provider", value: brand(ig.provider) },
                 ]}
               />
             }
@@ -245,11 +256,11 @@ function IntegrationRows({ items }: { items: Integration[] }) {
     </View>
   );
 }
-function heartbeatDemoPct(status: Property["status"]): number {
-  if (status === "down") return 94.1;
-  if (status === "stale") return 97.2;
-  if (status === "unknown") return 96.0;
-  return 99.5;
+function heartbeatColor(status: Property["status"]): string {
+  if (status === "down") return colors.accentDanger;
+  if (status === "healthy") return colors.green;
+  if (status === "unknown") return colors.fgMuted;
+  return colors.accentWarn; // stale
 }
 
 export default function Health() {
@@ -335,8 +346,8 @@ export default function Health() {
                           backgroundColor: "rgba(255,255,255,0.05)",
                         }}
                       >
-                        <Text style={{ fontFamily: MONO_500, fontSize: 8.5, color: colors.fgMuted, letterSpacing: 0.6 }}>
-                          {v.source.toUpperCase()}
+                        <Text style={{ fontFamily: MONO_500, fontSize: 9, color: colors.fgMuted, letterSpacing: 0.4 }}>
+                          {brand(v.source)}
                         </Text>
                       </View>
                       <Text style={{ flex: 1, fontFamily: MONO_500, fontSize: type.label, color: colors.fgSecondary }} numberOfLines={1}>
@@ -353,32 +364,34 @@ export default function Health() {
 
             <FullDivider />
             <CardSection index="04" title="Project heartbeat" count={props.length}>
-              <View style={{ paddingHorizontal: 16, paddingBottom: 4 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <Eyebrow size={8}>CRASH-FREE</Eyebrow>
-                  <DemoChip />
-                </View>
-              </View>
               {props.length === 0 ? (
                 <EmptyHint>NO PROJECTS</EmptyHint>
               ) : (
-                <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 12 }}>
+                <View style={{ paddingHorizontal: 16, paddingBottom: 14, gap: 15 }}>
                   {props.map((p) => {
-                    const pct = heartbeatDemoPct(p.status);
-                    const c = p.status === "down" ? colors.accentDanger : p.status === "healthy" ? colors.green : colors.accentWarn;
+                    // Real heartbeat signal only: ping freshness + interval. No fabricated %.
+                    const c = heartbeatColor(p.status);
+                    const ping = p.lastPingAt ? `last ping ${formatRelativeTime(p.lastPingAt)}` : "no ping yet";
+                    const every = p.intervalMinutes ? ` · every ${p.intervalMinutes}m` : "";
                     return (
                       <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
                         <StatusDot color={c} />
                         <View style={{ flex: 1, minWidth: 0 }}>
-                          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 5 }}>
-                            <Text style={{ fontFamily: SANS_600, fontSize: type.bodySm, color: colors.fgPrimary }} numberOfLines={1}>
+                          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
+                            <Text style={{ fontFamily: SANS_600, fontSize: type.body, color: colors.fgPrimary }} numberOfLines={1}>
                               {p.name}
                             </Text>
-                            <Text style={{ fontFamily: MONO_600, fontSize: type.label, color: colors.fgSecondary }}>
-                              {p.lastPingAt ? formatRelativeTime(p.lastPingAt) : "no ping"}
+                            <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: c, letterSpacing: 0.6 }}>
+                              {p.status.toUpperCase()}
                             </Text>
                           </View>
-                          <HBar pct={pct} color={c} height={5} />
+                          <Text
+                            style={{ fontFamily: MONO_500, fontSize: 9.5, color: colors.fgMuted, letterSpacing: 0.3, marginTop: 3 }}
+                            numberOfLines={1}
+                          >
+                            {(p.heartbeatName ?? "heartbeat")} · {ping}
+                            {every}
+                          </Text>
                         </View>
                       </View>
                     );
