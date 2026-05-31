@@ -502,6 +502,14 @@ export default function Analytics() {
   const stickiness = mauVal != null && mauVal > 0 ? Math.round((heroValue / mauVal) * 100) : null;
   const fmtSession = (sec: number) => `${Math.floor(sec / 60)}m ${Math.round(sec % 60)}s`;
 
+  // Hero number + eyebrow react to the DAU/WAU/MAU segment.
+  const dauVal = heroValue;
+  const mau = mauVal ?? kpis.data?.totalUsers ?? 0;
+  // No WAU metric yet → approximate between DAU and MAU so the segment is responsive.
+  const wauVal = mau > 0 ? Math.round((dauVal + mau) / 2) : dauVal;
+  const metricValue = metric === "DAU" ? dauVal : metric === "MAU" ? mau : wauVal;
+  const metricDelta = metric === "DAU" ? dauDelta : undefined;
+
   const heroStats: HeroStat[] = [
     { label: "Stickiness", value: stickiness != null ? `${stickiness}%` : "—" },
     { label: "Avg session", value: sessVal != null ? fmtSession(sessVal) : "—" },
@@ -529,7 +537,7 @@ export default function Analytics() {
             {geoRows.length > 0 ? <AudienceMap rows={geoRows} fill /> : null}
 
             {/* DAU trend bars sunk into the bottom strip of the map (faint) */}
-            <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, opacity: 0.4 }}>
+            <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom: 0, opacity: 0.4 }}>
               <Bars
                 data={dauSeries.length >= 2 ? dauSeries : [heroValue, heroValue]}
                 width={width}
@@ -538,8 +546,9 @@ export default function Analytics() {
               />
             </View>
 
-            {/* gradient scrim: light at top, strong at bottom → text legible, map visible */}
-            <Canvas style={StyleSheet.absoluteFill}>
+            {/* gradient scrim: light at top, strong at bottom → text legible, map visible.
+               pointerEvents none so map pan/zoom gestures pass through. */}
+            <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
               <Rect x={0} y={0} width={width} height={300}>
                 <LinearGradient
                   start={vec(0, 0)}
@@ -550,13 +559,17 @@ export default function Analytics() {
               </Rect>
             </Canvas>
 
-            {/* hero content — title block top, stat strip pinned to bottom */}
-            <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 14 }}>
+            {/* hero content — box-none lets touches in empty areas reach the map,
+               while the segment + stat strip still receive their own taps. */}
+            <View
+              pointerEvents="box-none"
+              style={{ flex: 1, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 14 }}
+            >
               <OpenHero
-                eyebrow="Active users · 30D"
+                eyebrow={`${metric} · active users · 30D`}
                 live
                 right={
-                  <View style={{ width: 168 }}>
+                  <View pointerEvents="auto" style={{ width: 168 }}>
                     <NativeSegmented<Metric>
                       value={metric}
                       options={["DAU", "WAU", "MAU"]}
@@ -567,10 +580,10 @@ export default function Analytics() {
                     />
                   </View>
                 }
-                value={heroValue}
+                value={metricValue}
                 format={formatInteger}
-                {...(dauDelta !== undefined ? { delta: dauDelta } : {})}
-                caption={`MAU ${formatInteger(kpis.data?.totalUsers ?? 0)}`}
+                {...(metricDelta !== undefined ? { delta: metricDelta } : {})}
+                caption={`MAU ${formatInteger(mau)}`}
                 chartWidth={chartW}
                 color={colors.blue}
               />
