@@ -31,7 +31,10 @@ import {
   NativeSegmented,
   ReviewsSection,
   EmptyHint,
+  ShowMore,
 } from "~/components/liquid";
+
+const TOP_N = 5; // glance-first lists: show the top few, total stays in the header
 import type { HeroStat } from "~/components/liquid";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -192,10 +195,12 @@ function FunnelSection({ projectId }: { projectId?: string | undefined }) {
 
 function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const q = useAcquisition(projectId);
   const rows = q.data?.rows ?? [];
   const total = q.data?.total ?? 0;
   if (projectId && !q.isLoading && rows.length === 0) return null;
+  const visible = showAll ? rows : rows.slice(0, TOP_N);
 
   return (
     <>
@@ -206,7 +211,8 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
         ) : q.isLoading ? (
           <EmptyHint>LOADING…</EmptyHint>
         ) : (
-          rows.map((a, i) => {
+          <>
+          {visible.map((a, i) => {
             const open = openId === a.source;
             const color = ACQ_COLORS[i % ACQ_COLORS.length]!;
             const pct = total > 0 ? Math.round((a.users / total) * 100) : 0;
@@ -218,7 +224,7 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
                   haptic.tap();
                   setOpenId(open ? null : a.source);
                 }}
-                isLast={i === rows.length - 1}
+                isLast={i === visible.length - 1}
                 header={
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
                     <View style={{ width: 9, height: 9, borderRadius: 3, backgroundColor: color }} />
@@ -246,7 +252,16 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
                 }
               />
             );
-          })
+          })}
+          <ShowMore
+            hidden={rows.length - TOP_N}
+            expanded={showAll}
+            onPress={() => {
+              haptic.tap();
+              setShowAll((v) => !v);
+            }}
+          />
+          </>
         )}
         <View style={{ height: 8 }} />
       </CardSection>
@@ -258,11 +273,13 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
 
 function CountriesSection({ projectId }: { projectId?: string | undefined }) {
   const [openCode, setOpenCode] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const q = useGeoBreakdown(projectId);
   const rows = q.data?.rows ?? [];
   const total = q.data?.total ?? 0;
   const maxUsers = rows.reduce((m, r) => Math.max(m, r.users), 0);
   if (projectId && !q.isLoading && rows.length === 0) return null;
+  const visible = showAll ? rows : rows.slice(0, TOP_N);
 
   return (
     <>
@@ -273,7 +290,8 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
       ) : q.isLoading ? (
         <EmptyHint>LOADING…</EmptyHint>
       ) : (
-        rows.map((c, i) => {
+        <>
+        {visible.map((c, i) => {
           const open = openCode === c.country;
           const pct = total > 0 ? Math.round((c.users / total) * 100) : 0;
           const barPct = maxUsers > 0 ? (c.users / maxUsers) * 100 : 0;
@@ -285,7 +303,7 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
                 haptic.tap();
                 setOpenCode(open ? null : c.country);
               }}
-              isLast={i === rows.length - 1}
+              isLast={i === visible.length - 1}
               header={
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
                   <Text
@@ -329,7 +347,16 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
               }
             />
           );
-        })
+        })}
+        <ShowMore
+          hidden={rows.length - TOP_N}
+          expanded={showAll}
+          onPress={() => {
+            haptic.tap();
+            setShowAll((v) => !v);
+          }}
+        />
+        </>
       )}
       <View style={{ height: 8 }} />
     </CardSection>
@@ -341,10 +368,12 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
 
 function OsSection({ projectId }: { projectId?: string | undefined }) {
   const [openLabel, setOpenLabel] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const q = useOsBreakdown(projectId);
   const rows = q.data?.rows ?? [];
   const maxPct = rows.reduce((m, r) => Math.max(m, r.pct), 0);
   if (projectId && !q.isLoading && rows.length === 0) return null;
+  const visible = showAll ? rows : rows.slice(0, TOP_N);
 
   return (
     <>
@@ -355,7 +384,8 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
       ) : q.isLoading ? (
         <EmptyHint>LOADING…</EmptyHint>
       ) : (
-        rows.map((o, i) => {
+        <>
+        {visible.map((o, i) => {
           const label = `${humanize(o.os)}${o.version ? ` ${o.version}` : ""}`;
           const open = openLabel === label;
           const barPct = maxPct > 0 ? (o.pct / maxPct) * 100 : 0;
@@ -367,7 +397,7 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
                 haptic.tap();
                 setOpenLabel(open ? null : label);
               }}
-              isLast={i === rows.length - 1}
+              isLast={i === visible.length - 1}
               header={
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
                   <Text
@@ -396,7 +426,16 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
               }
             />
           );
-        })
+        })}
+        <ShowMore
+          hidden={rows.length - TOP_N}
+          expanded={showAll}
+          onPress={() => {
+            haptic.tap();
+            setShowAll((v) => !v);
+          }}
+        />
+        </>
       )}
       <View style={{ height: 8 }} />
     </CardSection>
