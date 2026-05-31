@@ -32,6 +32,8 @@ import {
   AudienceMap,
   ReviewsSection,
   EmptyHint,
+  MiniStat,
+  Sep,
 } from "~/components/liquid";
 import type { HeroStat } from "~/components/liquid";
 
@@ -548,13 +550,13 @@ export default function Analytics() {
               </Rect>
             </Canvas>
 
-            {/* hero content (no chart here — bars are the sunk strip behind) */}
-            <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 30 }}>
+            {/* hero content — title block top, stat strip pinned to bottom */}
+            <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 14 }}>
               <OpenHero
                 eyebrow="Active users · 30D"
                 live
                 right={
-                  <View style={{ width: 150 }}>
+                  <View style={{ width: 168 }}>
                     <NativeSegmented<Metric>
                       value={metric}
                       options={["DAU", "WAU", "MAU"]}
@@ -571,8 +573,29 @@ export default function Analytics() {
                 caption={`MAU ${formatInteger(kpis.data?.totalUsers ?? 0)}`}
                 chartWidth={chartW}
                 color={colors.blue}
-                stats={heroStats}
               />
+
+              <View style={{ flex: 1 }} />
+
+              {/* stat strip on a faint glass plate, pinned above the sunk bars */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  paddingVertical: 12,
+                  paddingHorizontal: 14,
+                  borderRadius: 16,
+                  backgroundColor: "rgba(10,10,14,0.55)",
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.08)",
+                }}
+              >
+                {heroStats.map((s, i) => (
+                  <View key={s.label} style={{ flex: 1, flexDirection: "row" }}>
+                    {i > 0 ? <Sep /> : null}
+                    <MiniStat {...s} />
+                  </View>
+                ))}
+              </View>
             </View>
           </View>
 
