@@ -16,6 +16,7 @@ export {
   DemoChip,
   Stars,
   Toggle,
+  ShowMore,
 } from "./primitives";
 export { OpenHero, MiniStat, Sep } from "./hero";
 export type { HeroStat } from "./hero";

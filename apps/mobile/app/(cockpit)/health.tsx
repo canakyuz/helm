@@ -24,8 +24,11 @@ import {
   SearchInput,
   StatusDot,
   EmptyHint,
+  ShowMore,
   ReviewsSection,
 } from "~/components/liquid";
+
+const TOP_N = 5; // glance-first lists: show the top few, total stays in the header
 import type { HeroStat } from "~/components/liquid";
 
 const MONO_500 = "GeistMono-500";
@@ -38,6 +41,9 @@ const BRAND: Record<string, string> = {
   admob: "AdMob",
   posthog: "PostHog",
   sentry: "Sentry",
+  supabase: "Supabase",
+  google_play_developer: "Google Play",
+  app_store_connect: "App Store Connect",
   appstore: "App Store",
   playstore: "Play Store",
   itunes: "iTunes",
@@ -67,6 +73,7 @@ function CrashRows({ issues }: { issues: SentryIssue[] }) {
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [status, setStatus] = useState<Record<string, "resolved" | "ignored">>({});
+  const [showAll, setShowAll] = useState(false);
 
   const list = useMemo(() => {
     const needle = q.toLowerCase();
@@ -77,6 +84,7 @@ function CrashRows({ issues }: { issues: SentryIssue[] }) {
       return hay.includes(needle);
     });
   }, [issues, filter, q, status]);
+  const visible = showAll ? list : list.slice(0, TOP_N);
 
   return (
     <View>
@@ -95,7 +103,8 @@ function CrashRows({ issues }: { issues: SentryIssue[] }) {
       {list.length === 0 ? (
         <EmptyHint>NO MATCHING ISSUES</EmptyHint>
       ) : (
-        list.map((c, i) => {
+        <>
+        {visible.map((c, i) => {
           const open = openId === c.id;
           const resolved = status[c.id] === "resolved";
           const lc = levelColor(c.level);
@@ -105,7 +114,7 @@ function CrashRows({ issues }: { issues: SentryIssue[] }) {
               key={c.id}
               style={{
                 flexDirection: "row",
-                borderBottomWidth: i === list.length - 1 ? 0 : 1,
+                borderBottomWidth: i === visible.length - 1 ? 0 : 1,
                 borderBottomColor: "rgba(255,255,255,0.055)",
                 opacity: resolved ? 0.6 : 1,
               }}
@@ -185,7 +194,16 @@ function CrashRows({ issues }: { issues: SentryIssue[] }) {
               </View>
             </View>
           );
-        })
+        })}
+        <ShowMore
+          hidden={list.length - TOP_N}
+          expanded={showAll}
+          onPress={() => {
+            haptic.tap();
+            setShowAll((v) => !v);
+          }}
+        />
+        </>
       )}
     </View>
   );
@@ -266,6 +284,7 @@ function heartbeatColor(status: Property["status"]): string {
 export default function Health() {
   const { width } = useWindowDimensions();
   const chartW = width - 44;
+  const [versionsAll, setVersionsAll] = useState(false);
 
   const issuesQuery = useSentryIssues();
   const healthQuery = useSystemHealth();
@@ -333,7 +352,7 @@ export default function Health() {
                 <EmptyHint>NO VERSIONS TRACKED</EmptyHint>
               ) : (
                 <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 10 }}>
-                  {versions.slice(0, 6).map((v) => (
+                  {(versionsAll ? versions : versions.slice(0, TOP_N)).map((v) => (
                     <View key={v.id} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                       <Text style={{ fontFamily: MONO_600, fontSize: type.bodySm, color: colors.fgPrimary, width: 56 }}>
                         {v.version}
@@ -358,6 +377,14 @@ export default function Health() {
                       </Text>
                     </View>
                   ))}
+                  <ShowMore
+                    hidden={versions.length - TOP_N}
+                    expanded={versionsAll}
+                    onPress={() => {
+                      haptic.tap();
+                      setVersionsAll((v) => !v);
+                    }}
+                  />
                 </View>
               )}
             </CardSection>

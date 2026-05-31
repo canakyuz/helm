@@ -271,13 +271,13 @@ export function ActionBtn({
       ? colors.accent
       : tone === "danger"
         ? `${colors.accentDanger}1F`
-        : "rgba(255,255,255,0.06)";
+        : "rgba(0,0,0,0.06)";
   const bd =
     tone === "accent"
       ? "transparent"
       : tone === "danger"
         ? `${colors.accentDanger}59`
-        : "rgba(255,255,255,0.1)";
+        : "rgba(0,0,0,0.1)";
   return (
     <Pressable
       onPress={onPress}
@@ -319,9 +319,9 @@ export function SearchInput({
         marginHorizontal: 12,
         marginBottom: 8,
         borderRadius: 12,
-        backgroundColor: "rgba(255,255,255,0.04)",
+        backgroundColor: "rgba(0,0,0,0.04)",
         borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
+        borderColor: "rgba(0,0,0,0.08)",
       }}
     >
       <TextInput
@@ -349,6 +349,37 @@ export function EmptyHint({ children }: { children: string }) {
     >
       {children}
     </Text>
+  );
+}
+
+// condensed-list footer: keep lists glanceable (top-N), expand on demand.
+export function ShowMore({
+  hidden,
+  expanded,
+  onPress,
+}: {
+  hidden: number;
+  expanded: boolean;
+  onPress: () => void;
+}) {
+  if (hidden <= 0) return null;
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        paddingVertical: 11,
+        opacity: pressed ? 0.55 : 1,
+      })}
+    >
+      <Text style={{ fontFamily: MONO_500, fontSize: 11, color: colors.fgMuted, letterSpacing: 0.4 }}>
+        {expanded ? "Show less" : `+ ${hidden} more`}
+      </Text>
+      <Text style={{ fontFamily: MONO_500, fontSize: 10, color: colors.fgSubtle }}>{expanded ? "↑" : "↓"}</Text>
+    </Pressable>
   );
 }
 
