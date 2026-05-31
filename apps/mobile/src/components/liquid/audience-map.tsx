@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { AppleMaps } from "expo-maps";
 
 import { countryGeo } from "~/lib/country-geo";
@@ -8,7 +8,15 @@ import { formatInteger } from "~/lib/format";
 
 export type AudienceMapRow = { country: string; country_name: string | null; users: number };
 
-export function AudienceMap({ rows, height = 200 }: { rows: AudienceMapRow[]; height?: number }) {
+export function AudienceMap({
+  rows,
+  height = 200,
+  fill = false,
+}: {
+  rows: AudienceMapRow[];
+  height?: number;
+  fill?: boolean;
+}) {
   const markers = useMemo(() => {
     return rows
       .map((r) => {
@@ -27,15 +35,19 @@ export function AudienceMap({ rows, height = 200 }: { rows: AudienceMapRow[]; he
 
   return (
     <View
-      style={{
-        height,
-        marginHorizontal: 16,
-        marginBottom: 12,
-        borderRadius: glass.radiusSm,
-        overflow: "hidden",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
-      }}
+      style={
+        fill
+          ? StyleSheet.absoluteFill
+          : {
+              height,
+              marginHorizontal: 16,
+              marginBottom: 12,
+              borderRadius: glass.radiusSm,
+              overflow: "hidden",
+              borderWidth: 1,
+              borderColor: "rgba(255,255,255,0.08)",
+            }
+      }
     >
       <AppleMaps.View
         style={{ flex: 1 }}
