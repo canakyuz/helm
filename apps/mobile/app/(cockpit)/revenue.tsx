@@ -28,8 +28,6 @@ import {
   StackBar,
   AreaChart,
   NativeSegmented,
-  ActionBtn,
-  SearchInput,
   Glyph,
   Eyebrow,
   Delta,
@@ -42,7 +40,6 @@ import type { HeroStat } from "~/components/liquid";
 
 type Period = "7D" | "30D" | "90D";
 type TabView = "Mix" | "Subs" | "Payouts";
-type RefundedMap = Record<string, boolean>;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -55,12 +52,6 @@ function sumSeries(arr: number[]): number {
   return total;
 }
 
-const KIND_COLOR: Record<string, string> = {
-  sub: colors.accentViolet,
-  iap: colors.accent,
-  refund: colors.accentDanger,
-};
-
 // ─── Mix tab ──────────────────────────────────────────────────────────────────
 
 function MixView({ fmt }: { fmt: (n: number) => string }) {
@@ -69,22 +60,7 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
   const mix = useRevenueMix();
   const segments = mix.data?.segments ?? [];
   const [openSplit, setOpenSplit] = useState<string | null>(null);
-  const [openPlatform, setOpenPlatform] = useState<string | null>(null);
   const [openEarner, setOpenEarner] = useState<string | null>(null);
-  const [txSearch, setTxSearch] = useState("");
-  const [openTx, setOpenTx] = useState<string | null>(null);
-  const [refunded, setRefunded] = useState<RefundedMap>({});
-
-  const filteredTx = useMemo(() => {
-    const q = txSearch.toLowerCase();
-    if (!q) return demoData.transactions;
-    return demoData.transactions.filter(
-      (t) =>
-        t.type.toLowerCase().includes(q) ||
-        t.detail.toLowerCase().includes(q) ||
-        t.project.toLowerCase().includes(q),
-    );
-  }, [txSearch]);
 
   // Real per-project earnings: rank by ad_revenue + mrr from the metrics table.
   const earners = useMemo(() => {
@@ -175,79 +151,9 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
 
       <FullDivider />
 
-      {/* By platform — DEMO: Android gelir kaynağı yok, türetilemiyor */}
-      <CardSection index="02" title="By platform" pt={14}>
-        <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 4 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-            <DemoChip />
-          </View>
-          {demoData.platformSplit.map((p, i) => {
-            const open = openPlatform === p.label;
-            return (
-              <Row
-                key={p.label}
-                open={open}
-                onToggle={() => {
-                  haptic.tap();
-                  setOpenPlatform(open ? null : p.label);
-                }}
-                isLast={i === demoData.platformSplit.length - 1}
-                header={
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <View
-                      style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: p.color }}
-                    />
-                    <Text
-                      style={{
-                        flex: 1,
-                        fontFamily: "Geist-600",
-                        fontSize: type.body,
-                        color: colors.fgPrimary,
-                        letterSpacing: -0.2,
-                      }}
-                    >
-                      {p.label}
-                    </Text>
-                    <View style={{ width: 80 }}>
-                      <HBar pct={p.pct} color={p.color} height={6} />
-                    </View>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-600",
-                        fontSize: type.body,
-                        color: p.color,
-                        width: 72,
-                        textAlign: "right",
-                      }}
-                    >
-                      {fmt(p.value)}
-                    </Text>
-                  </View>
-                }
-                detail={
-                  <KV
-                    items={[
-                      { label: "Revenue", value: fmt(p.value), color: p.color },
-                      { label: "Share", value: `${p.pct}%` },
-                      { label: "vs last period", value: "+8.3%" },
-                      {
-                        label: "Avg transaction",
-                        value: fmt(Math.round(p.value / 420)),
-                      },
-                    ]}
-                  />
-                }
-              />
-            );
-          })}
-        </View>
-      </CardSection>
-
-      <FullDivider />
-
       {/* Top earners */}
       <CardSection
-        index="03"
+        index="02"
         title="Top earners"
         action="SEE ALL"
         onAction={() => haptic.tap()}
@@ -317,124 +223,6 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
         <View style={{ height: 8 }} />
       </CardSection>
 
-      <FullDivider />
-
-      {/* Recent payments */}
-      <CardSection
-        index="04"
-        title="Recent payments"
-        count={filteredTx.length}
-        pt={14}
-      >
-        <View style={{ paddingHorizontal: 16, marginBottom: 4 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-            <DemoChip />
-          </View>
-        </View>
-        <SearchInput
-          value={txSearch}
-          onChange={setTxSearch}
-          placeholder="Filter by type, detail or project…"
-        />
-        {filteredTx.length === 0 ? (
-          <EmptyHint>NO TRANSACTIONS MATCH</EmptyHint>
-        ) : (
-          filteredTx.map((tx, i) => {
-            const open = openTx === tx.id;
-            const dotColor = KIND_COLOR[tx.kind] ?? colors.fgMuted;
-            const isRefunded = refunded[tx.id] ?? false;
-            return (
-              <Row
-                key={tx.id}
-                open={open}
-                onToggle={() => {
-                  haptic.tap();
-                  setOpenTx(open ? null : tx.id);
-                }}
-                isLast={i === filteredTx.length - 1}
-                dimmed={isRefunded}
-                header={
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <View
-                      style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: dotColor }}
-                    />
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text
-                        style={{
-                          fontFamily: "Geist-600",
-                          fontSize: type.body,
-                          color: colors.fgPrimary,
-                          letterSpacing: -0.2,
-                        }}
-                        numberOfLines={1}
-                      >
-                        {tx.type} · {tx.detail}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: "GeistMono-500",
-                          fontSize: type.label,
-                          color: colors.fgMuted,
-                          letterSpacing: 0.4,
-                        }}
-                        numberOfLines={1}
-                      >
-                        {tx.project} · {tx.ago}
-                      </Text>
-                    </View>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-600",
-                        fontSize: type.body,
-                        color: tx.amount < 0 ? colors.accentDanger : colors.fgPrimary,
-                      }}
-                    >
-                      {tx.amount < 0 ? "-" : "+"}
-                      {fmt(Math.abs(tx.amount))}
-                    </Text>
-                  </View>
-                }
-                detail={
-                  <>
-                    <KV
-                      items={[
-                        { label: "Type", value: tx.type },
-                        { label: "Project", value: tx.project },
-                        {
-                          label: "Detail",
-                          value: tx.detail,
-                          full: true,
-                        },
-                        {
-                          label: "Amount",
-                          value: `${tx.amount < 0 ? "-" : "+"}${fmt(Math.abs(tx.amount))}`,
-                          color: tx.amount < 0 ? colors.accentDanger : colors.green,
-                        },
-                      ]}
-                    />
-                    {tx.kind !== "refund" ? (
-                      <View style={{ flexDirection: "row", gap: 8 }}>
-                        <ActionBtn
-                          label={isRefunded ? "REFUNDED" : "REFUND"}
-                          tone="danger"
-                          onPress={() => {
-                            if (!isRefunded) {
-                              haptic.tap();
-                              setRefunded((r) => ({ ...r, [tx.id]: true }));
-                            }
-                          }}
-                        />
-                        <ActionBtn label="RECEIPT" onPress={() => haptic.tap()} />
-                      </View>
-                    ) : null}
-                  </>
-                }
-              />
-            );
-          })
-        )}
-        <View style={{ height: 8 }} />
-      </CardSection>
     </>
   );
 }
