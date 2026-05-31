@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Canvas, Rect, LinearGradient, vec } from "@shopify/react-native-skia";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
@@ -515,14 +516,40 @@ export default function Analytics() {
           showsVerticalScrollIndicator={false}
         >
           {/* Full-bleed hero over live map background (map-as-background, web style) */}
-          <View style={{ overflow: "hidden", borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" }}>
+          <View
+            style={{
+              height: 300,
+              overflow: "hidden",
+              borderBottomWidth: 1,
+              borderBottomColor: "rgba(255,255,255,0.08)",
+            }}
+          >
             {geoRows.length > 0 ? <AudienceMap rows={geoRows} fill /> : null}
-            {/* darken so hero text stays legible over the map */}
-            <View
-              pointerEvents="none"
-              style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(7,7,10,0.55)" }]}
-            />
-            <View style={{ paddingVertical: 16, paddingHorizontal: 16 }}>
+
+            {/* DAU trend bars sunk into the bottom strip of the map (faint) */}
+            <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, opacity: 0.4 }}>
+              <Bars
+                data={dauSeries.length >= 2 ? dauSeries : [heroValue, heroValue]}
+                width={width}
+                height={72}
+                color={colors.blue}
+              />
+            </View>
+
+            {/* gradient scrim: light at top, strong at bottom → text legible, map visible */}
+            <Canvas style={StyleSheet.absoluteFill}>
+              <Rect x={0} y={0} width={width} height={300}>
+                <LinearGradient
+                  start={vec(0, 0)}
+                  end={vec(0, 300)}
+                  colors={["rgba(7,7,10,0.30)", "rgba(7,7,10,0.45)", "rgba(7,7,10,0.92)"]}
+                  positions={[0, 0.45, 1]}
+                />
+              </Rect>
+            </Canvas>
+
+            {/* hero content (no chart here — bars are the sunk strip behind) */}
+            <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 30 }}>
               <OpenHero
                 eyebrow="Active users · 30D"
                 live
@@ -543,16 +570,7 @@ export default function Analytics() {
                 {...(dauDelta !== undefined ? { delta: dauDelta } : {})}
                 caption={`MAU ${formatInteger(kpis.data?.totalUsers ?? 0)}`}
                 chartWidth={chartW}
-                chartEl={
-                  <Bars
-                    data={dauSeries.length >= 2 ? dauSeries : [heroValue, heroValue]}
-                    width={chartW}
-                    height={84}
-                    color={colors.blue}
-                  />
-                }
                 color={colors.blue}
-                chartH={84}
                 stats={heroStats}
               />
             </View>
