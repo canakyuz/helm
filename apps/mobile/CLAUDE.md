@@ -3,6 +3,8 @@
 Bu, `helm` cockpit'inin **kişisel** mobil yoldaşıdır. Refine masaüstünde kalır; bu uygulama sadece sahada/yolda hızlı KPI + alert kontrolü için. Kendi TestFlight'ından dağıtılır, App Store'a gitmez.
 
 > Global kurallar: `~/.claude/CLAUDE.md` — kanıt önce yargı, algoritmik mükemmellik, polyrepo, no `any`, conventional commits + WES-XXX.
+>
+> **Tasarım sistemi: [`design.md`](./design.md)** — liquid glass token'ları (`src/theme/tokens.ts`: colors/type/space/glass/radius), bileşen envanteri (`src/components/liquid/`), native parçalar (@expo/ui NativeSegmented, expo-maps AudienceMap), hareket + gotcha kuralları. UI yazmadan önce oku; token/bileşen adı uydurma.
 
 ---
 
