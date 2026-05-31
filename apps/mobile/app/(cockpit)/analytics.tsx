@@ -28,7 +28,6 @@ import {
   Row,
   KV,
   HBar,
-  Bars,
   NativeSegmented,
   AudienceMap,
   ReviewsSection,
@@ -483,10 +482,8 @@ export default function Analytics() {
     selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
 
   const kpis = useCockpitKpis();
-  const dauDetail = useMetricDetail("dau");
   const mauDetail = useMetricDetail("mau");
   const sessDetail = useMetricDetail("avg_session_sec");
-  const dauSeries = (dauDetail.data?.series ?? []).map((p) => p.value);
   const geo = useGeoBreakdown(projectId);
   const geoRows = geo.data?.rows ?? [];
 
@@ -540,16 +537,6 @@ export default function Analytics() {
           >
             {geoRows.length > 0 ? <AudienceMap rows={geoRows} fill showPill={false} /> : null}
 
-            {/* DAU trend bars sunk into the bottom strip of the map (faint) */}
-            <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom: 0, opacity: 0.4 }}>
-              <Bars
-                data={dauSeries.length >= 2 ? dauSeries : [heroValue, heroValue]}
-                width={width}
-                height={72}
-                color={colors.blue}
-              />
-            </View>
-
             {/* gradient scrim: light at top, strong at bottom → text legible, map visible.
                pointerEvents none so map pan/zoom gestures pass through. */}
             <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -557,8 +544,13 @@ export default function Analytics() {
                 <LinearGradient
                   start={vec(0, 0)}
                   end={vec(0, 300)}
-                  colors={["rgba(7,7,10,0.30)", "rgba(7,7,10,0.45)", "rgba(7,7,10,0.92)"]}
-                  positions={[0, 0.45, 1]}
+                  colors={[
+                    "rgba(7,7,10,0.74)",
+                    "rgba(7,7,10,0.52)",
+                    "rgba(7,7,10,0.78)",
+                    "rgba(7,7,10,0.97)",
+                  ]}
+                  positions={[0, 0.34, 0.66, 1]}
                 />
               </Rect>
             </Canvas>

@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 import { AppleMaps } from "expo-maps";
+// The AppleMaps namespace exposes MapType/MapColorScheme/MapStyleElevation as
+// consts but omits MapStyleEmphasis — deep-import the enum to mute the basemap.
+import { AppleMapsMapStyleEmphasis } from "expo-maps/build/apple/AppleMaps.types";
 
 import { countryGeo, countryFlag } from "~/lib/country-geo";
 import { colors, glass } from "~/theme/tokens";
@@ -113,11 +116,21 @@ export function AudienceMap({
         onMarkerClick={(m) => {
           if (m?.id) setSelected(m.id);
         }}
+        // Strip every floating control (compass / locate / scale / pitch) so the
+        // map reads as ambient texture, not an interactive map chrome.
+        uiSettings={{
+          compassEnabled: false,
+          myLocationButtonEnabled: false,
+          scaleBarEnabled: false,
+          togglePitchEnabled: false,
+        }}
         properties={{
           isMyLocationEnabled: false,
           isTrafficEnabled: false,
           mapType: AppleMaps.MapType.STANDARD,
           elevation: AppleMaps.MapStyleElevation.FLAT,
+          emphasis: AppleMapsMapStyleEmphasis.MUTED,
+          selectionEnabled: false,
           pointsOfInterest: { including: [] },
         }}
       />
