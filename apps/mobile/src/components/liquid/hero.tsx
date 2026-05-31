@@ -27,11 +27,11 @@ export function Sep() {
   );
 }
 
-export function MiniStat({ label, value, delta, invert }: HeroStat) {
+export function MiniStat({ label, value, delta, invert, valueSize = type.stat }: HeroStat & { valueSize?: number }) {
   return (
     <View style={{ flex: 1, flexDirection: "column", gap: 4 }}>
       <Eyebrow size={9}>{label}</Eyebrow>
-      <Text style={{ fontFamily: MONO_600, fontSize: type.stat, lineHeight: 24, color: colors.fgPrimary, letterSpacing: -0.3 }}>
+      <Text style={{ fontFamily: MONO_600, fontSize: valueSize, lineHeight: valueSize + 4, color: colors.fgPrimary, letterSpacing: -0.3 }}>
         {value} {delta != null ? <View style={{ marginBottom: 6 }}><Delta value={delta} size={10} invert={invert ?? false} /></View> : null}
       </Text>
     </View>

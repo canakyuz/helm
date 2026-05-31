@@ -1,7 +1,7 @@
 export { LiquidGlass } from "./glass";
 export type { GlassTone } from "./glass";
 export { LiquidBackground } from "./background";
-export { AreaChart, Bars, Ring, HBar, StackBar, Spark } from "./charts";
+export { AreaChart, Bars, Ring, Donut, HBar, StackBar, Spark } from "./charts";
 export {
   Eyebrow,
   Delta,

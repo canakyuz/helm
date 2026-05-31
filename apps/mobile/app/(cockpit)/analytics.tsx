@@ -28,6 +28,9 @@ import {
   Row,
   KV,
   HBar,
+  Donut,
+  StackBar,
+  AreaChart,
   NativeSegmented,
   AudienceMap,
   ReviewsSection,
@@ -44,62 +47,46 @@ type Metric = "DAU" | "WAU" | "MAU";
 // ─── Retention section ────────────────────────────────────────────────────────
 
 function RetentionSection({ projectId }: { projectId?: string | undefined }) {
+  const { width } = useWindowDimensions();
   const q = useRetention(projectId);
   const cohorts = q.data?.cohorts ?? [];
+  if (projectId && !q.isLoading && cohorts.length === 0) return null;
+
+  const chartW = width - 64; // card margin (32) + section padding (32)
+  const series = cohorts.map((c) => c.pct);
+  const d1 = cohorts[0]?.pct;
 
   return (
-    <CardSection index="04" title="Retention" pt={14}>
-      <View style={{ paddingHorizontal: 16, paddingBottom: 4, gap: 6 }}>
-        {!projectId ? (
-          <EmptyHint>SELECT A PROJECT</EmptyHint>
-        ) : q.isLoading ? (
-          <EmptyHint>LOADING…</EmptyHint>
-        ) : cohorts.length === 0 ? (
-          <EmptyHint>NO RETENTION DATA</EmptyHint>
-        ) : (
-          cohorts.map((r, i) => (
-            <View
-              key={r.day}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 12,
-                paddingVertical: 4,
-                borderBottomWidth: i === cohorts.length - 1 ? 0 : 1,
-                borderBottomColor: "rgba(255,255,255,0.05)",
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "GeistMono-600",
-                  fontSize: type.label,
-                  color: colors.fgMuted,
-                  width: 28,
-                  letterSpacing: 0.4,
-                }}
-              >
-                {r.day}
-              </Text>
-              <View style={{ flex: 1 }}>
-                <HBar pct={r.pct} color={colors.blue} height={6} />
+    <>
+      <FullDivider />
+      <CardSection index="04" title="Retention" pt={14} {...(d1 != null ? { action: `D1 ${d1}%` } : {})}>
+        <View style={{ paddingHorizontal: 16, paddingBottom: 10, gap: 8 }}>
+          {!projectId ? (
+            <EmptyHint>SELECT A PROJECT</EmptyHint>
+          ) : q.isLoading ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : series.length < 2 ? (
+            <EmptyHint>NO RETENTION DATA</EmptyHint>
+          ) : (
+            <>
+              <AreaChart data={series} width={chartW} height={96} color={colors.blue} />
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                {cohorts.map((c) => (
+                  <View key={c.day} style={{ alignItems: "center", gap: 3 }}>
+                    <Text style={{ fontFamily: "GeistMono-600", fontSize: type.bodySm, color: colors.blue }}>
+                      {c.pct}%
+                    </Text>
+                    <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle, letterSpacing: 0.4 }}>
+                      {c.day}
+                    </Text>
+                  </View>
+                ))}
               </View>
-              <Text
-                style={{
-                  fontFamily: "GeistMono-600",
-                  fontSize: type.bodySm,
-                  color: colors.blue,
-                  width: 36,
-                  textAlign: "right",
-                }}
-              >
-                {r.pct}%
-              </Text>
-            </View>
-          ))
-        )}
-        <View style={{ height: 8 }} />
-      </View>
-    </CardSection>
+            </>
+          )}
+        </View>
+      </CardSection>
+    </>
   );
 }
 
@@ -108,15 +95,18 @@ function RetentionSection({ projectId }: { projectId?: string | undefined }) {
 function FunnelSection({ projectId }: { projectId?: string | undefined }) {
   const q = useFunnel(projectId);
   const steps = q.data?.steps ?? [];
+  if (projectId && !q.isLoading && steps.length === 0) return null;
 
   return (
+    <>
+    <FullDivider />
     <CardSection
       index="02"
       title="Conversion funnel"
       pt={14}
       {...(q.data ? { action: `${Math.round(q.data.overall_conversion)}% conv` } : {})}
     >
-      <View style={{ paddingHorizontal: 16, paddingBottom: 4, gap: 6 }}>
+      <View style={{ paddingHorizontal: 16, paddingBottom: 4, gap: 12 }}>
         {!projectId ? (
           <EmptyHint>SELECT A PROJECT</EmptyHint>
         ) : q.isLoading ? (
@@ -125,61 +115,52 @@ function FunnelSection({ projectId }: { projectId?: string | undefined }) {
           <EmptyHint>NO FUNNEL CONFIGURED</EmptyHint>
         ) : (
           steps.map((step, i) => {
+            // Centered fill width = share of the entry step → the stack narrows.
+            const width = Math.max(1.5, Math.min(100, step.overall_pct));
             const drop = i > 0 ? Math.max(0, Math.round(100 - step.step_pct)) : 0;
+            const lost = i > 0 && drop > 0;
+            const dead = step.count === 0;
             return (
-              <View
-                key={`${step.event}-${step.order}`}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 12,
-                  paddingVertical: 4,
-                  borderBottomWidth: i === steps.length - 1 ? 0 : 1,
-                  borderBottomColor: "rgba(255,255,255,0.05)",
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "Geist-600",
-                    fontSize: type.body,
-                    color: colors.fgPrimary,
-                    width: 72,
-                    letterSpacing: -0.2,
-                  }}
-                  numberOfLines={1}
-                >
-                  {step.event}
-                </Text>
-                <View style={{ flex: 1 }}>
-                  <HBar pct={Math.round(step.overall_pct)} color={colors.accent} height={6} />
-                </View>
-                <Text
-                  style={{
-                    fontFamily: "GeistMono-600",
-                    fontSize: type.body,
-                    color: colors.fgPrimary,
-                    width: 56,
-                    textAlign: "right",
-                  }}
-                >
-                  {formatInteger(step.count)}
-                </Text>
-                {i > 0 ? (
+              <View key={`${step.event}-${step.order}`} style={{ gap: 7, opacity: dead ? 0.55 : 1 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle, width: 16 }}>
+                    {i + 1}
+                  </Text>
+                  <Text
+                    style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
+                    numberOfLines={1}
+                  >
+                    {step.event}
+                  </Text>
+                  <Text style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: colors.fgPrimary }}>
+                    {formatInteger(step.count)}
+                  </Text>
                   <Text
                     style={{
                       fontFamily: "GeistMono-500",
                       fontSize: type.label,
-                      color: colors.accentDanger,
-                      width: 36,
+                      color: lost ? colors.accentDanger : colors.fgSubtle,
+                      width: 44,
                       textAlign: "right",
                       letterSpacing: 0.3,
                     }}
                   >
-                    -{drop}%
+                    {lost ? `−${drop}%` : i === 0 ? "entry" : "—"}
                   </Text>
-                ) : (
-                  <View style={{ width: 36 }} />
-                )}
+                </View>
+                {/* centered narrowing fill — the funnel itself */}
+                <View style={{ alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: `${width}%`,
+                      minWidth: 4,
+                      height: 11,
+                      borderRadius: 6,
+                      backgroundColor: colors.accent,
+                      opacity: Math.max(0.4, 1 - i * 0.13),
+                    }}
+                  />
+                </View>
               </View>
             );
           })
@@ -187,106 +168,91 @@ function FunnelSection({ projectId }: { projectId?: string | undefined }) {
         <View style={{ height: 8 }} />
       </View>
     </CardSection>
+    </>
   );
 }
 
-// ─── Acquisition section ──────────────────────────────────────────────────────
-
-const ACQ_COLORS = [colors.accent, colors.accentViolet, colors.blue, colors.green, colors.accentWarn];
+// ─── Acquisition section (share split) ────────────────────────────────────────
 
 function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
-  const [openId, setOpenId] = useState<string | null>(null);
   const q = useAcquisition(projectId);
   const rows = q.data?.rows ?? [];
   const total = q.data?.total ?? 0;
+  // Hide the whole section (incl. its divider) when there's genuinely no data.
+  if (projectId && !q.isLoading && rows.length === 0) return null;
+
+  const segments = rows.map((acq, i) => ({
+    pct: total > 0 ? (acq.users / total) * 100 : 0,
+    color: SHARE_PALETTE[i % SHARE_PALETTE.length]!,
+  }));
 
   return (
-    <CardSection
-      index="03"
-      title="Acquisition"
-      pt={14}
-      {...(total > 0 ? { action: `${formatInteger(total)} · 30d` } : {})}
-    >
-      {!projectId ? (
-        <EmptyHint>SELECT A PROJECT</EmptyHint>
-      ) : q.isLoading ? (
-        <EmptyHint>LOADING…</EmptyHint>
-      ) : rows.length === 0 ? (
-        <EmptyHint>NO ACQUISITION DATA</EmptyHint>
-      ) : (
-        rows.map((acq, i) => {
-          const open = openId === acq.source;
-          const color = ACQ_COLORS[i % ACQ_COLORS.length]!;
-          const pct = total > 0 ? Math.round((acq.users / total) * 100) : 0;
-          return (
-            <Row
-              key={acq.source}
-              open={open}
-              onToggle={() => {
-                haptic.tap();
-                setOpenId(open ? null : acq.source);
-              }}
-              isLast={i === rows.length - 1}
-              header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <View style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: color }} />
-                  <Text
-                    style={{
-                      flex: 1,
-                      fontFamily: "Geist-600",
-                      fontSize: type.body,
-                      color: colors.fgPrimary,
-                      letterSpacing: -0.2,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {acq.source}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: "GeistMono-600",
-                      fontSize: type.body,
-                      color,
-                      width: 48,
-                      textAlign: "right",
-                    }}
-                  >
-                    {formatInteger(acq.users)}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: "GeistMono-500",
-                      fontSize: type.label,
-                      color: colors.fgMuted,
-                      width: 32,
-                      textAlign: "right",
-                      letterSpacing: 0.3,
-                    }}
-                  >
-                    {pct}%
-                  </Text>
-                </View>
-              }
-              detail={
-                <KV
-                  items={[
-                    { label: "Users", value: formatInteger(acq.users), color },
-                    { label: "Share", value: `${pct}%` },
-                    { label: "Type", value: acq.type },
-                    { label: "Window", value: `${q.data?.days ?? 30}d` },
-                  ]}
-                />
-              }
-            />
-          );
-        })
-      )}
-      <View style={{ height: 8 }} />
-    </CardSection>
+    <>
+      <FullDivider />
+      <CardSection
+        index="03"
+        title="Acquisition"
+        pt={14}
+        {...(total > 0 ? { action: `${formatInteger(total)} · 30d` } : {})}
+      >
+        <View style={{ paddingHorizontal: 16, paddingBottom: 8, gap: 14 }}>
+          {!projectId ? (
+            <EmptyHint>SELECT A PROJECT</EmptyHint>
+          ) : q.isLoading ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : (
+            <>
+              <StackBar segments={segments} height={14} />
+              <View style={{ gap: 11 }}>
+                {rows.map((acq, i) => {
+                  const color = SHARE_PALETTE[i % SHARE_PALETTE.length]!;
+                  const pct = total > 0 ? Math.round((acq.users / total) * 100) : 0;
+                  return (
+                    <View key={acq.source} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                      <View style={{ width: 9, height: 9, borderRadius: 3, backgroundColor: color }} />
+                      <Text
+                        style={{ flex: 1, fontFamily: "Geist-500", fontSize: type.body, color: colors.fgSecondary, letterSpacing: -0.2 }}
+                        numberOfLines={1}
+                      >
+                        {acq.source}
+                      </Text>
+                      <Text style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: colors.fgPrimary }}>
+                        {formatInteger(acq.users)}
+                      </Text>
+                      <Text
+                        style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgMuted, width: 34, textAlign: "right", letterSpacing: 0.3 }}
+                      >
+                        {pct}%
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          )}
+        </View>
+      </CardSection>
+    </>
   );
 }
 
-// ─── Countries section ────────────────────────────────────────────────────────
+// ─── Shared palettes ──────────────────────────────────────────────────────────
+
+// Rank tint: #1 pops lime, podium fades; tail goes muted. Drives leaderboard +
+// any rank-ordered share visual.
+const RANK_TINT = [colors.accent, colors.accentViolet, colors.blue];
+const rankTint = (i: number) => (i < RANK_TINT.length ? RANK_TINT[i]! : colors.fgMuted);
+// Categorical share palette (donut / stacked bar segments).
+const SHARE_PALETTE = [
+  colors.accent,
+  colors.accentViolet,
+  colors.blue,
+  colors.green,
+  colors.accentWarn,
+  colors.fgMuted,
+];
+
+// ─── Countries section (leaderboard) ──────────────────────────────────────────
 
 function CountriesSection({ projectId }: { projectId?: string | undefined }) {
   const [openCode, setOpenCode] = useState<string | null>(null);
@@ -307,7 +273,8 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
         rows.map((c, i) => {
           const open = openCode === c.country;
           const pct = total > 0 ? Math.round((c.users / total) * 100) : 0;
-          const barPct = maxUsers > 0 ? Math.round((c.users / maxUsers) * 100) : 0;
+          const barPct = maxUsers > 0 ? (c.users / maxUsers) * 100 : 0;
+          const tint = rankTint(i);
           return (
             <Row
               key={c.country}
@@ -318,61 +285,60 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
               }}
               isLast={i === rows.length - 1}
               header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <View
-                    style={{
-                      paddingHorizontal: 5,
-                      paddingVertical: 2,
-                      borderRadius: 4,
-                      backgroundColor: "rgba(255,255,255,0.06)",
-                      borderWidth: 1,
-                      borderColor: "rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    <Text
+                <View style={{ gap: 9 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
+                    {/* Rank-tinted ISO chip (flag emoji doesn't render on the iOS sim). */}
+                    <View
                       style={{
-                        fontFamily: "GeistMono-600",
-                        fontSize: 9,
-                        color: colors.fgSecondary,
-                        letterSpacing: 0.6,
+                        width: 30,
+                        height: 22,
+                        borderRadius: 6,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: `${tint}1A`,
+                        borderWidth: 1,
+                        borderColor: `${tint}55`,
                       }}
                     >
-                      {c.country}
+                      <Text style={{ fontFamily: "GeistMono-600", fontSize: 10, color: tint, letterSpacing: 0.5 }}>
+                        {c.country}
+                      </Text>
+                    </View>
+                    <Text
+                      style={{
+                        flex: 1,
+                        fontFamily: "Geist-600",
+                        fontSize: type.body,
+                        color: colors.fgPrimary,
+                        letterSpacing: -0.2,
+                      }}
+                      numberOfLines={1}
+                    >
+                      {c.country_name ?? c.country}
+                    </Text>
+                    <Text style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: tint }}>
+                      {formatInteger(c.users)}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: "GeistMono-500",
+                        fontSize: type.label,
+                        color: colors.fgMuted,
+                        width: 34,
+                        textAlign: "right",
+                        letterSpacing: 0.3,
+                      }}
+                    >
+                      {pct}%
                     </Text>
                   </View>
-                  <Text
-                    style={{
-                      flex: 1,
-                      fontFamily: "Geist-600",
-                      fontSize: type.body,
-                      color: colors.fgPrimary,
-                      letterSpacing: -0.2,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {c.country_name ?? c.country}
-                  </Text>
-                  <View style={{ width: 64 }}>
-                    <HBar pct={barPct} color={colors.accentViolet} height={5} />
-                  </View>
-                  <Text
-                    style={{
-                      fontFamily: "GeistMono-500",
-                      fontSize: type.label,
-                      color: colors.fgMuted,
-                      width: 30,
-                      textAlign: "right",
-                      letterSpacing: 0.3,
-                    }}
-                  >
-                    {pct}%
-                  </Text>
+                  <HBar pct={barPct} color={tint} height={6} />
                 </View>
               }
               detail={
                 <KV
                   items={[
-                    { label: "Users", value: formatInteger(c.users), color: colors.blue },
+                    { label: "Users", value: formatInteger(c.users), color: tint },
                     { label: "Share", value: `${pct}%` },
                     { label: "Country", value: c.country_name ?? c.country },
                     { label: "Window", value: `${q.data?.days ?? 30}d` },
@@ -391,80 +357,62 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
 // ─── OS versions section ──────────────────────────────────────────────────────
 
 function OsSection({ projectId }: { projectId?: string | undefined }) {
-  const [openLabel, setOpenLabel] = useState<string | null>(null);
   const q = useOsBreakdown(projectId);
   const rows = q.data?.rows ?? [];
-  const maxPct = rows.reduce((m, r) => Math.max(m, r.pct), 0);
+  if (projectId && !q.isLoading && rows.length === 0) return null;
+
+  const segments = rows.map((os, i) => ({ pct: os.pct, color: SHARE_PALETTE[i % SHARE_PALETTE.length]! }));
+  const top = rows[0];
 
   return (
-    <CardSection index="06" title="OS versions" pt={14}>
-      {!projectId ? (
-        <EmptyHint>SELECT A PROJECT</EmptyHint>
-      ) : q.isLoading ? (
-        <EmptyHint>LOADING…</EmptyHint>
-      ) : rows.length === 0 ? (
-        <EmptyHint>NO OS DATA</EmptyHint>
-      ) : (
-        rows.map((os, i) => {
-          const label = `${os.os}${os.version ? ` ${os.version}` : ""}`;
-          const open = openLabel === label;
-          const barPct = maxPct > 0 ? Math.round((os.pct / maxPct) * 100) : 0;
-          return (
-            <Row
-              key={label}
-              open={open}
-              onToggle={() => {
-                haptic.tap();
-                setOpenLabel(open ? null : label);
-              }}
-              isLast={i === rows.length - 1}
-              header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <Text
-                    style={{
-                      fontFamily: "Geist-600",
-                      fontSize: type.body,
-                      color: colors.fgPrimary,
-                      flex: 1,
-                      letterSpacing: -0.2,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {label}
-                  </Text>
-                  <View style={{ width: 72 }}>
-                    <HBar pct={barPct} color={colors.green} height={5} />
-                  </View>
-                  <Text
-                    style={{
-                      fontFamily: "GeistMono-500",
-                      fontSize: type.label,
-                      color: colors.fgMuted,
-                      width: 30,
-                      textAlign: "right",
-                      letterSpacing: 0.3,
-                    }}
-                  >
-                    {os.pct}%
-                  </Text>
-                </View>
-              }
-              detail={
-                <KV
-                  items={[
-                    { label: "Share", value: `${os.pct}%`, color: colors.green },
-                    { label: "Users", value: formatInteger(os.users) },
-                    { label: "OS", value: os.os },
-                    { label: "Window", value: `${q.data?.days ?? 30}d` },
-                  ]}
-                />
-              }
-            />
-          );
-        })
-      )}
-      <View style={{ height: 8 }} />
-    </CardSection>
+    <>
+      <FullDivider />
+      <CardSection index="06" title="OS versions" pt={14}>
+        <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
+          {!projectId ? (
+            <EmptyHint>SELECT A PROJECT</EmptyHint>
+          ) : q.isLoading ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : rows.length === 0 ? (
+            <EmptyHint>NO OS DATA</EmptyHint>
+          ) : (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 18 }}>
+              <Donut segments={segments} size={104} stroke={18}>
+                <Text style={{ fontFamily: "GeistMono-600", fontSize: 19, color: colors.fgPrimary, letterSpacing: -0.5 }}>
+                  {Math.round(top?.pct ?? 0)}%
+                </Text>
+                <Text
+                  style={{ fontFamily: "GeistMono-500", fontSize: 9, color: colors.fgMuted, letterSpacing: 1, marginTop: 2 }}
+                  numberOfLines={1}
+                >
+                  {(top?.os ?? "").toUpperCase()}
+                </Text>
+              </Donut>
+              <View style={{ flex: 1, gap: 11 }}>
+                {rows.map((os, i) => {
+                  const label = `${os.os}${os.version ? ` ${os.version}` : ""}`;
+                  const color = SHARE_PALETTE[i % SHARE_PALETTE.length]!;
+                  return (
+                    <View key={label} style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+                      <View style={{ width: 9, height: 9, borderRadius: 3, backgroundColor: color }} />
+                      <Text
+                        style={{ flex: 1, fontFamily: "Geist-500", fontSize: type.bodySm, color: colors.fgSecondary, letterSpacing: -0.2 }}
+                        numberOfLines={1}
+                      >
+                        {label}
+                      </Text>
+                      <Text style={{ fontFamily: "GeistMono-600", fontSize: type.bodySm, color: colors.fgPrimary }}>
+                        {os.pct}%
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          )}
+        </View>
+      </CardSection>
+    </>
   );
 }
 
@@ -580,10 +528,10 @@ export default function Analytics() {
               <View
                 pointerEvents="box-none"
                 style={{
-                  gap: 12,
-                  paddingVertical: 12,
-                  paddingHorizontal: 14,
-                  borderRadius: 16,
+                  gap: 8,
+                  paddingVertical: 9,
+                  paddingHorizontal: 12,
+                  borderRadius: 14,
                   backgroundColor: "rgba(10,10,14,0.55)",
                   borderWidth: 1,
                   borderColor: "rgba(255,255,255,0.08)",
@@ -593,7 +541,7 @@ export default function Analytics() {
                   {heroStats.map((s, i) => (
                     <View key={s.label} style={{ flex: 1, flexDirection: "row" }}>
                       {i > 0 ? <Sep /> : null}
-                      <MiniStat {...s} />
+                      <MiniStat {...s} valueSize={16} />
                     </View>
                   ))}
                 </View>
@@ -612,18 +560,15 @@ export default function Analytics() {
             </View>
           </Animated.View>
 
-          {/* Analytics sections — audience layout */}
+          {/* Analytics sections — each visual matches its data shape; empty
+             sections (incl. their leading divider) self-hide. */}
           <LiquidGlass padding={0} style={{ marginHorizontal: 16 }}>
             <CountriesSection projectId={projectId} />
-            <FullDivider />
             <FunnelSection projectId={projectId} />
-            <FullDivider />
             <AcquisitionSection projectId={projectId} />
-            <FullDivider />
             <RetentionSection projectId={projectId} />
             <FullDivider />
             <ReviewsSection index="05" />
-            <FullDivider />
             <OsSection projectId={projectId} />
           </LiquidGlass>
         </ScrollView>
