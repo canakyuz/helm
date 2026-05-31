@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScrollView, Text, View, useWindowDimensions } from "react-native";
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
@@ -283,26 +283,6 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
   );
 }
 
-// ─── Where (map) section ──────────────────────────────────────────────────────
-
-function WhereSection({ projectId }: { projectId?: string | undefined }) {
-  const q = useGeoBreakdown(projectId);
-  const rows = q.data?.rows ?? [];
-  return (
-    <CardSection index="01" title="Where" pt={14} {...(rows.length ? { count: rows.length } : {})}>
-      {!projectId ? (
-        <EmptyHint>SELECT A PROJECT</EmptyHint>
-      ) : q.isLoading ? (
-        <EmptyHint>LOADING…</EmptyHint>
-      ) : rows.length === 0 ? (
-        <EmptyHint>NO GEO DATA</EmptyHint>
-      ) : (
-        <AudienceMap rows={rows} />
-      )}
-    </CardSection>
-  );
-}
-
 // ─── Countries section ────────────────────────────────────────────────────────
 
 function CountriesSection({ projectId }: { projectId?: string | undefined }) {
@@ -313,7 +293,7 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
   const maxUsers = rows.reduce((m, r) => Math.max(m, r.users), 0);
 
   return (
-    <CardSection title="Top countries" pt={14} {...(rows.length ? { count: rows.length } : {})}>
+    <CardSection index="01" title="Top countries" pt={14} {...(rows.length ? { count: rows.length } : {})}>
       {!projectId ? (
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
@@ -503,6 +483,8 @@ export default function Analytics() {
   const mauDetail = useMetricDetail("mau");
   const sessDetail = useMetricDetail("avg_session_sec");
   const dauSeries = (dauDetail.data?.series ?? []).map((p) => p.value);
+  const geo = useGeoBreakdown(projectId);
+  const geoRows = geo.data?.rows ?? [];
 
   const heroValue = kpis.data?.dau ?? 0;
   const dauDelta: number | undefined = kpis.data?.dauDelta ?? undefined;
@@ -532,43 +514,52 @@ export default function Analytics() {
           contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Hero — DAU real, chart + stats demo */}
-          <OpenHero
-            eyebrow="Active users · 30D"
-            live
-            right={
-              <View style={{ width: 150 }}>
-                <NativeSegmented<Metric>
-                  value={metric}
-                  options={["DAU", "WAU", "MAU"]}
-                  onChange={(v) => {
-                    haptic.tap();
-                    setMetric(v);
-                  }}
-                />
-              </View>
-            }
-            value={heroValue}
-            format={formatInteger}
-            {...(dauDelta !== undefined ? { delta: dauDelta } : {})}
-            caption={`MAU ${formatInteger(kpis.data?.totalUsers ?? 0)}`}
-            chartWidth={chartW}
-            chartEl={
-              <Bars
-                data={dauSeries.length >= 2 ? dauSeries : [heroValue, heroValue]}
-                width={chartW}
-                height={84}
+          {/* Hero over live map background (map-as-background, web style) */}
+          <View style={{ borderRadius: 22, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" }}>
+            {geoRows.length > 0 ? <AudienceMap rows={geoRows} fill /> : null}
+            {/* darken so hero text stays legible over the map */}
+            <View
+              pointerEvents="none"
+              style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(7,7,10,0.55)" }]}
+            />
+            <View style={{ paddingVertical: 16 }}>
+              <OpenHero
+                eyebrow="Active users · 30D"
+                live
+                right={
+                  <View style={{ width: 150 }}>
+                    <NativeSegmented<Metric>
+                      value={metric}
+                      options={["DAU", "WAU", "MAU"]}
+                      onChange={(v) => {
+                        haptic.tap();
+                        setMetric(v);
+                      }}
+                    />
+                  </View>
+                }
+                value={heroValue}
+                format={formatInteger}
+                {...(dauDelta !== undefined ? { delta: dauDelta } : {})}
+                caption={`MAU ${formatInteger(kpis.data?.totalUsers ?? 0)}`}
+                chartWidth={chartW}
+                chartEl={
+                  <Bars
+                    data={dauSeries.length >= 2 ? dauSeries : [heroValue, heroValue]}
+                    width={chartW}
+                    height={84}
+                    color={colors.blue}
+                  />
+                }
                 color={colors.blue}
+                chartH={84}
+                stats={heroStats}
               />
-            }
-            color={colors.blue}
-            chartH={84}
-            stats={heroStats}
-          />
+            </View>
+          </View>
 
           {/* Analytics sections — audience layout */}
           <LiquidGlass padding={0}>
-            <WhereSection projectId={projectId} />
             <CountriesSection projectId={projectId} />
             <FullDivider />
             <FunnelSection projectId={projectId} />
