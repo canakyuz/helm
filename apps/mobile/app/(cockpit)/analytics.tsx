@@ -27,7 +27,6 @@ import {
   FullDivider,
   Row,
   KV,
-  HBar,
   Donut,
   StackBar,
   AreaChart,
@@ -115,15 +114,15 @@ function FunnelSection({ projectId }: { projectId?: string | undefined }) {
           <EmptyHint>NO FUNNEL CONFIGURED</EmptyHint>
         ) : (
           steps.map((step, i) => {
-            // Centered fill width = share of the entry step → the stack narrows.
-            const width = Math.max(1.5, Math.min(100, step.overall_pct));
+            // Left-anchored fill = share of the entry step → bars staircase down.
+            const width = Math.max(2, Math.min(100, step.overall_pct));
             const drop = i > 0 ? Math.max(0, Math.round(100 - step.step_pct)) : 0;
             const lost = i > 0 && drop > 0;
             const dead = step.count === 0;
             return (
-              <View key={`${step.event}-${step.order}`} style={{ gap: 7, opacity: dead ? 0.55 : 1 }}>
+              <View key={`${step.event}-${step.order}`} style={{ gap: 6, opacity: dead ? 0.5 : 1 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle, width: 16 }}>
+                  <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle, width: 14 }}>
                     {i + 1}
                   </Text>
                   <Text
@@ -140,24 +139,23 @@ function FunnelSection({ projectId }: { projectId?: string | undefined }) {
                       fontFamily: "GeistMono-500",
                       fontSize: type.label,
                       color: lost ? colors.accentDanger : colors.fgSubtle,
-                      width: 44,
+                      width: 46,
                       textAlign: "right",
                       letterSpacing: 0.3,
                     }}
                   >
-                    {lost ? `−${drop}%` : i === 0 ? "entry" : "—"}
+                    {lost ? `−${drop}%` : i === 0 ? "100%" : "—"}
                   </Text>
                 </View>
-                {/* centered narrowing fill — the funnel itself */}
-                <View style={{ alignItems: "center" }}>
+                {/* left-anchored narrowing bar on a track → reads as a funnel */}
+                <View style={{ height: 9, borderRadius: 5, backgroundColor: "rgba(255,255,255,0.05)", overflow: "hidden", marginLeft: 22 }}>
                   <View
                     style={{
                       width: `${width}%`,
-                      minWidth: 4,
-                      height: 11,
-                      borderRadius: 6,
+                      height: "100%",
+                      borderRadius: 5,
                       backgroundColor: colors.accent,
-                      opacity: Math.max(0.4, 1 - i * 0.13),
+                      opacity: Math.max(0.5, 1 - i * 0.1),
                     }}
                   />
                 </View>
@@ -259,7 +257,6 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
   const q = useGeoBreakdown(projectId);
   const rows = q.data?.rows ?? [];
   const total = q.data?.total ?? 0;
-  const maxUsers = rows.reduce((m, r) => Math.max(m, r.users), 0);
 
   return (
     <CardSection index="01" title="Top countries" pt={14} {...(rows.length ? { count: rows.length } : {})}>
@@ -273,7 +270,6 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
         rows.map((c, i) => {
           const open = openCode === c.country;
           const pct = total > 0 ? Math.round((c.users / total) * 100) : 0;
-          const barPct = maxUsers > 0 ? (c.users / maxUsers) * 100 : 0;
           const tint = rankTint(i);
           return (
             <Row
@@ -285,54 +281,45 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
               }}
               isLast={i === rows.length - 1}
               header={
-                <View style={{ gap: 9 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
-                    {/* Rank-tinted ISO chip (flag emoji doesn't render on the iOS sim). */}
-                    <View
-                      style={{
-                        width: 30,
-                        height: 22,
-                        borderRadius: 6,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: `${tint}1A`,
-                        borderWidth: 1,
-                        borderColor: `${tint}55`,
-                      }}
-                    >
-                      <Text style={{ fontFamily: "GeistMono-600", fontSize: 10, color: tint, letterSpacing: 0.5 }}>
-                        {c.country}
-                      </Text>
-                    </View>
-                    <Text
-                      style={{
-                        flex: 1,
-                        fontFamily: "Geist-600",
-                        fontSize: type.body,
-                        color: colors.fgPrimary,
-                        letterSpacing: -0.2,
-                      }}
-                      numberOfLines={1}
-                    >
-                      {c.country_name ?? c.country}
-                    </Text>
-                    <Text style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: tint }}>
-                      {formatInteger(c.users)}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-500",
-                        fontSize: type.label,
-                        color: colors.fgMuted,
-                        width: 34,
-                        textAlign: "right",
-                        letterSpacing: 0.3,
-                      }}
-                    >
-                      {pct}%
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
+                  {/* Rank-tinted ISO chip (flag emoji doesn't render on the iOS sim). */}
+                  <View
+                    style={{
+                      width: 30,
+                      height: 22,
+                      borderRadius: 6,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: `${tint}1A`,
+                      borderWidth: 1,
+                      borderColor: `${tint}55`,
+                    }}
+                  >
+                    <Text style={{ fontFamily: "GeistMono-600", fontSize: 10, color: tint, letterSpacing: 0.5 }}>
+                      {c.country}
                     </Text>
                   </View>
-                  <HBar pct={barPct} color={tint} height={6} />
+                  <Text
+                    style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
+                    numberOfLines={1}
+                  >
+                    {c.country_name ?? c.country}
+                  </Text>
+                  <Text style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: tint }}>
+                    {formatInteger(c.users)}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: "GeistMono-500",
+                      fontSize: type.label,
+                      color: colors.fgMuted,
+                      width: 36,
+                      textAlign: "right",
+                      letterSpacing: 0.3,
+                    }}
+                  >
+                    {pct}%
+                  </Text>
                 </View>
               }
               detail={
