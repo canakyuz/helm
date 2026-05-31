@@ -30,8 +30,11 @@ import {
   Glyph,
   Eyebrow,
   EmptyHint,
+  ShowMore,
 } from "~/components/liquid";
 import type { HeroStat } from "~/components/liquid";
+
+const TOP_N = 5; // glance-first lists: show the top few, total stays in the header
 
 const PROJECT_TINTS = [colors.accent, colors.accentViolet, colors.blue, colors.green, colors.accentWarn];
 const PROJECT_GLYPHS = ["◆", "✦", "❖", "◇", "●"];
@@ -76,11 +79,13 @@ function ProjectRows({
   const [filter, setFilter] = useState<Kind>("All");
   const [openId, setOpenId] = useState<string | null>(null);
   const [muted, setMuted] = useState<Record<string, boolean>>({});
+  const [showAll, setShowAll] = useState(false);
 
   const list = useMemo(
     () => (properties.data ?? []).filter((p) => matchesKind(p, filter)),
     [properties.data, filter],
   );
+  const visible = showAll ? list : list.slice(0, TOP_N);
 
   return (
     <View>
@@ -97,7 +102,8 @@ function ProjectRows({
       {list.length === 0 ? (
         <EmptyHint>NO PROJECTS IN THIS GROUP</EmptyHint>
       ) : (
-        list.map((p, i) => {
+        <>
+        {visible.map((p, i) => {
           const open = openId === p.id;
           const tint = PROJECT_TINTS[i % PROJECT_TINTS.length]!;
           const glyph = PROJECT_GLYPHS[i % PROJECT_GLYPHS.length]!;
@@ -106,7 +112,7 @@ function ProjectRows({
               key={p.id}
               open={open}
               onToggle={() => setOpenId(open ? null : p.id)}
-              isLast={i === list.length - 1}
+              isLast={i === visible.length - 1}
               header={
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                   <Glyph glyph={glyph} tint={tint} size={30} />
@@ -151,7 +157,16 @@ function ProjectRows({
               }
             />
           );
-        })
+        })}
+        <ShowMore
+          hidden={list.length - TOP_N}
+          expanded={showAll}
+          onPress={() => {
+            haptic.tap();
+            setShowAll((v) => !v);
+          }}
+        />
+        </>
       )}
     </View>
   );
@@ -167,12 +182,14 @@ function AlertRows({
   onDismiss: (id: number) => void;
 }) {
   const [openId, setOpenId] = useState<number | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   if (list.length === 0) return <EmptyHint>ALL CLEAR · NO OPEN ALERTS</EmptyHint>;
+  const visible = showAll ? list : list.slice(0, TOP_N);
 
   return (
     <View>
-      {list.map((a: Alert, i) => {
+      {visible.map((a: Alert, i) => {
         const open = openId === a.id;
         const sev =
           a.severity === "critical"
@@ -185,7 +202,7 @@ function AlertRows({
             key={a.id}
             style={{
               flexDirection: "row",
-              borderBottomWidth: i === list.length - 1 ? 0 : 1,
+              borderBottomWidth: i === visible.length - 1 ? 0 : 1,
               borderBottomColor: "rgba(255,255,255,0.055)",
             }}
           >
@@ -235,6 +252,14 @@ function AlertRows({
           </View>
         );
       })}
+      <ShowMore
+        hidden={list.length - TOP_N}
+        expanded={showAll}
+        onPress={() => {
+          haptic.tap();
+          setShowAll((v) => !v);
+        }}
+      />
     </View>
   );
 }
