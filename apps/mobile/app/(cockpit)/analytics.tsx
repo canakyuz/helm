@@ -469,7 +469,7 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
 
 export default function Analytics() {
   const { width } = useWindowDimensions();
-  const chartW = width - 44;
+  const chartW = width - 32;
 
   const [metric, setMetric] = useState<Metric>("DAU");
   const { selectedPropertyId } = usePreferences();
@@ -511,18 +511,18 @@ export default function Analytics() {
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <LiquidHeader />
         <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
+          contentContainerStyle={{ paddingBottom: 120, gap: 12 }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Hero over live map background (map-as-background, web style) */}
-          <View style={{ borderRadius: 22, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" }}>
+          {/* Full-bleed hero over live map background (map-as-background, web style) */}
+          <View style={{ overflow: "hidden", borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" }}>
             {geoRows.length > 0 ? <AudienceMap rows={geoRows} fill /> : null}
             {/* darken so hero text stays legible over the map */}
             <View
               pointerEvents="none"
               style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(7,7,10,0.55)" }]}
             />
-            <View style={{ paddingVertical: 16 }}>
+            <View style={{ paddingVertical: 16, paddingHorizontal: 16 }}>
               <OpenHero
                 eyebrow="Active users · 30D"
                 live
@@ -559,7 +559,7 @@ export default function Analytics() {
           </View>
 
           {/* Analytics sections — audience layout */}
-          <LiquidGlass padding={0}>
+          <LiquidGlass padding={0} style={{ marginHorizontal: 16 }}>
             <CountriesSection projectId={projectId} />
             <FullDivider />
             <FunnelSection projectId={projectId} />
