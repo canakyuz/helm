@@ -176,6 +176,71 @@ export function Ring({
   );
 }
 
+// Multi-segment donut (share breakdown). Same start/end arc trick as Ring,
+// stacked per segment. O(segments) paths.
+export function Donut({
+  segments,
+  size = 96,
+  stroke = 16,
+  gap = 0.014,
+  children,
+}: {
+  segments: { pct: number; color: string }[];
+  size?: number;
+  stroke?: number;
+  gap?: number;
+  children?: React.ReactNode;
+}) {
+  const r = (size - stroke) / 2;
+  const cx = size / 2;
+  const track = useMemo(() => {
+    const p = Skia.Path.Make();
+    p.addCircle(cx, cx, r);
+    return p;
+  }, [cx, r]);
+  const arcs = useMemo(() => {
+    const total = segments.reduce((s, x) => s + x.pct, 0) || 1;
+    let acc = 0;
+    return segments.map((s) => {
+      const start = acc / total;
+      acc += s.pct;
+      const end = acc / total;
+      const hg = segments.length > 1 ? gap / 2 : 0;
+      return { start: start + hg, end: Math.max(start + hg, end - hg), color: s.color };
+    });
+  }, [segments, gap]);
+  return (
+    <View style={{ width: size, height: size }}>
+      <Canvas style={{ width: size, height: size }}>
+        <Path path={track} style="stroke" strokeWidth={stroke} color="rgba(255,255,255,0.06)" />
+        {arcs.map((a, i) => (
+          <Path
+            key={i}
+            path={track}
+            style="stroke"
+            strokeWidth={stroke}
+            strokeCap="butt"
+            color={a.color}
+            start={a.start}
+            end={a.end}
+          />
+        ))}
+      </Canvas>
+      <View
+        style={{
+          position: "absolute",
+          width: size,
+          height: size,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {children}
+      </View>
+    </View>
+  );
+}
+
 // animated horizontal proportion fill
 export function HBar({
   pct,
