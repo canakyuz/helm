@@ -115,6 +115,10 @@ export function Row({
         borderBottomWidth: isLast ? 0 : 1,
         borderBottomColor: "rgba(255,255,255,0.055)",
         opacity: dimmed ? 0.5 : 1,
+        flexDirection: "column",
+        gap: 12,
+        paddingHorizontal: 12,
+        justifyContent: "center",
       }}
     >
       <Pressable
@@ -122,6 +126,7 @@ export function Row({
         style={({ pressed }) => ({
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "center",
           gap: 10,
           paddingVertical: 11,
           paddingLeft: 16,
@@ -129,8 +134,10 @@ export function Row({
           backgroundColor: pressed ? "rgba(255,255,255,0.03)" : "transparent",
         })}
       >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8 }}>
         <View style={{ flex: 1, minWidth: 0 }}>{header}</View>
         <Chevron open={open} />
+      </View>
       </Pressable>
       {open && detail ? (
         <View style={{ paddingHorizontal: 16, paddingBottom: 14, gap: 12 }}>{detail}</View>
@@ -155,6 +162,8 @@ export function KV({
         borderColor: "rgba(255,255,255,0.06)",
         paddingHorizontal: 14,
         paddingVertical: 4,
+        marginHorizontal: 0,
+        marginVertical: 0,
       }}
     >
       {items.map((it, i) => (
