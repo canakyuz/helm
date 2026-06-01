@@ -1,0 +1,18 @@
+- generic [active]:
+  - generic:
+    - generic [ref=e1]:
+      - button [ref=e2]:
+        - img [ref=e3]
+        - button "Element Selector" [ref=e11]:
+          - img
+      - generic:
+        - iframe
+        - generic:
+          - img
+        - generic:
+          - img
+        - generic:
+          - img
+        - generic:
+          - img
+    - region "Notifications alt+T"

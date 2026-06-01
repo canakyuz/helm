@@ -1,0 +1,163 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e6]:
+      - list [ref=e8]:
+        - listitem [ref=e9]:
+          - button "Tüm Projeler 0 proje" [ref=e10]:
+            - img [ref=e12]
+            - generic [ref=e22]:
+              - generic [ref=e23]: Tüm Projeler
+              - generic [ref=e24]: 0 proje
+            - img [ref=e25]
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]: Genel
+          - list [ref=e32]:
+            - listitem [ref=e33]:
+              - link "Cockpit" [ref=e34] [cursor=pointer]:
+                - /url: /
+                - img [ref=e35]
+                - generic [ref=e40]: Cockpit
+        - generic [ref=e41]:
+          - generic [ref=e42]: CRM
+          - list [ref=e44]:
+            - listitem [ref=e45]:
+              - link "Kullanıcılar" [ref=e46] [cursor=pointer]:
+                - /url: /users
+                - img [ref=e47]
+                - generic [ref=e52]: Kullanıcılar
+            - listitem [ref=e53]:
+              - link "Segmentler" [ref=e54] [cursor=pointer]:
+                - /url: /segments
+                - img [ref=e55]
+                - generic [ref=e57]: Segmentler
+            - listitem [ref=e58]:
+              - link "Yorumlar" [ref=e59] [cursor=pointer]:
+                - /url: /reviews
+                - img [ref=e60]
+                - generic [ref=e62]: Yorumlar
+            - listitem [ref=e63]:
+              - link "Müdahale Geçmişi" [ref=e64] [cursor=pointer]:
+                - /url: /audit
+                - img [ref=e65]
+                - generic [ref=e69]: Müdahale Geçmişi
+        - generic [ref=e70]:
+          - generic [ref=e71]: Analitik
+          - list [ref=e73]:
+            - listitem [ref=e74]:
+              - link "Gelir & Reklam" [ref=e75] [cursor=pointer]:
+                - /url: /revenue
+                - img [ref=e76]
+                - generic [ref=e79]: Gelir & Reklam
+            - listitem [ref=e80]:
+              - link "Büyüme" [ref=e81] [cursor=pointer]:
+                - /url: /growth
+                - img [ref=e82]
+                - generic [ref=e85]: Büyüme
+            - listitem [ref=e86]:
+              - link "Huni" [ref=e87] [cursor=pointer]:
+                - /url: /funnel
+                - img [ref=e88]
+                - generic [ref=e92]: Huni
+            - listitem [ref=e93]:
+              - link "Uyarılar" [ref=e94] [cursor=pointer]:
+                - /url: /alerts
+                - img [ref=e95]
+                - generic [ref=e98]: Uyarılar
+        - generic [ref=e99]:
+          - generic [ref=e100]: İletişim
+          - list [ref=e102]:
+            - listitem [ref=e103]:
+              - link "Mail" [ref=e104] [cursor=pointer]:
+                - /url: /mail
+                - img [ref=e105]
+                - generic [ref=e108]: Mail
+            - listitem [ref=e109]:
+              - link "Push" [ref=e110] [cursor=pointer]:
+                - /url: /push
+                - img [ref=e111]
+                - generic [ref=e114]: Push
+            - listitem [ref=e115]:
+              - link "Kampanya Geçmişi" [ref=e116] [cursor=pointer]:
+                - /url: /campaigns
+                - img [ref=e117]
+                - generic [ref=e120]: Kampanya Geçmişi
+        - generic [ref=e121]:
+          - generic [ref=e122]: DevOps
+          - list [ref=e124]:
+            - listitem [ref=e125]:
+              - link "Entegrasyonlar" [ref=e126] [cursor=pointer]:
+                - /url: /integrations
+                - img [ref=e127]
+                - generic [ref=e129]: Entegrasyonlar
+            - listitem [ref=e130]:
+              - link "Senkron & Sağlık" [ref=e131] [cursor=pointer]:
+                - /url: /system
+                - img [ref=e132]
+                - generic [ref=e134]: Senkron & Sağlık
+            - listitem [ref=e135]:
+              - link "Loglar" [ref=e136] [cursor=pointer]:
+                - /url: /logs
+                - img [ref=e137]
+                - generic [ref=e140]: Loglar
+            - listitem [ref=e141]:
+              - link "Sürümler" [ref=e142] [cursor=pointer]:
+                - /url: /versions
+                - img [ref=e143]
+                - generic [ref=e146]: Sürümler
+        - generic [ref=e147]:
+          - generic [ref=e148]: Sistem
+          - list [ref=e150]:
+            - listitem [ref=e151]:
+              - link "Ayarlar" [ref=e152] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e153]
+                - generic [ref=e156]: Ayarlar
+      - generic [ref=e157]:
+        - list [ref=e158]:
+          - listitem [ref=e159]:
+            - button "Aydınlık" [ref=e160]:
+              - img [ref=e161]
+              - generic [ref=e167]: Aydınlık
+        - list [ref=e168]:
+          - listitem [ref=e169]:
+            - button "M Misafir" [ref=e170]:
+              - generic [ref=e172]: M
+              - generic [ref=e174]: Misafir
+              - img [ref=e175]
+      - button "Toggle Sidebar" [ref=e178]
+    - main [ref=e179]:
+      - generic [ref=e180]:
+        - button "Toggle Sidebar" [ref=e181]:
+          - img
+          - generic [ref=e182]: Toggle Sidebar
+        - heading "Cockpit" [level=2] [ref=e183]
+        - button "Hızlı arama… ⌘K" [ref=e184]:
+          - img [ref=e185]
+          - generic [ref=e188]: Hızlı arama…
+          - generic [ref=e189]: ⌘K
+        - generic [ref=e190]:
+          - link "Uyarılar" [ref=e191] [cursor=pointer]:
+            - /url: /alerts
+            - img [ref=e192]
+          - link "Ayarlar" [ref=e195] [cursor=pointer]:
+            - /url: /settings
+            - generic [ref=e197]: "?"
+      - main [ref=e198]:
+        - img [ref=e200]
+  - generic [ref=e202]:
+    - button [ref=e203] [cursor=pointer]:
+      - img [ref=e204]
+      - button "Element Selector" [ref=e212]:
+        - img
+    - generic:
+      - iframe
+      - generic:
+        - img
+      - generic:
+        - img
+      - generic:
+        - img
+      - generic:
+        - img
+  - region "Notifications alt+T"
