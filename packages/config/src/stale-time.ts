@@ -1,5 +1,6 @@
 export const STALE_TIME = {
   kpis: 30_000,
+  spark: 60_000,
   alerts: 30_000,
   audit: 300_000,
   systemHealth: 60_000,
