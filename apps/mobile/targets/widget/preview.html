@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>helm · dark glass widget</title>
+    <style>
+      :root {
+        --text: #fff;
+        --mute: rgba(255, 255, 255, 0.55);
+        --dim: rgba(255, 255, 255, 0.35);
+        --glass: rgba(28, 28, 32, 0.55);
+        --glass-edge: rgba(255, 255, 255, 0.22);
+        --glass-edge-dim: rgba(255, 255, 255, 0.06);
+        --track: rgba(255, 255, 255, 0.1);
+        --up: #34c759;
+        --down: #ff453a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 40px 20px 60px;
+        font-family: -apple-system, "SF Pro Display", system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(ellipse 120% 80% at 50% 0%, #1a1a22, #08080c),
+          url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      }
+
+      .intro {
+        max-width: 520px;
+        margin: 0 auto 32px;
+        text-align: center;
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--mute);
+      }
+
+      .intro strong {
+        color: var(--text);
+      }
+
+      .intro code {
+        font-size: 11px;
+        color: var(--dim);
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        color: var(--dim);
+        margin: 0 0 28px;
+        font-weight: 600;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      .col-label {
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-bottom: 10px;
+      }
+
+      /* iOS widget chrome = glass card fills bounds */
+      .widget {
+        position: relative;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid var(--glass-edge-dim);
+        box-shadow:
+          inset 0 1px 0 var(--glass-edge),
+          inset 1px 0 0 rgba(255, 255, 255, 0.06),
+          0 20px 50px rgba(0, 0, 0, 0.45);
+        background: var(--glass);
+        backdrop-filter: blur(40px) saturate(160%);
+        -webkit-backdrop-filter: blur(40px) saturate(160%);
+      }
+
+      .widget.small {
+        width: 158px;
+        height: 158px;
+      }
+      .widget.medium {
+        width: 329px;
+        height: 155px;
+      }
+      .widget.large {
+        width: 329px;
+        height: 345px;
+      }
+
+      .inner {
+        height: 100%;
+        padding: 14px 14px 12px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .widget.medium .inner,
+      .widget.large .inner {
+        padding: 16px 18px 14px;
+      }
+
+      .top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+
+      .label {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--mute);
+        letter-spacing: 0.01em;
+      }
+
+      .widget.small .label {
+        font-size: 10px;
+      }
+
+      .delta {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 7px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        white-space: nowrap;
+      }
+
+      .delta.up {
+        color: var(--up);
+      }
+      .delta.down {
+        color: var(--down);
+      }
+
+      .amount-wrap {
+        margin-top: 8px;
+        flex-shrink: 0;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      .widget.large .amount-wrap {
+        margin-top: 10px;
+      }
+
+      .amount {
+        display: flex;
+        align-items: flex-start;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .amount .main {
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .amount .cents {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .widget.small .amount .main {
+        font-size: 22px;
+      }
+      .widget.small .amount .cents {
+        font-size: 12px;
+        margin-top: 3px;
+      }
+
+      .widget.medium .amount .main {
+        font-size: 28px;
+      }
+      .widget.medium .amount .cents {
+        font-size: 15px;
+        margin-top: 5px;
+      }
+
+      .widget.large .amount .main {
+        font-size: 32px;
+      }
+      .widget.large .amount .cents {
+        font-size: 17px;
+        margin-top: 6px;
+      }
+
+      .sub {
+        margin-top: 6px;
+        font-size: 10px;
+        color: var(--mute);
+        line-height: 1.35;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 0;
+      }
+
+      .widget.medium .sub {
+        font-size: 11px;
+      }
+
+      .grow {
+        flex: 1;
+        min-height: 4px;
+      }
+
+      /* Week chart — card balance style */
+      .week {
+        flex-shrink: 0;
+      }
+
+      .week-bars {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 3px;
+        height: 36px;
+      }
+
+      .widget.medium .week-bars {
+        height: 44px;
+        gap: 5px;
+      }
+
+      .widget.large .week-bars {
+        height: 56px;
+        gap: 6px;
+      }
+
+      .day {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .day .track {
+        width: 100%;
+        max-width: 14px;
+        height: 100%;
+        border-radius: 5px;
+        background: var(--track);
+        display: flex;
+        align-items: flex-end;
+        overflow: hidden;
+      }
+
+      .day .fill {
+        width: 100%;
+        border-radius: 5px;
+        background: linear-gradient(
+          180deg,
+          #ff6b6b 0%,
+          #c56cf0 35%,
+          #6c5ce7 65%,
+          #4834d4 100%
+        );
+        box-shadow: 0 0 10px rgba(197, 108, 240, 0.35);
+      }
+
+      .day .letter {
+        margin-top: 4px;
+        font-size: 8px;
+        font-weight: 500;
+        color: var(--dim);
+      }
+
+      .widget.medium .day .letter {
+        font-size: 9px;
+      }
+
+      /* Large: inner glass tiles */
+      .tiles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 12px 0;
+        flex-shrink: 0;
+      }
+
+      .tile {
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+
+      .tile .t {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--dim);
+        margin-bottom: 4px;
+      }
+
+      .tile .v {
+        font-size: 12px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .legend {
+        max-width: 520px;
+        margin: 36px auto 0;
+        padding: 16px 18px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--mute);
+      }
+
+      .legend dt {
+        color: var(--text);
+        font-weight: 600;
+        margin-top: 10px;
+      }
+
+      .legend dt:first-child {
+        margin-top: 0;
+      }
+
+      .legend dd {
+        margin: 2px 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="intro">
+      <strong>Dark glass</strong> — son referanstaki gibi. Hero =
+      <strong>total gelir</strong> (ad + pay). Alt satır kırılım. Haftalık çubuklar =
+      7 günlük total trend.
+      <code>bun run widget:preview</code>
+    </p>
+    <h1>HELM · DARK GLASS</h1>
+    <div class="row" id="root"></div>
+
+    <dl class="legend">
+      <dt>Total Revenue</dt>
+      <dd>metrics.ad_revenue + metrics.mrr (seçili para birimi)</dd>
+      <dt>Alt satır</dt>
+      <dd>Ad + Pay tutarları — sadece reklam değil, toplamın parçaları</dd>
+      <dt>MRR Δ badge</dt>
+      <dd>Önceki güne göre MRR yüzde değişimi (yeşil / kırmızı)</dd>
+      <dt>Haftalık çubuklar</dt>
+      <dd>Son 7 gün total gelir (yakında gerçek sparkline payload)</dd>
+      <dt>Alerts (large)</dt>
+      <dd>Açık alert_events sayısı</dd>
+    </dl>
+
+    <script>
+      const D = {
+        total: "₺3.224.020,75",
+        ad: "₺8.420",
+        pay: "₺15.600",
+        delta: "+12%",
+        deltaUp: true,
+        alerts: 2,
+        week: [0.42, 0.58, 0.5, 0.72, 0.65, 0.88, 0.95],
+        days: ["M", "T", "W", "T", "F", "S", "S"],
+      };
+
+      function splitMoney(t) {
+        const c = t.lastIndexOf(",");
+        const d = t.lastIndexOf(".");
+        if (c !== -1 && d !== -1) return c > d ? [t.slice(0, c), t.slice(c)] : [t.slice(0, d), t.slice(d)];
+        const s = c !== -1 ? c : d;
+        if (s !== -1 && t.length - s - 1 <= 2) return [t.slice(0, s), t.slice(s)];
+        return [t, ""];
+      }
+
+      function fitAmount(wrap, sizes) {
+        const el = wrap.querySelector(".amount");
+        const main = el.querySelector(".main");
+        const cents = el.querySelector(".cents");
+        for (const [m, c] of sizes) {
+          main.style.fontSize = m + "px";
+          if (cents) {
+            cents.style.fontSize = c + "px";
+            cents.style.marginTop = Math.round(m * 0.14) + "px";
+          }
+          if (el.scrollWidth <= wrap.clientWidth) return;
+        }
+      }
+
+      function weekHtml(barH) {
+        return `<div class="week"><div class="week-bars">${D.week
+          .map((v, i) => {
+            const h = Math.max(4, v * barH);
+            return `<div class="day"><div class="track"><div class="fill" style="height:${h}px"></div></div><span class="letter">${D.days[i]}</span></div>`;
+          })
+          .join("")}</div></div>`;
+      }
+
+      function card(size, extra) {
+        const [m, c] = splitMoney(D.total);
+        const compact = size === "small";
+        const w = document.createElement("div");
+        w.className = `widget ${size}`;
+        w.innerHTML = `
+          <div class="inner">
+            <div class="top">
+              <span class="label">Total Revenue</span>
+              <span class="delta ${D.deltaUp ? "up" : "down"}">${D.delta}</span>
+            </div>
+            <div class="amount-wrap">
+              <div class="amount"><span class="main">${m}</span><span class="cents">${c}</span></div>
+            </div>
+            <p class="sub">${D.ad} ad · ${D.pay} pay</p>
+            ${extra || ""}
+            <div class="grow"></div>
+            ${weekHtml(compact ? 36 : size === "large" ? 56 : 44)}
+          </div>`;
+        requestAnimationFrame(() => {
+          const wrap = w.querySelector(".amount-wrap");
+          const sizes =
+            size === "small"
+              ? [
+                  [22, 12],
+                  [19, 11],
+                  [16, 10],
+                  [14, 9],
+                ]
+              : size === "medium"
+                ? [
+                    [28, 15],
+                    [24, 13],
+                    [20, 11],
+                    [17, 10],
+                  ]
+                : [
+                    [32, 17],
+                    [28, 15],
+                    [24, 13],
+                  ];
+          fitAmount(wrap, sizes);
+        });
+        return w;
+      }
+
+      const root = document.getElementById("root");
+      [
+        ["Small · 158×158", card("small")],
+        ["Medium · 329×155", card("medium")],
+        [
+          "Large · 329×345",
+          card(
+            "large",
+            `<div class="tiles">
+              <div class="tile"><div class="t">Ad</div><div class="v">${D.ad}</div></div>
+              <div class="tile"><div class="t">Pay</div><div class="v">${D.pay}</div></div>
+              <div class="tile"><div class="t">Live</div><div class="v">1,240</div></div>
+              <div class="tile"><div class="t">Alerts</div><div class="v">${D.alerts}</div></div>
+            </div>`
+          ),
+        ],
+      ].forEach(([label, node]) => {
+        const col = document.createElement("div");
+        col.innerHTML = `<div class="col-label">${label}</div>`;
+        col.append(node);
+        root.append(col);
+      });
+    </script>
+  </body>
+</html>
