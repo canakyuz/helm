@@ -43,7 +43,12 @@
     "tailwindcss": "^4.3.0",
     "tw-animate-css": "^1.4.0",
     "vaul": "^1.1.2",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@helm/types": "workspace:*",
+    "@helm/api": "workspace:*",
+    "@helm/queries": "workspace:*",
+    "@helm/domain": "workspace:*",
+    "@helm/config": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
