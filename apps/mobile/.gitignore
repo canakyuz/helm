@@ -33,3 +33,5 @@ Thumbs.db
 
 expo-env.d.ts
 # @end expo-cli
+# brainstorm visual companion
+.superpowers/
