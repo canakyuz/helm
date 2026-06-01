@@ -10,3 +10,6 @@ export * from "./audit";
 export * from "./sentry-issues";
 export * from "./app-versions";
 export * from "./users";
+export * from "./projects-breakdown";
+export * from "./segments";
+export * from "./property-metric-totals";
