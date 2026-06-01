@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "target": "ESNext",
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@helm/types": ["./packages/types/src/index.ts"],
+      "@helm/api": ["./packages/api/src/index.ts"],
+      "@helm/queries": ["./packages/queries/src/index.ts"],
+      "@helm/domain": ["./packages/domain/src/index.ts"],
+      "@helm/config": ["./packages/config/src/index.ts"]
+    }
+  }
+}
