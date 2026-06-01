@@ -1,0 +1,226 @@
+/* Liquid Glass — cam efekti (blur + ışık bloom).
+   Tek tema, iki mod. Selector [data-helm-theme^="glass"] her iki moda da uygular.
+   Token'lar src/styles/index.css'te (glass-dark / glass-light). */
+
+/* Dark mod — Editorial mono. Tek lime bloom üst-sol, çok düşük opacity.
+   Pink/violet/cyan/cyan2 katmanları kaldırıldı; Linear/Notion ölçeğinde
+   sessiz, editorial his. Lime accent içerikte (KPI, harita, çizgi)
+   parlamaya devam eder; arka plan susar. */
+[data-helm-theme="glass-dark"] body {
+  background-color: #07080c;
+  background-image:
+    radial-gradient(
+      circle 1300px at -8% -12%,
+      rgba(163, 230, 53, 0.14),
+      transparent 60%
+    );
+  background-attachment: fixed;
+}
+
+/* Light mod — paralel sadeleştirme: tek soğuk-yeşil pastel orb üst-sol. */
+[data-helm-theme="glass-light"] body {
+  background-color: #f2f4f8;
+  background-image:
+    radial-gradient(
+      1100px circle at 6% -8%,
+      rgba(101, 163, 13, 0.09),
+      transparent 60%
+    );
+  background-attachment: fixed;
+}
+
+/* Kartlar yarı saydam (--card token) → arkasını bulanıklaştır. */
+[data-helm-theme^="glass"] [data-slot="card"] {
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+/* Sidebar + popover yüzeyleri de camsı. */
+[data-helm-theme^="glass"] [data-slot="popover-content"],
+[data-helm-theme^="glass"] [data-slot="dropdown-menu-content"],
+[data-helm-theme^="glass"] [data-slot="dialog-content"] {
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+
+/* Sidebar yüzeyi de camsı — her iki modda da.
+   Floating variant + transparan bg → bloom arkadan görünür. */
+[data-helm-theme^="glass"] [data-slot="sidebar-container"] {
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+[data-helm-theme="glass-dark"] [data-slot="sidebar-inner"] {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 48px rgba(0, 0, 0, 0.4);
+}
+[data-helm-theme="glass-light"] [data-slot="sidebar-inner"] {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+/* SidebarInset bg-background opak — bloom'u kapıyor. Glass tema'da
+   şeffaf yap ki body radial gradient görünür kalsın. */
+[data-helm-theme^="glass"] [data-slot="sidebar-inset"] {
+  background: transparent !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Liquid Cells — animasyon keyframes (Helm Cockpit v3)
+   ════════════════════════════════════════════════════════════════ */
+
+/* Sync orb nabız atışı — ring fade in/out + hafif scale. */
+@keyframes sync-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Map marker nefes alma — Leaflet CircleMarker SVG path için.
+   Transform kullanmıyoruz (Leaflet pozisyonu bozulur); stroke-width
+   + stroke-opacity animate ederek "halka genişler" hissi. */
+@keyframes helm-marker-pulse {
+  0%,
+  100% {
+    stroke-width: 2;
+    stroke-opacity: 0.9;
+  }
+  50% {
+    stroke-width: 10;
+    stroke-opacity: 0.3;
+  }
+}
+[data-helm-theme^="glass"] .helm-pulse-markers path.leaflet-interactive {
+  animation: helm-marker-pulse 2.4s ease-in-out infinite;
+  stroke: var(--primary);
+  fill: var(--primary);
+  fill-opacity: 0.95;
+  filter: drop-shadow(0 0 4px color-mix(in oklch, var(--primary) 70%, transparent));
+}
+
+/* Aurora drift — tek bloom yavaşça oynar (60s, daha durgun).
+   Editorial mono'da tek gradient olduğu için tek position yeter. */
+@keyframes aurora-drift {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 12% 8%;
+  }
+}
+[data-helm-theme^="glass"] body {
+  animation: aurora-drift 60s ease-in-out infinite;
+}
+
+/* Reduced motion respect — animasyonları kapat. */
+@media (prefers-reduced-motion: reduce) {
+  .helm-marker-pulse,
+  [data-helm-theme^="glass"] body {
+    animation: none !important;
+  }
+}
+
+/* Sidebar aktif item glow — sol kenarda 2px primary glow şeridi. */
+[data-helm-theme^="glass"] [data-slot="sidebar-menu-button"] {
+  position: relative;
+}
+[data-helm-theme^="glass"] [data-slot="sidebar-menu-button"][data-active="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+  border-radius: 2px;
+}
+
+/* Header şeffaf cam zemin — sticky'de net görünsün. */
+[data-helm-theme^="glass"] [data-slot="helm-header"] {
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+}
+
+/* Card glass texture — DRAMATIK derinlik (Haulix/Airlinesim referansı):
+   - Görünür border (rgba 0.1) — bloom üzerinde silinip görünmesin
+   - Çift inset highlight (üstte beyaz, altta soft glow)
+   - Çok katmanlı outer shadow — gerçek camsı yüzme hissi. */
+[data-helm-theme="glass-dark"] [data-slot="card"] {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 16px 48px rgba(0, 0, 0, 0.5);
+}
+[data-helm-theme="glass-light"] [data-slot="card"] {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 255, 255, 0.5) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 40px rgba(15, 23, 42, 0.1);
+}
+
+/* Hover lift — interaktif kartlarda. */
+[data-helm-theme^="glass"] a[data-slot="card"]:hover,
+[data-helm-theme^="glass"] button[data-slot="card"]:hover {
+  transform: translateY(-2px);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+/* Hero typography utility — büyük, mono, tabular. */
+[data-helm-theme^="glass"] .helm-hero-number {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* Table row hover — frosted highlight. */
+[data-helm-theme="glass-dark"] [data-slot="table"] tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+[data-helm-theme="glass-light"] [data-slot="table"] tbody tr:hover {
+  background: rgba(0, 0, 0, 0.025);
+}
+
+/* Default CTA button gradient + soft glow — Haulix referansı. */
+[data-helm-theme^="glass"] button[data-slot="button"][data-variant="default"],
+[data-helm-theme^="glass"] a[data-slot="button"][data-variant="default"] {
+  background-image: linear-gradient(
+    135deg,
+    var(--primary),
+    color-mix(in oklch, var(--primary) 75%, white)
+  );
+  box-shadow: 0 4px 14px -2px
+    color-mix(in oklch, var(--primary) 50%, transparent);
+}
+[data-helm-theme^="glass"] button[data-slot="button"][data-variant="default"]:hover,
+[data-helm-theme^="glass"] a[data-slot="button"][data-variant="default"]:hover {
+  box-shadow: 0 6px 20px -2px
+    color-mix(in oklch, var(--primary) 60%, transparent);
+}
