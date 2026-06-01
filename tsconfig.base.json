@@ -7,7 +7,6 @@
     "module": "ESNext",
     "target": "ESNext",
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
       "@helm/types": ["./packages/types/src/index.ts"],
       "@helm/api": ["./packages/api/src/index.ts"],

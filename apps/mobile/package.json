@@ -78,7 +78,8 @@
     "@helm/api": "workspace:*",
     "@helm/queries": "workspace:*",
     "@helm/domain": "workspace:*",
-    "@helm/config": "workspace:*"
+    "@helm/config": "workspace:*",
+    "expo-modules-core": "~56.0.14"
   },
   "devDependencies": {
     "@types/react": "~19.2.14",
