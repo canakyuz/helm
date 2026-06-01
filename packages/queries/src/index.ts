@@ -13,3 +13,6 @@ export * from "./users";
 export * from "./projects-breakdown";
 export * from "./segments";
 export * from "./property-metric-totals";
+export * from "./property-metrics";
+export * from "./analytics";
+export * from "./revenue";
