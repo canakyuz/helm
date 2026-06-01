@@ -1,0 +1,4 @@
+# Expo/Metro + babel plugin çözünürlüğü bun'ın symlink'li layout'unda kırılıyor.
+# Flat (hoisted) node_modules → babel/Metro npm-yarn gibi çözer.
+[install]
+linker = "hoisted"
