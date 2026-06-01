@@ -11,3 +11,7 @@ export * from "./sentry-issues";
 export * from "./app-versions";
 export * from "./users";
 export * from "./property-dau";
+export * from "./projects-breakdown";
+export * from "./segments";
+export * from "./segment-metrics";
+export * from "./property-metric-totals";
