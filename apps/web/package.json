@@ -68,7 +68,9 @@
     "dev": "refine dev",
     "build": "tsc && refine build",
     "start": "refine start",
-    "refine": "refine"
+    "refine": "refine",
+    "seed:wesan": "bun run scripts/seed-wesan-cms.ts",
+    "seed:friday": "bun run scripts/seed-friday-cms.ts"
   },
   "browserslist": {
     "production": [
