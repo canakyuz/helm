@@ -9,7 +9,7 @@ import { useProperties, type Property } from "~/hooks/use-properties";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
-import { colors, type } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 import {
   LiquidBackground,
   LiquidHeader,
@@ -57,6 +57,15 @@ function levelColor(level: SentryLevel): string {
   if (level === "fatal" || level === "error") return colors.accentDanger;
   if (level === "warning") return colors.accentWarn;
   return colors.accentInfo;
+}
+
+// App-version review status → semantic tint, so "rejected" never reads like "live".
+function versionStatusColor(status: string | null | undefined): string {
+  const s = (status ?? "").toLowerCase();
+  if (s.includes("live") || s.includes("ready") || s.includes("approved")) return colors.green;
+  if (s.includes("reject") || s.includes("removed") || s.includes("invalid")) return colors.accentDanger;
+  if (s.includes("review") || s.includes("pending") || s.includes("waiting") || s.includes("prepare")) return colors.accentWarn;
+  return colors.fgMuted;
 }
 
 // ── Crashes (real: Sentry) ──────────────────────────────────────
@@ -108,18 +117,18 @@ function CrashRows({ issues }: { issues: SentryIssue[] }) {
           const open = openId === c.id;
           const resolved = status[c.id] === "resolved";
           const lc = levelColor(c.level);
-          const stripe = resolved ? colors.green : lc;
+          const stripe = resolved ? colors.fgSubtle : lc;
           return (
             <View
               key={c.id}
               style={{
                 flexDirection: "row",
                 borderBottomWidth: i === visible.length - 1 ? 0 : 1,
-                borderBottomColor: "rgba(255,255,255,0.055)",
+                borderBottomColor: glass.hairline,
                 opacity: resolved ? 0.6 : 1,
               }}
             >
-              <View style={{ width: 3, backgroundColor: stripe, opacity: c.level === "fatal" && !resolved ? 1 : 0.7 }} />
+              <View style={{ width: space.xs, backgroundColor: stripe, opacity: c.level === "fatal" && !resolved ? 1 : 0.7 }} />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Row
                   open={open}
@@ -151,7 +160,7 @@ function CrashRows({ issues }: { issues: SentryIssue[] }) {
                         </Text>
                       </View>
                       <Text
-                        style={{ fontFamily: MONO_500, fontSize: 9.5, color: colors.fgMuted, letterSpacing: 0.4, marginTop: 2 }}
+                        style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgSecondary, letterSpacing: 0.4, marginTop: space.xs2 }}
                         numberOfLines={1}
                       >
                         {(c.culprit ?? "—")} · {formatInteger(c.count)} EVENTS · {formatInteger(c.userCount)} USERS
@@ -351,25 +360,25 @@ export default function Health() {
               {versions.length === 0 ? (
                 <EmptyHint>NO VERSIONS TRACKED</EmptyHint>
               ) : (
-                <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 10 }}>
+                <View style={{ paddingHorizontal: space.lg, paddingBottom: space.md, gap: space.md }}>
                   {(versionsAll ? versions : versions.slice(0, TOP_N)).map((v) => (
-                    <View key={v.id} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <View key={v.id} style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
                       <Text style={{ fontFamily: MONO_600, fontSize: type.bodySm, color: colors.fgPrimary, width: 56 }}>
                         {v.version}
                       </Text>
                       <View
                         style={{
-                          paddingHorizontal: 6,
-                          paddingVertical: 2,
-                          borderRadius: 5,
-                          backgroundColor: "rgba(255,255,255,0.05)",
+                          paddingHorizontal: space.xs,
+                          paddingVertical: space.xs2,
+                          borderRadius: 6,
+                          backgroundColor: glass.tint,
                         }}
                       >
-                        <Text style={{ fontFamily: MONO_500, fontSize: 9, color: colors.fgMuted, letterSpacing: 0.4 }}>
+                        <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgMuted, letterSpacing: 0.4 }}>
                           {brand(v.source)}
                         </Text>
                       </View>
-                      <Text style={{ flex: 1, fontFamily: MONO_500, fontSize: type.label, color: colors.fgSecondary }} numberOfLines={1}>
+                      <Text style={{ flex: 1, fontFamily: MONO_500, fontSize: type.label, color: versionStatusColor(v.status), letterSpacing: 0.4 }} numberOfLines={1}>
                         {(v.status ?? "—").toUpperCase()}
                       </Text>
                       <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgSubtle }}>
@@ -394,14 +403,14 @@ export default function Health() {
               {props.length === 0 ? (
                 <EmptyHint>NO PROJECTS</EmptyHint>
               ) : (
-                <View style={{ paddingHorizontal: 16, paddingBottom: 14, gap: 15 }}>
+                <View style={{ paddingHorizontal: space.lg, paddingBottom: space.md, gap: space.md }}>
                   {props.map((p) => {
                     // Real heartbeat signal only: ping freshness + interval. No fabricated %.
                     const c = heartbeatColor(p.status);
                     const ping = p.lastPingAt ? `last ping ${formatRelativeTime(p.lastPingAt)}` : "no ping yet";
                     const every = p.intervalMinutes ? ` · every ${p.intervalMinutes}m` : "";
                     return (
-                      <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
+                      <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
                         <StatusDot color={c} />
                         <View style={{ flex: 1, minWidth: 0 }}>
                           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -413,7 +422,7 @@ export default function Health() {
                             </Text>
                           </View>
                           <Text
-                            style={{ fontFamily: MONO_500, fontSize: 9.5, color: colors.fgMuted, letterSpacing: 0.3, marginTop: 3 }}
+                            style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgSecondary, letterSpacing: 0.3, marginTop: space.xs2 }}
                             numberOfLines={1}
                           >
                             {(p.heartbeatName ?? "heartbeat")} · {ping}

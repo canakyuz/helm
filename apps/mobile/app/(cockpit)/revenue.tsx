@@ -13,7 +13,7 @@ import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { usePreferences } from "~/lib/preferences";
 import { formatInteger } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
-import { colors, type } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 import {
   LiquidBackground,
   LiquidHeader,
@@ -375,16 +375,17 @@ function SubsView({
             <View
               key={stat.label}
               style={{
-                width: "47%",
-                padding: 12,
-                borderRadius: 14,
-                backgroundColor: "rgba(255,255,255,0.04)",
+                flex: 1,
+                minWidth: "45%",
+                padding: space.md,
+                borderRadius: glass.radiusSm,
+                backgroundColor: glass.tint,
                 borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.07)",
-                gap: 4,
+                borderColor: glass.hairline,
+                gap: space.xs,
               }}
             >
-              <Eyebrow size={9}>{stat.label}</Eyebrow>
+              <Eyebrow>{stat.label}</Eyebrow>
               <Text
                 style={{
                   fontFamily: "GeistMono-600",
@@ -411,9 +412,9 @@ function SubsView({
             <EmptyHint>NO MRR DATA</EmptyHint>
           ) : (
             <>
-              <AreaChart data={mrrSeries} width={chartW - 8} height={72} color={colors.accentViolet} />
+              <AreaChart data={mrrSeries} width={chartW - space.sm} height={72} color={colors.accentViolet} />
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle }}>
+                <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgMuted }}>
                   {mrrSeries.length} days
                 </Text>
                 {mrrDelta != null ? (
@@ -473,15 +474,15 @@ function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId
                     style={{
                       flex: 1,
                       minWidth: "45%",
-                      padding: 16,
-                      borderRadius: 16,
-                      backgroundColor: "rgba(255,255,255,0.04)",
+                      padding: space.md,
+                      borderRadius: glass.radiusSm,
+                      backgroundColor: glass.tint,
                       borderWidth: 1,
                       borderColor: `${color}33`,
-                      gap: 8,
+                      gap: space.sm,
                     }}
                   >
-                    <Eyebrow size={9} color={color}>
+                    <Eyebrow color={color}>
                       {block.source}
                     </Eyebrow>
                     <Text

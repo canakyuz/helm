@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-import { colors } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 
 const FONT = "Geist-400";
 const FONT_600 = "Geist-600";
@@ -212,11 +218,11 @@ export function Seg<T extends string>({
     <View
       style={{
         flexDirection: "row",
-        padding: 3,
+        padding: space.xs2,
         borderRadius: 999,
-        backgroundColor: "rgba(255,255,255,0.05)",
+        backgroundColor: glass.tint,
         borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
+        borderColor: glass.sheen,
         alignSelf: full ? "stretch" : "flex-start",
       }}
     >
@@ -226,19 +232,20 @@ export function Seg<T extends string>({
           <Pressable
             key={k}
             onPress={() => onChange(k)}
-            style={{
+            style={({ pressed }) => ({
               flex: full ? 1 : undefined,
-              paddingVertical: 5,
-              paddingHorizontal: 12,
+              paddingVertical: space.xs,
+              paddingHorizontal: space.md,
               borderRadius: 999,
               alignItems: "center",
+              opacity: pressed && !on ? 0.85 : 1,
               backgroundColor: on ? "rgba(255,255,255,0.12)" : "transparent",
-            }}
+            })}
           >
             <Text
               style={{
                 fontFamily: MONO_500,
-                fontSize: 11,
+                fontSize: type.bodySm,
                 color: on ? colors.fgPrimary : colors.fgMuted,
               }}
             >
@@ -271,20 +278,20 @@ export function ActionBtn({
       ? colors.accent
       : tone === "danger"
         ? `${colors.accentDanger}1F`
-        : "rgba(0,0,0,0.06)";
+        : glass.tint;
   const bd =
     tone === "accent"
       ? "transparent"
       : tone === "danger"
         ? `${colors.accentDanger}59`
-        : "rgba(0,0,0,0.1)";
+        : glass.border;
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
         flex: 1,
-        paddingVertical: 9,
-        borderRadius: 10,
+        paddingVertical: space.sm,
+        borderRadius: glass.radiusSm,
         alignItems: "center",
         backgroundColor: bg,
         borderWidth: 1,
@@ -292,7 +299,7 @@ export function ActionBtn({
         opacity: pressed ? 0.85 : 1,
       })}
     >
-      <Text style={{ fontFamily: MONO_600, fontSize: 10.5, letterSpacing: 0.6, color: fg }}>
+      <Text style={{ fontFamily: MONO_600, fontSize: type.label, letterSpacing: 0.6, color: fg }}>
         {label}
       </Text>
     </Pressable>
@@ -313,15 +320,15 @@ export function SearchInput({
       style={{
         flexDirection: "row",
         alignItems: "center",
-        gap: 9,
-        paddingVertical: 9,
-        paddingHorizontal: 12,
-        marginHorizontal: 12,
-        marginBottom: 8,
-        borderRadius: 12,
-        backgroundColor: "rgba(0,0,0,0.04)",
+        gap: space.sm,
+        paddingVertical: space.sm,
+        paddingHorizontal: space.md,
+        marginHorizontal: space.md,
+        marginBottom: space.sm,
+        borderRadius: glass.radiusSm,
+        backgroundColor: glass.tint,
         borderWidth: 1,
-        borderColor: "rgba(0,0,0,0.08)",
+        borderColor: glass.border,
       }}
     >
       <TextInput
@@ -329,7 +336,7 @@ export function SearchInput({
         onChangeText={onChange}
         placeholder={placeholder}
         placeholderTextColor={colors.fgSubtle}
-        style={{ flex: 1, color: colors.fgPrimary, fontFamily: FONT, fontSize: 13, padding: 0 }}
+        style={{ flex: 1, color: colors.fgPrimary, fontFamily: FONT, fontSize: type.body, padding: 0 }}
       />
     </View>
   );
@@ -340,7 +347,7 @@ export function EmptyHint({ children }: { children: string }) {
     <Text
       style={{
         fontFamily: MONO_500,
-        fontSize: 10.5,
+        fontSize: type.label,
         letterSpacing: 0.6,
         color: colors.fgSubtle,
         textAlign: "center",
@@ -399,22 +406,28 @@ export function Stars({ n, size = 11 }: { n: number; size?: number }) {
   );
 }
 
-// settings toggle
+// settings toggle — thumb travels via transform (not a layout-prop flip)
+const TOGGLE_TRAVEL = 18; // 44 width − 2×2 pad − 20 thumb
 export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  const reduced = useReducedMotion();
+  const x = useSharedValue(on ? TOGGLE_TRAVEL : 0);
+  useEffect(() => {
+    x.value = reduced ? (on ? TOGGLE_TRAVEL : 0) : withTiming(on ? TOGGLE_TRAVEL : 0, { duration: 200 });
+  }, [on, reduced, x]);
+  const thumb = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
   return (
     <Pressable
       onPress={() => onChange(!on)}
-      style={{
+      style={({ pressed }) => ({
         width: 44,
         height: 26,
         borderRadius: 99,
         backgroundColor: on ? colors.accent : "rgba(255,255,255,0.13)",
-        padding: 3,
-        flexDirection: "row",
-        justifyContent: on ? "flex-end" : "flex-start",
-      }}
+        padding: space.xs2,
+        opacity: pressed ? 0.85 : 1,
+      })}
     >
-      <View style={{ width: 20, height: 20, borderRadius: 99, backgroundColor: "#fff" }} />
+      <Animated.View style={[{ width: 20, height: 20, borderRadius: 99, backgroundColor: "#fff" }, thumb]} />
     </Pressable>
   );
 }
@@ -424,15 +437,15 @@ export function DemoChip() {
   return (
     <View
       style={{
-        paddingHorizontal: 5,
+        paddingHorizontal: space.xs,
         paddingVertical: 1,
-        borderRadius: 4,
+        borderRadius: 6,
         backgroundColor: `${colors.accentWarn}22`,
         borderWidth: 1,
         borderColor: `${colors.accentWarn}55`,
       }}
     >
-      <Text style={{ fontFamily: MONO_600, fontSize: 7.5, letterSpacing: 1, color: colors.accentWarn }}>
+      <Text style={{ fontFamily: MONO_600, fontSize: type.label, letterSpacing: 1, color: colors.accentWarn }}>
         DEMO
       </Text>
     </View>
