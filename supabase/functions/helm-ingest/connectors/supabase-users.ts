@@ -77,6 +77,47 @@ export const fetchSupabaseUsers: Connector = async (config) => {
         }`,
       );
     }
+
+    // Funnel-health metrikleri (anlık snapshot) — ayrı try, çünkü funnel
+    // migration'ı olmayan projelerde kolonlar yoksa dau/mau emit'i etkilenmesin.
+    try {
+      await admin.rpc("snapshot_funnel_daily"); // idempotent, sadece bugünü yazar
+      const { data: funnel, error } = await admin
+        .from("analytics_daily")
+        .select(
+          "date, players_total, paying_users, pct_le1_business, pct_level1, pct_paused, pct_ever_prestiged",
+        )
+        .order("date", { ascending: false })
+        .limit(90);
+      if (error) throw new Error(error.message);
+
+      const FUNNEL_METRICS = [
+        "players_total",
+        "paying_users",
+        "pct_le1_business",
+        "pct_level1",
+        "pct_paused",
+        "pct_ever_prestiged",
+      ] as const;
+
+      // Sadece dolu (non-null) alanları emit et — funnel kolonları yalnızca
+      // snapshot alınan günlerde dolu olur, boş günleri yanlış 0 olarak basmayız.
+      for (const row of funnel ?? []) {
+        const date = String(row.date).slice(0, 10);
+        for (const m of FUNNEL_METRICS) {
+          const v = (row as Record<string, unknown>)[m];
+          if (v !== null && v !== undefined) {
+            points.push({ date, metric: m, value: Number(v) || 0 });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn(
+        `[supabase connector] funnel metrics skipped: ${
+          e instanceof Error ? e.message : String(e)
+        }`,
+      );
+    }
   }
 
   return points;

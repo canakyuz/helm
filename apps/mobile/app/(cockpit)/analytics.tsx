@@ -58,6 +58,64 @@ function humanize(s: string): string {
     .join(" ");
 }
 
+// ─── Funnel health (product snapshot, source='supabase') ──────────────────────
+// Empire'ın analytics_daily funnel snapshot'ı. "Oyun loop'u tutuyor mu" sorusu.
+// Yüzdeler düşmesi-iyi (≤1 işletme / Lv1 takılma / vergi kilidi) renkle işaretli.
+
+const lastValue = (q: ReturnType<typeof useMetricDetail>): number | null => {
+  const s = q.data?.series ?? [];
+  const last = s[s.length - 1];
+  return last ? last.value : null;
+};
+
+function FunnelHealthSection({
+  projectId,
+  index,
+}: {
+  projectId?: string | undefined;
+  index: string;
+}) {
+  const players = useMetricDetail("players_total");
+  const paying = useMetricDetail("paying_users");
+  const prestiged = useMetricDetail("pct_ever_prestiged");
+  const le1 = useMetricDetail("pct_le1_business");
+  const level1 = useMetricDetail("pct_level1");
+  const paused = useMetricDetail("pct_paused");
+
+  const pct = (v: number | null) => (v == null ? "—" : `${v.toFixed(1)}%`);
+  const cnt = (v: number | null) => (v == null ? "—" : formatInteger(v));
+  const playersTotal = lastValue(players);
+
+  // Snapshot henüz alınmadıysa (funnel migration yoksa) bölümü gizle.
+  if (projectId && !players.isLoading && playersTotal == null) return null;
+
+  const items = [
+    { label: "Players", value: cnt(playersTotal) },
+    { label: "Paying", value: cnt(lastValue(paying)), color: colors.green },
+    { label: "Prestiged", value: pct(lastValue(prestiged)) },
+    { label: "≤1 business", value: pct(lastValue(le1)), color: colors.accentDanger },
+    { label: "Stuck Lv1", value: pct(lastValue(level1)), color: colors.accentDanger },
+    { label: "Tax-locked", value: pct(lastValue(paused)), color: colors.accentWarn },
+  ];
+
+  return (
+    <>
+      <FullDivider />
+      <CardSection index={index} title="Funnel health" pt={14}>
+        <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          {!projectId ? (
+            <EmptyHint>SELECT A PROJECT</EmptyHint>
+          ) : players.isLoading ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : (
+            <KV items={items} />
+          )}
+        </View>
+      </CardSection>
+    </>
+  );
+}
+
 // ─── 01 · Retention (vertical bars, per design) ───────────────────────────────
 
 function RetentionSection({ projectId }: { projectId?: string | undefined }) {
@@ -533,8 +591,9 @@ export default function Analytics() {
             <AcquisitionSection projectId={projectId} />
             <CountriesSection projectId={projectId} />
             <OsSection projectId={projectId} />
+            <FunnelHealthSection projectId={projectId} index="06" />
             <FullDivider />
-            <ReviewsSection index="06" />
+            <ReviewsSection index="07" />
           </LiquidGlass>
         </ScrollView>
       </SafeAreaView>
