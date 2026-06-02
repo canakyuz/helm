@@ -3,7 +3,11 @@ import { type Connector, type MetricPoint } from "./types.ts";
 
 // Supabase — hedef projenin auth.users kayıtlarından son 90 günlük
 // total_users + new_users serisini created_at'e bakarak yeniden kurar.
-// config: { project_url, service_role_key }
+//
+// track_activity="true" ise ek olarak hedef projenin public.analytics_daily
+// rollup tablosundan dau/mau/sessions çekilir (Empire gibi event yazan ürünler).
+// Tablo/RPC yoksa bu ek kısım sessizce atlanır — geriye dönük güvenli.
+// config: { project_url, service_role_key, track_activity?, activity_refresh_days? }
 export const fetchSupabaseUsers: Connector = async (config) => {
   const admin = createClient(config.project_url, config.service_role_key, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -41,5 +45,39 @@ export const fetchSupabaseUsers: Connector = async (config) => {
     points.push({ date: dayStr, metric: "total_users", value: total });
     points.push({ date: dayStr, metric: "new_users", value: newUsers });
   }
+
+  // Aktivite metrikleri (dau/mau/sessions) — yalnızca opt-in eden projeler için.
+  // Hedef projedeki analytics_daily rollup tablosundan okunur; ham event taranmaz.
+  if (config.track_activity === "true") {
+    try {
+      // Rollup'u tazele (geç gelen event'leri yakala). pg_cron varsa zaten günlük
+      // çalışıyor; bu çağrı idempotent ve ucuz (son N gün). O(N*event) ile sınırlı.
+      const refreshDays = Number(config.activity_refresh_days) || 7;
+      await admin.rpc("refresh_analytics_daily", { p_days: refreshDays });
+
+      const { data: daily, error } = await admin
+        .from("analytics_daily")
+        .select("date, dau, mau, sessions")
+        .order("date", { ascending: false })
+        .limit(90);
+      if (error) throw new Error(error.message);
+
+      for (const row of daily ?? []) {
+        const date = String(row.date).slice(0, 10);
+        points.push({ date, metric: "dau", value: Number(row.dau) || 0 });
+        points.push({ date, metric: "mau", value: Number(row.mau) || 0 });
+        points.push({ date, metric: "sessions", value: Number(row.sessions) || 0 });
+      }
+    } catch (e) {
+      // analytics_daily / refresh_analytics_daily yoksa veya eski şemaysa: atla.
+      // total_users/new_users emit'i etkilenmez.
+      console.warn(
+        `[supabase connector] activity metrics skipped: ${
+          e instanceof Error ? e.message : String(e)
+        }`,
+      );
+    }
+  }
+
   return points;
 };
