@@ -27,9 +27,6 @@
     "patch:ios-app-groups": "node ./plugins/patch-ios-app-groups-build.js",
     "patch:widget-storage": "node ./plugins/patch-extension-storage-file.js"
   },
-  "trustedDependencies": [
-    "@shopify/react-native-skia"
-  ],
   "dependencies": {
     "@bacons/apple-targets": "^4.0.7",
     "@expo-google-fonts/geist": "^0.4.2",
