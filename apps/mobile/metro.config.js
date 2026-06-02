@@ -14,6 +14,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
 ];
+// GEREKLİ: mobil tailwind v3'ü root'un (web) v4'ü yerine çözer. expo-doctor
+// bunu uyarır ama bu monorepo'da NativeWind çözünürlüğü için şart.
 config.resolver.disableHierarchicalLookup = true;
 
 module.exports = withNativeWind(config, { input: "./global.css" });
