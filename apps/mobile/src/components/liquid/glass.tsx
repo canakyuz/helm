@@ -86,22 +86,25 @@ export function LiquidGlass({
     </>
   );
 
+  // Each layer carries its own borderRadius — iOS native blur views don't reliably
+  // clip to the parent's overflow:hidden, so a square corner pokes out under the
+  // rounded border ("cut corner" artifact) unless the layer rounds itself.
   const base =
     Platform.OS === "ios" && liquidAvailable ? (
       <GlassView
         glassEffectStyle="regular"
         colorScheme="dark"
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, { borderRadius: radius }]}
       />
     ) : Platform.OS === "ios" ? (
       <BlurView
         intensity={glass.blurIntensity}
         tint="dark"
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, { borderRadius: radius }]}
       />
     ) : (
       <View
-        style={[StyleSheet.absoluteFill, { backgroundColor: colors.bgElevated }]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: colors.bgElevated, borderRadius: radius }]}
       />
     );
 
@@ -112,7 +115,7 @@ export function LiquidGlass({
   const fill = (
     <View
       pointerEvents="none"
-      style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.07)" }]}
+      style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.07)", borderRadius: radius }]}
     />
   );
 
