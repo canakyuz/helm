@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import { RangeSelect } from "@/components/range-select";
 import { StatCard } from "@/components/stat-card";
+import { FunnelHealth } from "@/components/cockpit/funnel-health";
 import { supabaseClient } from "@/providers/supabase-client";
 import { useScope } from "@/context/scope";
 import { compact } from "@/lib/metrics";
@@ -224,6 +225,9 @@ export const FunnelPage = () => {
           </Button>
         </div>
       </div>
+
+      {/* Ürün funnel sağlığı — Empire snapshot'ı (PostHog'dan bağımsız, her scope'ta çalışır). */}
+      <FunnelHealth />
 
       {isAll && (
         <ErrorBanner variant="warning">
