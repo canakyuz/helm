@@ -107,6 +107,9 @@ function ProjectRows({
           const open = openId === p.id;
           const tint = PROJECT_TINTS[i % PROJECT_TINTS.length]!;
           const glyph = PROJECT_GLYPHS[i % PROJECT_GLYPHS.length]!;
+          // The metrics map only holds an entry for projects with at least one
+          // metric row — a missing entry means "no data source", not real zeros.
+          const m = metrics.data?.[p.id];
           return (
             <Row
               key={p.id}
@@ -138,14 +141,20 @@ function ProjectRows({
               }
               detail={
                 <>
-                  <KV
-                    items={[
-                      { label: "Revenue today", value: fmt(metrics.data?.[p.id]?.adRevenue ?? 0), color: colors.accent },
-                      { label: "MRR", value: fmt(metrics.data?.[p.id]?.mrr ?? 0), color: colors.accentViolet },
-                      { label: "DAU", value: formatInteger(metrics.data?.[p.id]?.dau ?? 0), color: colors.blue },
-                      { label: "Status", value: statusLabel(p.status), color: statusColor(p.status) },
-                    ]}
-                  />
+                  {metrics.isLoading ? (
+                    <EmptyHint>LOADING METRICS…</EmptyHint>
+                  ) : m != null ? (
+                    <KV
+                      items={[
+                        { label: "Revenue today", value: fmt(m.adRevenue), color: colors.accent },
+                        { label: "MRR", value: fmt(m.mrr), color: colors.accentViolet },
+                        { label: "DAU", value: formatInteger(m.dau), color: colors.blue },
+                        { label: "Status", value: statusLabel(p.status), color: statusColor(p.status) },
+                      ]}
+                    />
+                  ) : (
+                    <EmptyHint>NO METRICS YET · CONNECT A SOURCE IN SETTINGS</EmptyHint>
+                  )}
                   <View style={{ flexDirection: "row", gap: 24, justifyContent: "center" }}>
                     <ActionBtn label="OPEN DETAIL" tone="accent" onPress={() => haptic.tap()} />
                     <ActionBtn
