@@ -1,11 +1,21 @@
 {
   "name": "helm",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
   "scripts": {
     "typecheck": "bun run --filter '*' typecheck",
     "gen:types": "supabase gen types typescript --project-id $HELM_SUPABASE_PROJECT_ID --schema public > packages/types/src/database.ts",
     "db:push": "supabase db push",
     "fn:deploy": "supabase functions deploy"
+  },
+  "dependencies": {
+    "tailwindcss": "3.4.19"
   }
 }
