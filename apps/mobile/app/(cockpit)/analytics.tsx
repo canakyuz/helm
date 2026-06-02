@@ -16,7 +16,7 @@ import {
 import { usePreferences } from "~/lib/preferences";
 import { formatInteger } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
-import { colors, type } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 import {
   LiquidBackground,
   LiquidHeader,
@@ -45,7 +45,9 @@ type Metric = "DAU" | "MAU";
 
 const MONO_600 = "GeistMono-600";
 const MONO_500 = "GeistMono-500";
-const ACQ_COLORS = [colors.blue, colors.accentViolet, colors.green, colors.accentWarn, colors.accent];
+// Analytics charts stay in the blue/violet/info family; lime `accent` is the app's
+// CTA color and must not double as a category fill (it clashes with the blue identity).
+const ACQ_COLORS = [colors.blue, colors.accentViolet, colors.green, colors.accentWarn, colors.fgMuted];
 
 // Raw event / source keys → readable Title Case. "paywall_dismissed" → "Paywall
 // Dismissed"; already-spaced labels ("Application Became Active") pass through.
@@ -101,7 +103,7 @@ function FunnelHealthSection({
   return (
     <>
       <FullDivider />
-      <CardSection index={index} title="Funnel health" pt={14}>
+      <CardSection index={index} title="Funnel health" pt={space.md}>
         <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
           {!projectId ? (
             <EmptyHint>SELECT A PROJECT</EmptyHint>
@@ -125,7 +127,7 @@ function RetentionSection({ projectId }: { projectId?: string | undefined }) {
   if (projectId && !q.isLoading && cohorts.length === 0) return null;
 
   return (
-    <CardSection index="01" title="Retention" pt={14}>
+    <CardSection index="01" title="Retention" pt={space.md}>
       {!projectId ? (
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
@@ -135,11 +137,11 @@ function RetentionSection({ projectId }: { projectId?: string | undefined }) {
           style={{
             flexDirection: "row",
             alignItems: "flex-end",
-            gap: 10,
+            gap: space.md,
             height: 104,
-            paddingHorizontal: 18,
-            paddingTop: 4,
-            paddingBottom: 14,
+            paddingHorizontal: space.lg,
+            paddingTop: space.xs,
+            paddingBottom: space.md,
           }}
         >
           {cohorts.map((r) => {
@@ -148,21 +150,21 @@ function RetentionSection({ projectId }: { projectId?: string | undefined }) {
             return (
               <View
                 key={r.day}
-                style={{ flex: 1, alignItems: "center", gap: 7, height: "100%", justifyContent: "flex-end" }}
+                style={{ flex: 1, alignItems: "center", gap: space.sm, height: "100%", justifyContent: "flex-end" }}
               >
-                <Text style={{ fontFamily: MONO_600, fontSize: 11, color: colors.fgPrimary }}>{r.pct}%</Text>
+                <Text style={{ fontFamily: MONO_600, fontSize: type.bodySm, color: colors.fgPrimary }}>{r.pct}%</Text>
                 <View style={{ width: "62%", flex: 1, justifyContent: "flex-end" }}>
                   <View
                     style={{
                       width: "100%",
                       height: `${h}%`,
-                      minHeight: 4,
+                      minHeight: space.xs,
                       borderRadius: 6,
                       backgroundColor: colors.blue,
                     }}
                   />
                 </View>
-                <Text style={{ fontFamily: MONO_500, fontSize: 9, color: colors.fgSubtle, letterSpacing: 0.4 }}>
+                <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgSubtle, letterSpacing: 0.4 }}>
                   {r.day}
                 </Text>
               </View>
@@ -193,10 +195,10 @@ function FunnelSection({ projectId }: { projectId?: string | undefined }) {
       <CardSection
         index="02"
         title="Conversion funnel"
-        pt={14}
+        pt={space.md}
         {...(q.data ? { action: `${Math.round(q.data.overall_conversion)}% conv` } : {})}
       >
-        <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 13 }}>
+        <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: space.md }}>
           {!projectId ? (
             <EmptyHint>SELECT A PROJECT</EmptyHint>
           ) : q.isLoading ? (
@@ -220,7 +222,7 @@ function FunnelSection({ projectId }: { projectId?: string | undefined }) {
                         {humanize(step.event)}
                       </Text>
                       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8, marginLeft: 8 }}>
-                        <Text style={{ fontFamily: MONO_600, fontSize: 12.5, color: colors.fgPrimary }}>
+                        <Text style={{ fontFamily: MONO_600, fontSize: type.body, color: colors.fgPrimary }}>
                           {formatInteger(step.count)}
                         </Text>
                         {i > 0 ? (
@@ -232,7 +234,8 @@ function FunnelSection({ projectId }: { projectId?: string | undefined }) {
                         )}
                       </View>
                     </View>
-                    <HBar pct={pct} color={last ? colors.accent : colors.blue} height={8} />
+                    {/* final step = converted cohort → green success tint, not lime CTA */}
+                    <HBar pct={pct} color={last ? colors.green : colors.blue} height={8} />
                   </View>
                 );
               })}
@@ -263,7 +266,7 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
   return (
     <>
       <FullDivider />
-      <CardSection index="03" title="Acquisition" pt={14} {...(total > 0 ? { action: `${formatInteger(total)} · 30d` } : {})}>
+      <CardSection index="03" title="Acquisition" pt={space.md} {...(total > 0 ? { action: `${formatInteger(total)} · 30d` } : {})}>
         {!projectId ? (
           <EmptyHint>SELECT A PROJECT</EmptyHint>
         ) : q.isLoading ? (
@@ -293,7 +296,7 @@ function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
                       {humanize(a.source)}
                     </Text>
                     <Text style={{ fontFamily: MONO_600, fontSize: 12, color: colors.fgSecondary }}>{formatInteger(a.users)}</Text>
-                    <Text style={{ fontFamily: MONO_500, fontSize: 10.5, color: colors.fgMuted, width: 32, textAlign: "right" }}>
+                    <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgMuted, width: 32, textAlign: "right" }}>
                       {pct}%
                     </Text>
                   </View>
@@ -342,7 +345,7 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
   return (
     <>
     <FullDivider />
-    <CardSection index="04" title="Top countries" pt={14} {...(rows.length ? { count: rows.length } : {})}>
+    <CardSection index="04" title="Top countries" pt={space.md} {...(rows.length ? { count: rows.length } : {})}>
       {!projectId ? (
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
@@ -370,9 +373,9 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
                       paddingVertical: 3,
                       textAlign: "center",
                       borderRadius: 5,
-                      backgroundColor: "rgba(255,255,255,0.06)",
+                      backgroundColor: glass.sheen,
                       fontFamily: MONO_600,
-                      fontSize: 10.5,
+                      fontSize: type.label,
                       color: colors.fgSecondary,
                       letterSpacing: 0.4,
                     }}
@@ -388,7 +391,7 @@ function CountriesSection({ projectId }: { projectId?: string | undefined }) {
                   <View style={{ width: 60 }}>
                     <HBar pct={barPct} color={colors.blue} height={5} />
                   </View>
-                  <Text style={{ fontFamily: MONO_500, fontSize: 10.5, color: colors.fgMuted, width: 30, textAlign: "right" }}>
+                  <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgMuted, width: 30, textAlign: "right" }}>
                     {pct}%
                   </Text>
                 </View>
@@ -436,7 +439,7 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
   return (
     <>
     <FullDivider />
-    <CardSection index="05" title="OS versions" pt={14}>
+    <CardSection index="05" title="OS versions" pt={space.md}>
       {!projectId ? (
         <EmptyHint>SELECT A PROJECT</EmptyHint>
       ) : q.isLoading ? (
@@ -467,7 +470,7 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
                   <View style={{ flex: 1 }}>
                     <HBar pct={barPct} color={colors.accentViolet} height={5} />
                   </View>
-                  <Text style={{ fontFamily: MONO_500, fontSize: 10.5, color: colors.fgMuted, width: 30, textAlign: "right" }}>
+                  <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgMuted, width: 30, textAlign: "right" }}>
                     {o.pct}%
                   </Text>
                 </View>
@@ -548,9 +551,9 @@ export default function Analytics() {
       <LiquidBackground />
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <LiquidHeader />
-        <ScrollView contentContainerStyle={{ paddingBottom: 120, gap: 18 }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 120, gap: space.lg }} showsVerticalScrollIndicator={false}>
           {/* Card-less hero on the aurora background: number + bar chart + mini-stats. */}
-          <Animated.View entering={FadeIn.duration(420)} style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+          <Animated.View entering={FadeIn.duration(280)} style={{ paddingHorizontal: 16, paddingTop: 8 }}>
             <OpenHero
               eyebrow="Active users · 30D"
               live

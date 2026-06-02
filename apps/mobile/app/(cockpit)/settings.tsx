@@ -10,7 +10,7 @@ import { formatRelativeTime } from "~/lib/format";
 import { usePreferences, preferences, type Currency } from "~/lib/preferences";
 import { supabase } from "~/lib/supabase";
 import { haptic } from "~/lib/haptics";
-import { colors, type } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 import {
   LiquidBackground,
   LiquidHeader,
@@ -43,16 +43,17 @@ function SetRow({ label, sub, value, valueColor, right, danger, onPress, isLast 
     <Pressable
       onPress={onPress}
       disabled={onPress == null}
-      style={{
+      style={({ pressed }) => ({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 13,
+        gap: space.md,
+        paddingHorizontal: space.lg,
+        paddingVertical: space.md,
         borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: "rgba(255,255,255,0.055)",
-      }}
+        borderBottomColor: glass.hairline,
+        opacity: onPress != null && pressed ? 0.6 : 1,
+      })}
     >
       {/* label + optional sub */}
       <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
@@ -71,7 +72,7 @@ function SetRow({ label, sub, value, valueColor, right, danger, onPress, isLast 
             style={{
               fontFamily: "GeistMono-500",
               fontSize: type.label,
-              color: colors.fgSubtle,
+              color: colors.fgMuted,
               letterSpacing: 0.3,
             }}
           >
@@ -96,7 +97,7 @@ function SetRow({ label, sub, value, valueColor, right, danger, onPress, isLast 
             {value}
           </Text>
           {onPress != null ? (
-            <Text style={{ color: colors.fgSubtle, fontSize: 13 }}>›</Text>
+            <Text style={{ color: colors.fgMuted, fontSize: type.body }}>›</Text>
           ) : null}
         </View>
       ) : null}
@@ -206,7 +207,7 @@ export default function Settings() {
                   style={{
                     fontFamily: "GeistMono-500",
                     fontSize: type.label,
-                    color: colors.fgMuted,
+                    color: colors.fgSecondary,
                     letterSpacing: 0.5,
                   }}
                 >
@@ -278,11 +279,11 @@ export default function Settings() {
             <Eyebrow>{`Data sources · ${okCount}/${totalIntegrations} ok`}</Eyebrow>
             <LiquidGlass padding={0}>
               {integrations.length === 0 ? (
-                <View style={{ paddingVertical: 20, alignItems: "center" }}>
+                <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
                   <Text
                     style={{
                       fontFamily: "GeistMono-500",
-                      fontSize: 10.5,
+                      fontSize: type.label,
                       letterSpacing: 0.6,
                       color: colors.fgSubtle,
                     }}
@@ -297,15 +298,15 @@ export default function Settings() {
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      paddingHorizontal: 16,
-                      paddingVertical: 12,
+                      paddingHorizontal: space.lg,
+                      paddingVertical: space.md,
                       borderBottomWidth: i === integrations.length - 1 ? 0 : 1,
-                      borderBottomColor: "rgba(255,255,255,0.055)",
+                      borderBottomColor: glass.hairline,
                     }}
                   >
                     <StatusDot color={integStatusColor(integ.status)} />
 
-                    <View style={{ flex: 1, gap: 2, marginLeft: 10 }}>
+                    <View style={{ flex: 1, gap: space.xs2, marginLeft: space.md }}>
                       <Text
                         style={{
                           fontFamily: "Geist-500",
@@ -322,7 +323,7 @@ export default function Settings() {
                           style={{
                             fontFamily: "GeistMono-500",
                             fontSize: type.label,
-                            color: colors.fgSubtle,
+                            color: colors.fgMuted,
                             letterSpacing: 0.3,
                           }}
                           numberOfLines={1}

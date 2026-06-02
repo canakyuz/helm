@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { Text, View } from "react-native";
 
-import { colors, type } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 import { AreaChart, Ring } from "~/components/liquid/charts";
 import { CountUp, Delta, Eyebrow } from "~/components/liquid/primitives";
 
@@ -20,8 +20,8 @@ export function Sep() {
       style={{
         width: 1,
         alignSelf: "stretch",
-        marginHorizontal: 2,
-        backgroundColor: "rgba(255,255,255,0.08)",
+        marginHorizontal: space.xs2,
+        backgroundColor: glass.sheen,
       }}
     />
   );
@@ -29,10 +29,10 @@ export function Sep() {
 
 export function MiniStat({ label, value, delta, invert, valueSize = type.stat }: HeroStat & { valueSize?: number }) {
   return (
-    <View style={{ flex: 1, flexDirection: "column", gap: 4 }}>
-      <Eyebrow size={9}>{label}</Eyebrow>
+    <View style={{ flex: 1, flexDirection: "column", gap: space.xs }}>
+      <Eyebrow>{label}</Eyebrow>
       <Text style={{ fontFamily: MONO_600, fontSize: valueSize, lineHeight: valueSize + 4, color: colors.fgPrimary, letterSpacing: -0.3 }}>
-        {value} {delta != null ? <View style={{ marginBottom: 6 }}><Delta value={delta} size={10} invert={invert ?? false} /></View> : null}
+        {value} {delta != null ? <View style={{ marginBottom: space.xs }}><Delta value={delta} size={type.label} invert={invert ?? false} /></View> : null}
       </Text>
     </View>
   );
@@ -40,6 +40,7 @@ export function MiniStat({ label, value, delta, invert, valueSize = type.stat }:
 
 export function OpenHero({
   eyebrow,
+  eyebrowMeta,
   live = false,
   right,
   value,
@@ -56,6 +57,7 @@ export function OpenHero({
   ring,
 }: {
   eyebrow: string;
+  eyebrowMeta?: string;
   live?: boolean;
   right?: ReactNode;
   value: number;
@@ -86,6 +88,9 @@ export function OpenHero({
             <View style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: colors.accent }} />
           ) : null}
           <Eyebrow color={live ? colors.accent : colors.fgMuted}>{eyebrow}</Eyebrow>
+          {eyebrowMeta ? (
+            <Eyebrow color={colors.fgMuted}>{`· ${eyebrowMeta}`}</Eyebrow>
+          ) : null}
         </View>
         {right}
       </View>
@@ -95,12 +100,12 @@ export function OpenHero({
           flexDirection: "row",
           alignItems: "flex-end",
           justifyContent: "space-between",
-          gap: 14,
-          marginTop: 12,
+          gap: space.lg,
+          marginTop: space.md,
         }}
       >
         <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
+          <View style={{ flexDirection: "row", alignItems: "flex-end", gap: space.sm }}>
             <CountUp
               value={value}
               format={format}
@@ -115,20 +120,20 @@ export function OpenHero({
               }}
             />
             {delta != null ? (
-              <View style={{ marginBottom: 6 }}>
-                <Delta value={delta} size={13} invert={deltaInvert ?? false} />
+              <View style={{ marginBottom: space.xs }}>
+                <Delta value={delta} size={type.body} invert={deltaInvert ?? false} />
               </View>
             ) : null}
           </View>
           {caption ? (
-            <View style={{ marginTop: 9 }}>
+            <View style={{ marginTop: space.sm }}>
               <Eyebrow color={colors.fgMuted}>{caption}</Eyebrow>
             </View>
           ) : null}
         </View>
         {ring ? (
           <Ring value={ring.value} size={82} stroke={8} color={ring.color}>
-            <Text style={{ fontFamily: MONO_600, fontSize: 16, color: colors.fgPrimary }}>
+            <Text style={{ fontFamily: MONO_600, fontSize: type.emph, color: colors.fgPrimary }}>
               {ring.value}%
             </Text>
           </Ring>
@@ -136,9 +141,9 @@ export function OpenHero({
       </View>
 
       {chartEl ? (
-        <View style={{ marginTop: 16 }}>{chartEl}</View>
+        <View style={{ marginTop: space.lg }}>{chartEl}</View>
       ) : chartData ? (
-        <View style={{ marginTop: 16 }}>
+        <View style={{ marginTop: space.lg }}>
           <AreaChart data={chartData} width={chartWidth} height={chartH} color={color} />
         </View>
       ) : null}
@@ -147,10 +152,10 @@ export function OpenHero({
         <View
           style={{
             flexDirection: "row",
-            marginTop: 16,
-            paddingTop: 14,
+            marginTop: space.lg,
+            paddingTop: space.md,
             borderTopWidth: 1,
-            borderTopColor: "rgba(255,255,255,0.08)",
+            borderTopColor: glass.sheen,
           }}
         >
           {stats.map((s, i) => (

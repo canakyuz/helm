@@ -11,7 +11,7 @@ import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { useRevenueGoal } from "~/hooks/use-revenue-goal";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
-import { colors } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 import { ScreenStatus } from "~/components/screen-status";
 import {
   LiquidBackground,
@@ -114,12 +114,12 @@ function ProjectRows({
               onToggle={() => setOpenId(open ? null : p.id)}
               isLast={i === visible.length - 1}
               header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
                   <Glyph glyph={glyph} tint={tint} size={30} />
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
                       <Text
-                        style={{ fontFamily: "Geist-600", fontSize: 14, color: colors.fgPrimary, letterSpacing: -0.2 }}
+                        style={{ fontFamily: "Geist-600", fontSize: type.emph, color: colors.fgPrimary, letterSpacing: -0.2 }}
                         numberOfLines={1}
                       >
                         {p.name}
@@ -127,7 +127,7 @@ function ProjectRows({
                       <StatusDot color={statusColor(p.status)} />
                     </View>
                     <Text
-                      style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.fgMuted, letterSpacing: 0.4 }}
+                      style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSecondary, letterSpacing: 0.4 }}
                       numberOfLines={1}
                     >
                       {(p.brandName ?? p.type).toUpperCase()}
@@ -150,7 +150,10 @@ function ProjectRows({
                     <ActionBtn label="OPEN DETAIL" tone="accent" onPress={() => haptic.tap()} />
                     <ActionBtn
                       label={muted[p.id] ? "ALERTS MUTED" : "MUTE ALERTS"}
-                      onPress={() => setMuted((m) => ({ ...m, [p.id]: !m[p.id] }))}
+                      onPress={() => {
+                        haptic.tap();
+                        setMuted((m) => ({ ...m, [p.id]: !m[p.id] }));
+                      }}
                     />
                   </View>
                 </>
@@ -203,10 +206,10 @@ function AlertRows({
             style={{
               flexDirection: "row",
               borderBottomWidth: i === visible.length - 1 ? 0 : 1,
-              borderBottomColor: "rgba(255,255,255,0.055)",
+              borderBottomColor: glass.hairline,
             }}
           >
-            <View style={{ width: 3, backgroundColor: sev, opacity: a.severity === "critical" ? 1 : 0.7 }} />
+            <View style={{ width: space.xs, backgroundColor: sev, opacity: a.severity === "critical" ? 1 : 0.7 }} />
             <View style={{ flex: 1, minWidth: 0 }}>
               <Row
                 open={open}
@@ -216,17 +219,17 @@ function AlertRows({
                   <View>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <Text
-                        style={{ flex: 1, fontFamily: "Geist-600", fontSize: 12.5, color: colors.fgPrimary, letterSpacing: -0.2 }}
+                        style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
                         numberOfLines={1}
                       >
                         {a.ruleName}
                       </Text>
-                      <Text style={{ fontFamily: "GeistMono-500", fontSize: 10, color: colors.fgSubtle }}>
+                      <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle }}>
                         {formatRelativeTime(a.triggeredAt)}
                       </Text>
                     </View>
                     <Text
-                      style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.fgMuted, letterSpacing: 0.4 }}
+                      style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgMuted, letterSpacing: 0.4 }}
                       numberOfLines={1}
                     >
                       {a.metric.toUpperCase()} · {a.condition.toUpperCase()}
@@ -244,7 +247,13 @@ function AlertRows({
                         onDismiss(a.id);
                       }}
                     />
-                    <ActionBtn label="MUTE" onPress={() => onDismiss(a.id)} />
+                    <ActionBtn
+                      label="MUTE"
+                      onPress={() => {
+                        haptic.tap();
+                        onDismiss(a.id);
+                      }}
+                    />
                   </View>
                 }
               />
@@ -336,6 +345,10 @@ export default function Overview() {
         >
           <OpenHero
             eyebrow="Today"
+            eyebrowMeta={new Date(kpis.dataUpdatedAt).toLocaleTimeString("tr-TR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
             live
             value={today}
             format={(v) => fmt(v)}
@@ -351,17 +364,17 @@ export default function Overview() {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: 6,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
+                  gap: space.sm,
+                  paddingHorizontal: space.md,
+                  paddingVertical: space.xs,
                   borderRadius: 999,
-                  backgroundColor: "rgba(255,255,255,0.06)",
+                  backgroundColor: glass.tint,
                   borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.1)",
+                  borderColor: glass.border,
                 }}
               >
-                <View style={{ width: 5, height: 5, borderRadius: 99, backgroundColor: colors.accent }} />
-                <Text style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.fgSecondary, letterSpacing: 0.4 }}>
+                <View style={{ width: space.xs, height: space.xs, borderRadius: 99, backgroundColor: colors.accent }} />
+                <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSecondary, letterSpacing: 0.4 }}>
                   {formatInteger(data.dau)} ACTIVE
                 </Text>
               </View>
@@ -369,17 +382,17 @@ export default function Overview() {
           />
 
           {/* monthly revenue goal */}
-          <LiquidGlass padding={12}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <LiquidGlass padding={space.md}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.md }}>
               <Eyebrow>{goalLabel}</Eyebrow>
               {goalTarget != null ? (
-                <Text style={{ fontFamily: "GeistMono-500", fontSize: 11.5, color: colors.fgSecondary }}>
+                <Text style={{ fontFamily: "GeistMono-500", fontSize: type.bodySm, color: colors.fgSecondary }}>
                   <Text style={{ color: colors.fgPrimary, fontFamily: "GeistMono-600" }}>{fmt(goalCurrent)}</Text>
                   {" / "}
                   {fmt(goalTarget)}
                 </Text>
               ) : (
-                <Text style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.fgSubtle, letterSpacing: 0.4 }}>
+                <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle, letterSpacing: 0.4 }}>
                   SET IN SETTINGS
                 </Text>
               )}
@@ -387,14 +400,14 @@ export default function Overview() {
             {goalTarget != null ? (
               <>
                 <HBar pct={goalPct} color={colors.accent} height={8} />
-                <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
-                  <Text style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.accent, letterSpacing: 0.4 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: space.sm }}>
+                  <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.accent, letterSpacing: 0.4 }}>
                     {goalPct}% REACHED
                   </Text>
                 </View>
               </>
             ) : (
-              <Text style={{ fontFamily: "GeistMono-500", fontSize: 9.5, color: colors.fgSubtle, letterSpacing: 0.4 }}>
+              <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle, letterSpacing: 0.4 }}>
                 {fmt(goalCurrent)} THIS MONTH · NO TARGET YET
               </Text>
             )}

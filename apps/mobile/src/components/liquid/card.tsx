@@ -6,14 +6,14 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { colors, type } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 
 const FONT_600 = "Geist-600";
 const MONO_500 = "GeistMono-500";
 const MONO_600 = "GeistMono-600";
 
 export function FullDivider() {
-  return <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.06)" }} />;
+  return <View style={{ height: 1, backgroundColor: glass.hairline }} />;
 }
 
 export function CardSection({
@@ -56,21 +56,25 @@ export function CardSection({
         {count != null ? (
           <View
             style={{
-              paddingHorizontal: 5,
+              paddingHorizontal: space.xs,
               paddingVertical: 1,
-              borderRadius: 5,
-              backgroundColor: "rgba(255,255,255,0.05)",
+              borderRadius: 6,
+              backgroundColor: glass.tint,
               borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.06)",
+              borderColor: glass.hairline,
             }}
           >
-            <Text style={{ fontFamily: MONO_500, fontSize: 9.5, color: colors.fgMuted }}>{count}</Text>
+            <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgMuted }}>{count}</Text>
           </View>
         ) : null}
-        <View style={{ flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+        <View style={{ flex: 1, height: 1, backgroundColor: glass.sheen }} />
         {action ? (
-          <Pressable onPress={onAction} hitSlop={6}>
-            <Text style={{ fontFamily: MONO_500, fontSize: 10, color: colors.accent, letterSpacing: 0.4 }}>
+          <Pressable
+            onPress={onAction}
+            hitSlop={6}
+            style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+          >
+            <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.accent, letterSpacing: 0.4 }}>
               {action} →
             </Text>
           </Pressable>
@@ -89,7 +93,7 @@ function Chevron({ open }: { open: boolean }) {
   const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${r.value}deg` }] }));
   return (
     <Animated.View style={style}>
-      <Text style={{ color: colors.fgSubtle, fontSize: 12 }}>›</Text>
+      <Text style={{ color: colors.fgMuted, fontSize: type.bodySm }}>›</Text>
     </Animated.View>
   );
 }
@@ -113,11 +117,11 @@ export function Row({
     <View
       style={{
         borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: "rgba(255,255,255,0.055)",
+        borderBottomColor: glass.hairline,
         opacity: dimmed ? 0.5 : 1,
         flexDirection: "column",
-        gap: 12,
-        paddingHorizontal: 12,
+        gap: space.md,
+        paddingHorizontal: space.md,
         justifyContent: "center",
       }}
     >
@@ -126,21 +130,18 @@ export function Row({
         style={({ pressed }) => ({
           flexDirection: "row",
           alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          paddingVertical: 11,
-          paddingLeft: 16,
-          paddingRight: 14,
-          backgroundColor: pressed ? "rgba(255,255,255,0.03)" : "transparent",
+          gap: space.md,
+          paddingVertical: space.md,
+          paddingHorizontal: space.lg,
+          opacity: pressed ? 0.85 : 1,
+          backgroundColor: pressed ? glass.tint : "transparent",
         })}
       >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8 }}>
         <View style={{ flex: 1, minWidth: 0 }}>{header}</View>
         <Chevron open={open} />
-      </View>
       </Pressable>
       {open && detail ? (
-        <View style={{ paddingHorizontal: 16, paddingBottom: 14, gap: 12 }}>{detail}</View>
+        <View style={{ paddingHorizontal: space.lg, paddingBottom: space.md, gap: space.md }}>{detail}</View>
       ) : null}
     </View>
   );
@@ -156,30 +157,30 @@ export function KV({
       style={{
         flexDirection: "row",
         flexWrap: "wrap",
-        borderRadius: 12,
-        backgroundColor: "rgba(255,255,255,0.035)",
+        borderRadius: glass.radiusSm,
+        backgroundColor: glass.tint,
         borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.06)",
-        paddingHorizontal: 14,
-        paddingVertical: 4,
+        borderColor: glass.hairline,
+        paddingHorizontal: space.md,
+        paddingVertical: space.xs,
         marginHorizontal: 0,
         marginVertical: 0,
       }}
     >
       {items.map((it, i) => (
-        <View key={i} style={{ width: it.full ? "100%" : "50%", paddingVertical: 8 }}>
+        <View key={i} style={{ width: it.full ? "100%" : "50%", paddingVertical: space.sm }}>
           <Text
             style={{
               fontFamily: MONO_500,
-              fontSize: 8.5,
-              letterSpacing: 1.4,
+              fontSize: type.label,
+              letterSpacing: 1.2,
               textTransform: "uppercase",
               color: colors.fgMuted,
             }}
           >
             {it.label}
           </Text>
-          <Text style={{ fontFamily: MONO_600, fontSize: 13, color: it.color ?? colors.fgPrimary, marginTop: 3 }}>
+          <Text style={{ fontFamily: MONO_600, fontSize: type.body, color: it.color ?? colors.fgPrimary, marginTop: space.xs2 }}>
             {it.value}
           </Text>
         </View>
