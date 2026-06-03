@@ -255,6 +255,36 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
       );
     }
 
+    case "object": {
+      const obj =
+        value && typeof value === "object" && !Array.isArray(value)
+          ? (value as Record<string, unknown>)
+          : {};
+      return (
+        <div className="flex flex-col gap-3 rounded-md border p-3">
+          {field.fields.map((f) => (
+            <div key={f.name} className="flex flex-col gap-2">
+              <Label htmlFor={`${id}-${f.name}`} className="text-sm font-medium">
+                {f.label}
+                {f.required && <span className="text-destructive"> *</span>}
+              </Label>
+              <FieldInput
+                id={`${id}-${f.name}`}
+                field={f}
+                projectId={projectId}
+                value={obj[f.name]}
+                onChange={(next) => onChange({ ...obj, [f.name]: next })}
+                siblings={obj}
+              />
+              {f.help && (
+                <p className="text-xs text-muted-foreground">{f.help}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     case "richtext":
       return (
         <CmsPlateEditor
@@ -301,6 +331,11 @@ const defaultForField = (field: FieldDef): unknown => {
       return null;
     case "list":
       return [];
+    case "object": {
+      const obj: Record<string, unknown> = {};
+      for (const f of field.fields) obj[f.name] = defaultForField(f);
+      return obj;
+    }
     case "richtext":
       return [{ type: "p", children: [{ text: "" }] }];
     case "json":
