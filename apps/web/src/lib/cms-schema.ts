@@ -36,12 +36,6 @@ const fieldToZod = (field: FieldDef): ZodTypeAny => {
     case "list":
       schema = z.array(fieldToZod(field.of));
       break;
-    case "object": {
-      const shape: Record<string, ZodTypeAny> = {};
-      for (const f of field.fields) shape[f.name] = fieldToZod(f);
-      schema = z.object(shape);
-      break;
-    }
     case "ref":
       schema = z.string().uuid().nullable();
       break;
@@ -83,11 +77,6 @@ const fieldDefault = (field: FieldDef): unknown => {
       return null;
     case "list":
       return [];
-    case "object": {
-      const obj: Record<string, unknown> = {};
-      for (const f of field.fields) obj[f.name] = fieldDefault(f);
-      return obj;
-    }
     case "richtext":
       return [{ type: "p", children: [{ text: "" }] }];
     case "json":

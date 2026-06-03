@@ -26,7 +26,6 @@ export type FieldDef =
     })
   | (FieldBase & { kind: "asset"; accept?: string })
   | (FieldBase & { kind: "list"; of: FieldDef })
-  | (FieldBase & { kind: "object"; fields: FieldDef[] })
   | (FieldBase & { kind: "ref"; collection: string })
   | (FieldBase & { kind: "richtext" })
   | (FieldBase & { kind: "json" });
