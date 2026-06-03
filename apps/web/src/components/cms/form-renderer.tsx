@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { AssetPicker } from "@/components/cms/asset-picker";
 import { CmsPlateEditor } from "@/components/cms/plate-editor";
+import { JsonField } from "@/components/cms/json-field";
 import { slugify } from "@/pages/projects/schema";
 import type { CollectionSchema, FieldDef } from "@/types/cms";
 
@@ -294,22 +295,7 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
       );
 
     case "json":
-      return (
-        <Textarea
-          id={id}
-          value={JSON.stringify(value ?? {}, null, 2)}
-          rows={6}
-          className="font-mono text-xs"
-          onChange={(e) => {
-            try {
-              onChange(JSON.parse(e.target.value));
-            } catch {
-              // bekle: kullanıcı yazıyor olabilir
-              onChange(e.target.value);
-            }
-          }}
-        />
-      );
+      return <JsonField value={value} onChange={onChange} />;
   }
 };
 
