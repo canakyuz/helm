@@ -9,16 +9,22 @@ denetledi. Sorunlar sistemik çıktı → önce paylaşılan katman düzeltildi 
 
 ## Durum
 
+> ⚠️ **DERS (2026-06-03):** Faz 0 (token/font/boşluk pass'i) **körlemesine** yapıldı — sim'de
+> gözle doğrulanmadan. Sonuç: boyutlar/boşluklar kaydı, kullanıcı "uygulama bozuldu" dedi.
+> **Geri alındı** (`449d346`). Yalnız kayma-yapmayan 3 kazanım kaldı. **Kural: bundan sonra
+> her boşluk/font/motion değişikliği ÖNCE sim'de gözle doğrulanacak (Faz 1 gate), sonra commit.**
+
 | Faz | Skill | İş | Durum | Commit |
 |---|---|---|---|---|
-| 0 | denetim + token/kontrast/renk | press feedback, fgMuted/fgSubtle kontrast, skala-dışı font/boşluk, glass token, semantik renk (health version-status bug) | ✅ bitti | `1ae9076` |
-| — | — | glass kart köşe-kesik artifact (her blur/fill katmanına borderRadius) | ✅ bitti | `31a9cb4` |
-| 2 | onboard/harden | metriksiz projede sahte sıfır yerine veri-yok durumu (loading/has-data/empty) | ✅ bitti | `3a6687c` |
-| 1 | critique | **sim'de gözle doğrulama** (metro açık → cihazda hot-reload) | ⏳ gate | — |
-| 3 | layout | section dikey ritmi: padded-View vs trailing-spacer tutarsızlığı; KV hizalama | ⏳ gözle | — |
-| 4 | emil/animate | `useReducedMotion` sistemik (CountUp/HBar/Chevron/spin); liste stagger; FadeIn <300ms | ⏳ | — |
-| 5 | typeset/extract | `radius.sm` token'ı; type 20–40 arası boşluk; tek `Hairline` primitive | ⏳ | — |
-| 6 | colorize/taste | pozisyonel glyph tint'leri kaldır; accent=yalnız CTA kuralını design.md'ye yaz | ⏳ | — |
+| 0 | token/kontrast/renk pass | press feedback, kontrast, skala font/boşluk — **layout kaydırdı** | ❌ geri alındı | `449d346` |
+| — | köşe-fix | glass kart köşe-kesik artifact (her katmana borderRadius) | ✅ kaldı | `449d346` |
+| — | feat | "Today · saat" (eyebrowMeta) | ✅ kaldı | `449d346` |
+| 2 | onboard | metriksiz projede sahte sıfır yerine veri-yok durumu | ✅ kaldı | `449d346` |
+| 1 | critique | **sim'de gözle doğrulama** — artık her fazın ÖN KOŞULU | ⏳ gate | — |
+| 3 | layout | section ritmi + KV hizalama — **gözle, tek tek, küçük adım** | ⏳ | — |
+| 4 | emil/animate | `useReducedMotion`; stagger; FadeIn <300ms — **gözle** | ⏳ | — |
+| 5 | typeset/extract | `radius.sm`; type 20–40 boşluk; tek `Hairline` | ⏳ | — |
+| 6 | colorize/taste | accent=yalnız CTA kuralı; glyph tint kararı | ⏳ | — |
 
 ## Görsellerden kanıtlar (2026-06-03)
 - **Wesan kartı:** her şey `₺0.00 / 0 / Unknown` → "veri yok" sahte sıfır olarak gösteriliyordu. *(Faz 2'de çözüldü)*
