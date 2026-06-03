@@ -42,7 +42,6 @@ const KIND_LABELS: Record<FieldDef["kind"], string> = {
   select: "Seçim listesi",
   asset: "Medya",
   list: "Liste (tekrarlı)",
-  object: "Nesne (object)",
   ref: "Referans",
   richtext: "Zengin metin (Plate)",
   json: "Serbest JSON",
@@ -57,8 +56,6 @@ const makeField = (kind: FieldDef["kind"]): FieldDef => {
       return { ...base, kind, options: [{ value: "a", label: "A" }] };
     case "list":
       return { ...base, kind, of: { kind: "text", name: "item", label: "Öğe" } };
-    case "object":
-      return { ...base, kind, fields: [] };
     case "ref":
       return { ...base, kind, collection: "" };
     default:

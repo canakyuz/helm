@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import { AssetPicker } from "@/components/cms/asset-picker";
 import { CmsPlateEditor } from "@/components/cms/plate-editor";
-import { JsonField } from "@/components/cms/json-field";
 import { slugify } from "@/pages/projects/schema";
 import type { CollectionSchema, FieldDef } from "@/types/cms";
 
@@ -256,36 +255,6 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
       );
     }
 
-    case "object": {
-      const obj =
-        value && typeof value === "object" && !Array.isArray(value)
-          ? (value as Record<string, unknown>)
-          : {};
-      return (
-        <div className="flex flex-col gap-3 rounded-md border p-3">
-          {field.fields.map((f) => (
-            <div key={f.name} className="flex flex-col gap-2">
-              <Label htmlFor={`${id}-${f.name}`} className="text-sm font-medium">
-                {f.label}
-                {f.required && <span className="text-destructive"> *</span>}
-              </Label>
-              <FieldInput
-                id={`${id}-${f.name}`}
-                field={f}
-                projectId={projectId}
-                value={obj[f.name]}
-                onChange={(next) => onChange({ ...obj, [f.name]: next })}
-                siblings={obj}
-              />
-              {f.help && (
-                <p className="text-xs text-muted-foreground">{f.help}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      );
-    }
-
     case "richtext":
       return (
         <CmsPlateEditor
@@ -295,7 +264,22 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
       );
 
     case "json":
-      return <JsonField value={value} onChange={onChange} />;
+      return (
+        <Textarea
+          id={id}
+          value={JSON.stringify(value ?? {}, null, 2)}
+          rows={6}
+          className="font-mono text-xs"
+          onChange={(e) => {
+            try {
+              onChange(JSON.parse(e.target.value));
+            } catch {
+              // bekle: kullanıcı yazıyor olabilir
+              onChange(e.target.value);
+            }
+          }}
+        />
+      );
   }
 };
 
@@ -317,11 +301,6 @@ const defaultForField = (field: FieldDef): unknown => {
       return null;
     case "list":
       return [];
-    case "object": {
-      const obj: Record<string, unknown> = {};
-      for (const f of field.fields) obj[f.name] = defaultForField(f);
-      return obj;
-    }
     case "richtext":
       return [{ type: "p", children: [{ text: "" }] }];
     case "json":
