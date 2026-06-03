@@ -131,7 +131,7 @@ export function LiquidGlass({
     return (
       <Pressable
         onPress={onPress}
-        style={({ pressed }) => [shell, pressed && { opacity: 0.85 }]}
+        style={({ pressed }) => [shell, pressed && { opacity: 0.92 }]}
       >
         {content}
       </Pressable>
