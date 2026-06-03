@@ -1,7 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // helm-alert — alert_rules'u metrics'e karşı değerlendirir, tetiklenenleri
-// alert_events'e yazar, Telegram bot ayarlıysa ping atar.
+// alert_events'e yazar ve cockpit'e Expo push gönderir (asıl kanal; helm_push_devices
+// token'larına). Telegram bot env'i ayarlıysa paralel ping de atar (opsiyonel).
 // helm-ingest her senkron sonrası bunu çağırır; panelden de çağrılabilir.
 
 const corsHeaders = {
@@ -39,6 +40,51 @@ async function sendTelegram(text: string) {
         body: JSON.stringify({ chat_id: chatId, text }),
       },
     );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// Cockpit'e Expo push — helm_push_devices'taki kayıtlı token'lara bildirim atar.
+// Asıl kanal bu; telefon titrer. Token yoksa (henüz build/izin yok) sessizce false.
+async function sendExpoPush(
+  hub: ReturnType<typeof createClient>,
+  title: string,
+  body: string,
+): Promise<boolean> {
+  const { data: devices } = await hub
+    .from("helm_push_devices")
+    .select("token");
+  const tokens = Array.from(
+    new Set(
+      (devices ?? [])
+        .map((d: { token: string }) => d.token)
+        .filter(
+          (t: unknown): t is string =>
+            typeof t === "string" && t.startsWith("ExponentPushToken["),
+        ),
+    ),
+  );
+  if (tokens.length === 0) return false;
+
+  const messages = tokens.map((to) => ({
+    to,
+    title,
+    body,
+    sound: "default",
+    data: { kind: "alert" },
+  }));
+  try {
+    const res = await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Accept-Encoding": "gzip, deflate",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(messages),
+    });
     return res.ok;
   } catch {
     return false;
@@ -132,7 +178,10 @@ Deno.serve(async (req) => {
 
     if (!fire) continue;
 
-    const delivered = await sendTelegram(`🔔 ${rule.name}\n${message}`);
+    // Asıl kanal: cockpit'e Expo push. Telegram env ayarlıysa o da paralel gider.
+    const pushed = await sendExpoPush(hub, rule.name, message);
+    const tg = await sendTelegram(`🔔 ${rule.name}\n${message}`);
+    const delivered = pushed || tg;
     await hub.from("alert_events").insert({
       rule_id: rule.id,
       metric: rule.metric,
