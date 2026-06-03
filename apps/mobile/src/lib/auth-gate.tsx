@@ -4,11 +4,15 @@ import { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
 
 import { useAuth } from "~/hooks/use-auth";
+import { usePushRegistration } from "~/hooks/use-push-registration";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { session, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+
+  // Oturum açıldığında push izni + token kaydı (izin verilene kadar no-op).
+  usePushRegistration(session);
 
   useEffect(() => {
     if (isLoading) return;
