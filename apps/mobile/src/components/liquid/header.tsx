@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { colors, glass, space, type } from "~/theme/tokens";
+import { colors } from "~/theme/tokens";
 import { Icon } from "~/components/ui/icon";
 import { PropertyPicker } from "~/components/property-picker";
 import { HeaderAlertsButton } from "~/components/header-alerts-button";
@@ -61,14 +61,13 @@ function SyncButton() {
     <Pressable
       onPress={sync}
       hitSlop={8}
-      style={({ pressed }) => ({
-        padding: space.sm,
+      style={{
+        padding: 8,
         borderRadius: 999,
-        backgroundColor: glass.tint,
+        backgroundColor: "rgba(255,255,255,0.06)",
         borderWidth: 1,
-        borderColor: glass.border,
-        opacity: pressed ? 0.85 : 1,
-      })}
+        borderColor: "rgba(255,255,255,0.10)",
+      }}
     >
       <Animated.View style={style}>
         <Icon name="refresh" size={16} color={syncing ? colors.accent : colors.fgMuted} />
@@ -79,13 +78,13 @@ function SyncButton() {
 
 export function LiquidHeader({ showPicker = true }: { showPicker?: boolean }) {
   return (
-    <View style={{ paddingHorizontal: space.lg, paddingTop: space.xs, paddingBottom: space.md }}>
+    <View style={{ paddingHorizontal: 18, paddingTop: 6, paddingBottom: 13 }}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: space.md,
+          gap: 10,
         }}
       >
         <SyncButton />
@@ -96,7 +95,7 @@ export function LiquidHeader({ showPicker = true }: { showPicker?: boolean }) {
           </View>
         ) : (
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, letterSpacing: 2, color: colors.fgMuted }}>
+            <Text style={{ fontFamily: "GeistMono-500", fontSize: 11, letterSpacing: 2, color: colors.fgMuted }}>
               SETTINGS
             </Text>
           </View>
@@ -104,7 +103,7 @@ export function LiquidHeader({ showPicker = true }: { showPicker?: boolean }) {
 
         <HeaderAlertsButton />
       </View>
-      <View style={{ height: 1, marginTop: space.md, backgroundColor: glass.border }} />
+      <View style={{ height: 1, marginTop: 13, backgroundColor: "rgba(255,255,255,0.10)" }} />
     </View>
   );
 }
