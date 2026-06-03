@@ -6,7 +6,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { colors, type } from "~/theme/tokens";
+import { colors, glass, space, type } from "~/theme/tokens";
 
 const FONT_600 = "Geist-600";
 const MONO_500 = "GeistMono-500";
@@ -146,6 +146,9 @@ export function Row({
   );
 }
 
+// Detail readout: one full-width row per metric — label left, value right,
+// hairline between. Single column scans cleanly; value (mono+tabular, colored)
+// is the hero, label sits quietly beside it. (`full` kept for API compat, no-op.)
 export function KV({
   items,
 }: {
@@ -154,32 +157,50 @@ export function KV({
   return (
     <View
       style={{
-        flexDirection: "row",
-        flexWrap: "wrap",
-        borderRadius: 12,
-        backgroundColor: "rgba(255,255,255,0.035)",
+        borderRadius: glass.radiusSm,
+        backgroundColor: glass.tint,
         borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.06)",
-        paddingHorizontal: 14,
-        paddingVertical: 4,
-        marginHorizontal: 0,
-        marginVertical: 0,
+        borderColor: glass.hairline,
+        overflow: "hidden",
       }}
     >
       {items.map((it, i) => (
-        <View key={i} style={{ width: it.full ? "100%" : "50%", paddingVertical: 8 }}>
+        <View
+          key={i}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: space.md,
+            paddingHorizontal: space.md,
+            paddingVertical: space.sm,
+            borderTopWidth: i === 0 ? 0 : 1,
+            borderTopColor: glass.hairline,
+          }}
+        >
           <Text
             style={{
               fontFamily: MONO_500,
-              fontSize: 8.5,
-              letterSpacing: 1.4,
+              fontSize: type.label,
+              letterSpacing: 1,
               textTransform: "uppercase",
-              color: colors.fgMuted,
+              color: colors.fgSecondary,
             }}
+            numberOfLines={1}
           >
             {it.label}
           </Text>
-          <Text style={{ fontFamily: MONO_600, fontSize: 13, color: it.color ?? colors.fgPrimary, marginTop: 3 }}>
+          <Text
+            style={{
+              flexShrink: 1,
+              textAlign: "right",
+              fontFamily: MONO_600,
+              fontSize: type.body,
+              letterSpacing: -0.2,
+              color: it.color ?? colors.fgPrimary,
+            }}
+            numberOfLines={1}
+          >
             {it.value}
           </Text>
         </View>
