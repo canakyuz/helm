@@ -26,6 +26,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "com.apple.security.application-groups": [
         "group.com.canakyuz.helmmobile.shared",
       ],
+      // Push notifications. TestFlight (preview profile) ships a release build →
+      // production APNs. A development dev-client build would need "development".
+      "aps-environment": "production",
     },
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
@@ -59,6 +62,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-status-bar",
     "expo-sqlite",
     "expo-image",
+    "expo-notifications",
     "@bacons/apple-targets",
     "./plugins/with-helm-ios-entitlements.js",
     "./plugins/with-ios-register-app-groups.js",
