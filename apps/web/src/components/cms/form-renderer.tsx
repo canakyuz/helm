@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { AssetPicker } from "@/components/cms/asset-picker";
 import { CmsPlateEditor } from "@/components/cms/plate-editor";
+import { KeyValueEditor } from "@/components/key-value-editor";
+import type { JsonValue } from "@/components/key-value-editor";
 import { slugify } from "@/pages/projects/schema";
 import type { CollectionSchema, FieldDef } from "@/types/cms";
 
@@ -264,20 +266,12 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
       );
 
     case "json":
+      // Schema-less yapısal editör — ham JSON yerine key-value form (2000 satırlık
+      // en.json gibi bundle'lar için). Aynı şekli geri yazar.
       return (
-        <Textarea
-          id={id}
-          value={JSON.stringify(value ?? {}, null, 2)}
-          rows={6}
-          className="font-mono text-xs"
-          onChange={(e) => {
-            try {
-              onChange(JSON.parse(e.target.value));
-            } catch {
-              // bekle: kullanıcı yazıyor olabilir
-              onChange(e.target.value);
-            }
-          }}
+        <KeyValueEditor
+          value={value as JsonValue | undefined}
+          onChange={(next) => onChange(next)}
         />
       );
   }
