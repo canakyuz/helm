@@ -1,8 +1,10 @@
-// helm — CMS iki-pane tipli panel (master-detail).
-// Sol: top-level bölüm listesi · Sağ: SADECE seçili bölümün alanları → ekranda sabit yük,
-// 2000 satırlık bundle'da bile sakin. Render FormRenderer'a delege; bu sadece bölümleme.
+// helm — CMS iki-pane tipli panel + sağ panede drill-down.
+// Sol ray: top-level bölümler (sabit). Sağ pane: seçili bölüm; object çocukları breadcrumb
+// ile derinleşir (Pages › Home › Hero), leaf+list alanları o seviyede inline düzenlenir.
+// Böylece "pages" gibi 21 sayfalık derin ağaç tek wall yerine gezinilebilir detay olur.
 
-import { useMemo, useState } from "react";
+import { Fragment, useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FormRenderer } from "@/components/cms/form-renderer";
 import type { CollectionSchema, FieldDef } from "@/types/cms";
@@ -10,20 +12,34 @@ import type { CollectionSchema, FieldDef } from "@/types/cms";
 const GENERAL = "__general";
 
 type Section =
-  | { key: typeof GENERAL; label: string; kind: "leaves"; fields: FieldDef[] }
-  | { key: string; label: string; kind: "object"; field: Extract<FieldDef, { kind: "object" }> }
-  | { key: string; label: string; kind: "single"; field: FieldDef };
+  | { key: typeof GENERAL; label: string; fields: FieldDef[]; pick: "root" }
+  | { key: string; label: string; fields: FieldDef[]; pick: "child"; childKey: string }
+  | { key: string; label: string; fields: FieldDef[]; pick: "root" };
 
-// Bölümler: object → kendi alanları açılır; list → tek bölüm; kalan top-level leaf'ler "Genel"de.
+// Top-level bölümler: object → kendi alanları (data[name] slice'ı); list → tek alan (root slice);
+// kalan leaf'ler "Genel"de (root slice).
 const buildSections = (schema: CollectionSchema): Section[] => {
   const sections: Section[] = [];
   const leaves = schema.fields.filter((f) => f.kind !== "object" && f.kind !== "list");
-  if (leaves.length) sections.push({ key: GENERAL, label: "Genel", kind: "leaves", fields: leaves });
+  if (leaves.length) sections.push({ key: GENERAL, label: "Genel", fields: leaves, pick: "root" });
   for (const f of schema.fields) {
-    if (f.kind === "object") sections.push({ key: f.name, label: f.label, kind: "object", field: f });
-    else if (f.kind === "list") sections.push({ key: f.name, label: f.label, kind: "single", field: f });
+    if (f.kind === "object")
+      sections.push({ key: f.name, label: f.label, fields: f.fields, pick: "child", childKey: f.name });
+    else if (f.kind === "list")
+      sections.push({ key: f.name, label: f.label, fields: [f], pick: "root" });
   }
   return sections;
+};
+
+const isObjectVal = (v: unknown): v is Record<string, unknown> =>
+  !!v && typeof v === "object" && !Array.isArray(v);
+
+// path boyunca immutable yaz (object zinciri; ara düğüm yoksa {} ile oluştur).
+const setAtPath = (data: unknown, path: string[], slice: unknown): unknown => {
+  if (path.length === 0) return slice;
+  const [head, ...rest] = path;
+  const node = isObjectVal(data) ? data : {};
+  return { ...node, [head]: setAtPath(node[head], rest, slice) };
 };
 
 interface Props {
@@ -34,7 +50,7 @@ interface Props {
 }
 
 export const SectionedForm = ({ projectId, schema, value, onChange }: Props) => {
-  const sections = useMemo(() => buildSections(schema), [schema]);
+  const sections = buildSections(schema);
   const [active, setActive] = useState<string | null>(null);
   const activeKey = active ?? sections[0]?.key ?? null;
   const current = sections.find((s) => s.key === activeKey);
@@ -45,6 +61,16 @@ export const SectionedForm = ({ projectId, schema, value, onChange }: Props) => 
         Şema boş. Ingest çalıştır: <code className="text-xs">bun run ingest:&lt;target&gt;</code>
       </p>
     );
+  }
+
+  // Bölümün kök data slice'ı + o slice'a geri yazan onChange.
+  let sectionValue: Record<string, unknown> = value;
+  let sectionOnChange: (next: Record<string, unknown>) => void = onChange;
+  if (current && current.pick === "child") {
+    const ck = current.childKey;
+    const raw = value[ck];
+    sectionValue = isObjectVal(raw) ? raw : {};
+    sectionOnChange = (next) => onChange({ ...value, [ck]: next });
   }
 
   return (
@@ -73,65 +99,105 @@ export const SectionedForm = ({ projectId, schema, value, onChange }: Props) => 
         ))}
       </nav>
 
-      <div className="flex min-w-0 flex-col gap-4">
+      <div className="min-w-0">
         {current && (
-          <>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {current.label}
-            </h3>
-            <SectionBody section={current} projectId={projectId} value={value} onChange={onChange} />
-          </>
+          <SectionDetail
+            key={current.key}
+            projectId={projectId}
+            rootLabel={current.label}
+            fields={current.fields}
+            value={sectionValue}
+            onChange={sectionOnChange}
+          />
         )}
       </div>
     </div>
   );
 };
 
-const SectionBody = ({
-  section,
-  projectId,
-  value,
-  onChange,
-}: {
-  section: Section;
+interface DetailProps {
   projectId: string;
+  rootLabel: string;
+  fields: FieldDef[];
   value: Record<string, unknown>;
   onChange: (next: Record<string, unknown>) => void;
-}) => {
-  if (section.kind === "leaves") {
-    return (
-      <FormRenderer
-        projectId={projectId}
-        schema={{ fields: section.fields }}
-        value={value}
-        onChange={onChange}
-      />
-    );
+}
+
+// Bölüm içi drill-down: object çocukları breadcrumb ile derinleşir, leaf/list inline kalır.
+const SectionDetail = ({ projectId, rootLabel, fields, value, onChange }: DetailProps) => {
+  const [subPath, setSubPath] = useState<string[]>([]);
+
+  // subPath'i çöz: her segment bir object çocuk; geçersizse o noktada dur.
+  let curFields = fields;
+  let curValue: Record<string, unknown> = value;
+  const crumbs: { label: string; depth: number }[] = [{ label: rootLabel, depth: 0 }];
+  for (let i = 0; i < subPath.length; i++) {
+    const f = curFields.find((x) => x.name === subPath[i]);
+    if (!f || f.kind !== "object") break;
+    crumbs.push({ label: f.label, depth: i + 1 });
+    curFields = f.fields;
+    const child = curValue[subPath[i]];
+    curValue = isObjectVal(child) ? child : {};
   }
 
-  if (section.kind === "object") {
-    const raw = value[section.key];
-    const sub =
-      raw && typeof raw === "object" && !Array.isArray(raw)
-        ? (raw as Record<string, unknown>)
-        : {};
-    return (
-      <FormRenderer
-        projectId={projectId}
-        schema={{ fields: section.field.fields }}
-        value={sub}
-        onChange={(next) => onChange({ ...value, [section.key]: next })}
-      />
-    );
-  }
+  const navChildren = curFields.filter((f) => f.kind === "object");
+  const inlineChildren = curFields.filter((f) => f.kind !== "object");
 
-  // single (list vb.) — alan kendi label'ı + editörüyle render olur.
+  const handleInline = (nextSlice: Record<string, unknown>) =>
+    onChange(setAtPath(value, subPath, nextSlice) as Record<string, unknown>);
+
   return (
-    <FormRenderer
-      projectId={projectId}
-      schema={{ fields: [section.field] }}
-      value={value}
-      onChange={onChange}
-    />
+    <div className="flex flex-col gap-4">
+      <nav className="flex flex-wrap items-center gap-1 text-sm">
+        {crumbs.map((c, i) => (
+          <Fragment key={c.depth}>
+            {i > 0 && <ChevronRight className="size-3.5 text-muted-foreground" />}
+            <button
+              type="button"
+              onClick={() => setSubPath(subPath.slice(0, c.depth))}
+              className={cn(
+                i === crumbs.length - 1
+                  ? "font-semibold text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {c.label}
+            </button>
+          </Fragment>
+        ))}
+      </nav>
+
+      {navChildren.length > 0 && (
+        <div className="flex flex-col gap-1">
+          {navChildren.map((f) => (
+            <button
+              key={f.name}
+              type="button"
+              onClick={() => setSubPath([...subPath, f.name])}
+              className="group flex items-center justify-between rounded-md border border-border/60 px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
+            >
+              <span className="truncate font-medium">{f.label}</span>
+              <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+                {f.kind === "object" ? `${f.fields.length} alan` : ""}
+                <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {inlineChildren.length > 0 && (
+        <FormRenderer
+          projectId={projectId}
+          schema={{ fields: inlineChildren }}
+          value={curValue}
+          onChange={handleInline}
+        />
+      )}
+
+      {navChildren.length === 0 && inlineChildren.length === 0 && (
+        <p className="text-sm text-muted-foreground">Bu bölümde alan yok.</p>
+      )}
+    </div>
   );
 };
