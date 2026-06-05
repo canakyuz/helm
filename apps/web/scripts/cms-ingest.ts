@@ -130,10 +130,13 @@ async function ensureCollection(propertyId: string): Promise<{ id: string; schem
     .maybeSingle();
 
   const existingSchema = (existing?.schema as CollectionSchema | undefined) ?? null;
-  // Eski tek-json-field şemasını sözleşme saymayız (unwrap migrasyonu) → boş gibi davran.
-  const isLegacyJson =
-    existingSchema?.fields?.length === 1 && existingSchema.fields[0]?.kind === "json";
-  const { fields, report } = mergeSchema(isLegacyJson ? null : existingSchema, inferred);
+  // Eski "bundle" sarmal alanı (kind ne olursa olsun) sözleşme değil — gerçek top-level
+  // key'ler common/nav/... → unwrap migrasyonunda düşür. Kaynak gerçekten "bundle"
+  // içeriyorsa inference onu doğru tiple yeniden ekler.
+  const cleaned = existingSchema
+    ? existingSchema.fields.filter((f) => f.name !== "bundle")
+    : [];
+  const { fields, report } = mergeSchema(cleaned.length ? { fields: cleaned } : null, inferred);
   const schema: CollectionSchema = { fields };
 
   console.log(`  ↳ alan: +${report.added.length} eklendi · ${report.removed.length} korundu(kaynakta yok) · ${report.conflicts.length} çakışma`);
