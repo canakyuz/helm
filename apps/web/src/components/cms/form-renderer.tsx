@@ -174,6 +174,35 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
         />
       );
 
+    case "image": {
+      const url = (value as string) ?? "";
+      return (
+        <div className="flex flex-col gap-2">
+          <Input
+            id={id}
+            value={url}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="https://… veya /gorsel.svg"
+          />
+          {url.trim() && (
+            // onError: helm'de çözülemeyen göreli path'lerde önizlemeyi gizle.
+            <img
+              src={url}
+              alt=""
+              loading="lazy"
+              className="h-20 w-auto max-w-[180px] rounded-md border object-contain bg-muted/30 p-1"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+              onLoad={(e) => {
+                e.currentTarget.style.display = "";
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+
     case "select":
       return (
         <Select
@@ -315,6 +344,7 @@ const defaultForField = (field: FieldDef): unknown => {
     case "textarea":
     case "slug":
     case "date":
+    case "image":
       return "";
     case "number":
       return 0;

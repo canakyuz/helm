@@ -58,6 +58,25 @@ describe("inferSchema", () => {
     expect(byName(f2, "a").required).toBe(true);
     expect(byName(f2, "b").required).toBe(false);
   });
+
+  it("görsel tespiti: uzantı veya key+url → image, yanlış pozitif yok", () => {
+    const f = inferSchema([
+      {
+        file: "wesan-wordmark.svg", // uzantı
+        src: "https://cdn.example.com/Special:FilePath/Pantheon", // key+url
+        cover: "/img/hero.png",
+        mediaSide: "right", // key "media" eşleşir AMA değer path değil → text
+        icon: "mail", // image değil
+        title: "Bir başlık", // text
+      },
+    ]);
+    expect(byName(f, "file").kind).toBe("image");
+    expect(byName(f, "src").kind).toBe("image");
+    expect(byName(f, "cover").kind).toBe("image");
+    expect(byName(f, "mediaSide").kind).toBe("text");
+    expect(byName(f, "icon").kind).toBe("text");
+    expect(byName(f, "title").kind).toBe("text");
+  });
 });
 
 describe("mergeSchema — governance", () => {

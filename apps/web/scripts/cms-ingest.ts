@@ -66,6 +66,7 @@ function fail(msg: string): never {
 
 const targetKey = process.argv[2];
 const resetData = process.argv.includes("--reset-data");
+const resetSchema = process.argv.includes("--reset-schema"); // mevcut şemayı yok say, sıfırdan infer
 if (!targetKey || !TARGETS[targetKey]) {
   fail(`Geçersiz hedef. Kullanım: bun run scripts/cms-ingest.ts <${Object.keys(TARGETS).join("|")}> [--reset-data]`);
 }
@@ -136,7 +137,8 @@ async function ensureCollection(propertyId: string): Promise<{ id: string; schem
   const cleaned = existingSchema
     ? existingSchema.fields.filter((f) => f.name !== "bundle")
     : [];
-  const { fields, report } = mergeSchema(cleaned.length ? { fields: cleaned } : null, inferred);
+  const base = resetSchema || !cleaned.length ? null : { fields: cleaned };
+  const { fields, report } = mergeSchema(base, inferred);
   const schema: CollectionSchema = { fields };
 
   console.log(`  ↳ alan: +${report.added.length} eklendi · ${report.removed.length} korundu(kaynakta yok) · ${report.conflicts.length} çakışma`);
