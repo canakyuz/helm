@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/select";
 import { AssetPicker } from "@/components/cms/asset-picker";
 import { CmsPlateEditor } from "@/components/cms/plate-editor";
-import { KeyValueEditor } from "@/components/key-value-editor";
-import type { JsonValue } from "@/components/key-value-editor";
 import { slugify } from "@/pages/projects/schema";
 import type { CollectionSchema, FieldDef } from "@/types/cms";
 
@@ -257,6 +255,32 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
       );
     }
 
+    case "object": {
+      // Nested grup — alt FieldDef'leri value (alt-obje) üzerine recursive render.
+      // Üst seviye bölümleme SectionedForm'da; bu, bölüm İÇİ derin nesting içindir.
+      const obj =
+        value && typeof value === "object" && !Array.isArray(value)
+          ? (value as Record<string, unknown>)
+          : {};
+      return (
+        <div className="flex flex-col gap-4 rounded-md border border-border/60 p-3">
+          {field.fields.map((f) => (
+            <FieldRow
+              key={f.name}
+              field={f}
+              projectId={projectId}
+              value={obj[f.name]}
+              onChange={(next) => onChange({ ...obj, [f.name]: next })}
+              siblings={obj}
+            />
+          ))}
+          {field.fields.length === 0 && (
+            <p className="text-xs italic text-muted-foreground">boş grup</p>
+          )}
+        </div>
+      );
+    }
+
     case "richtext":
       return (
         <CmsPlateEditor
@@ -266,12 +290,20 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
       );
 
     case "json":
-      // Schema-less yapısal editör — ham JSON yerine key-value form (2000 satırlık
-      // en.json gibi bundle'lar için). Aynı şekli geri yazar.
+      // Şemasız serbest leaf için fallback (inference sonrası nadir). Ham JSON textarea.
       return (
-        <KeyValueEditor
-          value={value as JsonValue | undefined}
-          onChange={(next) => onChange(next)}
+        <Textarea
+          id={id}
+          value={JSON.stringify(value ?? {}, null, 2)}
+          rows={6}
+          className="font-mono text-xs"
+          onChange={(e) => {
+            try {
+              onChange(JSON.parse(e.target.value));
+            } catch {
+              onChange(e.target.value);
+            }
+          }}
         />
       );
   }
@@ -295,6 +327,11 @@ const defaultForField = (field: FieldDef): unknown => {
       return null;
     case "list":
       return [];
+    case "object": {
+      const obj: Record<string, unknown> = {};
+      for (const f of field.fields) obj[f.name] = defaultForField(f);
+      return obj;
+    }
     case "richtext":
       return [{ type: "p", children: [{ text: "" }] }];
     case "json":
