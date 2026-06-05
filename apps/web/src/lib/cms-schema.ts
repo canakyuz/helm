@@ -27,6 +27,9 @@ const fieldToZod = (field: FieldDef): ZodTypeAny => {
     case "date":
       schema = z.string();
       break;
+    case "image":
+      schema = z.string();
+      break;
     case "select":
       schema = z.enum(field.options.map((o) => o.value) as [string, ...string[]]);
       break;
@@ -71,6 +74,7 @@ const fieldDefault = (field: FieldDef): unknown => {
     case "textarea":
     case "slug":
     case "date":
+    case "image":
       return "";
     case "number":
       return 0;

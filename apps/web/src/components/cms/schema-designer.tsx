@@ -41,6 +41,7 @@ const KIND_LABELS: Record<FieldDef["kind"], string> = {
   date: "Tarih",
   select: "Seçim listesi",
   asset: "Medya",
+  image: "Görsel (önizlemeli)",
   list: "Liste (tekrarlı)",
   object: "Grup (nested)",
   ref: "Referans",

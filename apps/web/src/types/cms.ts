@@ -25,6 +25,7 @@ export type FieldDef =
       options: { value: string; label: string }[];
     })
   | (FieldBase & { kind: "asset"; accept?: string })
+  | (FieldBase & { kind: "image" }) // URL/path string + önizleme (asset UUID ref'ten farklı)
   | (FieldBase & { kind: "list"; of: FieldDef })
   | (FieldBase & { kind: "object"; fields: FieldDef[] })
   | (FieldBase & { kind: "ref"; collection: string })

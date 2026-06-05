@@ -31,6 +31,14 @@ const stringKind = (values: string[]): "date" | "textarea" | "text" => {
   return "text";
 };
 
+// Görsel tespiti — DEĞER bazlı (key tek başına güvenilmez: mediaSide="right", icon="mail").
+// image: değer image uzantılı, VEYA key görsel-ismi + değer url/path. Boş string tolere edilir.
+const IMG_EXT = /\.(png|jpe?g|webp|avif|svg|gif)(\?|#|$)/i;
+const IMG_KEY = /^(src|file|image|img|photo|logo|cover|avatar|banner|thumbnail|thumb|picture|poster|background)$/i;
+const looksLikeUrlOrPath = (s: string): boolean => /^(https?:)?\/\//.test(s) || s.startsWith("/");
+const isImageValue = (key: string, v: string): boolean =>
+  IMG_EXT.test(v) || (IMG_KEY.test(key) && looksLikeUrlOrPath(v));
+
 // Bir key'in (birden çok örnekteki) değerlerinden tek FieldDef üret.
 const inferField = (
   name: string,
@@ -58,7 +66,12 @@ const inferField = (
     return { ...base, kind: "list", of };
   }
   if (nonNull.every((v) => typeof v === "string")) {
-    return { ...base, kind: stringKind(nonNull as string[]) };
+    const strs = nonNull as string[];
+    const nonEmpty = strs.filter((s) => s.length > 0);
+    if (nonEmpty.length > 0 && nonEmpty.every((s) => isImageValue(name, s))) {
+      return { ...base, kind: "image" };
+    }
+    return { ...base, kind: stringKind(strs) };
   }
   if (nonNull.every((v) => typeof v === "number")) {
     return { ...base, kind: "number" };
