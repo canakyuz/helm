@@ -76,8 +76,9 @@
     "build": "tsc && refine build",
     "start": "refine start",
     "refine": "refine",
-    "seed:wesan": "bun run scripts/seed-wesan-cms.ts",
-    "seed:friday": "bun run scripts/seed-friday-cms.ts"
+    "seed:friday": "bun run scripts/seed-friday-cms.ts",
+    "ingest:friday": "bun run scripts/cms-ingest.ts friday",
+    "ingest:wesan": "bun run scripts/cms-ingest.ts wesan"
   },
   "browserslist": {
     "production": [
