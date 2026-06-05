@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { FormRenderer } from "@/components/cms/form-renderer";
+import { SectionedForm } from "@/components/cms/sectioned-form";
 import { LocaleSwitcher, DEFAULT_LOCALES } from "@/components/cms/locale-switcher";
 import { PublishButton } from "@/components/cms/publish-button";
 import { defaultEntryData } from "@/lib/cms-schema";
@@ -239,7 +239,7 @@ export const EntryEditPage = () => {
               />
             </div>
             <Separator />
-            <FormRenderer
+            <SectionedForm
               projectId={collection.project_id}
               schema={collection.schema}
               value={data}
