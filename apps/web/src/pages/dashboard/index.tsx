@@ -51,9 +51,11 @@ import {
   formatMoney2,
   latest,
   moneyRanges,
+  parseMrrCents,
   series,
   sumInRange,
   valueOnDate,
+  withMrrCents,
 } from "@/lib/metrics";
 import type {
   AlertEvent,
@@ -210,6 +212,14 @@ export const DashboardPage = () => {
     return ((rc?.config as { currency?: string })?.currency) || "USD";
   }, [integrations, scope, isAll]);
 
+  // RC MRR'ı kuruşu yuvarlar; config'te .99 verildiyse gösterimde geri ekle.
+  const mrrCents = useMemo(() => {
+    const rc = integrations.find(
+      (i) => i.provider === "revenuecat" && (isAll || i.project_id === scope),
+    );
+    return parseMrrCents((rc?.config as { mrr_cents?: string })?.mrr_cents);
+  }, [integrations, scope, isAll]);
+
   // Ekran para birimi — Ayarlar'dan. Tüm para değerleri buna çevrilir.
   const { currency: displayCcy } = useDisplayCurrency();
   const sourceCurrencies = useMemo(() => {
@@ -252,7 +262,7 @@ export const DashboardPage = () => {
       .map(([date, value]) => ({ date, value }));
   }, [metrics, isAll, fxRates, adCurrency]);
 
-  const mrrDisplay = latest(metrics, "mrr") * rateOf(rcCurrency);
+  const mrrDisplay = withMrrCents(latest(metrics, "mrr"), mrrCents) * rateOf(rcCurrency);
 
   const adRevenueSeries = useMemo(
     () => series(metrics, "ad_revenue"),
@@ -344,8 +354,8 @@ export const DashboardPage = () => {
     const rate = rateOf(rcCurrency);
     return [...map.entries()]
       .sort((a, b) => (a[0] < b[0] ? -1 : 1))
-      .map(([date, value]) => ({ date, value: value * rate }));
-  }, [metrics, fxRates, rcCurrency]);
+      .map(([date, value]) => ({ date, value: withMrrCents(value, mrrCents) * rate }));
+  }, [metrics, fxRates, rcCurrency, mrrCents]);
 
   return (
     <div className="absolute inset-0 grid grid-rows-[36px_112px_minmax(0,1fr)_220px] gap-3 overflow-hidden p-3">
@@ -667,7 +677,8 @@ export const DashboardPage = () => {
                     const ad = latestByProject(metrics, "ad_revenue");
                     const dau = latestByProject(metrics, "dau");
                     const mrrConverted =
-                      (mrrMap.get(p.id as string)?.value ?? 0) * rateOf(rcCurrency);
+                      withMrrCents(mrrMap.get(p.id as string)?.value ?? 0, mrrCents) *
+                      rateOf(rcCurrency);
                     const adConverted =
                       (ad.get(p.id as string)?.value ?? 0) *
                       rateOf(projAdCurrency(p.id as string));
