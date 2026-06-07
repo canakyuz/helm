@@ -21,11 +21,11 @@ export function CurrencyPicker() {
 
   const rate = rates?.[currency] ?? 1;
   const rateLabel =
-    currency === "TRY"
+    currency === "USD"
       ? "HUB BAZ · 1:1"
       : isLoading
       ? "KUR YÜKLENIYOR"
-      : `1 TRY ≈ ${rate.toFixed(4)} ${currency}`;
+      : `1 USD ≈ ${rate.toFixed(currency === "TRY" ? 2 : 4)} ${currency}`;
 
   return (
     <View

@@ -22,7 +22,7 @@ export function pushWidgetSnapshot(queryClient: QueryClient): boolean {
 
   const rates = queryClient.getQueryData<Record<string, number>>([
     "fx-rates",
-    "try-base",
+    "usd-base",
   ]);
   const fxRate = rates?.[currency] ?? 1;
   const sparkline = queryClient.getQueryData<number[]>(
