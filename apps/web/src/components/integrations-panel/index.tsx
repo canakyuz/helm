@@ -101,6 +101,12 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       placeholder: "USD",
       optional: true,
     },
+    {
+      key: "sub_price",
+      label: "Abonelik aylık fiyatı (kuruşlu — MRR'ı tam hesaplar, örn. 19.99)",
+      placeholder: "19.99",
+      optional: true,
+    },
   ],
   admob: [
     {
