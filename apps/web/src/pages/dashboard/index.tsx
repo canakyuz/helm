@@ -201,14 +201,22 @@ export const DashboardPage = () => {
     return cfg?.currency || "USD";
   };
 
+  // RevenueCat raporlama para birimi — config'ten (genelde USD).
+  const rcCurrency = useMemo(() => {
+    const rc = integrations.find(
+      (i) =>
+        i.provider === "revenuecat" && (isAll || i.project_id === scope),
+    );
+    return ((rc?.config as { currency?: string })?.currency) || "USD";
+  }, [integrations, scope, isAll]);
+
   // Ekran para birimi — Ayarlar'dan. Tüm para değerleri buna çevrilir.
   const { currency: displayCcy } = useDisplayCurrency();
   const sourceCurrencies = useMemo(() => {
-    const set = new Set<string>(["USD"]); // MRR/RevenueCat default
+    const set = new Set<string>(["USD"]);
     for (const i of integrations) {
-      if (i.provider === "admob") {
-        const c = (i.config as { currency?: string })?.currency || "USD";
-        set.add(c);
+      if (["admob", "app_store_connect", "revenuecat"].includes(i.provider)) {
+        set.add((i.config as { currency?: string })?.currency || "USD");
       }
     }
     return Array.from(set);
@@ -244,7 +252,7 @@ export const DashboardPage = () => {
       .map(([date, value]) => ({ date, value }));
   }, [metrics, isAll, fxRates, adCurrency]);
 
-  const mrrDisplay = latest(metrics, "mrr") * rateOf("USD");
+  const mrrDisplay = latest(metrics, "mrr") * rateOf(rcCurrency);
 
   const adRevenueSeries = useMemo(
     () => series(metrics, "ad_revenue"),
@@ -333,11 +341,11 @@ export const DashboardPage = () => {
       if (m.metric !== "mrr") continue;
       map.set(m.date, (map.get(m.date) ?? 0) + Number(m.value));
     }
-    const rate = rateOf("USD");
+    const rate = rateOf(rcCurrency);
     return [...map.entries()]
       .sort((a, b) => (a[0] < b[0] ? -1 : 1))
       .map(([date, value]) => ({ date, value: value * rate }));
-  }, [metrics, fxRates]);
+  }, [metrics, fxRates, rcCurrency]);
 
   return (
     <div className="absolute inset-0 grid grid-rows-[36px_112px_minmax(0,1fr)_220px] gap-3 overflow-hidden p-3">
@@ -659,7 +667,7 @@ export const DashboardPage = () => {
                     const ad = latestByProject(metrics, "ad_revenue");
                     const dau = latestByProject(metrics, "dau");
                     const mrrConverted =
-                      (mrrMap.get(p.id as string)?.value ?? 0) * rateOf("USD");
+                      (mrrMap.get(p.id as string)?.value ?? 0) * rateOf(rcCurrency);
                     const adConverted =
                       (ad.get(p.id as string)?.value ?? 0) *
                       rateOf(projAdCurrency(p.id as string));
