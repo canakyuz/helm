@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type User } from "https://esm.sh/@supabase/supabase-js@2";
 
 // helm-users — bir projenin Supabase kullanıcılarını + profiles join'i listeler.
 // auth.users (admin API) + public.profiles (username, country, city, location)
@@ -72,13 +72,21 @@ Deno.serve(async (req) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // 1. Auth kullanıcılarını çek (ilk 200).
-  const { data: authData, error: usersError } = await admin.auth.admin.listUsers(
-    { page: 1, perPage: 200 },
-  );
-  if (usersError) return json({ error: usersError.message }, 500);
+  // 1. Auth kullanıcılarını sayfalı çek — eski 200 limiti UUID/e-posta aramasını
+  //    ilk 200 kayıtla sınırlıyordu (201+ bulunamıyordu). Artık hepsini yüklüyoruz.
+  //    Güvenlik freni: en fazla MAX_PAGES * PER_PAGE kayıt (runaway koruması).
+  const PER_PAGE = 1000;
+  const MAX_PAGES = 50;
+  const authUsers: User[] = [];
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const { data: pageData, error: usersError } =
+      await admin.auth.admin.listUsers({ page, perPage: PER_PAGE });
+    if (usersError) return json({ error: usersError.message }, 500);
+    authUsers.push(...pageData.users);
+    if (pageData.users.length < PER_PAGE) break;
+  }
 
-  const userIds = authData.users.map((u) => u.id);
+  const userIds = authUsers.map((u) => u.id);
 
   // 2. profiles tablosundan username + lokasyon (tolerant — tablo yoksa boş bırak).
   const profileMap = new Map<string, ProfileRow>();
@@ -98,7 +106,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  const users = authData.users.map((u) => {
+  const users = authUsers.map((u) => {
     const meta = (u as { banned_until?: string }).banned_until ?? null;
     const isBanned = meta !== null && new Date(meta).getTime() > Date.now();
     const premium = Boolean(

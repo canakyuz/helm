@@ -254,7 +254,7 @@ export const UsersPage = () => {
           {stats.total > 0 && (
             <>
               <span className="font-mono tabular-nums">{stats.total}</span>{" "}
-              toplam · ilk 200
+              toplam
             </>
           )}
         </div>

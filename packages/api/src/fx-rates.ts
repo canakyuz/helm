@@ -9,10 +9,10 @@ export type FxRates = Record<Currency, number>;
 export const FX_FALLBACK: FxRates = { USD: 1, TRY: 40, EUR: 0.92, GBP: 0.79 };
 
 export async function fetchFxRates(): Promise<FxRates> {
-  // Frankfurter.app — ECB verisi, ücretsiz, anahtarsız. USD base.
+  // Frankfurter (api.frankfurter.dev/v1) — ECB verisi, ücretsiz, anahtarsız. USD base.
   try {
     const res = await fetch(
-      "https://api.frankfurter.app/latest?from=USD&to=TRY,EUR,GBP",
+      "https://api.frankfurter.dev/v1/latest?from=USD&to=TRY,EUR,GBP",
       { headers: { Accept: "application/json" } },
     );
     if (!res.ok) throw new Error(`fx http ${res.status}`);
