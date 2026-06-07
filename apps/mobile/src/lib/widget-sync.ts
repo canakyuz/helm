@@ -58,7 +58,8 @@ export function buildWidgetPayload(
   fxRate: number,
   sparkline?: number[],
 ): HelmWidgetPayload {
-  const toDisplay = (tryValue: number) => tryValue * fxRate;
+  // KPI değerleri USD baz; fxRate = USD → seçili currency.
+  const toDisplay = (usdValue: number) => usdValue * fxRate;
 
   return {
     liveUsers: data.dau,

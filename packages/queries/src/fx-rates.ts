@@ -2,7 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { fetchFxRates, FX_FALLBACK } from "@helm/api";
 import { STALE_TIME } from "@helm/config";
 
-export const fxRatesKeys = { all: ["fx-rates", "try-base"] as const };
+export const fxRatesKeys = { all: ["fx-rates", "usd-base"] as const };
 
 export function fxRatesQueryOptions() {
   return queryOptions({
