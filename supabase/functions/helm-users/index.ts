@@ -26,7 +26,14 @@ type ProfileRow = {
   city?: string | null;
   location?: string | null;
   avatar_url?: string | null;
+  // Premium — projeye özgü (Empire-Inc: profiles.premium_tier + premium_expires_at).
+  premium_tier?: number | null;
+  premium_expires_at?: string | null;
 };
+
+const PROFILE_BASE_COLS =
+  "id, username, display_name, country, country_code, city, location, avatar_url";
+const PROFILE_PREMIUM_COLS = "premium_tier, premium_expires_at";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -88,31 +95,37 @@ Deno.serve(async (req) => {
 
   const userIds = authUsers.map((u) => u.id);
 
-  // 2. profiles tablosundan username + lokasyon (tolerant — tablo yoksa boş bırak).
+  // 2. profiles tablosundan username + lokasyon + premium (tolerant).
+  //    Premium kolonları (premium_tier/premium_expires_at) projeye özgü → önce
+  //    onlarla dene; kolon yoksa premium'suz tekrar dene ki username/lokasyon kaybolmasın.
   const profileMap = new Map<string, ProfileRow>();
   if (userIds.length > 0) {
-    try {
-      const { data: profiles } = await admin
-        .from("profiles")
-        .select(
-          "id, username, display_name, country, country_code, city, location, avatar_url",
-        )
-        .in("id", userIds);
-      for (const p of (profiles ?? []) as ProfileRow[]) {
-        profileMap.set(p.id, p);
-      }
-    } catch {
-      // profiles tablosu yoksa veya kolon eksikse — username/location null kalır.
-    }
+    const tryFetch = async (cols: string) =>
+      (await admin.from("profiles").select(cols).in("id", userIds)) as {
+        data: ProfileRow[] | null;
+        error: unknown;
+      };
+    let res = await tryFetch(`${PROFILE_BASE_COLS}, ${PROFILE_PREMIUM_COLS}`);
+    if (res.error) res = await tryFetch(PROFILE_BASE_COLS); // premium kolonu yok → düş
+    for (const p of res.data ?? []) profileMap.set(p.id, p);
   }
 
+  const nowMs = Date.now();
   const users = authUsers.map((u) => {
     const meta = (u as { banned_until?: string }).banned_until ?? null;
-    const isBanned = meta !== null && new Date(meta).getTime() > Date.now();
-    const premium = Boolean(
-      (u.app_metadata as { premium?: unknown })?.premium,
-    );
+    const isBanned = meta !== null && new Date(meta).getTime() > nowMs;
     const profile = profileMap.get(u.id);
+
+    // Premium: profiles.premium_tier > 0 ve süresi geçmemiş (Empire-Inc modeli);
+    // yoksa eski app_metadata.premium fallback.
+    const tier = profile?.premium_tier ?? 0;
+    const expMs = profile?.premium_expires_at
+      ? new Date(profile.premium_expires_at).getTime()
+      : null;
+    const premiumActive = tier > 0 && (expMs === null || expMs > nowMs);
+    const premium =
+      premiumActive ||
+      Boolean((u.app_metadata as { premium?: unknown })?.premium);
 
     return {
       id: u.id,
@@ -122,6 +135,8 @@ Deno.serve(async (req) => {
       email_confirmed_at: u.email_confirmed_at ?? null,
       banned: isBanned,
       premium,
+      premium_tier: tier || null,
+      premium_expires_at: profile?.premium_expires_at ?? null,
       providers: (u.identities ?? []).map((i) => i.provider).filter(Boolean),
       // profiles join
       username: profile?.username ?? null,

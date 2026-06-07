@@ -54,8 +54,29 @@ interface ProjectUser {
   email_confirmed_at: string | null;
   banned: boolean;
   premium: boolean;
+  premium_tier: number | null;
+  premium_expires_at: string | null;
   providers: string[];
+  username: string | null;
+  display_name: string | null;
+  country: string | null;
+  country_code: string | null;
+  city: string | null;
+  location: string | null;
+  avatar_url: string | null;
 }
+
+// İki harfli ülke kodu → bayrak emoji (US → 🇺🇸). Geçersizse boş.
+const flag = (cc: string | null): string => {
+  if (!cc || cc.length !== 2) return "";
+  const base = 0x1f1e6;
+  const A = "A".charCodeAt(0);
+  const up = cc.toUpperCase();
+  return String.fromCodePoint(
+    base + (up.charCodeAt(0) - A),
+    base + (up.charCodeAt(1) - A),
+  );
+};
 
 type SortField = "created_at" | "last_sign_in_at" | "email";
 type SortDir = "asc" | "desc";
@@ -206,10 +227,9 @@ export const UsersPage = () => {
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const base = needle
-      ? tabFiltered.filter(
-          (u) =>
-            (u.email ?? "").toLowerCase().includes(needle) ||
-            u.id.toLowerCase().includes(needle),
+      ? tabFiltered.filter((u) =>
+          [u.email, u.id, u.username, u.display_name, u.country, u.city]
+            .some((f) => (f ?? "").toLowerCase().includes(needle)),
         )
       : tabFiltered;
     const sorted = [...base].sort((a, b) => {
@@ -396,6 +416,7 @@ export const UsersPage = () => {
                       <TableRow>
                         <TableHead className="w-10" />
                         <TableHead>Kullanıcı</TableHead>
+                        <TableHead>Konum</TableHead>
                         <TableHead>Etiketler</TableHead>
                         <TableHead className="text-right">Kayıt</TableHead>
                         <TableHead className="text-right">Son giriş</TableHead>
@@ -418,18 +439,48 @@ export const UsersPage = () => {
                               <Avatar user={u} />
                             </TableCell>
                             <TableCell className="py-2">
-                              {u.email ? (
+                              {u.display_name || u.username ? (
                                 <div className="truncate font-medium">
+                                  {u.display_name || u.username}
+                                </div>
+                              ) : null}
+                              {u.email ? (
+                                <div
+                                  className={cn(
+                                    "truncate text-sm",
+                                    u.display_name || u.username
+                                      ? "text-muted-foreground"
+                                      : "font-medium",
+                                  )}
+                                >
                                   {u.email}
                                 </div>
-                              ) : (
+                              ) : !u.display_name && !u.username ? (
                                 <div className="text-sm text-muted-foreground">
                                   (e-posta yok)
                                 </div>
-                              )}
+                              ) : null}
                               <code className="font-mono text-[10px] text-muted-foreground">
                                 {u.id.slice(0, 8)}…
                               </code>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap py-2 text-xs text-muted-foreground">
+                              {u.country_code || u.country || u.city ? (
+                                <div className="flex items-center gap-1.5">
+                                  {flag(u.country_code) && (
+                                    <span className="text-sm leading-none">
+                                      {flag(u.country_code)}
+                                    </span>
+                                  )}
+                                  <span className="truncate">
+                                    {[u.city, u.country ?? u.country_code]
+                                      .filter(Boolean)
+                                      .join(", ")}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span>—</span>
+                              )}
                             </TableCell>
                             <TableCell className="py-2">
                               <UserBadges user={u} />
@@ -589,7 +640,7 @@ const UserBadges = ({ user }: { user: ProjectUser }) => (
     {user.premium && (
       <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500 text-[10px]">
         <Sparkles className="mr-1 size-2.5" />
-        premium
+        premium{user.premium_tier ? ` T${user.premium_tier}` : ""}
       </Badge>
     )}
     {user.email_confirmed_at && !user.banned && (
@@ -672,6 +723,28 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
               ? new Date(user.email_confirmed_at).toLocaleDateString("tr-TR")
               : "—"}
           </dd>
+
+          {(user.country || user.city) && (
+            <>
+              <dt className="text-muted-foreground">Konum</dt>
+              <dd>
+                {flag(user.country_code)}{" "}
+                {[user.city, user.country].filter(Boolean).join(", ")}
+              </dd>
+            </>
+          )}
+
+          {user.premium && (
+            <>
+              <dt className="text-muted-foreground">Premium</dt>
+              <dd>
+                {user.premium_tier ? `Tier ${user.premium_tier}` : "aktif"}
+                {user.premium_expires_at
+                  ? ` · ${new Date(user.premium_expires_at).toLocaleDateString("tr-TR")} bitiş`
+                  : " · süresiz"}
+              </dd>
+            </>
+          )}
 
           <dt className="text-muted-foreground">Sağlayıcı</dt>
           <dd>
