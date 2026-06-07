@@ -38,8 +38,11 @@ export async function getFxRate(from: string, to: string): Promise<number> {
   const cached = cache.rates[from]?.[to];
   if (cached != null) return cached;
   try {
+    // frankfurter.app artık api.frankfurter.dev/v1'e 301 atıyor; cross-origin
+    // redirect'te CORS header gelmediği için tarayıcı fetch'i patlıyordu (rate=1
+    // → çeviri hiç olmuyordu). Doğrudan .dev/v1'e gidiyoruz.
     const res = await fetch(
-      `https://api.frankfurter.app/latest?from=${from}&to=${to}`,
+      `https://api.frankfurter.dev/v1/latest?from=${from}&to=${to}`,
     );
     if (!res.ok) return 1;
     const json = await res.json();
