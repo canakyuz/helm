@@ -9,15 +9,22 @@ export type FxRates = Record<Currency, number>;
 export const FX_FALLBACK: FxRates = { USD: 1, TRY: 40, EUR: 0.92, GBP: 0.79 };
 
 export async function fetchFxRates(): Promise<FxRates> {
-  // Frankfurter (api.frankfurter.dev/v1) — ECB verisi, ücretsiz, anahtarsız. USD base.
+  // open.er-api.com (ExchangeRate-API açık uç) — ücretsiz, anahtarsız, CORS açık,
+  // HER GÜN güncel (TRY hızlı oynadığı için ECB'nin hafta sonu boşluğu yok).
+  // Tek çağrı, USD base; rates[X] = 1 USD → X.
   try {
-    const res = await fetch(
-      "https://api.frankfurter.dev/v1/latest?from=USD&to=TRY,EUR,GBP",
-      { headers: { Accept: "application/json" } },
-    );
+    const res = await fetch("https://open.er-api.com/v6/latest/USD", {
+      headers: { Accept: "application/json" },
+    });
     if (!res.ok) throw new Error(`fx http ${res.status}`);
-    const json = (await res.json()) as { rates?: Record<string, number> };
-    const rates = json.rates ?? {};
+    const json = (await res.json()) as {
+      result?: string;
+      rates?: Record<string, number>;
+    };
+    if (json.result !== "success" || !json.rates) {
+      throw new Error("fx unexpected payload");
+    }
+    const rates = json.rates;
     return {
       USD: 1,
       TRY: rates.TRY ?? FX_FALLBACK.TRY,
