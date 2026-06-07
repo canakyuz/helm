@@ -102,9 +102,9 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       optional: true,
     },
     {
-      key: "sub_price",
-      label: "Abonelik aylık fiyatı (kuruşlu — MRR'ı tam hesaplar, örn. 19.99)",
-      placeholder: "19.99",
+      key: "mrr_cents",
+      label: "Fiyat ondalığı (hep .99 ise — MRR kuruşunu RC yuvarlamasına rağmen ekler)",
+      placeholder: "0.99",
       optional: true,
     },
   ],
