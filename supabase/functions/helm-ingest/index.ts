@@ -101,12 +101,18 @@ Deno.serve(async (req) => {
       const points = Array.isArray(result) ? result : result.points;
       const byCountry = Array.isArray(result) ? [] : (result.byCountry ?? []);
 
+      // Kaynak para birimi — config'ten (AdMob TRY, App Store vendor ccy…),
+      // yoksa USD (RevenueCat/Stripe USD raporlar). Değer HAM saklanır; gösterim
+      // katmanı metrics.currency'den USD'ye normalize eder.
+      const sourceCurrency =
+        ((it.config as { currency?: string } | null)?.currency) || "USD";
       const rows = points.map((p) => ({
         project_id: it.project_id,
         date: p.date,
         source: it.provider,
         metric: p.metric,
         value: p.value,
+        currency: sourceCurrency,
       }));
 
       if (rows.length > 0) {

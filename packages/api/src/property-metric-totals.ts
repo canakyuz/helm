@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { PropertyType } from "./properties";
+import { FX_FALLBACK, MONEY_METRICS, fetchFxRates, metricValueUsd } from "./fx-rates";
 
 export type PropertyMetricTotal = {
   id: string;
@@ -26,14 +27,17 @@ export async function fetchPropertyMetricTotals(
   const today = now.toISOString().slice(0, 10);
   const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
 
-  const [propsRes, metricsRes] = await Promise.all([
+  const isMoney = MONEY_METRICS.has(metric);
+  const [propsRes, metricsRes, rates] = await Promise.all([
     client.from("properties").select("id, name, type, brands ( name )").order("name"),
     client
       .from("metrics")
-      .select("project_id, date, value")
+      .select("project_id, date, value, currency")
       .eq("metric", metric)
       .gte("date", monthStart)
       .lte("date", today),
+    // FX'i sadece para metriklerinde çek (dau/retention gibi sayılar için gereksiz).
+    isMoney ? fetchFxRates() : Promise.resolve(FX_FALLBACK),
   ]);
 
   if (propsRes.error) throw propsRes.error;
@@ -41,15 +45,18 @@ export async function fetchPropertyMetricTotals(
 
   const properties = (propsRes.data as unknown as PropertyRow[] | null) ?? [];
 
+  // Para metriği ise her satır kaynak ccy'sinden USD'ye normalize edilir.
   const totalByProperty = new Map<string, { month: number; today: number }>();
   for (const row of (metricsRes.data ?? []) as Array<{
     project_id: string;
     date: string;
     value: number;
+    currency: string | null;
   }>) {
+    const v = metricValueUsd(metric, Number(row.value), row.currency, rates);
     const acc = totalByProperty.get(row.project_id) ?? { month: 0, today: 0 };
-    acc.month += Number(row.value);
-    if (row.date === today) acc.today = Number(row.value);
+    acc.month += v;
+    if (row.date === today) acc.today = v;
     totalByProperty.set(row.project_id, acc);
   }
 

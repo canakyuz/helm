@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { PropertyType } from "./properties";
+import { fetchFxRates, metricValueUsd } from "./fx-rates";
 
 export type ProjectBreakdown = {
   id: string;
@@ -19,7 +20,12 @@ type PropertyRow = {
   brands: { name: string } | null;
 };
 
-type MetricRow = { project_id: string; metric: string; value: number };
+type MetricRow = {
+  project_id: string;
+  metric: string;
+  value: number;
+  currency: string | null;
+};
 type AlertCountRow = { project_id: string | null };
 
 export async function fetchProjectsBreakdown(
@@ -30,11 +36,11 @@ export async function fetchProjectsBreakdown(
     .toISOString()
     .slice(0, 10);
 
-  const [propsRes, metricsRes, alertsRes] = await Promise.all([
+  const [propsRes, metricsRes, alertsRes, rates] = await Promise.all([
     client.from("properties").select("id, name, type, brands ( name )").order("name"),
     client
       .from("metrics")
-      .select("project_id, metric, value, date")
+      .select("project_id, metric, value, currency, date")
       .in("metric", ["mrr", "dau", "ad_revenue"])
       .gte("date", sevenDaysAgo)
       .lte("date", todayIso)
@@ -43,6 +49,7 @@ export async function fetchProjectsBreakdown(
       .from("alert_events")
       .select("rule_id, alert_rules!inner ( project_id )")
       .eq("delivered", false),
+    fetchFxRates(),
   ]);
 
   if (propsRes.error) throw propsRes.error;
@@ -52,12 +59,18 @@ export async function fetchProjectsBreakdown(
   const properties = (propsRes.data as unknown as PropertyRow[] | null) ?? [];
 
   // Her property + metric için en güncel değer (date desc; ilk gördüğü kalır).
+  // Para metrikleri USD'ye normalize (ad_revenue TRY → USD; mrr USD → no-op).
   const latestMetric = new Map<string, number>();
   for (const row of (metricsRes.data as unknown as Array<
     MetricRow & { date: string }
   > | null) ?? []) {
     const k = `${row.project_id}:${row.metric}`;
-    if (!latestMetric.has(k)) latestMetric.set(k, Number(row.value));
+    if (!latestMetric.has(k)) {
+      latestMetric.set(
+        k,
+        metricValueUsd(row.metric, Number(row.value), row.currency, rates),
+      );
+    }
   }
 
   const alertCounts = new Map<string, number>();

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SelectedPropertyId } from "@helm/types";
+import { FX_FALLBACK, MONEY_METRICS, fetchFxRates, metricValueUsd } from "./fx-rates";
 
 export type MetricDetail = {
   today: number;
@@ -9,7 +10,7 @@ export type MetricDetail = {
   series: Array<{ date: string; value: number }>;
 };
 
-type Row = { date: string; value: number };
+type Row = { date: string; value: number; currency: string | null };
 
 function ymd(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -41,7 +42,7 @@ export async function fetchMetricDetail(
 
   let q = client
     .from("metrics")
-    .select("date, value")
+    .select("date, value, currency")
     .eq("metric", metric)
     .gte("date", sinceIso)
     .lte("date", today)
@@ -49,13 +50,19 @@ export async function fetchMetricDetail(
 
   if (propertyId !== "all") q = q.eq("project_id", propertyId);
 
-  const { data, error } = await q;
+  const isMoney = MONEY_METRICS.has(metric);
+  const [{ data, error }, rates] = await Promise.all([
+    q,
+    isMoney ? fetchFxRates() : Promise.resolve(FX_FALLBACK),
+  ]);
   if (error) throw error;
 
-  // Date başına topla (multi-property aggregation için).
+  // Date başına topla (multi-property aggregation için). Para metriği ise her
+  // satır kaynak ccy'sinden USD'ye normalize edilir.
   const byDate = new Map<string, number>();
   for (const row of (data ?? []) as Row[]) {
-    byDate.set(row.date, (byDate.get(row.date) ?? 0) + Number(row.value));
+    const v = metricValueUsd(metric, Number(row.value), row.currency, rates);
+    byDate.set(row.date, (byDate.get(row.date) ?? 0) + v);
   }
 
   const todayVal = byDate.get(today) ?? 0;

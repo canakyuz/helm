@@ -8,7 +8,9 @@ import { useAlerts, useAckAlert, type Alert } from "~/hooks/use-alerts";
 import { useProperties, type Property, type PropertyStatus } from "~/hooks/use-properties";
 import { usePropertyMetrics } from "~/hooks/use-property-metrics";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
+import { useFxRates } from "~/hooks/use-fx-rates";
 import { useRevenueGoal } from "~/hooks/use-revenue-goal";
+import { toUsd, FX_FALLBACK } from "@helm/api";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { colors } from "~/theme/tokens";
@@ -277,6 +279,7 @@ export default function Overview() {
   const { width } = useWindowDimensions();
   const chartW = width - 44;
   const fmt = useFormatCurrency();
+  const { data: rates } = useFxRates();
   const kpis = useCockpitKpis();
   const alerts = useAlerts();
   const ack = useAckAlert();
@@ -302,8 +305,13 @@ export default function Overview() {
     cfSeries.length > 1
       ? Number((cfNow! - cfSeries[cfSeries.length - 2]!).toFixed(1))
       : undefined;
-  // Hedef gerçek tablodan; ilerleme gerçek gelirden (ad_revenue ay toplamı).
-  const goalTarget = goal.data?.target_amount ?? null;
+  // Hedef gerçek tablodan; ilerleme gerçek gelirden (ad_revenue ay toplamı, USD).
+  // Hedef kullanıcının kurduğu currency'de saklı → USD'ye normalize et ki hem
+  // oran (goalCurrent USD) hem fmt (USD→display) tutarlı olsun.
+  const goalTarget =
+    goal.data?.target_amount != null
+      ? toUsd(goal.data.target_amount, goal.data.currency, rates ?? FX_FALLBACK)
+      : null;
   const goalCurrent = revenue.data?.thisMonth ?? 0;
   const goalPct =
     goalTarget != null && goalTarget > 0
