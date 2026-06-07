@@ -95,6 +95,12 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       placeholder: "projXXXXXXXX",
     },
     { key: "api_key", label: "v2 Secret API Key", secret: true },
+    {
+      key: "currency",
+      label: "Para birimi (ISO kodu — RC raporlama, genelde USD)",
+      placeholder: "USD",
+      optional: true,
+    },
   ],
   admob: [
     {
