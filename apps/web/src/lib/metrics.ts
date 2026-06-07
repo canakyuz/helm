@@ -43,6 +43,20 @@ export const formatMoney2 = formatMoney;
 export const compact = (value: number) =>
   new Intl.NumberFormat("en-US", { notation: "compact" }).format(value);
 
+// RC overview MRR'ı kuruşu yuvarlar (19.99→19, 9.99→9). Fiyat tier'ı değişse de
+// (9.99/14.99/19.99) hep .99 biterse: tam kısmı RC'den koru, ondalığı geri ekle.
+// Gösterim tarafında uygulanır (edge-fn/re-sync beklemeden). 0/boş = no-op.
+// "0.99" da "99" da kabul; [0, 0.99]'a kıstırılır.
+export const parseMrrCents = (raw: unknown): number => {
+  let c = Number(raw) || 0;
+  if (c >= 1) c = c / 100;
+  return Math.min(0.99, Math.max(0, c));
+};
+
+// Idempotent: withMrrCents(19, .99)=19.99, withMrrCents(19.99, .99)=19.99.
+export const withMrrCents = (mrr: number, cents: number): number =>
+  mrr > 0 && cents > 0 ? Math.floor(mrr) + cents : mrr;
+
 /** Bir metriğin gün gün (tarihe göre toplanmış) zaman serisi. */
 export const series = (metrics: Metric[], metricName: string): TrendPoint[] => {
   const map = new Map<string, number>();

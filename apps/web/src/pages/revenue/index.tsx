@@ -30,9 +30,11 @@ import {
   formatMoney2,
   latest,
   moneyRanges,
+  parseMrrCents,
   series,
   sumInRange,
   valueOnDate,
+  withMrrCents,
 } from "@/lib/metrics";
 import type { Metric, ProjectIntegration } from "@/types";
 import { ErrorBanner } from "@/components/error-banner";
@@ -119,6 +121,14 @@ export const RevenuePage = () => {
     return ((rc?.config as { currency?: string })?.currency) || "USD";
   }, [integrations, scope, isAll]);
 
+  // RC MRR kuruş yuvarlamasını gösterimde geri ekle (config'te .99 verildiyse).
+  const mrrCents = useMemo(() => {
+    const rc = integrations.find(
+      (i) => i.provider === "revenuecat" && (isAll || i.project_id === scope),
+    );
+    return parseMrrCents((rc?.config as { mrr_cents?: string })?.mrr_cents);
+  }, [integrations, scope, isAll]);
+
   const mrrSeries = useMemo(() => series(metrics, "mrr"), [metrics]);
   const adSeries = useMemo(() => series(metrics, "ad_revenue"), [metrics]);
   const impSeries = useMemo(
@@ -156,7 +166,7 @@ export const RevenuePage = () => {
       })),
     [adSeries, fxRates, adCurrency],
   );
-  const mrrDisplay = latest(metrics, "mrr") * rateOf(rcCurrency);
+  const mrrDisplay = withMrrCents(latest(metrics, "mrr"), mrrCents) * rateOf(rcCurrency);
   const revenue28d = latest(metrics, "revenue_28d") * rateOf(rcCurrency);
 
   // AdMob konsolundaki "Bugün / Dün / Bu ay / Geçen ay" paneline paralel
@@ -206,7 +216,7 @@ export const RevenuePage = () => {
 
   // Birleşik gelir özeti — 3 kanal toplamı (MRR günlük tahmini + ad + app)
   const combinedTotals = useMemo(() => {
-    const mrr = latest(metrics, "mrr") * rateOf(rcCurrency);
+    const mrr = withMrrCents(latest(metrics, "mrr"), mrrCents) * rateOf(rcCurrency);
     const mrrDaily = mrr / 30;
     return {
       today: adTotals.today + appTotals.today + mrrDaily,
@@ -221,7 +231,7 @@ export const RevenuePage = () => {
     const channels: Array<{ name: string; value: number }> = [
       { name: "Reklam", value: adTotals.thisMonth },
       { name: "Mağaza", value: appTotals.thisMonth },
-      { name: "Abonelik", value: latest(metrics, "mrr") * rateOf(rcCurrency) },
+      { name: "Abonelik", value: withMrrCents(latest(metrics, "mrr"), mrrCents) * rateOf(rcCurrency) },
     ];
     const max = channels.reduce((a, b) => (b.value > a.value ? b : a));
     return max.value > 0 ? max.name : "—";
@@ -308,7 +318,7 @@ export const RevenuePage = () => {
               <TrendChart
                 data={mrrSeries.map((p) => ({
                   date: p.date,
-                  value: p.value * rateOf(rcCurrency),
+                  value: withMrrCents(p.value, mrrCents) * rateOf(rcCurrency),
                 }))}
                 color={theme.chart.revenue}
                 format={(v) => formatMoney(v, displayCcy)}
