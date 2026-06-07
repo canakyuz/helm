@@ -286,6 +286,7 @@ export default function Overview() {
   const properties = useProperties();
   const propMetrics = usePropertyMetrics();
   const revenue = useMetricDetail("ad_revenue");
+  const appRevDetail = useMetricDetail("app_revenue");
   const crashFree = useMetricDetail("crash_free_sessions");
   const goal = useRevenueGoal();
   const [dismissedAlerts, setDismissedAlerts] = useState<Record<number, boolean>>({});
@@ -295,9 +296,12 @@ export default function Overview() {
 
   const data = kpis.data;
   const series = (revenue.data?.series ?? []).map((p) => p.value);
-  const today = revenue.data?.today ?? data.adRevenue;
-  const yest = revenue.data?.yesterday ?? 0;
-  const revDelta = yest > 0 ? ((today - yest) / yest) * 100 : 0;
+  // Toplam kazanç (bu ay) — reklam + mağaza + MRR, hepsi USD canonical (fetcher
+  // normalize etti) → fmt seçili currency'ye çevirir.
+  const totalEarnings =
+    (revenue.data?.thisMonth ?? 0) +
+    (appRevDetail.data?.thisMonth ?? 0) +
+    data.mrr;
   const cfSeries = (crashFree.data?.series ?? []).map((p) => p.value);
   const cfHas = cfSeries.length > 0;
   const cfNow = cfHas ? cfSeries[cfSeries.length - 1]! : null;
@@ -352,18 +356,17 @@ export default function Overview() {
           }
         >
           <OpenHero
-            eyebrow="Today"
+            eyebrow="Toplam kazanç · bu ay"
             eyebrowMeta={new Date(kpis.dataUpdatedAt).toLocaleTimeString("tr-TR", {
               hour: "2-digit",
               minute: "2-digit",
             })}
             live
-            value={today}
+            value={totalEarnings}
             format={(v) => fmt(v)}
-            delta={Number(revDelta.toFixed(1))}
-            caption="Revenue · all projects"
+            caption="Reklam + abonelik + mağaza · tüm projeler"
             chartWidth={chartW}
-            chartData={series.length >= 2 ? series : [today, today]}
+            chartData={series.length >= 2 ? series : [totalEarnings, totalEarnings]}
             color={colors.accent}
             chartH={92}
             stats={stats}
