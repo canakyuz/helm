@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SelectedPropertyId } from "@helm/types";
+import { fetchFxRates, metricValueUsd } from "./fx-rates";
 
 // Gelir mix'i — bu ay subscription_revenue + iap_revenue + ad_revenue toplamları.
 // Renk UI concern → burada YOK; mobil/web hook'u metric'e göre renk ekler.
@@ -24,18 +25,25 @@ export async function fetchRevenueMix(
   const today = new Date().toISOString().slice(0, 10);
   let q = client
     .from("metrics")
-    .select("metric, value")
+    .select("metric, value, currency")
     .in("metric", REVENUE_MIX_METRICS.map((m) => m.metric))
     .gte("date", monthStart())
     .lte("date", today);
   if (propertyId !== "all") q = q.eq("project_id", propertyId);
 
-  const { data, error } = await q;
+  const [{ data, error }, rates] = await Promise.all([q, fetchFxRates()]);
   if (error) throw error;
 
+  // Hepsi para metriği, kaynak ccy'si farklı olabilir → USD'ye normalize et,
+  // pay/yüzde aynı baz üzerinden hesaplansın.
   const sums = new Map<string, number>();
-  for (const r of (data ?? []) as Array<{ metric: string; value: number }>) {
-    sums.set(r.metric, (sums.get(r.metric) ?? 0) + Number(r.value));
+  for (const r of (data ?? []) as Array<{
+    metric: string;
+    value: number;
+    currency: string | null;
+  }>) {
+    const v = metricValueUsd(r.metric, Number(r.value), r.currency, rates);
+    sums.set(r.metric, (sums.get(r.metric) ?? 0) + v);
   }
   const raw = REVENUE_MIX_METRICS.map((m) => ({ ...m, value: sums.get(m.metric) ?? 0 }));
   const total = raw.reduce((a, b) => a + b.value, 0);
