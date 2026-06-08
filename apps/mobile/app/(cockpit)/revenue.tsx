@@ -77,6 +77,10 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
     <>
       {/* Revenue mix */}
       <CardSection index="01" title="Revenue mix" pt={14}>
+        <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+          {/* Bu ay tahsil edilen gelir (akış) — üstteki MRR anlık run-rate'tir, farklı. */}
+          <Eyebrow size={9}>BU AY · KAYNAĞA GÖRE (MRR'DAN AYRI)</Eyebrow>
+        </View>
         <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 8 }}>
           {mix.isLoading ? (
             <EmptyHint>LOADING…</EmptyHint>
