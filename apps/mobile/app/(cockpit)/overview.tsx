@@ -296,8 +296,15 @@ export default function Overview() {
 
   const data = kpis.data;
   const series = (revenue.data?.series ?? []).map((p) => p.value);
-  // Toplam kazanç (bu ay) — reklam + mağaza + MRR, hepsi USD canonical (fetcher
-  // normalize etti) → fmt seçili currency'ye çevirir.
+  // Hero = GÜNLÜK gelir (bugün reklam + mağaza). Aylık/diğer veriler altta
+  // (goal + statlar). Hepsi USD canonical → fmt seçili currency'ye çevirir.
+  const todayRevenue =
+    (revenue.data?.today ?? 0) + (appRevDetail.data?.today ?? 0);
+  const yestRevenue =
+    (revenue.data?.yesterday ?? 0) + (appRevDetail.data?.yesterday ?? 0);
+  const revDelta =
+    yestRevenue > 0 ? ((todayRevenue - yestRevenue) / yestRevenue) * 100 : 0;
+  // Aylık toplam — goal ilerlemesi için (hero değil).
   const totalEarnings =
     (revenue.data?.thisMonth ?? 0) +
     (appRevDetail.data?.thisMonth ?? 0) +
@@ -356,17 +363,18 @@ export default function Overview() {
           }
         >
           <OpenHero
-            eyebrow="Toplam kazanç · bu ay"
+            eyebrow="Bugün · gelir"
             eyebrowMeta={new Date(kpis.dataUpdatedAt).toLocaleTimeString("tr-TR", {
               hour: "2-digit",
               minute: "2-digit",
             })}
             live
-            value={totalEarnings}
+            value={todayRevenue}
             format={(v) => fmt(v)}
-            caption="Reklam + abonelik + mağaza · tüm projeler"
+            delta={Number(revDelta.toFixed(1))}
+            caption="Reklam + mağaza · tüm projeler"
             chartWidth={chartW}
-            chartData={series.length >= 2 ? series : [totalEarnings, totalEarnings]}
+            chartData={series.length >= 2 ? series : [todayRevenue, todayRevenue]}
             color={colors.accent}
             chartH={92}
             stats={stats}
