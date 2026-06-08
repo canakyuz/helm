@@ -31,9 +31,19 @@ type ProfileRow = {
   premium_expires_at?: string | null;
 };
 
-const PROFILE_BASE_COLS =
-  "id, username, display_name, country, country_code, city, location, avatar_url";
+// Kolonlar projeye göre değişir: Empire-Inc'te location kolonları (country/
+// city/location) YOK ama premium_tier/username VAR. Tek select hepsini isteyince
+// eksik kolon yüzünden TÜM select patlıyordu → premium+username de gelmiyordu.
+// Bu yüzden katmanlı fallback: en zengin → location'sız → premium'suz → base.
+const PROFILE_BASE_COLS = "id, username, display_name, avatar_url";
+const PROFILE_LOCATION_COLS = "country, country_code, city, location";
 const PROFILE_PREMIUM_COLS = "premium_tier, premium_expires_at";
+const PROFILE_SELECT_ATTEMPTS = [
+  `${PROFILE_BASE_COLS}, ${PROFILE_LOCATION_COLS}, ${PROFILE_PREMIUM_COLS}`,
+  `${PROFILE_BASE_COLS}, ${PROFILE_PREMIUM_COLS}`,
+  `${PROFILE_BASE_COLS}, ${PROFILE_LOCATION_COLS}`,
+  PROFILE_BASE_COLS,
+];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -95,19 +105,20 @@ Deno.serve(async (req) => {
 
   const userIds = authUsers.map((u) => u.id);
 
-  // 2. profiles tablosundan username + lokasyon + premium (tolerant).
-  //    Premium kolonları (premium_tier/premium_expires_at) projeye özgü → önce
-  //    onlarla dene; kolon yoksa premium'suz tekrar dene ki username/lokasyon kaybolmasın.
+  // 2. profiles join — username + lokasyon + premium. Kolon seti projeye göre
+  //    değişir; ilk başarılı select'i kullan (eksik kolonda hepsi patlamasın).
   const profileMap = new Map<string, ProfileRow>();
   if (userIds.length > 0) {
-    const tryFetch = async (cols: string) =>
-      (await admin.from("profiles").select(cols).in("id", userIds)) as {
-        data: ProfileRow[] | null;
-        error: unknown;
-      };
-    let res = await tryFetch(`${PROFILE_BASE_COLS}, ${PROFILE_PREMIUM_COLS}`);
-    if (res.error) res = await tryFetch(PROFILE_BASE_COLS); // premium kolonu yok → düş
-    for (const p of res.data ?? []) profileMap.set(p.id, p);
+    for (const cols of PROFILE_SELECT_ATTEMPTS) {
+      const { data, error } = (await admin
+        .from("profiles")
+        .select(cols)
+        .in("id", userIds)) as { data: ProfileRow[] | null; error: unknown };
+      if (!error) {
+        for (const p of data ?? []) profileMap.set(p.id, p);
+        break;
+      }
+    }
   }
 
   const nowMs = Date.now();
