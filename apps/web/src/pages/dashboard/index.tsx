@@ -279,44 +279,22 @@ export const DashboardPage = () => {
     (i) => i.provider === "app_store_connect" && i.enabled,
   );
 
-  // App Store Connect proceeds currency (Revenue sayfasındaki aynı mantık).
-  const appCurrency = useMemo(() => {
-    const apps = integrations.filter(
-      (i) => i.provider === "app_store_connect",
-    );
-    if (!isAll) {
-      const cfg = apps.find((i) => i.project_id === scope)?.config as
-        | { currency?: string }
-        | undefined;
-      return cfg?.currency || "USD";
-    }
-    const codes = new Set(
-      apps.map(
-        (i) => ((i.config as { currency?: string })?.currency) || "USD",
-      ),
-    );
-    return codes.size === 1 ? [...codes][0] : "USD";
-  }, [integrations, scope, isAll]);
 
-  // AdMob konsoluna paralel: Bugün / Dün / Bu ay / Geçen ay toplam kazanç
-  // (Reklam + Mağaza, display currency).
+  // AdMob konsoluna paralel: Bugün / Dün / Bu ay / Geçen ay REKLAM geliri.
+  // Sadece ad_revenue (kart "REKLAM" — app/mağaza geliri Gelir & Reklam sayfasında).
   const ranges = useMemo(() => moneyRanges(), []);
-  const totalEarnings = useMemo(() => {
+  const adTotals = useMemo(() => {
     const ar = rateOf(adCurrency);
-    const apr = rateOf(appCurrency);
-    const pick = (date: string) =>
-      valueOnDate(metrics, "ad_revenue", date) * ar +
-      valueOnDate(metrics, "app_revenue", date) * apr;
+    const pick = (date: string) => valueOnDate(metrics, "ad_revenue", date) * ar;
     const pickRange = (s: string, e: string) =>
-      sumInRange(metrics, "ad_revenue", s, e) * ar +
-      sumInRange(metrics, "app_revenue", s, e) * apr;
+      sumInRange(metrics, "ad_revenue", s, e) * ar;
     return {
       today: pick(ranges.today),
       yesterday: pick(ranges.yesterday),
       thisMonth: pickRange(ranges.thisMonthStart, ranges.thisMonthEnd),
       prevMonth: pickRange(ranges.prevMonthStart, ranges.prevMonthEnd),
     };
-  }, [metrics, ranges, fxRates, adCurrency, appCurrency]);
+  }, [metrics, ranges, fxRates, adCurrency]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -480,22 +458,22 @@ export const DashboardPage = () => {
                 </div>
                 <div className="mt-1 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
                   <div className="helm-hero-number text-[clamp(1.875rem,4cqw,2.5rem)] leading-none">
-                    {formatMoney(totalEarnings.today, displayCcy)}
+                    {formatMoney(adTotals.today, displayCcy)}
                   </div>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3 pt-0 mt-0 flex-wrap align-top">
                 <SubStat
                     label="Dün"
-                    value={formatMoney(totalEarnings.yesterday, displayCcy)}
+                    value={formatMoney(adTotals.yesterday, displayCcy)}
                 />
                 <SubStat
                     label="Bu ay"
-                    value={formatMoney(totalEarnings.thisMonth, displayCcy)}
+                    value={formatMoney(adTotals.thisMonth, displayCcy)}
                 />
                 <SubStat
                     label="Geçen ay"
-                    value={formatMoney(totalEarnings.prevMonth, displayCcy)}
+                    value={formatMoney(adTotals.prevMonth, displayCcy)}
                 />
               </div>
             </div>
