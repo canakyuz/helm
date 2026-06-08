@@ -647,7 +647,7 @@ export default function Revenue() {
         >
           {/* Hero */}
           <OpenHero
-            eyebrow={`Total revenue · ${period}`}
+            eyebrow={`Reklam geliri · ${period}`}
             live
             right={
               <View style={{ width: 150 }}>

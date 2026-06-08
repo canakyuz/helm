@@ -309,14 +309,14 @@ export default function Overview() {
     cfSeries.length > 1
       ? Number((cfNow! - cfSeries[cfSeries.length - 2]!).toFixed(1))
       : undefined;
-  // Hedef gerçek tablodan; ilerleme gerçek gelirden (ad_revenue ay toplamı, USD).
-  // Hedef kullanıcının kurduğu currency'de saklı → USD'ye normalize et ki hem
-  // oran (goalCurrent USD) hem fmt (USD→display) tutarlı olsun.
+  // Hedef gerçek tablodan; ilerleme TOPLAM kazançtan (sadece reklam değil — hero
+  // ile tutarlı). Hedef kullanıcının kurduğu currency'de saklı → USD'ye normalize
+  // et ki hem oran hem fmt (ikisi de USD baz) tutarlı olsun.
   const goalTarget =
     goal.data?.target_amount != null
       ? toUsd(goal.data.target_amount, goal.data.currency, rates ?? FX_FALLBACK)
       : null;
-  const goalCurrent = revenue.data?.thisMonth ?? 0;
+  const goalCurrent = totalEarnings;
   const goalPct =
     goalTarget != null && goalTarget > 0
       ? Math.round((goalCurrent / goalTarget) * 100)
