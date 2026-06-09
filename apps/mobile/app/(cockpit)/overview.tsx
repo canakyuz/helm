@@ -10,6 +10,7 @@ import { usePropertyMetrics } from "~/hooks/use-property-metrics";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { useFxRates } from "~/hooks/use-fx-rates";
 import { useRevenueGoal } from "~/hooks/use-revenue-goal";
+import { useRevenueMix } from "~/hooks/use-revenue-mix";
 import { toUsd, FX_FALLBACK } from "@helm/api";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
@@ -289,6 +290,7 @@ export default function Overview() {
   const appRevDetail = useMetricDetail("app_revenue");
   const crashFree = useMetricDetail("crash_free_sessions");
   const goal = useRevenueGoal();
+  const mix = useRevenueMix();
   const [dismissedAlerts, setDismissedAlerts] = useState<Record<number, boolean>>({});
 
   if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
@@ -304,11 +306,6 @@ export default function Overview() {
     (revenue.data?.yesterday ?? 0) + (appRevDetail.data?.yesterday ?? 0);
   const revDelta =
     yestRevenue > 0 ? ((todayRevenue - yestRevenue) / yestRevenue) * 100 : 0;
-  // Aylık toplam — goal ilerlemesi için (hero değil).
-  const totalEarnings =
-    (revenue.data?.thisMonth ?? 0) +
-    (appRevDetail.data?.thisMonth ?? 0) +
-    data.mrr;
   const cfSeries = (crashFree.data?.series ?? []).map((p) => p.value);
   const cfHas = cfSeries.length > 0;
   const cfNow = cfHas ? cfSeries[cfSeries.length - 1]! : null;
@@ -316,14 +313,14 @@ export default function Overview() {
     cfSeries.length > 1
       ? Number((cfNow! - cfSeries[cfSeries.length - 2]!).toFixed(1))
       : undefined;
-  // Hedef gerçek tablodan; ilerleme TOPLAM kazançtan (sadece reklam değil — hero
-  // ile tutarlı). Hedef kullanıcının kurduğu currency'de saklı → USD'ye normalize
-  // et ki hem oran hem fmt (ikisi de USD baz) tutarlı olsun.
+  // İlerleme = bu ayın GERÇEK geliri (reklam + abonelik + IAP), MRR projeksiyonu
+  // DEĞİL ve çift sayım yok → revenue-mix toplamı. Hedef kullanıcının currency'sinde
+  // saklı → USD'ye normalize (ikisi de USD baz, fmt tutarlı).
   const goalTarget =
     goal.data?.target_amount != null
       ? toUsd(goal.data.target_amount, goal.data.currency, rates ?? FX_FALLBACK)
       : null;
-  const goalCurrent = totalEarnings;
+  const goalCurrent = mix.data?.total ?? 0;
   const goalPct =
     goalTarget != null && goalTarget > 0
       ? Math.round((goalCurrent / goalTarget) * 100)
@@ -358,6 +355,7 @@ export default function Overview() {
                 revenue.refetch();
                 crashFree.refetch();
                 goal.refetch();
+                mix.refetch();
               }}
             />
           }
