@@ -8,6 +8,34 @@ Bu, `helm` cockpit'inin **kişisel** mobil yoldaşıdır. Refine masaüstünde k
 
 ---
 
+## UI/UX Skill Workflow (ZORUNLU)
+
+Arayüz, ekran, component, layout, görsel, motion veya UX ile ilgili **her işte**
+— yeni ekran, redesign, hizalama/spacing düzeltme, animasyon, renk, tipografi,
+review/audit, "şu ekranı düzelt" — kod yazmadan/önermeden ÖNCE şu üç skill'i
+`Skill` tool ile çağır:
+
+1. **`emil-design-eng`** — bir **motion/animasyon kararı** verirken (geçiş, spring,
+   press feedback, enter/exit timing, easing, stagger). Statik UI'ı canlı/cilalı
+   yapan kararlar buradan. Her küçük dokunuşta değil, hareket kararı varken aç.
+2. **`impeccable`** — **görsel incelik** için (tipografi, renk, hiyerarşi, spacing,
+   hizalama, kontrast, layout, audit). Mevcut tasarım sistemini DEVRALIR, üzerine
+   yazmaz. Slop detector + komut modları var.
+3. **`design-taste-frontend`** (Taste) — **tasarım zevki / anti-slop** için.
+   Şablonvari, karaktersiz AI arayüzlerini engeller; consistency lock'lar
+   (tek accent, tek radius, tek tema), accent economy.
+
+**Dürüstlük kuralı:** `design-taste-frontend` bir **web landing/portfolio** skill'i.
+RN/Expo mobilde sadece **transfer olan ilkelerini** uygula (consistency lock'lar,
+accent economy, OKLCH, anti-slop) — web-only pattern'leri (GSAP ScrollTrigger,
+Next.js RSC, Tailwind utilities) zorla sokma. Hangi ilkenin geçerli olduğunu işaretle.
+
+**Sınır:** Bu üç skill mevcut tasarım dilimizi (`design.md` — Liquid Glass
++ native iOS) BOZMAZ; onun ÜSTÜNE cila/karar katar. Çakışırsa design.md + bu
+CLAUDE.md kazanır. Backend-only / non-UI işlerde bu skill'ler gerekmez.
+
+---
+
 ## 1) Amaç ve Kapsam
 
 - **Tek kullanıcı:** Can. Multi-tenant değil, multi-user değil.
