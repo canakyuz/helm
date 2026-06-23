@@ -5,6 +5,8 @@ import { supabase } from "~/lib/supabase";
 
 export type { PendingPayout, RecentPayout, PayoutsData } from "@helm/api";
 
-export function usePayouts(projectId?: string) {
-  return useQuery(payoutsQueryOptions(supabase, projectId));
+type QueryGate = { enabled?: boolean };
+
+export function usePayouts(projectId?: string, options: QueryGate = {}) {
+  return useQuery(payoutsQueryOptions(supabase, projectId, options));
 }

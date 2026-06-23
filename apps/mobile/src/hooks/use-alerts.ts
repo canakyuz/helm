@@ -7,9 +7,11 @@ import { usePreferences } from "~/lib/preferences";
 
 export type { Alert, AlertSeverity } from "@helm/api";
 
-export function useAlerts() {
+type QueryGate = { enabled?: boolean };
+
+export function useAlerts(options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
-  return useQuery(alertsQueryOptions(supabase, selectedPropertyId));
+  return useQuery(alertsQueryOptions(supabase, selectedPropertyId, options));
 }
 
 export function useAckAlert() {

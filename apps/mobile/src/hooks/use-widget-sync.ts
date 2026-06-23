@@ -12,23 +12,30 @@ import {
   syncHomeWidget,
 } from "~/lib/widget-sync";
 
+type WidgetSyncOptions = { enabled?: boolean };
+
 /** Push KPIs to the home screen widget whenever cockpit data is available. */
-export function useWidgetSync(data: CockpitKpis | undefined): void {
-  const { currency } = usePreferences();
-  const { data: rates } = useFxRates();
-  const { data: sparkline } = useTotalRevenueSpark();
-  const fxRate = rates?.[currency] ?? 1;
+export function useWidgetSync(
+  data: CockpitKpis | undefined,
+  options: WidgetSyncOptions = {},
+): void {
+  const enabled = options.enabled ?? true;
+  const { currency, revenueMultiplier } = usePreferences();
+  const { data: rates } = useFxRates({ enabled });
+  const { data: sparkline } = useTotalRevenueSpark({ enabled });
+  const displayRate = (rates?.[currency] ?? 1) * revenueMultiplier;
 
   const dataRef = useRef(data);
   const currencyRef = useRef(currency);
-  const fxRef = useRef(fxRate);
+  const fxRef = useRef(displayRate);
   const sparkRef = useRef(sparkline);
   dataRef.current = data;
   currencyRef.current = currency;
-  fxRef.current = fxRate;
+  fxRef.current = displayRate;
   sparkRef.current = sparkline;
 
   const push = () => {
+    if (!enabled) return;
     const current = dataRef.current;
     if (!current) return;
     syncHomeWidget(
@@ -42,6 +49,7 @@ export function useWidgetSync(data: CockpitKpis | undefined): void {
   };
 
   useEffect(() => {
+    if (!enabled) return undefined;
     push();
     if (!data) return undefined;
     const retry2s = setTimeout(push, 2000);
@@ -50,9 +58,10 @@ export function useWidgetSync(data: CockpitKpis | undefined): void {
       clearTimeout(retry2s);
       clearTimeout(retry5s);
     };
-  }, [data, currency, fxRate, sparkline]);
+  }, [data, currency, displayRate, enabled, sparkline]);
 
   useEffect(() => {
+    if (!enabled) return undefined;
     return subscribeWidgetResync(push);
-  }, []);
+  }, [enabled]);
 }

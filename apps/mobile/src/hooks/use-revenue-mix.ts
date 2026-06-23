@@ -20,9 +20,11 @@ const MIX_COLOR: Record<string, string> = {
   ad_revenue: colors.blue,
 };
 
-export function useRevenueMix() {
+type QueryGate = { enabled?: boolean };
+
+export function useRevenueMix(options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
-  const opts = revenueMixQueryOptions(supabase, selectedPropertyId);
+  const opts = revenueMixQueryOptions(supabase, selectedPropertyId, options);
   return useQuery({
     ...opts,
     select: (d): { segments: MixSegment[]; total: number } => ({

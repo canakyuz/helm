@@ -7,7 +7,12 @@ import { useSystemHealth } from "~/hooks/use-system-health";
 import { useAlertRulesCount } from "~/hooks/use-property-metrics";
 import { useRevenueGoal, useSetRevenueGoal } from "~/hooks/use-revenue-goal";
 import { formatRelativeTime } from "~/lib/format";
-import { usePreferences, preferences, type Currency } from "~/lib/preferences";
+import {
+  normalizeRevenueMultiplier,
+  usePreferences,
+  preferences,
+  type Currency,
+} from "~/lib/preferences";
 import { supabase } from "~/lib/supabase";
 import { haptic } from "~/lib/haptics";
 import { colors, type } from "~/theme/tokens";
@@ -107,7 +112,7 @@ function SetRow({ label, sub, value, valueColor, right, danger, onPress, isLast 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function Settings() {
-  const { currency } = usePreferences();
+  const { currency, revenueMultiplier, prioritizeRevenueRequests } = usePreferences();
   const propertiesQuery = useProperties();
   const healthQuery = useSystemHealth();
   const alertRules = useAlertRulesCount();
@@ -127,6 +132,22 @@ export default function Settings() {
       "plain-text",
       goal.data?.target_amount != null ? String(goal.data.target_amount) : "",
       "numeric",
+    );
+  }
+
+  function promptRevenueMultiplier() {
+    haptic.tap();
+    Alert.prompt(
+      "Revenue multiplier",
+      "Enter a value from 1 to 3. This only changes local display values.",
+      (text) => {
+        const n = Number((text ?? "").replace(",", ".").replace(/[^\d.]/g, ""));
+        if (!Number.isFinite(n)) return;
+        preferences.setRevenueMultiplier(normalizeRevenueMultiplier(n));
+      },
+      "plain-text",
+      String(revenueMultiplier),
+      "decimal-pad",
     );
   }
   const lastSyncAt = healthQuery.data?.lastSyncRun?.finishedAt ?? null;
@@ -262,6 +283,13 @@ export default function Settings() {
                     : "Not set"
                 }
                 onPress={promptGoal}
+              />
+              <SetRow
+                label="Revenue multiplier"
+                sub="local display only"
+                value={`${revenueMultiplier.toFixed(2)}x`}
+                valueColor={revenueMultiplier > 1 ? colors.accentWarn : colors.fgSecondary}
+                onPress={promptRevenueMultiplier}
               />
               <SetRow
                 label="Plan & billing"
@@ -450,6 +478,19 @@ export default function Settings() {
               <SetRow
                 label="Sync frequency"
                 value="Every 5 min"
+              />
+              <SetRow
+                label="Revenue priority"
+                sub="load earnings first"
+                right={
+                  <Toggle
+                    on={prioritizeRevenueRequests}
+                    onChange={(v) => {
+                      haptic.tap();
+                      preferences.setPrioritizeRevenueRequests(v);
+                    }}
+                  />
+                }
               />
               <SetRow
                 label="Last sync"

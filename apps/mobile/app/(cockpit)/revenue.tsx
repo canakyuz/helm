@@ -47,6 +47,8 @@ type TabView = "Mix" | "Subs" | "Payouts";
 const GLYPH_TINTS = [colors.accent, colors.accentViolet, colors.blue, colors.green];
 const PROJECT_GLYPHS = ["◆", "✦", "❖", "◇"];
 
+// Time:  O(n) series length; Space: O(1) auxiliary.
+// Note:  Single pass is optimal because every value contributes to the total.
 function sumSeries(arr: number[]): number {
   let total = 0;
   for (const v of arr) total += v;
@@ -55,10 +57,16 @@ function sumSeries(arr: number[]): number {
 
 // ─── Mix tab ──────────────────────────────────────────────────────────────────
 
-function MixView({ fmt }: { fmt: (n: number) => string }) {
-  const properties = useProperties();
-  const propMetrics = usePropertyMetrics();
-  const mix = useRevenueMix();
+function MixView({
+  fmt,
+  queriesEnabled,
+}: {
+  fmt: (n: number) => string;
+  queriesEnabled: boolean;
+}) {
+  const properties = useProperties({ enabled: queriesEnabled });
+  const propMetrics = usePropertyMetrics({ enabled: queriesEnabled });
+  const mix = useRevenueMix({ enabled: queriesEnabled });
   const segments = mix.data?.segments ?? [];
   const [openSplit, setOpenSplit] = useState<string | null>(null);
   const [openEarner, setOpenEarner] = useState<string | null>(null);
@@ -79,10 +87,10 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
       <CardSection index="01" title="Revenue mix" pt={14}>
         <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
           {/* Bu ay tahsil edilen gelir (akış) — üstteki MRR anlık run-rate'tir, farklı. */}
-          <Eyebrow size={9}>BU AY · KAYNAĞA GÖRE (MRR'DAN AYRI)</Eyebrow>
+          <Eyebrow size={9}>BU AY · KAYNAĞA GÖRE (MRR HARIC)</Eyebrow>
         </View>
         <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 8 }}>
-          {mix.isLoading ? (
+          {!queriesEnabled || mix.isLoading ? (
             <EmptyHint>LOADING…</EmptyHint>
           ) : (mix.data?.total ?? 0) === 0 ? (
             <EmptyHint>NO REVENUE THIS MONTH</EmptyHint>
@@ -167,7 +175,9 @@ function MixView({ fmt }: { fmt: (n: number) => string }) {
         <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
           <Eyebrow size={9}>REVENUE PER PROJECT · TODAY</Eyebrow>
         </View>
-        {earners.length === 0 ? (
+        {!queriesEnabled ? (
+          <EmptyHint>LOADING…</EmptyHint>
+        ) : earners.length === 0 ? (
           <EmptyHint>NO PROJECTS FOUND</EmptyHint>
         ) : (
           earners.map(({ p: prop, rev }, i) => {
@@ -240,26 +250,33 @@ function SubsView({
   activeSubs,
   trial,
   projectId,
+  queriesEnabled,
 }: {
   fmt: (n: number) => string;
   chartW: number;
   activeSubs: number;
   trial: number | null;
   projectId?: string | undefined;
+  queriesEnabled: boolean;
 }) {
   const [openMrr, setOpenMrr] = useState<string | null>(null);
   const [showAllMoves, setShowAllMoves] = useState(false);
-  const mrr = useMrrMovement(projectId);
-  const moves = mrr.data?.segments ?? [];
+  const mrr = useMrrMovement(projectId, { enabled: queriesEnabled });
+  const moves = useMemo(() => mrr.data?.segments ?? [], [mrr.data?.segments]);
   const visibleMoves = showAllMoves ? moves : moves.slice(0, TOP_N);
-  const maxAbs = useMemo(
-    () => Math.max(1, ...moves.map((m) => Math.abs(m.value))),
-    [moves],
-  );
+  // Time:  O(n) movement count; Space: O(1) auxiliary.
+  // Note:  Single pass avoids allocating an intermediate absolute-value array.
+  const maxAbs = useMemo(() => {
+    let max = 1;
+    for (const move of moves) {
+      max = Math.max(max, Math.abs(move.value));
+    }
+    return max;
+  }, [moves]);
   const segColor = (v: number) => (v >= 0 ? colors.green : colors.accentDanger);
 
   // Real daily MRR series (metrics table) → real trend chart + delta.
-  const mrrDetail = useMetricDetail("mrr");
+  const mrrDetail = useMetricDetail("mrr", { enabled: queriesEnabled });
   const mrrSeries = (mrrDetail.data?.series ?? []).map((p) => p.value);
   const mrrDelta =
     mrrSeries.length >= 2 && mrrSeries[0]! > 0
@@ -275,7 +292,9 @@ function SubsView({
         {...(mrr.data ? { action: `net ${mrr.data.net >= 0 ? "+" : ""}${fmt(mrr.data.net)}` } : {})}
         pt={14}
       >
-        {!projectId ? (
+        {!queriesEnabled ? (
+          <EmptyHint>LOADING…</EmptyHint>
+        ) : !projectId ? (
           <EmptyHint>SELECT A PROJECT</EmptyHint>
         ) : mrr.isLoading ? (
           <EmptyHint>LOADING…</EmptyHint>
@@ -409,7 +428,7 @@ function SubsView({
       {/* MRR trend — real daily MRR series from the metrics table */}
       <CardSection index="03" title="MRR trend" pt={14}>
         <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 8 }}>
-          {mrrDetail.isLoading ? (
+          {!queriesEnabled || mrrDetail.isLoading ? (
             <EmptyHint>LOADING…</EmptyHint>
           ) : mrrSeries.length < 2 ? (
             <EmptyHint>NO MRR DATA</EmptyHint>
@@ -439,15 +458,25 @@ function SubsView({
 
 // ─── Payouts tab ──────────────────────────────────────────────────────────────
 
-function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId?: string | undefined }) {
+function PayoutsView({
+  fmt,
+  projectId,
+  queriesEnabled,
+}: {
+  fmt: (n: number) => string;
+  projectId?: string | undefined;
+  queriesEnabled: boolean;
+}) {
   const [openPayout, setOpenPayout] = useState<string | null>(null);
   const [showAllRecent, setShowAllRecent] = useState(false);
-  const q = usePayouts(projectId);
-  const pending = q.data?.pending ?? [];
-  const recent = q.data?.recent ?? [];
+  const q = usePayouts(projectId, { enabled: queriesEnabled });
+  const pending = useMemo(() => q.data?.pending ?? [], [q.data?.pending]);
+  const recent = useMemo(() => q.data?.recent ?? [], [q.data?.recent]);
   const visibleRecent = showAllRecent ? recent : recent.slice(0, TOP_N);
 
   // Pending'i kaynağa göre topla.
+  // Time:  O(n) pending payouts; Space: O(s) unique sources.
+  // Note:  Map gives O(1) average source aggregation without nested scans.
   const pendingBySource = useMemo(() => {
     const m = new Map<string, number>();
     for (const p of pending) m.set(p.source, (m.get(p.source) ?? 0) + p.amount);
@@ -461,7 +490,9 @@ function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId
       {/* Pending balance */}
       <CardSection index="01" title="Pending balance" pt={14}>
         <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 8 }}>
-          {!projectId ? (
+          {!queriesEnabled ? (
+            <EmptyHint>LOADING…</EmptyHint>
+          ) : !projectId ? (
             <EmptyHint>SELECT A PROJECT</EmptyHint>
           ) : q.isLoading ? (
             <EmptyHint>LOADING…</EmptyHint>
@@ -517,7 +548,9 @@ function PayoutsView({ fmt, projectId }: { fmt: (n: number) => string; projectId
 
       {/* Recent payouts */}
       <CardSection index="02" title="Recent payouts" {...(recent.length ? { count: recent.length } : {})} pt={14}>
-        {!projectId ? (
+        {!queriesEnabled ? (
+          <EmptyHint>LOADING…</EmptyHint>
+        ) : !projectId ? (
           <EmptyHint>SELECT A PROJECT</EmptyHint>
         ) : q.isLoading ? (
           <EmptyHint>LOADING…</EmptyHint>
@@ -604,18 +637,24 @@ export default function Revenue() {
   const chartW = width - 44;
 
   const fmt = useFormatCurrency();
-  const kpis = useCockpitKpis();
-  const { selectedPropertyId } = usePreferences();
-  const properties = useProperties();
+  const [period, setPeriod] = useState<Period>("30D");
+  const [view, setView] = useState<TabView>("Mix");
+  const { selectedPropertyId, prioritizeRevenueRequests } = usePreferences();
+
+  const adRev = useMetricDetail("ad_revenue");
+  const primaryRevenueReady = adRev.data != null || adRev.isError;
+  const secondaryQueriesEnabled =
+    !prioritizeRevenueRequests || primaryRevenueReady;
+  const kpis = useCockpitKpis({ enabled: secondaryQueriesEnabled });
+  const properties = useProperties({
+    enabled: secondaryQueriesEnabled && view !== "Mix",
+  });
   // Payouts edge tek proje scope'lu — "all" ise ilk projeye düş.
   const projectId =
     selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
-
-  const [period, setPeriod] = useState<Period>("30D");
-  const [view, setView] = useState<TabView>("Mix");
-
-  const adRev = useMetricDetail("ad_revenue");
-  const trialDetail = useMetricDetail("subs_trial");
+  const trialDetail = useMetricDetail("subs_trial", {
+    enabled: secondaryQueriesEnabled && view === "Subs",
+  });
   const trialSeries = trialDetail.data?.series ?? [];
   const trialVal = trialSeries.length > 0 ? trialSeries[trialSeries.length - 1]!.value : null;
   // Real ad_revenue daily series (~30d window). 7D = last 7; 30D/90D = full
@@ -690,7 +729,7 @@ export default function Revenue() {
             <FullDivider />
 
             {view === "Mix" ? (
-              <MixView fmt={fmt} />
+              <MixView fmt={fmt} queriesEnabled={secondaryQueriesEnabled} />
             ) : view === "Subs" ? (
               <SubsView
                 fmt={fmt}
@@ -698,9 +737,14 @@ export default function Revenue() {
                 activeSubs={kpis.data?.activeSubs ?? 0}
                 trial={trialVal}
                 projectId={projectId}
+                queriesEnabled={secondaryQueriesEnabled}
               />
             ) : (
-              <PayoutsView fmt={fmt} projectId={projectId} />
+              <PayoutsView
+                fmt={fmt}
+                projectId={projectId}
+                queriesEnabled={secondaryQueriesEnabled}
+              />
             )}
           </LiquidGlass>
         </ScrollView>

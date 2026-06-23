@@ -12,17 +12,21 @@ import { usePreferences } from "~/lib/preferences";
 // sadece client + selectedPropertyId enjekte eder (web ile tek kaynak).
 export type { CockpitKpis, SparkPoint } from "@helm/api";
 
-export function useCockpitKpis() {
+type QueryGate = { enabled?: boolean };
+
+export function useCockpitKpis(options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
-  return useQuery(cockpitKpisQueryOptions(supabase, selectedPropertyId));
+  return useQuery(cockpitKpisQueryOptions(supabase, selectedPropertyId, options));
 }
 
-export function useMrrSpark() {
+export function useMrrSpark(options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
-  return useQuery(mrrSparkQueryOptions(supabase, selectedPropertyId));
+  return useQuery(mrrSparkQueryOptions(supabase, selectedPropertyId, options));
 }
 
-export function useTotalRevenueSpark() {
+export function useTotalRevenueSpark(options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
-  return useQuery(totalRevenueSparkQueryOptions(supabase, selectedPropertyId));
+  return useQuery(
+    totalRevenueSparkQueryOptions(supabase, selectedPropertyId, options),
+  );
 }

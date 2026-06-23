@@ -3,6 +3,8 @@ import { fxRatesQueryOptions } from "@helm/queries";
 
 export type { FxRates } from "@helm/api";
 
-export function useFxRates() {
-  return useQuery(fxRatesQueryOptions());
+type QueryGate = { enabled?: boolean };
+
+export function useFxRates(options: QueryGate = {}) {
+  return useQuery(fxRatesQueryOptions(options));
 }

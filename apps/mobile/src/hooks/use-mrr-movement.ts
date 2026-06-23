@@ -5,6 +5,8 @@ import { supabase } from "~/lib/supabase";
 
 export type { MrrSegment, MrrMovement } from "@helm/api";
 
-export function useMrrMovement(projectId?: string) {
-  return useQuery(mrrMovementQueryOptions(supabase, projectId));
+type QueryGate = { enabled?: boolean };
+
+export function useMrrMovement(projectId?: string, options: QueryGate = {}) {
+  return useQuery(mrrMovementQueryOptions(supabase, projectId, options));
 }
