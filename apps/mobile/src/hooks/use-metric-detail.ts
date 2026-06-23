@@ -6,7 +6,11 @@ import { usePreferences } from "~/lib/preferences";
 
 export type { MetricDetail } from "@helm/api";
 
-export function useMetricDetail(metric: string) {
+type QueryGate = { enabled?: boolean };
+
+export function useMetricDetail(metric: string, options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
-  return useQuery(metricDetailQueryOptions(supabase, metric, selectedPropertyId));
+  return useQuery(
+    metricDetailQueryOptions(supabase, metric, selectedPropertyId, options),
+  );
 }

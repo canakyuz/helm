@@ -8,6 +8,8 @@ import {
 } from "@helm/api";
 import { STALE_TIME } from "@helm/config";
 
+type QueryGate = { enabled?: boolean };
+
 export const cockpitKpisKeys = {
   all: ["cockpit-kpis"] as const,
   byProperty: (id: SelectedPropertyId) => [...cockpitKpisKeys.all, id] as const,
@@ -22,9 +24,11 @@ export const cockpitSparkKeys = {
 export function cockpitKpisQueryOptions(
   client: SupabaseClient,
   propertyId: SelectedPropertyId,
+  options: QueryGate = {},
 ) {
   return queryOptions({
     queryKey: cockpitKpisKeys.byProperty(propertyId),
+    enabled: options.enabled ?? true,
     queryFn: () => fetchCockpitKpis(client, propertyId),
     staleTime: STALE_TIME.kpis,
   });
@@ -33,9 +37,11 @@ export function cockpitKpisQueryOptions(
 export function mrrSparkQueryOptions(
   client: SupabaseClient,
   propertyId: SelectedPropertyId,
+  options: QueryGate = {},
 ) {
   return queryOptions({
     queryKey: cockpitSparkKeys.mrr(propertyId),
+    enabled: options.enabled ?? true,
     queryFn: () => fetchMrrSpark(client, propertyId),
     staleTime: STALE_TIME.spark,
   });
@@ -44,9 +50,11 @@ export function mrrSparkQueryOptions(
 export function totalRevenueSparkQueryOptions(
   client: SupabaseClient,
   propertyId: SelectedPropertyId,
+  options: QueryGate = {},
 ) {
   return queryOptions({
     queryKey: cockpitSparkKeys.totalRevenue(propertyId),
+    enabled: options.enabled ?? true,
     queryFn: () => fetchTotalRevenueSpark(client, propertyId),
     staleTime: STALE_TIME.spark,
   });

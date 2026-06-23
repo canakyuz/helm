@@ -1,15 +1,30 @@
+import { useMemo } from "react";
+import { usePathname } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 import { useAlerts } from "~/hooks/use-alerts";
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useWidgetSync } from "~/hooks/use-widget-sync";
+import { usePreferences } from "~/lib/preferences";
 import { colors } from "~/theme/tokens";
 
 export default function CockpitLayout() {
-  const kpis = useCockpitKpis();
-  useWidgetSync(kpis.data);
-  const alerts = useAlerts();
-  const openCount = (alerts.data ?? []).filter((a) => !a.delivered).length;
+  const pathname = usePathname();
+  const { prioritizeRevenueRequests } = usePreferences();
+  const deferShellQueries =
+    prioritizeRevenueRequests && pathname.endsWith("/revenue");
+  const kpis = useCockpitKpis({ enabled: !deferShellQueries });
+  useWidgetSync(kpis.data, { enabled: !deferShellQueries });
+  const alerts = useAlerts({ enabled: !deferShellQueries });
+  // Time:  O(n) alerts; Space: O(1) auxiliary.
+  // Note:  Counts in one pass without allocating an intermediate filtered array.
+  const openCount = useMemo(() => {
+    let count = 0;
+    for (const alert of alerts.data ?? []) {
+      if (!alert.delivered) count += 1;
+    }
+    return count;
+  }, [alerts.data]);
 
   return (
     <NativeTabs

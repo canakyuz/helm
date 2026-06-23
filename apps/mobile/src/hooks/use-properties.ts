@@ -5,6 +5,8 @@ import { supabase } from "~/lib/supabase";
 
 export type { Property, PropertyType, PropertyStatus } from "@helm/api";
 
-export function useProperties() {
-  return useQuery(propertiesQueryOptions(supabase));
+type QueryGate = { enabled?: boolean };
+
+export function useProperties(options: QueryGate = {}) {
+  return useQuery(propertiesQueryOptions(supabase, options));
 }

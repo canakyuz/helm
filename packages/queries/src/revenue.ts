@@ -9,6 +9,8 @@ import {
   fetchMrrMovement,
 } from "@helm/api";
 
+type QueryGate = { enabled?: boolean };
+
 // ── revenue-goal ──
 export const revenueGoalKeys = {
   all: ["revenue-goal"] as const,
@@ -36,29 +38,39 @@ export const revenueMixKeys = {
 export function revenueMixQueryOptions(
   client: SupabaseClient,
   propertyId: SelectedPropertyId,
+  options: QueryGate = {},
 ) {
   return queryOptions({
     queryKey: revenueMixKeys.byProperty(propertyId),
+    enabled: options.enabled ?? true,
     queryFn: () => fetchRevenueMix(client, propertyId),
     staleTime: 5 * 60_000,
   });
 }
 
 // ── payouts (tek project scope) ──
-export function payoutsQueryOptions(client: SupabaseClient, projectId?: string) {
+export function payoutsQueryOptions(
+  client: SupabaseClient,
+  projectId?: string,
+  options: QueryGate = {},
+) {
   return queryOptions({
     queryKey: ["payouts", projectId],
-    enabled: projectId != null,
+    enabled: projectId != null && (options.enabled ?? true),
     staleTime: 5 * 60_000,
     queryFn: () => fetchPayouts(client, projectId!),
   });
 }
 
 // ── mrr-movement (tek project scope) ──
-export function mrrMovementQueryOptions(client: SupabaseClient, projectId?: string) {
+export function mrrMovementQueryOptions(
+  client: SupabaseClient,
+  projectId?: string,
+  options: QueryGate = {},
+) {
   return queryOptions({
     queryKey: ["mrr-movement", projectId],
-    enabled: projectId != null,
+    enabled: projectId != null && (options.enabled ?? true),
     staleTime: 5 * 60_000,
     queryFn: () => fetchMrrMovement(client, projectId!),
   });

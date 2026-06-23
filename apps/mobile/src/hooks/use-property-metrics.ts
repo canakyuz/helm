@@ -8,8 +8,10 @@ import { supabase } from "~/lib/supabase";
 
 export type { PropertyMetric, PropertyMetricsMap } from "@helm/api";
 
-export function usePropertyMetrics() {
-  return useQuery(propertyMetricsQueryOptions(supabase));
+type QueryGate = { enabled?: boolean };
+
+export function usePropertyMetrics(options: QueryGate = {}) {
+  return useQuery(propertyMetricsQueryOptions(supabase, options));
 }
 
 export function useAlertRulesCount() {
