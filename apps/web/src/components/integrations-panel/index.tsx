@@ -3,6 +3,8 @@ import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
 import {
   AlertTriangle,
   Check,
+  Eye,
+  EyeOff,
   Pencil,
   Play,
   Plus,
@@ -387,6 +389,8 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [provider, setProvider] = useState<ProviderName | "">("");
   const [config, setConfig] = useState<Record<string, string>>({});
+  // Hangi secret alanların düz metin gösterileceği — key bazlı toggle.
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   const [testing, setTesting] = useState<string | null>(null);
   const [testOpen, setTestOpen] = useState(false);
@@ -461,6 +465,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const resetForm = () => {
     setProvider("");
     setConfig({});
+    setRevealed({});
     setEditingId(null);
   };
 
@@ -578,9 +583,36 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                           f.secret ? "font-mono text-xs" : undefined,
                         )}
                       />
+                    ) : f.secret ? (
+                      <div className="relative">
+                        <Input
+                          type={revealed[f.key] ? "text" : "password"}
+                          placeholder={f.placeholder}
+                          value={config[f.key] ?? ""}
+                          onChange={(e) =>
+                            setConfig((c) => ({ ...c, [f.key]: e.target.value }))
+                          }
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          onClick={() =>
+                            setRevealed((r) => ({ ...r, [f.key]: !r[f.key] }))
+                          }
+                          aria-label={revealed[f.key] ? "Gizle" : "Göster"}
+                          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground hover:text-foreground"
+                        >
+                          {revealed[f.key] ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
+                        </button>
+                      </div>
                     ) : (
                       <Input
-                        type={f.secret ? "password" : "text"}
+                        type="text"
                         placeholder={f.placeholder}
                         value={config[f.key] ?? ""}
                         onChange={(e) =>
