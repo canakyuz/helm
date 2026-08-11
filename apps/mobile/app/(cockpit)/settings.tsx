@@ -428,7 +428,7 @@ export default function Settings() {
                 right={
                   <Seg<Currency>
                     value={currency}
-                    options={["USD", "EUR", "TRY"]}
+                    options={["USD", "EUR", "GBP", "TRY"]}
                     onChange={(c) => {
                       haptic.tap();
                       preferences.setCurrency(c);
