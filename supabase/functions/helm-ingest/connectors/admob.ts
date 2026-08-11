@@ -38,7 +38,9 @@ export const fetchAdMob: Connector = async (config) => {
   const body = {
     reportSpec: {
       dateRange: { startDate: ymd(start), endDate: ymd(end) },
-      dimensions: ["DATE"],
+      // APP boyutu olmadan yayinci hesabindaki TUM uygulamalar tek gunluk
+      // rakamda toplanir ve hangi oyunun kazandirdigi gorunmez.
+      dimensions: ["DATE", "APP"],
       metrics: ["ESTIMATED_EARNINGS", "IMPRESSIONS", "IMPRESSION_RPM"],
     },
   };
@@ -60,7 +62,15 @@ export const fetchAdMob: Connector = async (config) => {
 
   // Yanıt bir dizi: { header } / { row } / { footer } elemanları.
   const items: Array<Record<string, unknown>> = await res.json();
-  const points: MetricPoint[] = [];
+
+  const appFilter = typeof config.app_id === "string" && config.app_id.length > 0
+    ? config.app_id
+    : null;
+
+  // Gun bazinda toplama: APP boyutu ile ayni tarih icin birden fazla satir
+  // doner. Tek tek push edilirse ingest'in upsert'i (project_id,date,source,
+  // metric) son satiri yazar ve toplam tek uygulamaya duser — sessiz veri kaybi.
+  const daily = new Map<string, { revenue: number; impressions: number }>();
 
   for (const item of items) {
     const row = item.row as
@@ -74,6 +84,13 @@ export const fetchAdMob: Connector = async (config) => {
       | undefined;
     if (!row) continue;
 
+    // app_id tanimliysa yalnizca o uygulamanin satirlari sayilir. Tanimli
+    // degilse hepsi toplanir — mevcut entegrasyonlar icin davranis degismez.
+    if (appFilter) {
+      const appId = row.dimensionValues?.APP?.value;
+      if (appId !== appFilter) continue;
+    }
+
     const dateRaw = row.dimensionValues?.DATE?.value; // "YYYYMMDD"
     if (!dateRaw || dateRaw.length !== 8) continue;
     const date = `${dateRaw.slice(0, 4)}-${dateRaw.slice(4, 6)}-${dateRaw.slice(6, 8)}`;
@@ -82,14 +99,20 @@ export const fetchAdMob: Connector = async (config) => {
     // ESTIMATED_EARNINGS, IMPRESSION_RPM → micros; IMPRESSIONS → integer.
     const revenue = Number(mv.ESTIMATED_EARNINGS?.microsValue ?? 0) / 1_000_000;
     const impressions = Number(mv.IMPRESSIONS?.integerValue ?? 0);
-    let ecpm = Number(mv.IMPRESSION_RPM?.microsValue ?? 0) / 1_000_000;
-    // AdMob bazı günlerde RPM dönmüyor — gelir/gösterimden hesapla.
-    if (ecpm === 0 && impressions > 0) {
-      ecpm = (revenue / impressions) * 1000;
-    }
 
-    points.push({ date, metric: "ad_revenue", value: revenue });
-    points.push({ date, metric: "ad_impressions", value: impressions });
+    const acc = daily.get(date) ?? { revenue: 0, impressions: 0 };
+    acc.revenue += revenue;
+    acc.impressions += impressions;
+    daily.set(date, acc);
+  }
+
+  const points: MetricPoint[] = [];
+  for (const [date, acc] of daily) {
+    // eCPM toplanamaz — oranlarin ortalamasi yanlis sonuc verir. Toplanmis
+    // gelir ve gosterimden yeniden hesaplanir.
+    const ecpm = acc.impressions > 0 ? (acc.revenue / acc.impressions) * 1000 : 0;
+    points.push({ date, metric: "ad_revenue", value: acc.revenue });
+    points.push({ date, metric: "ad_impressions", value: acc.impressions });
     points.push({ date, metric: "ad_ecpm", value: ecpm });
   }
   return points;
