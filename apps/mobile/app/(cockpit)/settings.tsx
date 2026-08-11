@@ -231,6 +231,7 @@ export default function Settings() {
                   <Toggle
                     on={prioritizeRevenueRequests}
                     offColor={theme.tile2}
+                    onColor={theme.accent}
                     onChange={(v) => {
                       haptic.tap();
                       preferences.setPrioritizeRevenueRequests(v);
