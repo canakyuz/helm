@@ -31,6 +31,9 @@ import {
   type RailRow,
 } from "~/components/bento";
 
+/** Dönem pili yüksekliği — yatay ScrollView'a açıkça verilmeli (bkz PeriodStrip). */
+const PILL_H = 40;
+
 const GRAINS = ["Ay", "Hafta"] as const;
 type Grain = (typeof GRAINS)[number];
 
@@ -80,7 +83,14 @@ function weekLabel(bucket: RevenueBucket): string {
   return `${fd}–${td} ${MONTHS_SHORT[(tm ?? 1) - 1]}`;
 }
 
+/** Cihazin yerel gunu, metrics.date ile ayni YYYY-MM-DD formatinda. */
+function localToday(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export default function Revenue() {
+  const todayIso = localToday();
   const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
   const [grain, setGrain] = useState<Grain>("Ay");
@@ -227,6 +237,10 @@ export default function Revenue() {
                     dimColor={glass.chartDim}
                     height={64}
                     gap={3}
+                    // Vurgu "bugun" demek. Gecmis bir donemde son gunu
+                    // vurgulamak yanlis bir "su an" ima eder; -1 hicbir
+                    // cubugu esitlemez, tamami sonuk kalir.
+                    selectedIndex={picked.days.some((d) => d.date === todayIso) ? null : -1}
                     replayKey={replayKey}
                   />
                 </View>
@@ -317,10 +331,15 @@ function PeriodStrip({
   if (buckets.length === 0) return null;
 
   return (
+    // AÇIK YÜKSEKLİK ŞART: dikey ScrollView içindeki yatay ScrollView'ın
+    // yüksekliği sıfıra düşüyor. iOS çocukları yine de çiziyor (varsayılan
+    // olarak kırpmaz) ama sınırların DIŞINDAKİ dokunuşları iletmiyor — piller
+    // görünür ama tıklanamaz oluyordu. flexGrow:0 tek başına yetmez.
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 6 }}
+      style={{ height: PILL_H, flexGrow: 0 }}
+      contentContainerStyle={{ gap: 6, alignItems: "center" }}
     >
       {buckets.map((b) => {
         const active = b.key === activeKey;
@@ -329,8 +348,9 @@ function PeriodStrip({
             {({ pressed }) => (
               <View
                 style={{
+                  height: PILL_H,
+                  justifyContent: "center",
                   paddingHorizontal: 14,
-                  paddingVertical: 9,
                   borderRadius: R.field,
                   backgroundColor: active ? theme.chrome : theme.tile2,
                   borderWidth: 1,
