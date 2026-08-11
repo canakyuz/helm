@@ -2,18 +2,25 @@ import { useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { space } from "@helm/design";
-import type { SentryLevel } from "@helm/api";
+import { AD_FORMAT_LABEL, instrumentationWarnings, type SentryLevel } from "@helm/api";
 
 import { useSentryIssues } from "~/hooks/use-sentry-issues";
 import { useSystemHealth } from "~/hooks/use-system-health";
 import { useAppVersions } from "~/hooks/use-app-versions";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
+import { useGameFunnels } from "~/hooks/use-game-funnels";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { Ring } from "~/components/liquid";
 import { BentoBackground, BentoHeader, BentoTile, Rise } from "~/components/bento";
+import {
+  FunnelTile,
+  InstrumentationTile,
+  PerfTile,
+  type FunnelRow,
+} from "~/components/analytics";
 
 const TOP_CRASHES = 4;
 const TOP_VERSIONS = 4;
@@ -31,6 +38,7 @@ export default function Health() {
   const healthQuery = useSystemHealth();
   const versionsQuery = useAppVersions();
   const crashFree = useMetricDetail("crash_free_sessions");
+  const funnels = useGameFunnels(30);
 
   const handleRefresh = () => {
     void onRefresh().then(() => setReplayKey((k) => k + 1));
@@ -59,6 +67,31 @@ export default function Health() {
         : cfNow >= DEGRADED_AT
           ? { label: "Zayıflamış", color: theme.warn }
           : { label: "Kritik", color: theme.neg };
+
+  const f = funnels.data;
+  const warnings = f != null ? instrumentationWarnings(f) : [];
+  const pct = (r: number | null): string => (r == null ? "—" : `%${Math.round(r * 100)}`);
+
+  // Oturum: degeri "kac oturum" degil, KAPANMAYAN oran — cokme gostergesi.
+  const sessionRows: FunnelRow[] = (f?.sessions ?? []).map((s) => ({
+    label: s.platform,
+    value: `${formatInteger(s.ended)} / ${formatInteger(s.started)}`,
+    ratio: s.started > 0 ? s.ended / s.started : 0,
+    note:
+      s.unclosedRate != null && s.unclosed > 0
+        ? `${formatInteger(s.unclosed)} oturum kapanmadı · ${pct(s.unclosedRate)}`
+        : undefined,
+    tone: s.unclosedRate != null && s.unclosedRate >= 0.5 ? "loss" : "normal",
+  }));
+
+  // Reklam: burada GELIR degil ARIZA olcusu — kac gosterim basarisiz oldu.
+  const adRows: FunnelRow[] = (f?.ads ?? []).map((a) => ({
+    label: AD_FORMAT_LABEL[a.format] ?? a.format,
+    value: `${formatInteger(a.shown)} / ${formatInteger(a.shown + a.failed)}`,
+    ratio: a.failureRate != null ? 1 - a.failureRate : 1,
+    note: a.failed > 0 ? `${formatInteger(a.failed)} hata · ${pct(a.failureRate)}` : undefined,
+    tone: a.failureRate != null && a.failureRate >= 0.3 ? "loss" : "normal",
+  }));
 
   const levelColor = (level: SentryLevel): string => {
     if (level === "fatal") return theme.neg;
@@ -176,8 +209,37 @@ export default function Health() {
             </BentoTile>
           </Rise>
 
-          {/* Entegrasyonlar */}
+          {/* Ölçüm şüpheleri — aşağıdaki her okumayı nitelendiriyor */}
           <Rise index={2} replayKey={replayKey}>
+            <InstrumentationTile warnings={warnings} />
+          </Rise>
+
+          <Rise index={3} replayKey={replayKey}>
+            <FunnelTile
+              title="Oturum kapanma"
+              count={f != null ? `${f.days} GÜN` : undefined}
+              rows={sessionRows}
+              empty={funnels.isLoading ? "YÜKLENİYOR…" : "OTURUM OLAYI YOK"}
+              replayKey={replayKey}
+            />
+          </Rise>
+
+          <Rise index={4} replayKey={replayKey}>
+            <FunnelTile
+              title="Reklam arızası"
+              count="GÖSTERİM / TOPLAM"
+              rows={adRows}
+              empty={funnels.isLoading ? "YÜKLENİYOR…" : "REKLAM OLAYI YOK"}
+              replayKey={replayKey}
+            />
+          </Rise>
+
+          <Rise index={5} replayKey={replayKey}>
+            <PerfTile rows={f?.perf ?? []} />
+          </Rise>
+
+          {/* Entegrasyonlar */}
+          <Rise index={6} replayKey={replayKey}>
             <BentoTile>
               <View className="flex-row items-center justify-between">
                 <Text className="font-semibold text-emph tracking-tight text-fg">
@@ -223,7 +285,7 @@ export default function Health() {
           </Rise>
 
           {/* Surumler */}
-          <Rise index={3} replayKey={replayKey}>
+          <Rise index={7} replayKey={replayKey}>
             <BentoTile>
               <Text className="font-semibold text-emph tracking-tight text-fg">
                 Sürümler
