@@ -7,11 +7,15 @@ import { makeAscJwt } from "../../_shared/asc-jwt.ts";
 
 // App Store Connect — Sales Reports (daily summary).
 // JWT ES256 ile auth → günlük satış raporu (gzip TSV).
-// config: { key_id, issuer_id?, private_key, vendor_number, currency? }
+// config: { key_id, issuer_id?, private_key, vendor_number, currency?, app_store_id? }
 //   issuer_id: Team Key için Integrations sayfasındaki Issuer ID (UUID).
 //              Individual API Key kullanıyorsan BOŞ bırak (Apple `sub: "user"` bekler).
 //   private_key: .p8 dosyasının tüm içeriği (BEGIN/END satırları dahil).
 //   currency: developer proceeds para birimi (vendor varsayılanı; çoğu hesapta USD).
+//   app_store_id: Apple'ın SAYISAL uygulama kimliği (App Store URL'indeki id######),
+//                 bundle id DEĞİL. Vendor raporu hesaptaki TÜM uygulamaları içerir;
+//                 bu alan verilmezse hepsi toplanıp tek projeye yazılır — birden
+//                 fazla uygulaması olan hesaplarda rakamlar birbirine karışır.
 
 const DAYS_BACK = 7;
 
@@ -58,9 +62,22 @@ interface ReportRow {
   units: number;
   proceeds: number;
   countryCode: string; // ISO 3166-1 alpha-2; boş ise ""
+  /** "Apple Identifier" — raporun HANGI uygulamaya ait oldugu. Kolon yoksa "". */
+  appleId: string;
 }
 
-function parseTsv(tsv: string): ReportRow[] {
+/**
+ * parseTsv ciktisi. hasAppleId, raporda uygulama kimligi kolonunun BULUNUP
+ * bulunmadigini soyler: vendor raporu hesaptaki TUM uygulamalari icerir ve bu
+ * kolon olmadan proje bazinda ayirmak imkansizdir. Filtre istenmisken kolon
+ * yoksa sessizce yanlis toplam yazmak yerine hata veririz.
+ */
+interface ParsedReport {
+  rows: ReportRow[];
+  hasAppleId: boolean;
+}
+
+function parseTsv(tsv: string): ParsedReport {
   const lines = tsv.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length < 2) return [];
   const headers = lines[0].split("\t");
@@ -69,7 +86,8 @@ function parseTsv(tsv: string): ReportRow[] {
   const iUnits = idx("Units");
   const iProc = idx("Developer Proceeds");
   const iCountry = idx("Country Code");
-  if (iType < 0 || iUnits < 0 || iProc < 0) return [];
+  const iAppleId = idx("Apple Identifier");
+  if (iType < 0 || iUnits < 0 || iProc < 0) return { rows: [], hasAppleId: iAppleId >= 0 };
 
   const rows: ReportRow[] = [];
   for (let i = 1; i < lines.length; i++) {
@@ -79,9 +97,10 @@ function parseTsv(tsv: string): ReportRow[] {
       units: Number(cols[iUnits] ?? 0),
       proceeds: Number(cols[iProc] ?? 0),
       countryCode: iCountry >= 0 ? (cols[iCountry] ?? "").trim() : "",
+      appleId: iAppleId >= 0 ? (cols[iAppleId] ?? "").trim() : "",
     });
   }
-  return rows;
+  return { rows, hasAppleId: iAppleId >= 0 };
 }
 
 // Apple product type identifiers:
@@ -110,6 +129,12 @@ function classifyRevenue(productType: string): RevClass {
 export const fetchAppStoreConnect: Connector = async (config) => {
   const jwt = await makeAscJwt(config as unknown as { key_id: string; issuer_id?: string; private_key: string });
   const vendor = String(config.vendor_number);
+  // Apple'in sayisal uygulama kimligi (App Store URL'indeki id######). Yorum
+  // tarafindaki app_store_id ile ayni alan; yeni bir isim uydurulmadi.
+  const appFilter =
+    typeof config.app_store_id === "string" && config.app_store_id.trim().length > 0
+      ? config.app_store_id.trim()
+      : null;
 
   const points: MetricPoint[] = [];
   const byCountry: CountryMetricPoint[] = [];
@@ -120,7 +145,18 @@ export const fetchAppStoreConnect: Connector = async (config) => {
     const date = ymd(d);
     const tsv = await fetchDailyReport(jwt, vendor, date);
     if (!tsv) continue;
-    const rows = parseTsv(tsv);
+    const parsed = parseTsv(tsv);
+    // Vendor raporu hesaptaki TUM uygulamalari icerir. app_store_id verilmisse
+    // yalnizca o uygulamanin satirlari sayilir; verilmemisse davranis eskisi
+    // gibi kalir (hepsi toplanir) — mevcut entegrasyonlar kirilmaz.
+    if (appFilter && !parsed.hasAppleId) {
+      throw new Error(
+        `ASC satis raporunda "Apple Identifier" kolonu yok; app_store_id="${appFilter}" ile ayristirma yapilamaz. Filtresiz devam etmek hesaptaki tum uygulamalari bu projeye yazardi.`,
+      );
+    }
+    const rows = appFilter
+      ? parsed.rows.filter((r) => r.appleId === appFilter)
+      : parsed.rows;
     let downloads = 0;
     let revenue = 0;
     let subRev = 0;
