@@ -21,6 +21,7 @@
         "@gorhom/bottom-sheet": "^5.2.14",
         "@helm/api": "workspace:*",
         "@helm/config": "workspace:*",
+        "@helm/design": "workspace:*",
         "@helm/domain": "workspace:*",
         "@helm/queries": "workspace:*",
         "@helm/types": "workspace:*",
@@ -154,6 +155,10 @@
     },
     "packages/config": {
       "name": "@helm/config",
+      "version": "0.0.0",
+    },
+    "packages/design": {
+      "name": "@helm/design",
       "version": "0.0.0",
     },
     "packages/domain": {
@@ -521,6 +526,8 @@
     "@helm/api": ["@helm/api@workspace:packages/api"],
 
     "@helm/config": ["@helm/config@workspace:packages/config"],
+
+    "@helm/design": ["@helm/design@workspace:packages/design"],
 
     "@helm/domain": ["@helm/domain@workspace:packages/domain"],
 

@@ -26,7 +26,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <StatusBar style="light" />
+          {/* "auto" durum cubugunu temaya birakir. Sabit "light" iken acik
+              temada saat/pil beyaz kaliyor ve acik zeminde kayboluyordu. */}
+          <StatusBar style="auto" />
           <AuthGate>
             <Slot />
           </AuthGate>

@@ -1,129 +1,76 @@
 import { useState } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Constants from "expo-constants";
+import { ACCENTS, press, radius as R, space } from "@helm/design";
 
 import { useProperties } from "~/hooks/use-properties";
 import { useSystemHealth } from "~/hooks/use-system-health";
 import { useAlertRulesCount } from "~/hooks/use-property-metrics";
 import { useRevenueGoal, useSetRevenueGoal } from "~/hooks/use-revenue-goal";
+import { useFormatCurrency } from "~/hooks/use-format-currency";
+import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatRelativeTime } from "~/lib/format";
+import { haptic } from "~/lib/haptics";
 import {
   normalizeRevenueMultiplier,
-  usePreferences,
   preferences,
+  usePreferences,
+  type Accent,
   type Currency,
+  type ThemeMode,
 } from "~/lib/preferences";
 import { supabase } from "~/lib/supabase";
-import { haptic } from "~/lib/haptics";
-import { colors, type } from "~/theme/tokens";
+import { useTheme } from "~/theme/use-theme";
+import { Toggle } from "~/components/liquid";
 import {
-  LiquidBackground,
-  LiquidHeader,
-  LiquidGlass,
-  CornerTicks,
-  Eyebrow,
-  Seg,
-  Toggle,
-  StatusDot,
-} from "~/components/liquid";
+  BentoBackground,
+  BentoHeader,
+  BentoSegment,
+  BentoTile,
+  Rise,
+  SolidTile,
+} from "~/components/bento";
 
-// ─── local SetRow helper ──────────────────────────────────────────────────────
+const CURRENCIES: readonly Currency[] = ["USD", "EUR", "GBP", "TRY"];
 
-type SetRowProps = {
-  label: string;
-  sub?: string;
-  value?: string;
-  valueColor?: string;
-  right?: React.ReactNode;
-  danger?: boolean;
-  onPress?: () => void;
-  isLast?: boolean;
+/** Ekranda gosterilen etiket → saklanan deger. Tercih Turkce degil, sabit. */
+const THEME_LABELS = ["Sistem", "Koyu", "Açık"] as const;
+type ThemeLabel = (typeof THEME_LABELS)[number];
+const LABEL_TO_MODE: Record<ThemeLabel, ThemeMode> = {
+  Sistem: "system",
+  Koyu: "dark",
+  Açık: "light",
+};
+const MODE_TO_LABEL: Record<ThemeMode, ThemeLabel> = {
+  system: "Sistem",
+  dark: "Koyu",
+  light: "Açık",
 };
 
-function SetRow({ label, sub, value, valueColor, right, danger, onPress, isLast }: SetRowProps) {
-  const hasRight = right != null;
-  const hasValue = value != null && !hasRight;
-
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={onPress == null}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 13,
-        borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: "rgba(255,255,255,0.055)",
-      }}
-    >
-      {/* label + optional sub */}
-      <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
-        <Text
-          style={{
-            fontFamily: "Geist-500",
-            fontSize: type.body,
-            color: danger === true ? colors.accentDanger : colors.fgPrimary,
-            letterSpacing: -0.1,
-          }}
-        >
-          {label}
-        </Text>
-        {sub != null ? (
-          <Text
-            style={{
-              fontFamily: "GeistMono-500",
-              fontSize: type.label,
-              color: colors.fgSubtle,
-              letterSpacing: 0.3,
-            }}
-          >
-            {sub}
-          </Text>
-        ) : null}
-      </View>
-
-      {/* right slot: explicit node > value+chevron */}
-      {hasRight ? (
-        <View style={{ flexShrink: 0 }}>{right}</View>
-      ) : hasValue ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 0 }}>
-          <Text
-            style={{
-              fontFamily: "GeistMono-500",
-              fontSize: type.bodySm,
-              color: valueColor ?? colors.fgSecondary,
-              letterSpacing: 0.2,
-            }}
-          >
-            {value}
-          </Text>
-          {onPress != null ? (
-            <Text style={{ color: colors.fgSubtle, fontSize: 13 }}>›</Text>
-          ) : null}
-        </View>
-      ) : null}
-    </Pressable>
-  );
-}
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
-
 export default function Settings() {
-  const { currency, revenueMultiplier, prioritizeRevenueRequests } = usePreferences();
+  const { theme } = useTheme();
+  const { currency, revenueMultiplier, prioritizeRevenueRequests, themeMode, accent } =
+    usePreferences();
+  const fmt = useFormatCurrency();
+  const { refreshing, onRefresh } = useScreenRefresh();
+  const [replayKey, setReplayKey] = useState(0);
+
   const propertiesQuery = useProperties();
   const healthQuery = useSystemHealth();
   const alertRules = useAlertRulesCount();
   const goal = useRevenueGoal();
   const setGoal = useSetRevenueGoal();
 
+  const handleRefresh = () => {
+    void onRefresh().then(() => setReplayKey((k) => k + 1));
+  };
+
   function promptGoal() {
     haptic.tap();
     Alert.prompt(
-      "Monthly revenue target",
-      "Hedef tutarı gir (sayı). İlerleme ad revenue ay toplamından hesaplanır.",
+      "Aylık gelir hedefi",
+      "Hedef tutarı gir. İlerleme ayın gerçek gelir toplamından hesaplanır.",
       (text) => {
         const n = Number((text ?? "").replace(/[^\d.]/g, ""));
         if (!Number.isFinite(n) || n < 0) return;
@@ -135,11 +82,11 @@ export default function Settings() {
     );
   }
 
-  function promptRevenueMultiplier() {
+  function promptMultiplier() {
     haptic.tap();
     Alert.prompt(
-      "Revenue multiplier",
-      "Enter a value from 1 to 100. This only changes local display values.",
+      "Gelir çarpanı",
+      "1 ile 100 arası bir değer. Yalnızca yerel gösterimi etkiler, veriyi değiştirmez.",
       (text) => {
         const n = Number((text ?? "").replace(",", ".").replace(/[^\d.]/g, ""));
         if (!Number.isFinite(n)) return;
@@ -150,341 +97,141 @@ export default function Settings() {
       "decimal-pad",
     );
   }
-  const lastSyncAt = healthQuery.data?.lastSyncRun?.finishedAt ?? null;
 
-  // local toggle state
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [criticalOnly, setCriticalOnly] = useState(false);
-  const [widgetEnabled, setWidgetEnabled] = useState(false);
+  function confirmSignOut() {
+    haptic.tap();
+    Alert.alert("Çıkış yap", "Tekrar girmek için e-posta bağlantısı gerekecek.", [
+      { text: "Vazgeç", style: "cancel" },
+      {
+        text: "Çıkış yap",
+        style: "destructive",
+        onPress: () => void supabase.auth.signOut(),
+      },
+    ]);
+  }
 
   const projectCount = propertiesQuery.data?.length ?? 0;
-  const integrations = healthQuery.data?.integrations ?? [];
-  const okCount = healthQuery.data?.okCount ?? 0;
-  const totalIntegrations = healthQuery.data?.totalIntegrations ?? 0;
-
-  function integStatusColor(status: "ok" | "error" | "pending"): string {
-    if (status === "ok") return colors.green;
-    if (status === "error") return colors.accentDanger;
-    return colors.accentWarn;
-  }
-
-  function integStatusLabel(status: "ok" | "error" | "pending"): string {
-    if (status === "ok") return "Connected";
-    if (status === "error") return "Degraded";
-    return "Pending";
-  }
+  const lastSync = healthQuery.data?.lastSyncRun?.finishedAt ?? null;
+  const sources = healthQuery.data?.totalIntegrations ?? 0;
+  const version = Constants.expoConfig?.version ?? "—";
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bgBase }}>
-      <LiquidBackground />
-      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-        <LiquidHeader showPicker={false} />
+    <View className="flex-1 bg-canvas">
+      <BentoBackground />
+      <SafeAreaView edges={["top"]} className="flex-1">
+        <BentoHeader
+          eyebrow="SİSTEM"
+          title="Ayarlar"
+          onSync={handleRefresh}
+          syncing={refreshing}
+        />
+
         <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 16 }}
+          contentContainerStyle={{
+            paddingHorizontal: space.screenX,
+            paddingBottom: 120,
+            gap: space.tileGap,
+          }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              tintColor={theme.fg}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+            />
+          }
         >
-
-          {/* ── 1. ACCOUNT CARD ─────────────────────────────────────────── */}
-          <LiquidGlass glow={colors.accent} deco={<CornerTicks />} padding={16}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
-              {/* avatar */}
-              <View
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 14,
-                  backgroundColor: colors.accent,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "GeistMono-600",
-                    fontSize: 22,
-                    color: colors.accentInk,
-                    letterSpacing: -1,
-                  }}
+          {/* Calisma alani */}
+          <Rise index={0} replayKey={replayKey}>
+            <BentoTile>
+              <View className="flex-row items-center gap-tilePadSm">
+                <SolidTile
+                  color={theme.accent}
+                  cornerRadius={18}
+                  padding={0}
+                  style={{ width: 52, height: 52, alignSelf: "auto" }}
                 >
-                  h
-                </Text>
-              </View>
-
-              {/* meta */}
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text
-                  style={{
-                    fontFamily: "Geist-600",
-                    fontSize: 18,
-                    color: colors.fgPrimary,
-                    letterSpacing: -0.4,
-                    lineHeight: 21,
-                  }}
-                >
-                  Personal workspace
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: "GeistMono-500",
-                    fontSize: type.label,
-                    color: colors.fgMuted,
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  {projectCount} PROJECTS · SINCE 2023
-                </Text>
-              </View>
-
-              {/* PRO badge */}
-              <View
-                style={{
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: `${colors.accent}60`,
-                  backgroundColor: `${colors.accent}14`,
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "GeistMono-600",
-                    fontSize: 10,
-                    letterSpacing: 1,
-                    color: colors.accent,
-                  }}
-                >
-                  PRO
-                </Text>
-              </View>
-            </View>
-          </LiquidGlass>
-
-          {/* ── 2. WORKSPACE ─────────────────────────────────────────────── */}
-          <View style={{ gap: 8 }}>
-            <Eyebrow>Workspace</Eyebrow>
-            <LiquidGlass padding={0}>
-              <SetRow
-                label="Projects"
-                value={String(projectCount)}
-                onPress={() => haptic.tap()}
-              />
-              <SetRow
-                label="Default project"
-                value="All projects"
-                onPress={() => haptic.tap()}
-              />
-              <SetRow
-                label="Monthly revenue target"
-                sub="ad revenue progress"
-                value={
-                  goal.data?.target_amount != null
-                    ? `${goal.data.target_amount.toLocaleString()} ${goal.data.currency}`
-                    : "Not set"
-                }
-                onPress={promptGoal}
-              />
-              <SetRow
-                label="Revenue multiplier"
-                sub="local display only"
-                value={`${revenueMultiplier.toFixed(2)}x`}
-                valueColor={revenueMultiplier > 1 ? colors.accentWarn : colors.fgSecondary}
-                onPress={promptRevenueMultiplier}
-              />
-              <SetRow
-                label="Plan & billing"
-                sub="pro · monthly"
-                value="$19/mo"
-                onPress={() => haptic.tap()}
-                isLast
-              />
-            </LiquidGlass>
-          </View>
-
-          {/* ── 3. DATA SOURCES ──────────────────────────────────────────── */}
-          <View style={{ gap: 8 }}>
-            <Eyebrow>{`Data sources · ${okCount}/${totalIntegrations} ok`}</Eyebrow>
-            <LiquidGlass padding={0}>
-              {integrations.length === 0 ? (
-                <View style={{ paddingVertical: 20, alignItems: "center" }}>
-                  <Text
-                    style={{
-                      fontFamily: "GeistMono-500",
-                      fontSize: 10.5,
-                      letterSpacing: 0.6,
-                      color: colors.fgSubtle,
-                    }}
-                  >
-                    NO INTEGRATIONS CONFIGURED
-                  </Text>
-                </View>
-              ) : (
-                integrations.map((integ, i) => (
-                  <View
-                    key={integ.id}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      paddingHorizontal: 16,
-                      paddingVertical: 12,
-                      borderBottomWidth: i === integrations.length - 1 ? 0 : 1,
-                      borderBottomColor: "rgba(255,255,255,0.055)",
-                    }}
-                  >
-                    <StatusDot color={integStatusColor(integ.status)} />
-
-                    <View style={{ flex: 1, gap: 2, marginLeft: 10 }}>
-                      <Text
-                        style={{
-                          fontFamily: "Geist-500",
-                          fontSize: type.body,
-                          color: colors.fgPrimary,
-                          letterSpacing: -0.1,
-                          textTransform: "capitalize",
-                        }}
-                      >
-                        {integ.provider}
-                      </Text>
-                      {integ.propertyName != null ? (
-                        <Text
-                          style={{
-                            fontFamily: "GeistMono-500",
-                            fontSize: type.label,
-                            color: colors.fgSubtle,
-                            letterSpacing: 0.3,
-                          }}
-                          numberOfLines={1}
-                        >
-                          {integ.propertyName}
-                        </Text>
-                      ) : null}
-                    </View>
-
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-500",
-                        fontSize: type.bodySm,
-                        color: integStatusColor(integ.status),
-                        letterSpacing: 0.2,
-                      }}
-                    >
-                      {integStatusLabel(integ.status)}
+                  <View className="h-full w-full items-center justify-center">
+                    <Text className="font-semibold text-statSm" style={{ color: theme.accentInk }}>
+                      h
                     </Text>
                   </View>
-                ))
-              )}
-            </LiquidGlass>
-          </View>
+                </SolidTile>
+                <View className="flex-1">
+                  <Text className="font-semibold text-title tracking-tighter text-fg">
+                    Kişisel çalışma alanı
+                  </Text>
+                  <Text className="mt-xs font-mono-medium text-eyebrow tracking-wide text-fg3">
+                    {projectCount} PROJE · {sources} KAYNAK
+                  </Text>
+                </View>
+              </View>
+            </BentoTile>
+          </Rise>
 
-          {/* ── 4. ALERTS & NOTIFICATIONS ────────────────────────────────── */}
-          <View style={{ gap: 8 }}>
-            <Eyebrow>Alerts & notifications</Eyebrow>
-            <LiquidGlass padding={0}>
-              <SetRow
-                label="Alert rules"
-                value={`${alertRules.data ?? 0} active`}
-                onPress={() => haptic.tap()}
-              />
-              <SetRow
-                label="Push notifications"
+          {/* Gorunum — ikisi de GERCEK, tercihe yaziyor */}
+          <Rise index={1} replayKey={replayKey}>
+            <BentoTile>
+              <Row
+                label="Tema"
+                sub="sistem / koyu / açık"
                 right={
-                  <Toggle
-                    on={pushEnabled}
-                    onChange={(v) => {
-                      haptic.tap();
-                      setPushEnabled(v);
-                    }}
+                  <BentoSegment
+                    options={THEME_LABELS}
+                    value={MODE_TO_LABEL[themeMode]}
+                    onChange={(l) => preferences.setThemeMode(LABEL_TO_MODE[l])}
+                    mono={false}
                   />
                 }
               />
-              <SetRow
-                label="Critical only"
-                sub="mute warnings"
-                right={
-                  <Toggle
-                    on={criticalOnly}
-                    onChange={(v) => {
-                      haptic.tap();
-                      setCriticalOnly(v);
-                    }}
-                  />
-                }
+              <Row
+                label="Vurgu rengi"
+                sub="dolgu ve aktif durumlar"
+                divider
+                right={<AccentPicker value={accent} />}
               />
-              <SetRow
-                label="Quiet hours"
-                value="23:00 – 08:00"
-                onPress={() => haptic.tap()}
-                isLast
-              />
-            </LiquidGlass>
-          </View>
-
-          {/* ── 5. APPEARANCE ────────────────────────────────────────────── */}
-          <View style={{ gap: 8 }}>
-            <Eyebrow>Appearance</Eyebrow>
-            <LiquidGlass padding={0}>
-              <SetRow
-                label="Currency"
+              <Row
+                label="Para birimi"
+                divider
                 right={
-                  <Seg<Currency>
+                  <BentoSegment
+                    options={CURRENCIES}
                     value={currency}
-                    options={["USD", "EUR", "GBP", "TRY"]}
-                    onChange={(c) => {
-                      haptic.tap();
-                      preferences.setCurrency(c);
-                    }}
+                    onChange={(c) => preferences.setCurrency(c)}
                   />
                 }
               />
-              <SetRow
-                label="Theme"
-                value="Dark"
-              />
-              <SetRow
-                label="Accent"
-                value="Lime"
-                isLast
-              />
-            </LiquidGlass>
-            <Text
-              style={{
-                fontFamily: "GeistMono-500",
-                fontSize: type.label,
-                color: colors.fgSubtle,
-                letterSpacing: 0.5,
-                textAlign: "center",
-              }}
-            >
-              ACCENT & GLASS TUNED IN v1 — LIME ONLY
-            </Text>
-          </View>
+            </BentoTile>
+          </Rise>
 
-          {/* ── 6. WIDGETS & SYNC ────────────────────────────────────────── */}
-          <View style={{ gap: 8 }}>
-            <Eyebrow>Widgets & sync</Eyebrow>
-            <LiquidGlass padding={0}>
-              <SetRow
-                label="Home screen widget"
-                right={
-                  <Toggle
-                    on={widgetEnabled}
-                    onChange={(v) => {
-                      haptic.tap();
-                      setWidgetEnabled(v);
-                    }}
-                  />
+          {/* Gelir */}
+          <Rise index={2} replayKey={replayKey}>
+            <BentoTile>
+              <Row
+                label="Aylık gelir hedefi"
+                onPress={promptGoal}
+                value={
+                  goal.data?.target_amount != null
+                    ? `${goal.data.target_amount} ${goal.data.currency}`
+                    : "Belirle"
                 }
               />
-              <SetRow
-                label="Sync frequency"
-                value="Every 5 min"
+              <Row
+                label="Gelir çarpanı"
+                sub="yalnızca yerel gösterim"
+                divider
+                onPress={promptMultiplier}
+                value={`×${revenueMultiplier}`}
               />
-              <SetRow
-                label="Revenue priority"
-                sub="load earnings first"
+              <Row
+                label="Gelir önceliği"
+                sub="gelir sorgusu önce yüklensin"
+                divider
                 right={
                   <Toggle
                     on={prioritizeRevenueRequests}
+                    offColor={theme.tile2}
+                    onColor={theme.accent}
                     onChange={(v) => {
                       haptic.tap();
                       preferences.setPrioritizeRevenueRequests(v);
@@ -492,58 +239,145 @@ export default function Settings() {
                   />
                 }
               />
-              <SetRow
-                label="Last sync"
-                value={lastSyncAt ? formatRelativeTime(lastSyncAt) : "—"}
-                isLast
-              />
-            </LiquidGlass>
-          </View>
+            </BentoTile>
+          </Rise>
 
-          {/* ── 7. ABOUT ─────────────────────────────────────────────────── */}
-          <View style={{ gap: 8 }}>
-            <Eyebrow>About</Eyebrow>
-            <LiquidGlass padding={0}>
-              <SetRow
-                label="Help & support"
-                onPress={() => haptic.tap()}
+          {/* Sistem — salt okunur */}
+          <Rise index={3} replayKey={replayKey}>
+            <BentoTile>
+              <Row label="Projeler" value={String(projectCount)} />
+              <Row label="Uyarı kuralları" divider value={String(alertRules.data ?? 0)} />
+              <Row
+                label="Son senkron"
+                divider
+                value={lastSync != null ? formatRelativeTime(lastSync) : "—"}
               />
-              <SetRow
-                label="Privacy & data"
-                onPress={() => haptic.tap()}
-              />
-              <SetRow
-                label="Version"
-                value="1.0.0 · #142"
-              />
-              <SetRow
-                label="Sign out"
-                danger
-                onPress={() => {
-                  haptic.tap();
-                  supabase.auth.signOut();
-                }}
-                isLast
-              />
-            </LiquidGlass>
-          </View>
+              <Row label="Sürüm" divider value={version} />
+            </BentoTile>
+          </Rise>
 
-          {/* footer */}
-          <Text
-            style={{
-              fontFamily: "GeistMono-500",
-              fontSize: type.label,
-              color: colors.fgSubtle,
-              letterSpacing: 0.6,
-              textAlign: "center",
-              paddingTop: 8,
-            }}
-          >
-            HELM · LIQUID GLASS · v1.0.0
-          </Text>
-
+          <Rise index={4} replayKey={replayKey}>
+            <Pressable onPress={confirmSignOut} accessibilityRole="button">
+              {({ pressed }) => (
+                <View style={pressed ? { opacity: press.opacity } : undefined}>
+                  <BentoTile padding={space.tilePadSm}>
+                    <Text
+                      className="font-semibold text-emph"
+                      style={{ color: theme.neg }}
+                    >
+                      Çıkış yap
+                    </Text>
+                  </BentoTile>
+                </View>
+              )}
+            </Pressable>
+          </Rise>
         </ScrollView>
       </SafeAreaView>
     </View>
+  );
+}
+
+/**
+ * Ayar satiri. onPress verilmezse basilamaz — dekoratif buton yok.
+ *
+ * Eski ekranda dokuz satir `onPress={() => haptic.tap()}` idi: basinca titriyor,
+ * baska hicbir sey yapmiyordu. Redesign'da tasinmadilar; calismayan bir butonu
+ * yeniden cizmek onu calisiyormus gibi gosterir.
+ */
+/**
+ * Accent secici — renk orneklerinin kendisi.
+ *
+ * Ad yerine RENK gosteriliyor: "Teal" yazisi hangi tonu sececegini soylemez,
+ * ornek soyler. Secili olan halka ile isaretlenir; renk korlugunde de ayirt
+ * edilebilsin diye ayrim yalnizca renge birakilmiyor.
+ */
+function AccentPicker({ value }: { value: Accent }) {
+  const { name, theme } = useTheme();
+
+  return (
+    <View className="flex-row gap-sm">
+      {ACCENTS.map((a) => {
+        const swatch = name === "dark" ? a.dark : a.light;
+        const active = a.id === value;
+        return (
+          <Pressable
+            key={a.id}
+            onPress={() => {
+              if (active) return;
+              haptic.tap();
+              preferences.setAccent(a.id);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={a.label}
+            accessibilityState={{ selected: active }}
+          >
+            {({ pressed }) => (
+              <View
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: R.pill,
+                  backgroundColor: swatch,
+                  borderWidth: active ? 2 : 0,
+                  borderColor: theme.fg,
+                  opacity: pressed && !active ? press.opacity : 1,
+                }}
+              />
+            )}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function Row({
+  label,
+  sub,
+  value,
+  right,
+  divider,
+  onPress,
+}: {
+  label: string;
+  sub?: string;
+  value?: string;
+  right?: React.ReactNode;
+  divider?: boolean;
+  onPress?: () => void;
+}) {
+  const body = (
+    <View
+      className="flex-row items-center justify-between py-headerY"
+      style={
+        divider
+          ? { borderTopWidth: 1, borderTopColor: "rgba(128,128,128,0.18)" }
+          : undefined
+      }
+    >
+      <View className="mr-rowY flex-1">
+        <Text className="font-medium text-emph text-fg">{label}</Text>
+        {sub != null ? (
+          <Text className="mt-[1px] text-meta text-fg3">{sub}</Text>
+        ) : null}
+      </View>
+      {right ?? (
+        <Text className="font-mono-semibold text-body text-fg2">
+          {value}
+          {onPress != null ? " ›" : ""}
+        </Text>
+      )}
+    </View>
+  );
+
+  if (onPress == null) return body;
+
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button">
+      {({ pressed }) => (
+        <View style={pressed ? { opacity: press.opacity } : undefined}>{body}</View>
+      )}
+    </Pressable>
   );
 }

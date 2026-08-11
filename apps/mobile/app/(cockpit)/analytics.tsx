@@ -1,602 +1,273 @@
-import { useState } from "react";
-import { Text, View, ScrollView, useWindowDimensions } from "react-native";
+import { useEffect, useState } from "react";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { FadeIn } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
+import { duration, radius as R, space } from "@helm/design";
+import { GAME_STEP_LABEL, orderedGameSteps } from "@helm/api";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
-import {
-  useAcquisition,
-  useFunnel,
-  useGeoBreakdown,
-  useRetention,
-  useOsBreakdown,
-} from "~/hooks/use-analytics";
-import { usePreferences } from "~/lib/preferences";
+import { useGeoBreakdown } from "~/hooks/use-analytics";
+import { useGameFunnels } from "~/hooks/use-game-funnels";
+import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger } from "~/lib/format";
-import { haptic } from "~/lib/haptics";
-import { colors, type } from "~/theme/tokens";
+import { usePreferences } from "~/lib/preferences";
+import { useTheme } from "~/theme/use-theme";
+import { ScreenStatus } from "~/components/screen-status";
+import { CountUp } from "~/components/liquid";
 import {
-  LiquidBackground,
-  LiquidHeader,
-  LiquidGlass,
-  OpenHero,
-  CardSection,
-  FullDivider,
-  Row,
-  KV,
-  HBar,
-  Bars,
-  NativeSegmented,
-  ReviewsSection,
-  EmptyHint,
-  ShowMore,
-} from "~/components/liquid";
+  BentoBackground,
+  BentoBars,
+  BentoHeader,
+  BentoRails,
+  BentoTile,
+  Rise,
+  type RailRow,
+} from "~/components/bento";
+import { FunnelTile, PlatformTile, type FunnelRow } from "~/components/analytics";
 
-const TOP_N = 5; // glance-first lists: show the top few, total stays in the header
-import type { HeroStat } from "~/components/liquid";
+const SPARK_BARS = 14;
+const TOP_COUNTRIES = 5;
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+/** Ilki secili accent — geri kalani sabit seri ladder'i. */
+const tintsFor = (accent: string): readonly string[] => [accent, "#B89CFF", "#7AA8FF", "#FF8A3D"];
 
-// Only DAU + MAU are real metrics (from the `metrics` table). WAU was a synthetic
-// midpoint with no backing data, so it's dropped — never show an unsourced number.
-type Metric = "DAU" | "MAU";
+const HERO_NUMBER = {
+  marginTop: 12,
+  fontFamily: "Geist-600",
+  fontSize: 46,
+  lineHeight: 48,
+  letterSpacing: -2,
+} as const;
 
-const MONO_600 = "GeistMono-600";
-const MONO_500 = "GeistMono-500";
-const ACQ_COLORS = [colors.blue, colors.accentViolet, colors.green, colors.accentWarn, colors.accent];
-
-// Raw event / source keys → readable Title Case. "paywall_dismissed" → "Paywall
-// Dismissed"; already-spaced labels ("Application Became Active") pass through.
-function humanize(s: string): string {
-  if (!s.includes("_") && s !== s.toLowerCase()) return s;
-  return s
-    .split(/[_\s]+/)
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+function fmtSession(sec: number): string {
+  return `${Math.floor(sec / 60)}d ${Math.round(sec % 60)}s`;
 }
-
-// ─── Funnel health (product snapshot, source='supabase') ──────────────────────
-// Empire'ın analytics_daily funnel snapshot'ı. "Oyun loop'u tutuyor mu" sorusu.
-// Yüzdeler düşmesi-iyi (≤1 işletme / Lv1 takılma / vergi kilidi) renkle işaretli.
-
-const lastValue = (q: ReturnType<typeof useMetricDetail>): number | null => {
-  const s = q.data?.series ?? [];
-  const last = s[s.length - 1];
-  return last ? last.value : null;
-};
-
-function FunnelHealthSection({
-  projectId,
-  index,
-}: {
-  projectId?: string | undefined;
-  index: string;
-}) {
-  const players = useMetricDetail("players_total");
-  const paying = useMetricDetail("paying_users");
-  const prestiged = useMetricDetail("pct_ever_prestiged");
-  const le1 = useMetricDetail("pct_le1_business");
-  const level1 = useMetricDetail("pct_level1");
-  const paused = useMetricDetail("pct_paused");
-
-  const pct = (v: number | null) => (v == null ? "—" : `${v.toFixed(1)}%`);
-  const cnt = (v: number | null) => (v == null ? "—" : formatInteger(v));
-  const playersTotal = lastValue(players);
-
-  // Snapshot henüz alınmadıysa (funnel migration yoksa) bölümü gizle.
-  if (projectId && !players.isLoading && playersTotal == null) return null;
-
-  const items = [
-    { label: "Players", value: cnt(playersTotal) },
-    { label: "Paying", value: cnt(lastValue(paying)), color: colors.green },
-    { label: "Prestiged", value: pct(lastValue(prestiged)) },
-    { label: "≤1 business", value: pct(lastValue(le1)), color: colors.accentDanger },
-    { label: "Stuck Lv1", value: pct(lastValue(level1)), color: colors.accentDanger },
-    { label: "Tax-locked", value: pct(lastValue(paused)), color: colors.accentWarn },
-  ];
-
-  return (
-    <>
-      <FullDivider />
-      <CardSection index={index} title="Funnel health" pt={14}>
-        <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
-          {!projectId ? (
-            <EmptyHint>SELECT A PROJECT</EmptyHint>
-          ) : players.isLoading ? (
-            <EmptyHint>LOADING…</EmptyHint>
-          ) : (
-            <KV items={items} />
-          )}
-        </View>
-      </CardSection>
-    </>
-  );
-}
-
-// ─── 01 · Retention (vertical bars, per design) ───────────────────────────────
-
-function RetentionSection({ projectId }: { projectId?: string | undefined }) {
-  const q = useRetention(projectId);
-  const cohorts = q.data?.cohorts ?? [];
-  const maxPct = cohorts.reduce((m, c) => Math.max(m, c.pct), 0);
-  if (projectId && !q.isLoading && cohorts.length === 0) return null;
-
-  return (
-    <CardSection index="01" title="Retention" pt={14}>
-      {!projectId ? (
-        <EmptyHint>SELECT A PROJECT</EmptyHint>
-      ) : q.isLoading ? (
-        <EmptyHint>LOADING…</EmptyHint>
-      ) : (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-end",
-            gap: 10,
-            height: 104,
-            paddingHorizontal: 18,
-            paddingTop: 4,
-            paddingBottom: 14,
-          }}
-        >
-          {cohorts.map((r) => {
-            // Normalize to the tallest cohort so low real-world retention still reads.
-            const h = maxPct > 0 ? Math.round((r.pct / maxPct) * 100) : 0;
-            return (
-              <View
-                key={r.day}
-                style={{ flex: 1, alignItems: "center", gap: 7, height: "100%", justifyContent: "flex-end" }}
-              >
-                <Text style={{ fontFamily: MONO_600, fontSize: 11, color: colors.fgPrimary }}>{r.pct}%</Text>
-                <View style={{ width: "62%", flex: 1, justifyContent: "flex-end" }}>
-                  <View
-                    style={{
-                      width: "100%",
-                      height: `${h}%`,
-                      minHeight: 4,
-                      borderRadius: 6,
-                      backgroundColor: colors.blue,
-                    }}
-                  />
-                </View>
-                <Text style={{ fontFamily: MONO_500, fontSize: 9, color: colors.fgSubtle, letterSpacing: 0.4 }}>
-                  {r.day}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-      )}
-    </CardSection>
-  );
-}
-
-// ─── 02 · Conversion funnel (horizontal bars, per design) ─────────────────────
-
-function FunnelSection({ projectId }: { projectId?: string | undefined }) {
-  const q = useFunnel(projectId);
-  const steps = q.data?.steps ?? [];
-  if (projectId && !q.isLoading && steps.length === 0) return null;
-
-  const entry = steps[0]?.count ?? 0;
-  // Collapse the trailing all-zero tail into one muted summary line.
-  const lastReal = steps.reduce((acc, s, i) => (s.count > 0 ? i : acc), -1);
-  const visible = lastReal >= 0 ? steps.slice(0, lastReal + 1) : steps;
-  const zeroTail = steps.length - visible.length;
-
-  return (
-    <>
-      <FullDivider />
-      <CardSection
-        index="02"
-        title="Conversion funnel"
-        pt={14}
-        {...(q.data ? { action: `${Math.round(q.data.overall_conversion)}% conv` } : {})}
-      >
-        <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 13 }}>
-          {!projectId ? (
-            <EmptyHint>SELECT A PROJECT</EmptyHint>
-          ) : q.isLoading ? (
-            <EmptyHint>LOADING…</EmptyHint>
-          ) : (
-            <>
-              {visible.map((step, i) => {
-                const pct = entry > 0 ? (step.count / entry) * 100 : 0;
-                const prev = steps[i - 1]?.count ?? step.count;
-                const drop = i > 0 && prev > 0 ? Math.round((1 - step.count / prev) * 100) : 0;
-                const last = i === visible.length - 1;
-                return (
-                  <View key={`${step.event}-${step.order}`}>
-                    <View
-                      style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}
-                    >
-                      <Text
-                        style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
-                        numberOfLines={1}
-                      >
-                        {humanize(step.event)}
-                      </Text>
-                      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8, marginLeft: 8 }}>
-                        <Text style={{ fontFamily: MONO_600, fontSize: 12.5, color: colors.fgPrimary }}>
-                          {formatInteger(step.count)}
-                        </Text>
-                        {i > 0 ? (
-                          <Text style={{ fontFamily: MONO_500, fontSize: 10, color: colors.accentDanger, width: 42, textAlign: "right" }}>
-                            −{drop}%
-                          </Text>
-                        ) : (
-                          <View style={{ width: 42 }} />
-                        )}
-                      </View>
-                    </View>
-                    <HBar pct={pct} color={last ? colors.accent : colors.blue} height={8} />
-                  </View>
-                );
-              })}
-              {zeroTail > 0 ? (
-                <Text style={{ fontFamily: MONO_500, fontSize: type.label, color: colors.fgSubtle, letterSpacing: 0.3, paddingTop: 2 }}>
-                  + {zeroTail} more step{zeroTail > 1 ? "s" : ""} · no conversions
-                </Text>
-              ) : null}
-            </>
-          )}
-        </View>
-      </CardSection>
-    </>
-  );
-}
-
-// ─── 03 · Acquisition (expandable rows, per design) ───────────────────────────
-
-function AcquisitionSection({ projectId }: { projectId?: string | undefined }) {
-  const [openId, setOpenId] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState(false);
-  const q = useAcquisition(projectId);
-  const rows = q.data?.rows ?? [];
-  const total = q.data?.total ?? 0;
-  if (projectId && !q.isLoading && rows.length === 0) return null;
-  const visible = showAll ? rows : rows.slice(0, TOP_N);
-
-  return (
-    <>
-      <FullDivider />
-      <CardSection index="03" title="Acquisition" pt={14} {...(total > 0 ? { action: `${formatInteger(total)} · 30d` } : {})}>
-        {!projectId ? (
-          <EmptyHint>SELECT A PROJECT</EmptyHint>
-        ) : q.isLoading ? (
-          <EmptyHint>LOADING…</EmptyHint>
-        ) : (
-          <>
-          {visible.map((a, i) => {
-            const open = openId === a.source;
-            const color = ACQ_COLORS[i % ACQ_COLORS.length]!;
-            const pct = total > 0 ? Math.round((a.users / total) * 100) : 0;
-            return (
-              <Row
-                key={a.source}
-                open={open}
-                onToggle={() => {
-                  haptic.tap();
-                  setOpenId(open ? null : a.source);
-                }}
-                isLast={i === visible.length - 1}
-                header={
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
-                    <View style={{ width: 9, height: 9, borderRadius: 3, backgroundColor: color }} />
-                    <Text
-                      style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
-                      numberOfLines={1}
-                    >
-                      {humanize(a.source)}
-                    </Text>
-                    <Text style={{ fontFamily: MONO_600, fontSize: 12, color: colors.fgSecondary }}>{formatInteger(a.users)}</Text>
-                    <Text style={{ fontFamily: MONO_500, fontSize: 10.5, color: colors.fgMuted, width: 32, textAlign: "right" }}>
-                      {pct}%
-                    </Text>
-                  </View>
-                }
-                detail={
-                  <KV
-                    items={[
-                      { label: "Users", value: formatInteger(a.users), color },
-                      { label: "Share", value: `${pct}%` },
-                      { label: "Type", value: a.type },
-                      { label: "Window", value: `${q.data?.days ?? 30}d` },
-                    ]}
-                  />
-                }
-              />
-            );
-          })}
-          <ShowMore
-            hidden={rows.length - TOP_N}
-            expanded={showAll}
-            onPress={() => {
-              haptic.tap();
-              setShowAll((v) => !v);
-            }}
-          />
-          </>
-        )}
-        <View style={{ height: 8 }} />
-      </CardSection>
-    </>
-  );
-}
-
-// ─── 04 · Top countries (expandable rows, per design) ─────────────────────────
-
-function CountriesSection({ projectId }: { projectId?: string | undefined }) {
-  const [openCode, setOpenCode] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState(false);
-  const q = useGeoBreakdown(projectId);
-  const rows = q.data?.rows ?? [];
-  const total = q.data?.total ?? 0;
-  const maxUsers = rows.reduce((m, r) => Math.max(m, r.users), 0);
-  if (projectId && !q.isLoading && rows.length === 0) return null;
-  const visible = showAll ? rows : rows.slice(0, TOP_N);
-
-  return (
-    <>
-    <FullDivider />
-    <CardSection index="04" title="Top countries" pt={14} {...(rows.length ? { count: rows.length } : {})}>
-      {!projectId ? (
-        <EmptyHint>SELECT A PROJECT</EmptyHint>
-      ) : q.isLoading ? (
-        <EmptyHint>LOADING…</EmptyHint>
-      ) : (
-        <>
-        {visible.map((c, i) => {
-          const open = openCode === c.country;
-          const pct = total > 0 ? Math.round((c.users / total) * 100) : 0;
-          const barPct = maxUsers > 0 ? (c.users / maxUsers) * 100 : 0;
-          return (
-            <Row
-              key={c.country}
-              open={open}
-              onToggle={() => {
-                haptic.tap();
-                setOpenCode(open ? null : c.country);
-              }}
-              isLast={i === visible.length - 1}
-              header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
-                  <Text
-                    style={{
-                      width: 26,
-                      paddingVertical: 3,
-                      textAlign: "center",
-                      borderRadius: 5,
-                      backgroundColor: "rgba(255,255,255,0.06)",
-                      fontFamily: MONO_600,
-                      fontSize: 10.5,
-                      color: colors.fgSecondary,
-                      letterSpacing: 0.4,
-                    }}
-                  >
-                    {c.country}
-                  </Text>
-                  <Text
-                    style={{ flex: 1, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
-                    numberOfLines={1}
-                  >
-                    {c.country_name ?? c.country}
-                  </Text>
-                  <View style={{ width: 60 }}>
-                    <HBar pct={barPct} color={colors.blue} height={5} />
-                  </View>
-                  <Text style={{ fontFamily: MONO_500, fontSize: 10.5, color: colors.fgMuted, width: 30, textAlign: "right" }}>
-                    {pct}%
-                  </Text>
-                </View>
-              }
-              detail={
-                <KV
-                  items={[
-                    { label: "Users", value: formatInteger(c.users), color: colors.blue },
-                    { label: "Share", value: `${pct}%` },
-                    { label: "Country", value: c.country_name ?? c.country },
-                    { label: "Window", value: `${q.data?.days ?? 30}d` },
-                  ]}
-                />
-              }
-            />
-          );
-        })}
-        <ShowMore
-          hidden={rows.length - TOP_N}
-          expanded={showAll}
-          onPress={() => {
-            haptic.tap();
-            setShowAll((v) => !v);
-          }}
-        />
-        </>
-      )}
-      <View style={{ height: 8 }} />
-    </CardSection>
-    </>
-  );
-}
-
-// ─── 05 · OS versions (expandable rows, per design) ───────────────────────────
-
-function OsSection({ projectId }: { projectId?: string | undefined }) {
-  const [openLabel, setOpenLabel] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState(false);
-  const q = useOsBreakdown(projectId);
-  const rows = q.data?.rows ?? [];
-  const maxPct = rows.reduce((m, r) => Math.max(m, r.pct), 0);
-  if (projectId && !q.isLoading && rows.length === 0) return null;
-  const visible = showAll ? rows : rows.slice(0, TOP_N);
-
-  return (
-    <>
-    <FullDivider />
-    <CardSection index="05" title="OS versions" pt={14}>
-      {!projectId ? (
-        <EmptyHint>SELECT A PROJECT</EmptyHint>
-      ) : q.isLoading ? (
-        <EmptyHint>LOADING…</EmptyHint>
-      ) : (
-        <>
-        {visible.map((o, i) => {
-          const label = `${humanize(o.os)}${o.version ? ` ${o.version}` : ""}`;
-          const open = openLabel === label;
-          const barPct = maxPct > 0 ? (o.pct / maxPct) * 100 : 0;
-          return (
-            <Row
-              key={label}
-              open={open}
-              onToggle={() => {
-                haptic.tap();
-                setOpenLabel(open ? null : label);
-              }}
-              isLast={i === visible.length - 1}
-              header={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
-                  <Text
-                    style={{ width: 92, fontFamily: "Geist-600", fontSize: type.body, color: colors.fgPrimary, letterSpacing: -0.2 }}
-                    numberOfLines={1}
-                  >
-                    {label}
-                  </Text>
-                  <View style={{ flex: 1 }}>
-                    <HBar pct={barPct} color={colors.accentViolet} height={5} />
-                  </View>
-                  <Text style={{ fontFamily: MONO_500, fontSize: 10.5, color: colors.fgMuted, width: 30, textAlign: "right" }}>
-                    {o.pct}%
-                  </Text>
-                </View>
-              }
-              detail={
-                <KV
-                  items={[
-                    { label: "Share", value: `${o.pct}%`, color: colors.accentViolet },
-                    { label: "Users", value: formatInteger(o.users) },
-                    { label: "OS", value: o.os },
-                    { label: "Window", value: `${q.data?.days ?? 30}d` },
-                  ]}
-                />
-              }
-            />
-          );
-        })}
-        <ShowMore
-          hidden={rows.length - TOP_N}
-          expanded={showAll}
-          onPress={() => {
-            haptic.tap();
-            setShowAll((v) => !v);
-          }}
-        />
-        </>
-      )}
-      <View style={{ height: 8 }} />
-    </CardSection>
-    </>
-  );
-}
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function Analytics() {
-  const { width } = useWindowDimensions();
-  const chartW = width - 32;
-  const barsW = width - 44; // screen pad (32) + OpenHero inner pad (12)
-
-  const [metric, setMetric] = useState<Metric>("DAU");
+  const { theme, glass } = useTheme();
+  const { refreshing, onRefresh } = useScreenRefresh();
+  const [replayKey, setReplayKey] = useState(0);
   const { selectedPropertyId } = usePreferences();
   const properties = useProperties();
-  // PostHog-backed edges need a single project; "all" → fall back to first property.
-  const projectId = selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
+  const projectId =
+    selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
 
   const kpis = useCockpitKpis();
   const dauDetail = useMetricDetail("dau");
   const mauDetail = useMetricDetail("mau");
   const sessDetail = useMetricDetail("avg_session_sec");
-  const dauSeries = (dauDetail.data?.series ?? []).map((p) => p.value);
+  const geo = useGeoBreakdown(projectId);
+  const funnels = useGameFunnels(30);
 
-  const heroValue = kpis.data?.dau ?? 0;
-  const dauDelta: number | undefined = kpis.data?.dauDelta ?? undefined;
+  const handleRefresh = () => {
+    void onRefresh().then(() => setReplayKey((k) => k + 1));
+  };
 
-  const latestVal = (d: typeof mauDetail): number | null => {
+  if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
+  if (kpis.isError || !kpis.data)
+    return <ScreenStatus label="Analiz yüklenemedi" tone="danger" />;
+
+  const last = (d: typeof mauDetail): number | null => {
     const s = d.data?.series ?? [];
     return s.length > 0 ? s[s.length - 1]!.value : null;
   };
-  const mauVal = latestVal(mauDetail);
-  const sessVal = latestVal(sessDetail);
-  const stickiness = mauVal != null && mauVal > 0 ? Math.round((heroValue / mauVal) * 100) : null;
-  const fmtSession = (sec: number) => `${Math.floor(sec / 60)}m ${Math.round(sec % 60)}s`;
 
-  const dauVal = heroValue;
-  const mau = mauVal ?? kpis.data?.totalUsers ?? 0;
-  const metricValue = metric === "DAU" ? dauVal : mau;
-  const metricDelta = metric === "DAU" ? dauDelta : undefined;
+  const dau = kpis.data.dau;
+  const mau = last(mauDetail) ?? kpis.data.totalUsers ?? 0;
+  const session = last(sessDetail);
+  const stickiness = mau > 0 ? Math.round((dau / mau) * 100) : null;
+  const dauPoints = (dauDetail.data?.series ?? []).slice(-SPARK_BARS);
 
-  const heroStats: HeroStat[] = [
-    { label: "Stickiness", value: stickiness != null ? `${stickiness}%` : "—" },
-    { label: "Avg session", value: sessVal != null ? fmtSession(sessVal) : "—" },
-    { label: "New users", value: formatInteger(kpis.data?.newUsers ?? 0) },
-  ];
+  const f = funnels.data;
+
+  // ── Oyun akisi: sabit sirada, en buyuk adima gore oranli ──
+  const steps = f != null ? orderedGameSteps(f.game) : [];
+  const stepPeak = Math.max(...steps.map((s) => s.count), 1);
+  const gameRows: FunnelRow[] = steps.map((s) => ({
+    label: GAME_STEP_LABEL[s.key] ?? s.key,
+    value: formatInteger(s.count),
+    ratio: s.count / stepPeak,
+  }));
+
+  // ── Satin alma: magaza acilisi → satin alma ──
+  const shopOpened = f?.game.find((g) => g.key === "shop_opened")?.count ?? 0;
+  const purchaseTotal = (f?.purchases ?? []).reduce((a, p) => a + p.count, 0);
+  const purchaseRows: FunnelRow[] =
+    shopOpened === 0 && purchaseTotal === 0
+      ? []
+      : [
+          {
+            label: "Mağaza açıldı",
+            value: formatInteger(shopOpened),
+            ratio: 1,
+          },
+          {
+            label: "Satın alındı",
+            value: formatInteger(purchaseTotal),
+            ratio: shopOpened > 0 ? Math.min(1, purchaseTotal / shopOpened) : 1,
+            note:
+              shopOpened > 0
+                ? `dönüşüm %${Math.round((purchaseTotal / shopOpened) * 100)}`
+                : "mağaza açılışı ölçülmüyor",
+            tone: shopOpened === 0 ? "warn" : "normal",
+          },
+        ];
+
+  const countries = (geo.data?.rows ?? []).slice(0, TOP_COUNTRIES);
+  const peak = Math.max(...countries.map((c) => c.users), 1);
+  const countryRows: RailRow[] = countries.map((c, i) => ({
+    label: c.country_name ?? c.country,
+    value: formatInteger(c.users),
+    ratio: c.users / peak,
+    color: tintsFor(theme.accent)[i % 4]!,
+  }));
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bgBase }}>
-      <LiquidBackground />
-      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-        <LiquidHeader />
-        <ScrollView contentContainerStyle={{ paddingBottom: 120, gap: 18 }} showsVerticalScrollIndicator={false}>
-          {/* Card-less hero on the aurora background: number + bar chart + mini-stats. */}
-          <Animated.View entering={FadeIn.duration(420)} style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-            <OpenHero
-              eyebrow="Active users · 30D"
-              live
-              right={
-                <View style={{ width: 124 }}>
-                  <NativeSegmented<Metric>
-                    value={metric}
-                    options={["DAU", "MAU"]}
-                    onChange={(v) => {
-                      haptic.tap();
-                      setMetric(v);
-                    }}
+    <View className="flex-1 bg-canvas">
+      <BentoBackground />
+      <SafeAreaView edges={["top"]} className="flex-1">
+        <BentoHeader
+          eyebrow="ANALİZ"
+          title="Kullanıcılar"
+          onSync={handleRefresh}
+          syncing={refreshing}
+        />
+
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: space.screenX,
+            paddingBottom: 120,
+            gap: space.tileGap,
+          }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              tintColor={theme.fg}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+            />
+          }
+        >
+          {/* Kim — sayaç. Geri kalan ekran "ne yapıyorlar"ı anlatır. */}
+          <Rise index={0} replayKey={replayKey}>
+            <BentoTile padding={space.tilePadLg}>
+              <View className="flex-row items-center justify-between">
+                <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
+                  AKTİF KULLANICI · 30G
+                </Text>
+                <View className="flex-row items-center gap-[6px]">
+                  <LiveDot color={theme.accent} />
+                  <Text className="font-mono-medium text-eyebrow tracking-wide text-fg2">
+                    CANLI
+                  </Text>
+                </View>
+              </View>
+
+              <CountUp
+                value={dau}
+                format={(v) => formatInteger(v)}
+                fitOneLine
+                style={{ ...HERO_NUMBER, color: theme.fg }}
+              />
+              <Text className="mt-[6px] text-meta text-fg2">
+                MAU {formatInteger(mau)}
+                {stickiness != null ? ` · yapışkanlık %${stickiness}` : ""}
+                {session != null ? ` · oturum ${fmtSession(session)}` : ""}
+              </Text>
+
+              {dauPoints.length > 1 ? (
+                <View className="mt-tilePad">
+                  <BentoBars
+                    points={dauPoints}
+                    activeColor={theme.blue}
+                    dimColor={glass.chartDim}
+                    height={76}
+                    gap={3}
+                    replayKey={replayKey}
                   />
                 </View>
-              }
-              value={metricValue}
-              format={formatInteger}
-              {...(metricDelta !== undefined ? { delta: metricDelta } : {})}
-              caption={`MAU ${formatInteger(mau)}`}
-              chartWidth={chartW}
-              chartEl={
-                <Bars
-                  data={dauSeries.length >= 2 ? dauSeries : [heroValue, heroValue]}
-                  width={barsW}
-                  height={84}
-                  color={colors.blue}
-                />
-              }
-              stats={heroStats}
-              color={colors.blue}
-            />
-          </Animated.View>
+              ) : null}
+            </BentoTile>
+          </Rise>
 
-          {/* One big compact card — sections in design order, fixed dividers. */}
-          <LiquidGlass padding={0} style={{ marginHorizontal: 16 }}>
-            <RetentionSection projectId={projectId} />
-            <FunnelSection projectId={projectId} />
-            <AcquisitionSection projectId={projectId} />
-            <CountriesSection projectId={projectId} />
-            <OsSection projectId={projectId} />
-            <FunnelHealthSection projectId={projectId} index="06" />
-            <FullDivider />
-            <ReviewsSection index="07" />
-          </LiquidGlass>
+          <Rise index={1} replayKey={replayKey}>
+            <FunnelTile
+              title="Oyun akışı"
+              rows={gameRows}
+              empty={funnels.isLoading ? "YÜKLENİYOR…" : "OYUN OLAYI YOK"}
+              replayKey={replayKey}
+            />
+          </Rise>
+
+          <Rise index={2} replayKey={replayKey}>
+            <FunnelTile
+              title="Satın alma"
+              rows={purchaseRows}
+              empty={funnels.isLoading ? "YÜKLENİYOR…" : "SATIN ALMA OLAYI YOK"}
+              replayKey={replayKey}
+            />
+          </Rise>
+
+          <Rise index={3} replayKey={replayKey}>
+            <PlatformTile rows={f?.platforms ?? []} />
+          </Rise>
+
+          <Rise index={4} replayKey={replayKey}>
+            <BentoTile>
+              <Text className="font-semibold text-emph tracking-tight text-fg">
+                Ülkeler
+              </Text>
+              {countryRows.length === 0 ? (
+                <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
+                  {geo.isLoading ? "YÜKLENİYOR…" : "ÜLKE VERİSİ YOK"}
+                </Text>
+              ) : (
+                <View className="mt-tilePadSm">
+                  <BentoRails rows={countryRows} replayKey={replayKey} />
+                </View>
+              )}
+            </BentoTile>
+          </Rise>
         </ScrollView>
       </SafeAreaView>
     </View>
+  );
+}
+
+/** Nabiz atan canli gostergesi — 1800ms, sonsuz. */
+function LiveDot({ color }: { color: string }) {
+  const pulse = useSharedValue(1);
+  const noMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (noMotion) return;
+    pulse.value = withRepeat(
+      withTiming(0, { duration: duration.pulse / 2, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true,
+    );
+  }, [noMotion, pulse]);
+
+  const animated = useAnimatedStyle(() => ({
+    opacity: 1 - pulse.value * 0.55,
+    transform: [{ scale: 1 - pulse.value * 0.18 }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        { width: 6, height: 6, borderRadius: R.pill, backgroundColor: color },
+        animated,
+      ]}
+    />
   );
 }
