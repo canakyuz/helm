@@ -32,6 +32,13 @@ export type GlassRecipe = {
     /** Android elevation karşılığı. */
     elevation: number;
   } | null;
+  /** Cam yüzey üzerindeki sönük grafik öğesi (dolmamış bar, zemin rail'i).
+   *
+   *  NEDEN CAM REÇETESİNDE: cam yüzey token'daki `tile` değerinde değil,
+   *  malzeme yüzünden ~#2A2A2C–#353438'e render ediliyor. Sabit bir koyu gri
+   *  (tasarımın `#2A2A32`'si) o yüzeyde tamamen kayboluyor. Yarı saydam beyaz
+   *  hangi yüzeye düşerse düşsün aynı oranda ayrışır. */
+  chartDim: string;
   /** Aurora blob opaklık aralığı [min, max].
    *
    *  Önce bento için 0.12–0.18'e kısılmıştı; simulator'da cam malzeme olarak
@@ -54,6 +61,7 @@ export const glass: Record<ThemeName, GlassRecipe> = {
     blurIntensity: 60,
     colorScheme: "dark",
     shadow: null,
+    chartDim: "rgba(255,255,255,0.22)",
     auroraOpacity: [0.28, 0.45],
   },
   light: {
@@ -69,6 +77,7 @@ export const glass: Record<ThemeName, GlassRecipe> = {
       radius: 2,
       elevation: 1,
     },
+    chartDim: "rgba(20,21,26,0.16)",
     // Light'ta dark'ın yaklaşık yarısı: beyaz zeminde aynı opaklık renkli
     // bir sis gibi okunur, metin kontrastını da düşürür.
     auroraOpacity: [0.14, 0.22],

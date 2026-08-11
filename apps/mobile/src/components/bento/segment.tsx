@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, type ViewStyle } from "react-native";
 import { press, radius as R } from "@helm/design";
 
 import { haptic } from "~/lib/haptics";
@@ -8,12 +8,12 @@ type Props<T extends string> = {
   options: readonly T[];
   value: T;
   onChange: (next: T) => void;
-  /** "accent": secili pill lime dolu (donem secici). "chrome": secili pill
-   *  yuzey rengi, metin fg (alt sekmeler). Tasarim ikisini de kullaniyor. */
+  /** "accent": secili pill lime dolu (donem/para birimi secici).
+   *  "chrome": secili pill yuzey rengi, metin fg (alt sekmeler). */
   tone?: "accent" | "chrome";
-  /** Mono yazi tipi — donem/para birimi gibi kisa kodlar icin. */
+  /** Mono yazi tipi — kisa kodlar icin (7G, USD). */
   mono?: boolean;
-  /** Segmentler esit genislikte yayilsin (alt sekmeler) veya icerige otursun. */
+  /** Segmentler esit genislikte yayilsin (alt sekmeler). */
   fill?: boolean;
 };
 
@@ -24,8 +24,12 @@ type Props<T extends string> = {
  * @expo/ui SwiftUI Picker kullaniliyordu. Bento tasarimi segmentleri kendi
  * ciziyor: pill kap, accent dolgulu secili durum, 11px mono etiket. Stok iOS
  * segmented control'un yaricapi, rengi ve tipografisi bunlarin hicbirini
- * tutmuyor — sistemin ortasinda yabanci bir parca olarak duruyordu. Bento
- * benimsendigi icin custom kazaniyor; bu bilincli bir sapma.
+ * tutmuyor. Bento benimsendigi icin custom kazaniyor; bilincli sapma.
+ *
+ * KRITIK: Pressable'in style'i FONKSIYON DEGIL. Fonksiyon-style'da layout ve
+ * renk ozellikleri uygulanmiyor (design.md §8) — ilk surumde tam olarak bu
+ * yuzden secili pill'in dolgusu ve hizalamasi kayboldu. Basma geri bildirimi
+ * icin ayri bir sarmalayici View kullaniliyor.
  */
 export function BentoSegment<T extends string>({
   options,
@@ -37,19 +41,33 @@ export function BentoSegment<T extends string>({
 }: Props<T>) {
   const { theme } = useTheme();
 
+  const container: ViewStyle = {
+    flexDirection: "row",
+    gap: 3,
+    padding: 3,
+    borderRadius: R.pill,
+    backgroundColor: tone === "accent" ? theme.tile2 : theme.tile2,
+    ...(fill ? { alignSelf: "stretch" } : { alignSelf: "flex-start" }),
+  };
+
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        gap: 3,
-        padding: 3,
-        borderRadius: R.pill,
-        backgroundColor: tone === "accent" ? theme.tile2 : theme.tile,
-        ...(fill ? {} : { alignSelf: "flex-start" }),
-      }}
-    >
+    <View style={container}>
       {options.map((opt) => {
         const active = opt === value;
+        const cell: ViewStyle = {
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: R.pill,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: active
+            ? tone === "accent"
+              ? "#D4FF4D"
+              : theme.chrome
+            : "transparent",
+          ...(fill ? { flex: 1 } : {}),
+        };
+
         return (
           <Pressable
             key={opt}
@@ -58,40 +76,34 @@ export function BentoSegment<T extends string>({
               haptic.tap();
               onChange(opt);
             }}
-            style={({ pressed }) => ({
-              paddingHorizontal: 11,
-              paddingVertical: 5,
-              borderRadius: R.pill,
-              backgroundColor: active
-                ? tone === "accent"
-                  ? "#D4FF4D"
-                  : theme.chrome
-                : "transparent",
-              opacity: pressed && !active ? press.opacity : 1,
-              ...(fill ? { flex: 1, alignItems: "center" as const } : {}),
-            })}
+            style={fill ? { flex: 1 } : undefined}
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
           >
-            <Text
-              style={{
-                fontFamily: mono
-                  ? active
-                    ? "GeistMono-600"
-                    : "GeistMono-500"
-                  : active
-                    ? "Geist-600"
-                    : "Geist-500",
-                fontSize: 11,
-                color: active
-                  ? tone === "accent"
-                    ? "#11130A"
-                    : theme.fg
-                  : theme.fg2,
-              }}
-            >
-              {opt}
-            </Text>
+            {({ pressed }) => (
+              <View style={[cell, pressed && !active ? { opacity: press.opacity } : null]}>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontFamily: mono
+                      ? active
+                        ? "GeistMono-600"
+                        : "GeistMono-500"
+                      : active
+                        ? "Geist-600"
+                        : "Geist-500",
+                    fontSize: 12,
+                    color: active
+                      ? tone === "accent"
+                        ? "#11130A"
+                        : theme.fg
+                      : theme.fg2,
+                  }}
+                >
+                  {opt}
+                </Text>
+              </View>
+            )}
           </Pressable>
         );
       })}
