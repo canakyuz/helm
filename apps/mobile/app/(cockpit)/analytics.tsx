@@ -10,12 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { duration, radius as R, space } from "@helm/design";
-import {
-  AD_FORMAT_LABEL,
-  GAME_STEP_LABEL,
-  instrumentationWarnings,
-  orderedGameSteps,
-} from "@helm/api";
+import { GAME_STEP_LABEL, orderedGameSteps } from "@helm/api";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
@@ -37,13 +32,7 @@ import {
   Rise,
   type RailRow,
 } from "~/components/bento";
-import {
-  FunnelTile,
-  InstrumentationTile,
-  PerfTile,
-  PlatformTile,
-  type FunnelRow,
-} from "~/components/analytics";
+import { FunnelTile, PlatformTile, type FunnelRow } from "~/components/analytics";
 
 const SPARK_BARS = 14;
 const TOP_COUNTRIES = 5;
@@ -58,8 +47,6 @@ const HERO_NUMBER = {
   lineHeight: 48,
   letterSpacing: -2,
 } as const;
-
-const pct = (r: number | null): string => (r == null ? "—" : `%${Math.round(r * 100)}`);
 
 function fmtSession(sec: number): string {
   return `${Math.floor(sec / 60)}d ${Math.round(sec % 60)}s`;
@@ -101,28 +88,6 @@ export default function Analytics() {
   const dauPoints = (dauDetail.data?.series ?? []).slice(-SPARK_BARS);
 
   const f = funnels.data;
-  const warnings = f != null ? instrumentationWarnings(f) : [];
-
-  // ── Oturum hunisi: platform basina baslayan / kapanan ──
-  const sessionRows: FunnelRow[] = (f?.sessions ?? []).map((s) => ({
-    label: s.platform,
-    value: `${formatInteger(s.ended)} / ${formatInteger(s.started)}`,
-    ratio: s.started > 0 ? s.ended / s.started : 0,
-    note:
-      s.unclosedRate != null && s.unclosed > 0
-        ? `${formatInteger(s.unclosed)} oturum kapanmadı · ${pct(s.unclosedRate)}`
-        : undefined,
-    tone: s.unclosedRate != null && s.unclosedRate >= 0.5 ? "loss" : "normal",
-  }));
-
-  // ── Reklam hunisi: bicim basina gosterim / hata ──
-  const adRows: FunnelRow[] = (f?.ads ?? []).map((a) => ({
-    label: AD_FORMAT_LABEL[a.format] ?? a.format,
-    value: `${formatInteger(a.shown)} / ${formatInteger(a.shown + a.failed)}`,
-    ratio: a.failureRate != null ? 1 - a.failureRate : 1,
-    note: a.failed > 0 ? `${formatInteger(a.failed)} hata · ${pct(a.failureRate)}` : undefined,
-    tone: a.failureRate != null && a.failureRate >= 0.3 ? "loss" : "normal",
-  }));
 
   // ── Oyun akisi: sabit sirada, en buyuk adima gore oranli ──
   const steps = f != null ? orderedGameSteps(f.game) : [];
@@ -172,7 +137,7 @@ export default function Analytics() {
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow="ANALİZ"
-          title="Davranış"
+          title="Kullanıcılar"
           onSync={handleRefresh}
           syncing={refreshing}
         />
@@ -234,32 +199,7 @@ export default function Analytics() {
             </BentoTile>
           </Rise>
 
-          {/* Ölçüm şüpheleri EN ÜSTTE: aşağıdaki her okumayı nitelendiriyor. */}
           <Rise index={1} replayKey={replayKey}>
-            <InstrumentationTile warnings={warnings} />
-          </Rise>
-
-          <Rise index={2} replayKey={replayKey}>
-            <FunnelTile
-              title="Oturum"
-              count={f != null ? `${f.days} GÜN` : undefined}
-              rows={sessionRows}
-              empty={funnels.isLoading ? "YÜKLENİYOR…" : "OTURUM OLAYI YOK"}
-              replayKey={replayKey}
-            />
-          </Rise>
-
-          <Rise index={3} replayKey={replayKey}>
-            <FunnelTile
-              title="Reklam"
-              count="GÖSTERİM / TOPLAM"
-              rows={adRows}
-              empty={funnels.isLoading ? "YÜKLENİYOR…" : "REKLAM OLAYI YOK"}
-              replayKey={replayKey}
-            />
-          </Rise>
-
-          <Rise index={4} replayKey={replayKey}>
             <FunnelTile
               title="Oyun akışı"
               rows={gameRows}
@@ -268,7 +208,7 @@ export default function Analytics() {
             />
           </Rise>
 
-          <Rise index={5} replayKey={replayKey}>
+          <Rise index={2} replayKey={replayKey}>
             <FunnelTile
               title="Satın alma"
               rows={purchaseRows}
@@ -277,15 +217,11 @@ export default function Analytics() {
             />
           </Rise>
 
-          <Rise index={6} replayKey={replayKey}>
-            <PerfTile rows={f?.perf ?? []} />
-          </Rise>
-
-          <Rise index={7} replayKey={replayKey}>
+          <Rise index={3} replayKey={replayKey}>
             <PlatformTile rows={f?.platforms ?? []} />
           </Rise>
 
-          <Rise index={8} replayKey={replayKey}>
+          <Rise index={4} replayKey={replayKey}>
             <BentoTile>
               <Text className="font-semibold text-emph tracking-tight text-fg">
                 Ülkeler
