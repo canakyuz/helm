@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Text, View, ScrollView, useWindowDimensions } from "react-native";
+import { RefreshControl, Text, View, ScrollView, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
@@ -504,6 +506,7 @@ function OsSection({ projectId }: { projectId?: string | undefined }) {
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function Analytics() {
+  const { refreshing, onRefresh } = useScreenRefresh();
   const { width } = useWindowDimensions();
   const chartW = width - 32;
   const barsW = width - 44; // screen pad (32) + OpenHero inner pad (12)
@@ -548,7 +551,11 @@ export default function Analytics() {
       <LiquidBackground />
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <LiquidHeader />
-        <ScrollView contentContainerStyle={{ paddingBottom: 120, gap: 18 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 120, gap: 18 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl tintColor={colors.fgPrimary} refreshing={refreshing} onRefresh={onRefresh} />}
+        >
           {/* Card-less hero on the aurora background: number + bar chart + mini-stats. */}
           <Animated.View entering={FadeIn.duration(420)} style={{ paddingHorizontal: 16, paddingTop: 8 }}>
             <OpenHero

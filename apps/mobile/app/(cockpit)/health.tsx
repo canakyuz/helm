@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
-import { Linking, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { Linking, RefreshControl, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 
 import { useSentryIssues, type SentryIssue, type SentryLevel } from "~/hooks/use-sentry-issues";
 import { useSystemHealth } from "~/hooks/use-system-health";
@@ -282,6 +284,7 @@ function heartbeatColor(status: Property["status"]): string {
 }
 
 export default function Health() {
+  const { refreshing, onRefresh } = useScreenRefresh();
   const { width } = useWindowDimensions();
   const chartW = width - 44;
   const [versionsAll, setVersionsAll] = useState(false);
@@ -322,7 +325,11 @@ export default function Health() {
       <LiquidBackground />
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <LiquidHeader />
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl tintColor={colors.fgPrimary} refreshing={refreshing} onRefresh={onRefresh} />}
+        >
           <OpenHero
             eyebrow="Crash-free · sessions"
             live
