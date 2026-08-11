@@ -10,12 +10,12 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { duration, radius as R, space } from "@helm/design";
-import { GAME_STEP_LABEL, orderedGameSteps } from "@helm/api";
+import { flagOf, GAME_STEP_LABEL, orderedGameSteps } from "@helm/api";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
-import { useGeoBreakdown } from "~/hooks/use-analytics";
+import { useCountryMetrics } from "~/hooks/use-country-metrics";
 import { useGameFunnels } from "~/hooks/use-game-funnels";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger } from "~/lib/format";
@@ -65,7 +65,7 @@ export default function Analytics() {
   const dauDetail = useMetricDetail("dau");
   const mauDetail = useMetricDetail("mau");
   const sessDetail = useMetricDetail("avg_session_sec");
-  const geo = useGeoBreakdown(projectId);
+  const geo = useCountryMetrics();
   const funnels = useGameFunnels(30);
 
   const handleRefresh = () => {
@@ -131,12 +131,15 @@ export default function Analytics() {
           },
         ];
 
+  // Kaynak metrics_country / app_downloads — PostHog geo ucu bos donuyor.
+  // Etiket "indirme": dau kirilimi 15 satir ve Mayis'ta donmus, onu kullanici
+  // diye gostermek yaniltici olurdu.
   const countries = (geo.data?.rows ?? []).slice(0, TOP_COUNTRIES);
-  const peak = Math.max(...countries.map((c) => c.users), 1);
+  const peak = Math.max(...countries.map((c) => c.value), 1);
   const countryRows: RailRow[] = countries.map((c, i) => ({
-    label: c.country_name ?? c.country,
-    value: formatInteger(c.users),
-    ratio: c.users / peak,
+    label: `${flagOf(c.code)}  ${c.code}`,
+    value: formatInteger(c.value),
+    ratio: c.value / peak,
     color: tintsFor(theme.accent)[i % 4]!,
   }));
 
@@ -246,9 +249,14 @@ export default function Analytics() {
 
           <Rise index={4} replayKey={replayKey}>
             <BentoTile>
-              <Text className="font-semibold text-emph tracking-tight text-fg">
-                Ülkeler
-              </Text>
+              <View className="flex-row items-center justify-between">
+                <Text className="font-semibold text-emph tracking-tight text-fg">
+                  Ülkeler
+                </Text>
+                <Text className="font-mono-medium text-[11px] text-fg3">
+                  İNDİRME · 30G
+                </Text>
+              </View>
               {countryRows.length === 0 ? (
                 <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
                   {geo.isLoading ? "YÜKLENİYOR…" : "ÜLKE VERİSİ YOK"}
