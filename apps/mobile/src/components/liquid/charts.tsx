@@ -126,12 +126,16 @@ export function Ring({
   size = 82,
   stroke = 8,
   color = colors.green,
+  // Dolmamis yay. Varsayilan koyu tema icin; acik temada beyaz uzerine beyaz
+  // gorunmez oldugu icin cagiran tema renginden gecmeli.
+  trackColor = "rgba(255,255,255,0.08)",
   children,
 }: {
   value: number;
   size?: number;
   stroke?: number;
   color?: string;
+  trackColor?: string;
   children?: React.ReactNode;
 }) {
   const r = (size - stroke) / 2;
@@ -149,7 +153,7 @@ export function Ring({
           path={track}
           style="stroke"
           strokeWidth={stroke}
-          color="rgba(255,255,255,0.08)"
+          color={trackColor}
         />
         <Path
           path={track}
