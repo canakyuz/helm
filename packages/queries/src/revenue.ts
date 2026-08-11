@@ -7,6 +7,7 @@ import {
   fetchRevenueMix,
   fetchPayouts,
   fetchMrrMovement,
+  fetchRevenueHistory,
 } from "@helm/api";
 
 type QueryGate = { enabled?: boolean };
@@ -73,5 +74,25 @@ export function mrrMovementQueryOptions(
     enabled: projectId != null && (options.enabled ?? true),
     staleTime: 5 * 60_000,
     queryFn: () => fetchMrrMovement(client, projectId!),
+  });
+}
+
+// ── revenue-history (donem gezinmesi: ay/hafta) ──
+export const revenueHistoryKeys = {
+  all: ["revenue-history"] as const,
+  byProperty: (id: SelectedPropertyId) => ["revenue-history", id] as const,
+};
+
+export function revenueHistoryQueryOptions(
+  client: SupabaseClient,
+  propertyId: SelectedPropertyId,
+  options: QueryGate = {},
+) {
+  return queryOptions({
+    queryKey: revenueHistoryKeys.byProperty(propertyId),
+    enabled: options.enabled ?? true,
+    // Gecmis donemler degismiyor; yalnizca bugunun satiri buyuyor.
+    staleTime: 5 * 60_000,
+    queryFn: () => fetchRevenueHistory(client, propertyId),
   });
 }

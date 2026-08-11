@@ -1,15 +1,25 @@
 import { useSyncExternalStore } from "react";
 
+import { ACCENTS, DEFAULT_ACCENT, type AccentId } from "@helm/design";
+
 import { storage } from "~/lib/storage";
 
 export type Currency = "USD" | "TRY" | "EUR" | "GBP";
 export type SelectedPropertyId = string | "all";
+/** "system" iOS gorunum ayarini takip eder; digerleri elle kilitler. */
+export type ThemeMode = "system" | "dark" | "light";
+/** Accent ailesi kimligi — packages/design/src/accents.ts ile ayni kume. */
+export type Accent = AccentId;
+
+const THEME_MODES: readonly ThemeMode[] = ["system", "dark", "light"];
 
 export type Preferences = {
   selectedPropertyId: SelectedPropertyId;
   currency: Currency;
   revenueMultiplier: number;
   prioritizeRevenueRequests: boolean;
+  themeMode: ThemeMode;
+  accent: Accent;
 };
 
 const KEYS = {
@@ -17,6 +27,8 @@ const KEYS = {
   currency: "pref.currency",
   revenueMultiplier: "pref.revenueMultiplier",
   prioritizeRevenueRequests: "pref.prioritizeRevenueRequests",
+  themeMode: "pref.themeMode",
+  accent: "pref.accent",
 } as const;
 
 const DEFAULTS: Preferences = {
@@ -24,6 +36,8 @@ const DEFAULTS: Preferences = {
   currency: "TRY",
   revenueMultiplier: 1,
   prioritizeRevenueRequests: true,
+  themeMode: "system",
+  accent: DEFAULT_ACCENT,
 };
 
 const MIN_REVENUE_MULTIPLIER = 1;
@@ -35,10 +49,24 @@ export function normalizeRevenueMultiplier(value: number): number {
   return Math.round(clamped * 100) / 100;
 }
 
+function readThemeMode(): ThemeMode {
+  const raw = storage.getString(KEYS.themeMode);
+  // Bilinmeyen deger (eski surum / bozuk yazim) sessizce varsayilana duser.
+  return THEME_MODES.includes(raw as ThemeMode) ? (raw as ThemeMode) : DEFAULTS.themeMode;
+}
+
+function readAccent(): Accent {
+  const raw = storage.getString(KEYS.accent);
+  // Bilinmeyen deger (eski surum / kaldirilmis aile) sessizce varsayilana duser.
+  return ACCENTS.some((a) => a.id === raw) ? (raw as Accent) : DEFAULTS.accent;
+}
+
 function readCurrent(): Preferences {
   const prioritizeRevenueRequests = storage.getString(KEYS.prioritizeRevenueRequests);
 
   return {
+    themeMode: readThemeMode(),
+    accent: readAccent(),
     selectedPropertyId:
       storage.getString(KEYS.selectedPropertyId) ?? DEFAULTS.selectedPropertyId,
     currency:
@@ -84,6 +112,12 @@ export const preferences = {
   },
   setCurrency(currency: Currency) {
     storage.set(KEYS.currency, currency);
+  },
+  setThemeMode(mode: ThemeMode) {
+    storage.set(KEYS.themeMode, mode);
+  },
+  setAccent(accent: Accent) {
+    storage.set(KEYS.accent, accent);
   },
   setRevenueMultiplier(multiplier: number) {
     storage.set(

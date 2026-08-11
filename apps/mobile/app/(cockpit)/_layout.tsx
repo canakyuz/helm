@@ -6,10 +6,11 @@ import { useAlerts } from "~/hooks/use-alerts";
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useWidgetSync } from "~/hooks/use-widget-sync";
 import { usePreferences } from "~/lib/preferences";
-import { colors } from "~/theme/tokens";
+import { useTheme } from "~/theme/use-theme";
 
 export default function CockpitLayout() {
   const pathname = usePathname();
+  const { name: themeName, theme } = useTheme();
   const { prioritizeRevenueRequests } = usePreferences();
   const deferShellQueries =
     prioritizeRevenueRequests && pathname.endsWith("/revenue");
@@ -27,31 +28,36 @@ export default function CockpitLayout() {
   }, [alerts.data]);
 
   return (
+    // tintColor accent DEGIL fg: lime beyaz zemin uzerinde ~1.3:1, light temada
+    // aktif sekme etiketi okunmuyordu. Tasarim da aktif sekme icin accent degil
+    // fg kullaniyor (kaynak: tabs[].fg = s.tab === id ? on : off).
     <NativeTabs
       labelStyle={{ fontFamily: "GeistMono-500", fontSize: 10 }}
-      tintColor={colors.accent}
-      blurEffect="systemChromeMaterialDark"
+      tintColor={theme.fg}
+      blurEffect={
+        themeName === "dark" ? "systemChromeMaterialDark" : "systemChromeMaterialLight"
+      }
     >
       <NativeTabs.Trigger name="overview">
         <NativeTabs.Trigger.Icon
           sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis" }}
         />
-        <NativeTabs.Trigger.Label>Overview</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Özet</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="revenue">
         <NativeTabs.Trigger.Icon sf={{ default: "creditcard", selected: "creditcard.fill" }} />
-        <NativeTabs.Trigger.Label>Revenue</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Gelir</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="analytics">
         <NativeTabs.Trigger.Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
-        <NativeTabs.Trigger.Label>Analytics</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Kullanıcı</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="health">
         <NativeTabs.Trigger.Icon sf={{ default: "heart", selected: "heart.fill" }} />
-        <NativeTabs.Trigger.Label>Health</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Sağlık</NativeTabs.Trigger.Label>
         {openCount > 0 ? (
           <NativeTabs.Trigger.Badge>{String(openCount)}</NativeTabs.Trigger.Badge>
         ) : null}
@@ -59,7 +65,7 @@ export default function CockpitLayout() {
 
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Icon sf={{ default: "gearshape", selected: "gearshape.fill" }} />
-        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Ayar</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

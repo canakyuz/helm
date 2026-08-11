@@ -8,6 +8,11 @@ import { type Connector, type MetricPoint } from "./types.ts";
 // package name veya App Store numeric id DEGIL — bunlar AdMob'un APP
 // boyutuyla eslesmez. app_id bos birakilirsa yayinci hesabindaki TUM
 // uygulamalarin geliri toplanip tek seri olarak yazilir.
+//
+// VIRGULLE BIRDEN FAZLA DEGER verilebilir ve genelde verilmelidir: AdMob'da
+// iOS ve Android AYRI uygulama kayitlaridir, yani tek oyun iki app_id tasir.
+// Ornek: "ca-app-pub-4702963699712162~8005529163,ca-app-pub-4702963699712162~8165311263"
+// Tek platformun kimligi yazilirsa digerinin geliri sessizce elenir.
 
 const ymd = (d: Date) => ({
   year: d.getUTCFullYear(),
@@ -68,9 +73,18 @@ export const fetchAdMob: Connector = async (config) => {
   // Yanıt bir dizi: { header } / { row } / { footer } elemanları.
   const items: Array<Record<string, unknown>> = await res.json();
 
-  const appFilter = typeof config.app_id === "string" && config.app_id.length > 0
-    ? config.app_id
-    : null;
+  // app_id VIRGULLE AYRILMIS liste kabul eder. Sebebi somut: AdMob'da iOS ve
+  // Android ayri uygulama kayitlaridir, yani tek bir oyun iki app_id tasir.
+  // Tek deger yazilsaydi diger platformun geliri filtreden sessizce elenir ve
+  // toplam yariya duserdi — dogru gorunumlu, yanlis bir rakam.
+  const appFilter = (() => {
+    if (typeof config.app_id !== "string") return null;
+    const ids = config.app_id
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    return ids.length > 0 ? new Set(ids) : null;
+  })();
 
   // Gun bazinda toplama: APP boyutu ile ayni tarih icin birden fazla satir
   // doner. Tek tek push edilirse ingest'in upsert'i (project_id,date,source,
@@ -93,7 +107,7 @@ export const fetchAdMob: Connector = async (config) => {
     // degilse hepsi toplanir — mevcut entegrasyonlar icin davranis degismez.
     if (appFilter) {
       const appId = row.dimensionValues?.APP?.value;
-      if (appId !== appFilter) continue;
+      if (!appId || !appFilter.has(appId)) continue;
     }
 
     const dateRaw = row.dimensionValues?.DATE?.value; // "YYYYMMDD"
@@ -119,7 +133,7 @@ export const fetchAdMob: Connector = async (config) => {
   // sessiz-bos davranis korunur.
   if (appFilter && daily.size === 0) {
     throw new Error(
-      `AdMob app_id "${appFilter}" hicbir satirla eslesmedi — AdMob uygulama kimligi (ca-app-pub-XXXX~YYYY) bekleniyor, bundle id degil.`,
+      `AdMob app_id (${[...appFilter].join(", ")}) hicbir satirla eslesmedi — AdMob uygulama kimligi (ca-app-pub-XXXX~YYYY) bekleniyor, bundle id degil.`,
     );
   }
 
