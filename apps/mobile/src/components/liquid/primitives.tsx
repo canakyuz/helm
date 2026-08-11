@@ -400,7 +400,17 @@ export function Stars({ n, size = 11 }: { n: number; size?: number }) {
 }
 
 // settings toggle
-export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({
+  on,
+  onChange,
+  // Kapali durum rengi. Varsayilan koyu tema icin; acik temada beyaz uzerine
+  // beyaz gorunmez oldugu icin cagiran tema renginden gecmeli.
+  offColor = "rgba(255,255,255,0.13)",
+}: {
+  on: boolean;
+  onChange: (v: boolean) => void;
+  offColor?: string;
+}) {
   return (
     <Pressable
       onPress={() => onChange(!on)}
@@ -408,7 +418,7 @@ export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) =
         width: 44,
         height: 26,
         borderRadius: 99,
-        backgroundColor: on ? colors.accent : "rgba(255,255,255,0.13)",
+        backgroundColor: on ? colors.accent : offColor,
         padding: 3,
         flexDirection: "row",
         justifyContent: on ? "flex-end" : "flex-start",
