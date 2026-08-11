@@ -169,15 +169,33 @@ export async function fetchGameFunnels(
 }
 
 /**
- * Oyun adimlarini sabit siraya dizer, veri gelmeyen adimlari atar.
- * Time: O(n), Space: O(n).
+ * Oyun adimlarini siraya dizer.
+ *
+ * BILINEN anahtarlar once, KANONIK sirada — "basla" olayi "bitir"den once
+ * gelmeli, sayisi kucuk olsa bile. Sayiya gore siralamak huniyi ters cevirirdi.
+ *
+ * BILINMEYEN anahtarlar ATILMAZ, sona eklenir (sayiya gore). Bu cok-urunlu
+ * yapinin sarti: GAME_STEP_ORDER Block Forge'un sozlugu; Dante veya Echo baska
+ * anahtarlar gonderecek. Filtrelemek onlari SESSIZCE gorunmez yapardi — yeni bir
+ * oyun ekleyen kisi verisinin neden gelmedigini anlayamazdi.
+ *
+ * Time: O(n log n) — bilinmeyenlerin siralamasi. Space: O(n).
  */
 export function orderedGameSteps(rows: readonly CountRow[]): CountRow[] {
   const byKey = new Map(rows.map((r) => [r.key, r.count]));
-  return GAME_STEP_ORDER.filter((k) => byKey.has(k)).map((k) => ({
+  const known = new Set<string>(GAME_STEP_ORDER);
+
+  const canonical = GAME_STEP_ORDER.filter((k) => byKey.has(k)).map((k) => ({
     key: k,
     count: byKey.get(k)!,
   }));
+
+  const rest = rows
+    .filter((r) => !known.has(r.key))
+    .slice()
+    .sort((a, b) => b.count - a.count);
+
+  return [...canonical, ...rest];
 }
 
 /**
