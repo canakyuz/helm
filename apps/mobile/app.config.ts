@@ -15,7 +15,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: "com.canakyuz.helmmobile",
     // Required by @bacons/apple-targets on EAS (not only local .env).
     appleTeamId: process.env.EXPO_APPLE_TEAM_ID ?? "AZPJSKX9C9",
-    buildNumber: "12",
+    buildNumber: "15",
     icon: {
       // HELM iOS asset set (1024×1024): Default / Dark / Clear Light (tinted home screen)
       light: "./assets/icon.png",
