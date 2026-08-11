@@ -7,7 +7,7 @@ import { space, type Theme } from "@helm/design";
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useAlerts, useAckAlert } from "~/hooks/use-alerts";
-import { useProperties, type PropertyStatus } from "~/hooks/use-properties";
+import { useProperties, type PropertyStatus, type PropertyType } from "~/hooks/use-properties";
 import { usePropertyMetrics } from "~/hooks/use-property-metrics";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { useFxRates } from "~/hooks/use-fx-rates";
@@ -34,6 +34,14 @@ const SPARK_BARS = 10;
 /** Listede gosterilen proje sayisi; toplam basliktaki sayida kalir. */
 const TOP_N = 5;
 
+const TYPE_LABEL: Record<PropertyType, string> = {
+  website: "Web",
+  web_app: "Web app",
+  mobile_app: "Uygulama",
+  desktop_app: "Masaüstü",
+  game: "Oyun",
+};
+
 const STATUS_LABEL: Record<PropertyStatus, string> = {
   healthy: "sağlıklı",
   stale: "veri bayat",
@@ -46,11 +54,16 @@ const MONTHS_TR = [
   "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
 ];
 
-/** Proje monogrami — ad'in ilk iki harfi. "Orbit Runner" → "OR". */
+/**
+ * Proje monogrami — ad'in ilk iki harfi. "Orbit Runner" → "OR".
+ *
+ * Noktalama ATILIR: "Wesan · Corporate site" ikinci kelime olarak "·" veriyordu,
+ * monogram "W·" cikiyordu.
+ */
 function monogram(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] ?? "?";
-  const second = parts[1]?.[0] ?? parts[0]?.[1] ?? "";
+  const words = name.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const first = words[0]?.[0] ?? "?";
+  const second = words[1]?.[0] ?? words[0]?.[1] ?? "";
   return (first + second).toUpperCase();
 }
 
@@ -289,8 +302,11 @@ export default function Overview() {
                         >
                           {p.name}
                         </Text>
+                        {/* Tur + durum. brandName KULLANILMIYOR: cogu projede
+                            marka adi proje adiyla ayni, satir "Block Forge ·
+                            Block Forge" diye tekrar ediyordu. */}
                         <Text className="mt-[1px] text-meta text-fg3" numberOfLines={1}>
-                          {p.brandName ?? p.type} · {STATUS_LABEL[p.status]}
+                          {TYPE_LABEL[p.type] ?? p.type} · {STATUS_LABEL[p.status]}
                         </Text>
                       </View>
                       {/* Proje bazli delta kaynagi yok — uydurmak yerine
@@ -379,6 +395,9 @@ function StatTile({
 }) {
   const { theme } = useTheme();
   const hasDelta = delta != null && Number.isFinite(delta);
+  // Yuvarlandiginda sifira dusen degisim "degismedi" demektir — "+0.0" yazmak
+  // yanlis bir yon ima eder. Notr renkte, isaretsiz gosterilir.
+  const flat = hasDelta && Math.abs(delta) < 0.05;
   const positive = (delta ?? 0) >= 0;
 
   return (
@@ -397,9 +416,9 @@ function StatTile({
         {hasDelta ? (
           <Text
             className="mt-[6px] font-mono-medium text-[11px]"
-            style={{ color: positive ? theme.pos : theme.neg }}
+            style={{ color: flat ? theme.fg3 : positive ? theme.pos : theme.neg }}
           >
-            {positive ? "+" : "−"}
+            {flat ? "" : positive ? "+" : "−"}
             {Math.abs(delta).toFixed(1)}
           </Text>
         ) : (
