@@ -67,16 +67,44 @@ function monogram(name: string): string {
   return (first + second).toUpperCase();
 }
 
+/** Hero rakaminin stili — CountUp ve duz Text ayni gorunmeli. */
+const HERO_NUMBER = {
+  marginTop: 14,
+  fontFamily: "Geist-600",
+  fontSize: 48,
+  lineHeight: 50,
+  letterSpacing: -2.2,
+  color: "#11130A",
+} as const;
+
 /**
- * Son N degeri 0–1 araligina normalize eder.
- * Time: O(n), Space: O(n) — n = SPARK_BARS, sabit.
+ * Iki gunluk seriyi tarihe gore toplar.
+ *
+ * NEDEN GEREKLI: hero'daki rakam reklam + magaza gelirinin toplami, ama sparkline
+ * sadece ad_revenue serisinden geliyordu. Bir cubuga basinca basliktakinden BASKA
+ * bir metrik gorunurdu. Ayni sayiyi gostermeleri sart.
+ *
+ * Time: O(n+m), Space: O(n+m).
  */
-function normalizeTail(series: readonly number[], count: number): number[] {
-  const tail = series.slice(-count);
-  if (tail.length === 0) return [];
-  const max = Math.max(...tail);
-  if (max <= 0) return tail.map(() => 0.04);
-  return tail.map((v) => Math.max(0.04, v / max));
+function mergeSeries(
+  a: readonly { date: string; value: number }[],
+  b: readonly { date: string; value: number }[],
+): { date: string; value: number }[] {
+  const byDate = new Map<string, number>();
+  for (const p of a) byDate.set(p.date, p.value);
+  for (const p of b) byDate.set(p.date, (byDate.get(p.date) ?? 0) + p.value);
+  return [...byDate.entries()]
+    .sort(([x], [y]) => (x < y ? -1 : x > y ? 1 : 0))
+    .map(([date, value]) => ({ date, value }));
+}
+
+/** "2026-08-09" → "9 AĞUSTOS". Secili gun eyebrow'da tarihi gosterir. */
+function formatDayLabel(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  if (y == null || m == null || d == null) return iso;
+  return new Date(y, m - 1, d)
+    .toLocaleDateString("tr-TR", { day: "numeric", month: "long" })
+    .toLocaleUpperCase("tr-TR");
 }
 
 export default function Overview() {
@@ -100,10 +128,15 @@ export default function Overview() {
   // oynatir. Sekme degisiminde oynatmaz — o siklikta animasyon gecikme demek
   // (packages/design/src/motion.ts → replayOn).
   const [replayKey, setReplayKey] = useState(0);
+  /** Hero'da hangi gun gosteriliyor. null = bugun. */
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
-  const seriesTail = useMemo(
-    () => normalizeTail((revenue.data?.series ?? []).map((p) => p.value), SPARK_BARS),
-    [revenue.data],
+  const sparkPoints = useMemo(
+    () =>
+      mergeSeries(revenue.data?.series ?? [], appRevDetail.data?.series ?? []).slice(
+        -SPARK_BARS,
+      ),
+    [revenue.data, appRevDetail.data],
   );
 
   if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
@@ -132,6 +165,10 @@ export default function Overview() {
       : null;
   const goalCurrent = mix.data?.total ?? 0;
   const goalRatio = goalTarget != null && goalTarget > 0 ? goalCurrent / goalTarget : 0;
+
+  // Secili gun. Yenileme seriyi kisaltabilecegi icin indeks dogrulanir —
+  // aksi halde eski bir indeks undefined'a duser.
+  const picked = selectedDay != null ? (sparkPoints[selectedDay] ?? null) : null;
 
   const openAlerts = (alerts.data ?? []).filter((a) => !dismissed[a.id]);
   const allProjects = properties.data ?? [];
@@ -173,37 +210,63 @@ export default function Overview() {
           <Rise index={0} replayKey={replayKey}>
             <SolidTile color="#D4FF4D" padding={space.tilePadLg}>
               <View className="flex-row items-center justify-between">
-                <Text className="font-mono-medium text-eyebrow tracking-wider text-accent-ink/60">
-                  BUGÜN · GELİR
+                {/* .60 alfa 10px'te 4.70:1 ile sinirdaydi; .78 → 8.64:1. */}
+                <Text className="font-mono-medium text-eyebrow tracking-wider text-accent-ink/[0.78]">
+                  {picked != null ? formatDayLabel(picked.date) : "BUGÜN · GELİR"}
                 </Text>
-                <View className="rounded-pill bg-accent-ink/[0.14] px-sm py-[3px]">
-                  <Text className="font-mono-semibold text-[11px] text-accent-ink">
-                    {revDelta >= 0 ? "+" : ""}
-                    {revDelta.toFixed(1)}%
+                {picked == null ? (
+                  <View className="rounded-pill bg-accent-ink/[0.14] px-sm py-[3px]">
+                    <Text className="font-mono-semibold text-[11px] text-accent-ink">
+                      {revDelta >= 0 ? "+" : ""}
+                      {revDelta.toFixed(1)}%
+                    </Text>
+                  </View>
+                ) : (
+                  // Gecmis bir gun secildiginde delta gizlenir: o oran "dun'e
+                  // gore bugun" demek, secili gunle ilgisi yok.
+                  // Delta pill ile AYNI dikey olculer: pill'in padding'i varken
+                  // bu duz metin olsa satir alcalir ve cubuga her basista tum
+                  // duzen yukari ziplardi.
+                  <Text
+                    onPress={() => {
+                      haptic.tap();
+                      setSelectedDay(null);
+                    }}
+                    suppressHighlighting
+                    className="rounded-pill px-sm py-[3px] font-mono-semibold text-[11px] text-accent-ink/[0.78]"
+                  >
+                    BUGÜNE DÖN ✕
                   </Text>
-                </View>
+                )}
               </View>
 
-              <CountUp
-                value={todayRevenue}
-                format={fmt}
-                fitOneLine
-                style={{
-                  marginTop: 14,
-                  fontFamily: "Geist-600",
-                  fontSize: 48,
-                  lineHeight: 50,
-                  letterSpacing: -2.2,
-                  color: "#11130A",
-                }}
-              />
+              {picked != null ? (
+                // Secim degisiminde sayac YOK: cubuklara arka arkaya basilir,
+                // her seferinde 900ms saymak etkilesimi agirlastirir.
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={HERO_NUMBER}
+                >
+                  {fmt(picked.value)}
+                </Text>
+              ) : (
+                <CountUp value={todayRevenue} format={fmt} fitOneLine style={HERO_NUMBER} />
+              )}
 
               <View className="mt-tilePadSm">
                 <BentoBars
-                  values={seriesTail}
+                  points={sparkPoints}
                   activeColor="#11130A"
-                  dimColor="rgba(17,19,10,0.22)"
+                  // .22 alfa zemine karsi 1.61:1 idi — grafik goruunmuyordu.
+                  // .50 → 3.42:1 (non-text esigi 3:1) ve vurgulu barla 4.75:1.
+                  dimColor="rgba(17,19,10,0.50)"
                   height={44}
+                  selectedIndex={selectedDay}
+                  onSelect={(i) => {
+                    haptic.tap();
+                    setSelectedDay((prev) => (prev === i ? null : i));
+                  }}
                   replayKey={replayKey}
                 />
               </View>
