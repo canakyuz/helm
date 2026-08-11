@@ -1,8 +1,13 @@
 import { type Connector, type MetricPoint } from "./types.ts";
 
-// AdMob — networkReport ile tahmini reklam geliri (son 3 gün).
+// AdMob — networkReport ile tahmini reklam geliri (son 90 gün).
 // AdMob API service account DESTEKLEMEZ → refresh_token ile OAuth2.
-// config: { publisher_id, client_id, client_secret, refresh_token }
+// config: { publisher_id, client_id, client_secret, refresh_token, app_id? }
+// app_id (opsiyonel): tek bir oyunun gelirini ayirmak icin AdMob UYGULAMA
+// KIMLIGI — format "ca-app-pub-XXXXXXXX~YYYYYYYY". iOS bundle id, Android
+// package name veya App Store numeric id DEGIL — bunlar AdMob'un APP
+// boyutuyla eslesmez. app_id bos birakilirsa yayinci hesabindaki TUM
+// uygulamalarin geliri toplanip tek seri olarak yazilir.
 
 const ymd = (d: Date) => ({
   year: d.getUTCFullYear(),
@@ -104,6 +109,18 @@ export const fetchAdMob: Connector = async (config) => {
     acc.revenue += revenue;
     acc.impressions += impressions;
     daily.set(date, acc);
+  }
+
+  // app_id filtresi tanimliysa ve hicbir satir eslesmediyse daily bos kalir;
+  // bu durumda sessizce bos points donmek yerine hata firlatilir — aksi
+  // halde index.ts rows.length === 0 icin upsert'i atlar ve "ok" durumunu
+  // yazar, gelir sessizce donmeyi keser (yanlis bundle id gibi tipik hata).
+  // Filtre tanimli degilse (yeni hesap, sifir gelirli pencere) mevcut
+  // sessiz-bos davranis korunur.
+  if (appFilter && daily.size === 0) {
+    throw new Error(
+      `AdMob app_id "${appFilter}" hicbir satirla eslesmedi — AdMob uygulama kimligi (ca-app-pub-XXXX~YYYY) bekleniyor, bundle id degil.`,
+    );
   }
 
   const points: MetricPoint[] = [];
