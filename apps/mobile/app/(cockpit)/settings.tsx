@@ -139,7 +139,7 @@ export default function Settings() {
     haptic.tap();
     Alert.prompt(
       "Revenue multiplier",
-      "Enter a value from 1 to 3. This only changes local display values.",
+      "Enter a value from 1 to 100. This only changes local display values.",
       (text) => {
         const n = Number((text ?? "").replace(",", ".").replace(/[^\d.]/g, ""));
         if (!Number.isFinite(n)) return;

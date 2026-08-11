@@ -27,7 +27,7 @@ const DEFAULTS: Preferences = {
 };
 
 const MIN_REVENUE_MULTIPLIER = 1;
-const MAX_REVENUE_MULTIPLIER = 3;
+const MAX_REVENUE_MULTIPLIER = 100;
 
 export function normalizeRevenueMultiplier(value: number): number {
   if (!Number.isFinite(value)) return DEFAULTS.revenueMultiplier;
