@@ -186,6 +186,7 @@ export default function Overview() {
           title="Tüm projeler"
           onSync={handleRefresh}
           syncing={refreshing}
+          picker
           alertCount={openAlerts.length}
         />
 

@@ -6,3 +6,4 @@ export { BentoHeader } from "./header";
 export { BentoBackground } from "./background";
 export { BentoSegment } from "./segment";
 export { BentoRails, BentoStack, type RailRow } from "./rail";
+export { PropertyPicker } from "./property-picker";
