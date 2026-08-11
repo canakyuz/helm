@@ -1,7 +1,10 @@
 import { type Connector, type MetricPoint } from "./types.ts";
 
 // Sentry — iki metrik:
-//   1) "errors": son 90 gün günlük "received event" sayısı (stats endpoint).
+//   1) "errors": son 90 gün günlük kabul edilmiş hata olayı sayısı
+//      (org-level stats_v2, category=error & outcome=accepted).
+//      NOT: legacy /projects/{org}/{proj}/stats/?stat=received kullanılmıyor —
+//      200 dönüp 171 gün boyunca sabit 0 ürettiği ölçüldü.
 //   2) "crash_free_sessions": son 90 gün günlük crash-free session oranı (0–100),
 //      Sessions/Release-Health endpoint'inden. Indie founder için en kritik sağlık
 //      sinyali. Projede release-health (session) verisi yoksa veya token scope yetmezse
@@ -9,6 +12,26 @@ import { type Connector, type MetricPoint } from "./types.ts";
 // config: { org_slug, project_slug, auth_token, host? }
 
 const SESSION_FIELD = "crash_free_rate(session)";
+
+/**
+ * Slug → numerik project id. Hem sessions hem stats_v2 uc noktasi slug kabul
+ * etmiyor, ikisi de bu id'yi istiyor.
+ */
+async function resolveProjectId(
+  host: string,
+  config: Record<string, string>,
+): Promise<string> {
+  const res = await fetch(
+    `${host}/api/0/projects/${config.org_slug}/${config.project_slug}/`,
+    { headers: { Authorization: `Bearer ${config.auth_token}` } },
+  );
+  if (!res.ok) {
+    throw new Error(`Sentry project ${res.status}: ${await res.text()}`);
+  }
+  const id = String((await res.json())?.id ?? "");
+  if (!id) throw new Error("Sentry project id çözülemedi");
+  return id;
+}
 
 /**
  * Crash-free session oranını günlük seri olarak çeker.
@@ -24,15 +47,7 @@ async function fetchCrashFree(
   const auth = { Authorization: `Bearer ${config.auth_token}` };
 
   // 1) slug → numerik project id
-  const projRes = await fetch(
-    `${host}/api/0/projects/${config.org_slug}/${config.project_slug}/`,
-    { headers: auth },
-  );
-  if (!projRes.ok) {
-    throw new Error(`Sentry project ${projRes.status}: ${await projRes.text()}`);
-  }
-  const projectId = String((await projRes.json())?.id ?? "");
-  if (!projectId) throw new Error("Sentry project id çözülemedi");
+  const projectId = await resolveProjectId(host, config);
 
   // 2) günlük crash-free session oranı
   const qs = new URLSearchParams({
@@ -72,23 +87,49 @@ async function fetchCrashFree(
 
 export const fetchSentry: Connector = async (config) => {
   const host = (config.host || "https://sentry.io").replace(/\/+$/, "");
-  const until = Math.floor(Date.now() / 1000);
-  const since = until - 90 * 86_400;
 
-  // errors — ana metrik (her zaman çekilir)
-  const url = `${host}/api/0/projects/${config.org_slug}/${config.project_slug}/stats/?stat=received&resolution=1d&since=${since}&until=${until}`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${config.auth_token}` },
+  // errors — ana metrik (her zaman çekilir).
+  //
+  // ESKIDEN: /api/0/projects/{org}/{proj}/stats/?stat=received — Sentry'nin LEGACY
+  // uc noktasi. 200 donuyordu ama degeri her gun 0'di: 171 gun boyunca tek bir
+  // sifirdan farkli deger uretmedi. Ayni donemde crash_free_sessions %99.53
+  // raporluyordu, yani proje canliydi ve veri akiyordu — sorun uygulamada degil,
+  // sorulan uc noktadaydi. Sonuc: kullanici App Store'da bug bildirirken panel
+  // "0 hata" gosteriyordu.
+  //
+  // SIMDI: org-level stats_v2. category=error + outcome=accepted, yani Sentry'nin
+  // gercekten kabul ettigi hata olaylari. Slug kabul etmedigi icin numerik id sart.
+  const projectId = await resolveProjectId(host, config);
+  const qs = new URLSearchParams({
+    field: "sum(quantity)",
+    category: "error",
+    outcome: "accepted",
+    interval: "1d",
+    statsPeriod: "90d",
+    project: projectId,
   });
+  const res = await fetch(
+    `${host}/api/0/organizations/${config.org_slug}/stats_v2/?${qs}`,
+    { headers: { Authorization: `Bearer ${config.auth_token}` } },
+  );
   if (!res.ok) {
-    throw new Error(`Sentry ${res.status}: ${await res.text()}`);
+    throw new Error(`Sentry stats_v2 ${res.status}: ${await res.text()}`);
   }
-  const data: Array<[number, number]> = await res.json();
-  const points: MetricPoint[] = data.map(([ts, count]): MetricPoint => ({
-    date: new Date(ts * 1000).toISOString().slice(0, 10),
-    metric: "errors",
-    value: Number(count ?? 0),
-  }));
+  const data = (await res.json()) as {
+    intervals?: string[];
+    groups?: Array<{ series?: Record<string, Array<number | null>> }>;
+  };
+  const intervals = data.intervals ?? [];
+  const series = data.groups?.[0]?.series?.["sum(quantity)"] ?? [];
+  const points: MetricPoint[] = [];
+  for (let i = 0; i < intervals.length; i++) {
+    points.push({
+      date: intervals[i].slice(0, 10),
+      metric: "errors",
+      // null = o aralikta olay yok → gercekten 0.
+      value: Number(series[i] ?? 0),
+    });
+  }
 
   // crash_free_sessions — opsiyonel, hata errors'ı bloklamaz
   try {
