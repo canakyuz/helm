@@ -62,7 +62,7 @@ export function BentoSegment<T extends string>({
           justifyContent: "center",
           backgroundColor: active
             ? tone === "accent"
-              ? "#D4FF4D"
+              ? theme.accent
               : theme.chrome
             : "transparent",
           ...(fill ? { flex: 1 } : {}),
@@ -95,7 +95,7 @@ export function BentoSegment<T extends string>({
                     fontSize: 12,
                     color: active
                       ? tone === "accent"
-                        ? "#11130A"
+                        ? theme.accentInk
                         : theme.fg
                       : theme.fg2,
                   }}

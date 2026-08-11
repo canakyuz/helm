@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
-import { press, space } from "@helm/design";
+import { ACCENTS, press, radius as R, space } from "@helm/design";
 
 import { useProperties } from "~/hooks/use-properties";
 import { useSystemHealth } from "~/hooks/use-system-health";
@@ -16,6 +16,7 @@ import {
   normalizeRevenueMultiplier,
   preferences,
   usePreferences,
+  type Accent,
   type Currency,
   type ThemeMode,
 } from "~/lib/preferences";
@@ -49,7 +50,7 @@ const MODE_TO_LABEL: Record<ThemeMode, ThemeLabel> = {
 
 export default function Settings() {
   const { theme } = useTheme();
-  const { currency, revenueMultiplier, prioritizeRevenueRequests, themeMode } =
+  const { currency, revenueMultiplier, prioritizeRevenueRequests, themeMode, accent } =
     usePreferences();
   const fmt = useFormatCurrency();
   const { refreshing, onRefresh } = useScreenRefresh();
@@ -145,13 +146,15 @@ export default function Settings() {
             <BentoTile>
               <View className="flex-row items-center gap-tilePadSm">
                 <SolidTile
-                  color="#D4FF4D"
+                  color={theme.accent}
                   cornerRadius={18}
                   padding={0}
                   style={{ width: 52, height: 52, alignSelf: "auto" }}
                 >
                   <View className="h-full w-full items-center justify-center">
-                    <Text className="font-semibold text-statSm text-accent-ink">h</Text>
+                    <Text className="font-semibold text-statSm" style={{ color: theme.accentInk }}>
+                      h
+                    </Text>
                   </View>
                 </SolidTile>
                 <View className="flex-1">
@@ -180,6 +183,12 @@ export default function Settings() {
                     mono={false}
                   />
                 }
+              />
+              <Row
+                label="Vurgu rengi"
+                sub="dolgu ve aktif durumlar"
+                divider
+                right={<AccentPicker value={accent} />}
               />
               <Row
                 label="Para birimi"
@@ -275,6 +284,53 @@ export default function Settings() {
  * baska hicbir sey yapmiyordu. Redesign'da tasinmadilar; calismayan bir butonu
  * yeniden cizmek onu calisiyormus gibi gosterir.
  */
+/**
+ * Accent secici — renk orneklerinin kendisi.
+ *
+ * Ad yerine RENK gosteriliyor: "Teal" yazisi hangi tonu sececegini soylemez,
+ * ornek soyler. Secili olan halka ile isaretlenir; renk korlugunde de ayirt
+ * edilebilsin diye ayrim yalnizca renge birakilmiyor.
+ */
+function AccentPicker({ value }: { value: Accent }) {
+  const { name, theme } = useTheme();
+
+  return (
+    <View className="flex-row gap-sm">
+      {ACCENTS.map((a) => {
+        const swatch = name === "dark" ? a.dark : a.light;
+        const active = a.id === value;
+        return (
+          <Pressable
+            key={a.id}
+            onPress={() => {
+              if (active) return;
+              haptic.tap();
+              preferences.setAccent(a.id);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={a.label}
+            accessibilityState={{ selected: active }}
+          >
+            {({ pressed }) => (
+              <View
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: R.pill,
+                  backgroundColor: swatch,
+                  borderWidth: active ? 2 : 0,
+                  borderColor: theme.fg,
+                  opacity: pressed && !active ? press.opacity : 1,
+                }}
+              />
+            )}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function Row({
   label,
   sub,

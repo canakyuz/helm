@@ -37,7 +37,8 @@ const SPARK_BARS = 14;
 const TOP_COUNTRIES = 5;
 
 /** Seri ladder'i — pos/neg/warn DURUM renkleri, seri degil. */
-const SERIES_TINTS = ["#D4FF4D", "#B89CFF", "#7AA8FF", "#FF8A3D"] as const;
+/** Ilki secili accent — geri kalani sabit seri ladder'i. */
+const tintsFor = (accent: string): readonly string[] => [accent, "#B89CFF", "#7AA8FF", "#FF8A3D"];
 
 const HERO_NUMBER = {
   marginTop: 12,
@@ -93,7 +94,7 @@ export default function Analytics() {
     label: c.country_name ?? c.country,
     value: formatInteger(c.users),
     ratio: c.users / peak,
-    color: SERIES_TINTS[i % SERIES_TINTS.length]!,
+    color: tintsFor(theme.accent)[i % 4]!,
   }));
 
   const cohorts = retention.data?.cohorts ?? [];
@@ -131,7 +132,7 @@ export default function Analytics() {
                   AKTİF KULLANICI · 30G
                 </Text>
                 <View className="flex-row items-center gap-[6px]">
-                  <LiveDot color="#D4FF4D" />
+                  <LiveDot color={theme.accent} />
                   <Text className="font-mono-medium text-eyebrow tracking-wide text-fg2">
                     CANLI
                   </Text>

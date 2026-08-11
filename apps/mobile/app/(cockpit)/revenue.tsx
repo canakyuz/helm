@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { space, radius as R, press } from "@helm/design";
+import { space, radius as R, press, withAlpha } from "@helm/design";
 import { weekRange, type RevenueBucket } from "@helm/api";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
@@ -49,11 +49,13 @@ const HERO_NUMBER = {
 } as const;
 
 /** Kaynak renkleri — seri ladder'i (pos/neg/warn DURUM renkleri, seri degil). */
-const SOURCE_TINT: Record<string, string> = {
-  ad_revenue: "#D4FF4D",
-  subscription_revenue: "#B89CFF",
-  iap_revenue: "#7AA8FF",
-};
+/** Kaynak renkleri. Reklam = secili accent (ana gelir kalemi), digerleri sabit seri. */
+function sourceTint(metric: string, accent: string): string {
+  if (metric === "ad_revenue") return accent;
+  if (metric === "subscription_revenue") return "#B89CFF";
+  if (metric === "iap_revenue") return "#7AA8FF";
+  return "#FF8A3D";
+}
 
 /** API etiketleri Ingilizce ve web ile paylasiliyor; metrik anahtarindan cevrilir. */
 const SOURCE_LABEL: Record<string, string> = {
@@ -203,7 +205,7 @@ export default function Revenue() {
                     <BentoStack
                       parts={sources.map((s) => ({
                         ratio: picked.total > 0 ? s.value / picked.total : 0,
-                        color: SOURCE_TINT[s.metric] ?? theme.fg3,
+                        color: sourceTint(s.metric, theme.accent),
                       }))}
                     />
                   </View>
@@ -212,7 +214,7 @@ export default function Revenue() {
                       <View key={s.metric} className="flex-row items-center gap-[10px]">
                         <View
                           className="h-[9px] w-[9px] rounded-bar"
-                          style={{ backgroundColor: SOURCE_TINT[s.metric] ?? theme.fg3 }}
+                          style={{ backgroundColor: sourceTint(s.metric, theme.accent) }}
                         />
                         <Text className="flex-1 font-medium text-row text-fg">
                           {SOURCE_LABEL[s.metric] ?? s.metric}
@@ -233,7 +235,7 @@ export default function Revenue() {
                 <View className="mt-tilePad">
                   <BentoBars
                     points={picked.days}
-                    activeColor="#D4FF4D"
+                    activeColor={theme.accent}
                     dimColor={glass.chartDim}
                     height={64}
                     gap={3}
@@ -263,12 +265,14 @@ export default function Revenue() {
 
           <View className="flex-row gap-tileGap">
             <Rise index={2} replayKey={replayKey} style={{ flex: 1 }}>
-              <SolidTile color="#D4FF4D" padding={space.tilePadSm}>
-                <Text className="font-mono-medium text-eyebrow tracking-wide text-accent-ink/[0.78]">
+              <SolidTile color={theme.accent} padding={space.tilePadSm}>
+                <Text className="font-mono-medium text-eyebrow tracking-wide"
+                  style={{ color: withAlpha(theme.accentInk, 0.78) }}>
                   MRR
                 </Text>
                 <Text
-                  className="mt-sm font-semibold text-stat tracking-tightest text-accent-ink"
+                  className="mt-sm font-semibold text-stat tracking-tightest"
+                  style={{ color: theme.accentInk }}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
