@@ -43,8 +43,19 @@ export const darkTheme: Theme = {
   tile2: "#1A1A21",
   line: "#1F1F26",
   fg: "#F6F6F1",
-  fg2: "#8C8C94",
-  fg3: "#828289", // AA: mockup #5F5F68 → 2.74:1 kalıyordu, 4.53:1'e çekildi
+  // fg2 ve fg3 dark temada AYNI DEĞER — bilinçli.
+  //
+  // Cam yüzey GlassView malzemesi yüzünden token'daki #131318'e değil ~#353438'e
+  // render ediliyor (ekran görüntüsünden ölçüldü). O yüzeyde 4.5:1'i tutturan en
+  // koyu gri #9E9EA4; hem fg2 hem fg3 oraya çıkmak zorunda, aralarında yer
+  // kalmıyor (parlaklık farkı 1.001x). Üç kademeli gri merdiven bu yüzeyde AA ile
+  // birlikte mümkün değil.
+  //
+  // Ayrım kaybolmuyor, taşıyıcısı değişiyor: fg3 metni her zaman 10px mono,
+  // BÜYÜK HARF, .16em tracking — biçim farkı renk farkından güçlü.
+  // Light tema etkilenmez, orada tile opak beyaz (bkz lightTheme).
+  fg2: "#9E9EA4",
+  fg3: "#9E9EA4",
   pos: "#C2F8CB", // marka yeşili (Can) — tile üstünde 15.51:1
   neg: "#FF5C7A",
   warn: "#FFB100",

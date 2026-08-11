@@ -74,14 +74,35 @@ metin 4.5:1, dolgu 3:1) ölçümü ve düzeltmeler:
 düzeltme gerektirmedi; accent üstündeki `#11130A` metin 16.24:1, %60 alfalı eyebrow
 bile 4.70:1.
 
-### `fg3`'ün bedeli
+### Cam yüzey ölçümü değiştirdi — ve önceki ölçüm yanlıştı
 
-`fg3` AA'ya çekilince `fg2`↔`fg3` parlaklık farkı **1.18x** (dark) / **1.31x** (light)
-kalıyor — renk olarak neredeyse aynılar. Üç kademeli gri merdiven iki kademeye iniyor.
+İlk kontrast doğrulaması **token hex'ine karşı** yapılmıştı (`fg3` vs `tile #131318`).
+Bu yanlıştı: `GlassView` malzemesi tile'ı token değerinde bırakmıyor. Ekran
+görüntüsünden piksel örnekleyerek ölçülen gerçek yüzey, seçilen cam ayarında
+**`#2B2A2C` – `#353438`** aralığında.
 
-Kabul edildi, çünkü tasarım üçüncü kademeyi zaten renkle değil **biçimle** ayırıyor:
-`fg3` metni her zaman 10px mono, BÜYÜK HARF, .16em tracking. Ayrımın taşıyıcısı
-tipografi olur.
+Gerçek yüzeye karşı ölçüm:
+
+| Cam ayarı | `fg2` | `fg3` |
+|---|---|---|
+| İnce (fill .07, aurora .12–.18) | 4.73:1 ✓ | 4.14:1 ✗ |
+| Belirgin (fill .09, aurora .28–.45) | 3.72:1 ✗ | 3.25:1 ✗ |
+
+Yani `fg3` ince camda bile sınırın altındaydı. Aurora'yı kısmak neredeyse hiçbir şey
+değiştirmiyor (3.62 → 3.72) — yüzeyi açan şey aurora değil, `GlassView`'in kendi
+malzemesi.
+
+**Karar:** Belirgin cam korunur (Can'ın tercihi), metin yüzeye uyarlanır. Ölçülen
+yüzeylerde 4.5:1'i tutturan en koyu gri `#9E9EA4`; hem `fg2` hem `fg3` oraya çıkmak
+zorunda ve aralarında yer kalmıyor (parlaklık farkı **1.001x**).
+
+Dolayısıyla **dark temada `fg2` ve `fg3` aynı değerdir.** Üç kademeli gri merdiven bu
+yüzeyde AA ile birlikte mümkün değil. Ayrım kaybolmuyor, taşıyıcısı değişiyor: `fg3`
+metni her zaman 10px mono, BÜYÜK HARF, .16em tracking — biçim farkı renk farkından
+güçlü. Light tema etkilenmez; orada tile opak beyaz, üç kademe ayrık kalır.
+
+**Ders:** Cam yüzeyde kontrast token hex'inden hesaplanamaz. Render edilen pikselden
+ölçülmeli.
 
 ### Seri renkleri durum renklerinden ayrıldı
 
