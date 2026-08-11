@@ -3,7 +3,7 @@
    Yeniden uret: bun run gen:design */
 module.exports = {
   "colors": {
-    "bg": "rgb(var(--bg) / <alpha-value>)",
+    "canvas": "rgb(var(--bg) / <alpha-value>)",
     "tile": "rgb(var(--tile) / <alpha-value>)",
     "tile2": "rgb(var(--tile2) / <alpha-value>)",
     "line": "rgb(var(--line) / <alpha-value>)",
@@ -16,6 +16,7 @@ module.exports = {
     "chrome": "rgb(var(--chrome) / <alpha-value>)",
     "violet": "rgb(var(--violet) / <alpha-value>)",
     "blue": "rgb(var(--blue) / <alpha-value>)",
+    "amber": "rgb(var(--amber) / <alpha-value>)",
     "accent": "#D4FF4D",
     "accent-ink": "#11130A",
     "accent-soft": "#A8CC3D"

@@ -4,12 +4,17 @@ import { storage } from "~/lib/storage";
 
 export type Currency = "USD" | "TRY" | "EUR" | "GBP";
 export type SelectedPropertyId = string | "all";
+/** "system" iOS gorunum ayarini takip eder; digerleri elle kilitler. */
+export type ThemeMode = "system" | "dark" | "light";
+
+const THEME_MODES: readonly ThemeMode[] = ["system", "dark", "light"];
 
 export type Preferences = {
   selectedPropertyId: SelectedPropertyId;
   currency: Currency;
   revenueMultiplier: number;
   prioritizeRevenueRequests: boolean;
+  themeMode: ThemeMode;
 };
 
 const KEYS = {
@@ -17,6 +22,7 @@ const KEYS = {
   currency: "pref.currency",
   revenueMultiplier: "pref.revenueMultiplier",
   prioritizeRevenueRequests: "pref.prioritizeRevenueRequests",
+  themeMode: "pref.themeMode",
 } as const;
 
 const DEFAULTS: Preferences = {
@@ -24,6 +30,7 @@ const DEFAULTS: Preferences = {
   currency: "TRY",
   revenueMultiplier: 1,
   prioritizeRevenueRequests: true,
+  themeMode: "system",
 };
 
 const MIN_REVENUE_MULTIPLIER = 1;
@@ -35,10 +42,17 @@ export function normalizeRevenueMultiplier(value: number): number {
   return Math.round(clamped * 100) / 100;
 }
 
+function readThemeMode(): ThemeMode {
+  const raw = storage.getString(KEYS.themeMode);
+  // Bilinmeyen deger (eski surum / bozuk yazim) sessizce varsayilana duser.
+  return THEME_MODES.includes(raw as ThemeMode) ? (raw as ThemeMode) : DEFAULTS.themeMode;
+}
+
 function readCurrent(): Preferences {
   const prioritizeRevenueRequests = storage.getString(KEYS.prioritizeRevenueRequests);
 
   return {
+    themeMode: readThemeMode(),
     selectedPropertyId:
       storage.getString(KEYS.selectedPropertyId) ?? DEFAULTS.selectedPropertyId,
     currency:
@@ -84,6 +98,9 @@ export const preferences = {
   },
   setCurrency(currency: Currency) {
     storage.set(KEYS.currency, currency);
+  },
+  setThemeMode(mode: ThemeMode) {
+    storage.set(KEYS.themeMode, mode);
   },
   setRevenueMultiplier(multiplier: number) {
     storage.set(
