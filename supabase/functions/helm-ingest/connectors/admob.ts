@@ -42,7 +42,16 @@ export const fetchAdMob: Connector = async (config) => {
   const accessToken = await getAccessToken(config);
 
   // Son 90 gün — grafik için geçmiş seri (idempotent upsert tekrarları düzeltir).
-  const end = new Date();
+  //
+  // BİTİŞ TARİHİ UTC YARIN, bugün değil. AdMob raporu HESABIN saat diliminde
+  // döndürür (bizde Europe/Istanbul, UTC+3); ymd() ise UTC okur. Bitişi UTC
+  // bugüne sabitlersek, İstanbul'da yeni gün başladığı andan UTC gün dönümüne
+  // kadarki ~3 saat boyunca AdMob'un GÜNCEL günü hiç istenmez — panel "bugün"
+  // diye dünün rakamını gösterirdi (ölçüldü: uygulama ₺87.88 "bugün" derken
+  // AdMob dün ₺88,93 / bugün ₺45,48 gösteriyordu).
+  //
+  // Var olmayan bir günü istemek zararsız: AdMob yalnızca mevcut satırları döner.
+  const end = new Date(Date.now() + 86_400_000);
   const start = new Date(Date.now() - 90 * 86_400_000);
 
   const body = {
