@@ -1,763 +1,437 @@
 import { useMemo, useState } from "react";
-import { RefreshControl, ScrollView, Text, View, useWindowDimensions } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { space } from "@helm/design";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
-import { usePropertyMetrics } from "~/hooks/use-property-metrics";
 import { usePayouts } from "~/hooks/use-payouts";
 import { useRevenueMix } from "~/hooks/use-revenue-mix";
 import { useMrrMovement } from "~/hooks/use-mrr-movement";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
-import { usePreferences } from "~/lib/preferences";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger } from "~/lib/format";
-import { haptic } from "~/lib/haptics";
-import { colors, type } from "~/theme/tokens";
+import { usePreferences } from "~/lib/preferences";
+import { useTheme } from "~/theme/use-theme";
+import { ScreenStatus } from "~/components/screen-status";
+import { CountUp } from "~/components/liquid";
 import {
-  LiquidBackground,
-  LiquidHeader,
-  LiquidGlass,
-  OpenHero,
-  CardSection,
-  FullDivider,
-  Row,
-  KV,
-  HBar,
-  StackBar,
-  AreaChart,
-  NativeSegmented,
-  Glyph,
-  Eyebrow,
-  Delta,
-  EmptyHint,
-  ShowMore,
-} from "~/components/liquid";
-import type { HeroStat } from "~/components/liquid";
+  BentoBackground,
+  BentoBars,
+  BentoHeader,
+  BentoRails,
+  BentoSegment,
+  BentoStack,
+  BentoTile,
+  Rise,
+  SolidTile,
+  type RailRow,
+} from "~/components/bento";
 
-const TOP_N = 5; // glance-first lists: show the top few, total stays in the header
+/**
+ * Donem secenekleri.
+ *
+ * 90 GUN YOK — bilincli. metrics tablosu ~30 gunluk pencere tutuyor; eski ekran
+ * "90D" segmentini gosteriyor ama 30D ile AYNI seriyi donduruyordu (kod:
+ * period === "7D" ? real.slice(-7) : real). Ayni veriyi iki farkli etiketle
+ * sunmak yanlis bir derinlik ima eder. Veri penceresi genisleyince eklenir.
+ */
+const PERIODS = ["7G", "30G"] as const;
+type Period = (typeof PERIODS)[number];
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+const VIEWS = ["Kırılım", "Abonelik", "Ödeme"] as const;
+type View_ = (typeof VIEWS)[number];
 
-type Period = "7D" | "30D" | "90D";
-type TabView = "Mix" | "Subs" | "Payouts";
+/** Hero rakaminin stili — CountUp ve duz Text ayni gorunmeli. */
+const HERO_NUMBER = {
+  marginTop: 14,
+  fontFamily: "Geist-600",
+  fontSize: 44,
+  lineHeight: 46,
+  letterSpacing: -2,
+} as const;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const GLYPH_TINTS = [colors.accent, colors.accentViolet, colors.blue, colors.green];
-const PROJECT_GLYPHS = ["◆", "✦", "❖", "◇"];
-
-// Time:  O(n) series length; Space: O(1) auxiliary.
-// Note:  Single pass is optimal because every value contributes to the total.
-function sumSeries(arr: number[]): number {
-  let total = 0;
-  for (const v of arr) total += v;
-  return total;
-}
-
-// ─── Mix tab ──────────────────────────────────────────────────────────────────
-
-function MixView({
-  fmt,
-  queriesEnabled,
-}: {
-  fmt: (n: number) => string;
-  queriesEnabled: boolean;
-}) {
-  const properties = useProperties({ enabled: queriesEnabled });
-  const propMetrics = usePropertyMetrics({ enabled: queriesEnabled });
-  const mix = useRevenueMix({ enabled: queriesEnabled });
-  const segments = mix.data?.segments ?? [];
-  const [openSplit, setOpenSplit] = useState<string | null>(null);
-  const [openEarner, setOpenEarner] = useState<string | null>(null);
-
-  // Real per-project earnings: rank by ad_revenue + mrr from the metrics table.
-  const earners = useMemo(() => {
-    const m = propMetrics.data ?? {};
-    return (properties.data ?? [])
-      .map((p) => ({ p, rev: (m[p.id]?.adRevenue ?? 0) + (m[p.id]?.mrr ?? 0) }))
-      .sort((a, b) => b.rev - a.rev)
-      .slice(0, 4);
-  }, [properties.data, propMetrics.data]);
-  const maxEarn = earners[0]?.rev ?? 0;
-
-  return (
-    <>
-      {/* Revenue mix */}
-      <CardSection index="01" title="Revenue mix" pt={14}>
-        <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-          {/* Bu ay tahsil edilen gelir (akış) — üstteki MRR anlık run-rate'tir, farklı. */}
-          <Eyebrow size={9}>BU AY · KAYNAĞA GÖRE (MRR HARIC)</Eyebrow>
-        </View>
-        <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 8 }}>
-          {!queriesEnabled || mix.isLoading ? (
-            <EmptyHint>LOADING…</EmptyHint>
-          ) : (mix.data?.total ?? 0) === 0 ? (
-            <EmptyHint>NO REVENUE THIS MONTH</EmptyHint>
-          ) : (
-            <>
-              <StackBar
-                segments={segments.map((s) => ({ pct: s.pct, color: s.color }))}
-                height={14}
-              />
-              {segments.map((s, i) => {
-                const open = openSplit === s.label;
-                return (
-                  <Row
-                    key={s.label}
-                    open={open}
-                    onToggle={() => {
-                      haptic.tap();
-                      setOpenSplit(open ? null : s.label);
-                    }}
-                    isLast={i === segments.length - 1}
-                    header={
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                        <View
-                          style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: s.color }}
-                        />
-                        <Text
-                          style={{
-                            flex: 1,
-                            fontFamily: "Geist-600",
-                            fontSize: type.body,
-                            color: colors.fgPrimary,
-                            letterSpacing: -0.2,
-                          }}
-                          numberOfLines={1}
-                        >
-                          {s.label}
-                        </Text>
-                        <Text
-                          style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: s.color }}
-                        >
-                          {fmt(s.value)}
-                        </Text>
-                        <Text
-                          style={{
-                            fontFamily: "GeistMono-500",
-                            fontSize: type.label,
-                            color: colors.fgMuted,
-                            width: 32,
-                            textAlign: "right",
-                          }}
-                        >
-                          {s.pct}%
-                        </Text>
-                      </View>
-                    }
-                    detail={
-                      <KV
-                        items={[
-                          { label: "This month", value: fmt(s.value), color: s.color },
-                          { label: "Share", value: `${s.pct}%` },
-                        ]}
-                      />
-                    }
-                  />
-                );
-              })}
-            </>
-          )}
-        </View>
-      </CardSection>
-
-      <FullDivider />
-
-      {/* Top earners */}
-      <CardSection
-        index="02"
-        title="Top earners"
-        action="SEE ALL"
-        onAction={() => haptic.tap()}
-        pt={14}
-      >
-        <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-          <Eyebrow size={9}>REVENUE PER PROJECT · TODAY</Eyebrow>
-        </View>
-        {!queriesEnabled ? (
-          <EmptyHint>LOADING…</EmptyHint>
-        ) : earners.length === 0 ? (
-          <EmptyHint>NO PROJECTS FOUND</EmptyHint>
-        ) : (
-          earners.map(({ p: prop, rev }, i) => {
-            const tint = GLYPH_TINTS[i % GLYPH_TINTS.length]!;
-            const glyph = PROJECT_GLYPHS[i % PROJECT_GLYPHS.length]!;
-            const pct = maxEarn > 0 ? Math.round((rev / maxEarn) * 100) : 0;
-            const m = propMetrics.data?.[prop.id];
-            const open = openEarner === prop.id;
-            return (
-              <Row
-                key={prop.id}
-                open={open}
-                onToggle={() => {
-                  haptic.tap();
-                  setOpenEarner(open ? null : prop.id);
-                }}
-                isLast={i === earners.length - 1}
-                header={
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <Glyph glyph={glyph} tint={tint} size={28} />
-                    <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-                      <Text
-                        style={{
-                          fontFamily: "Geist-600",
-                          fontSize: type.body,
-                          color: colors.fgPrimary,
-                          letterSpacing: -0.2,
-                        }}
-                        numberOfLines={1}
-                      >
-                        {prop.name}
-                      </Text>
-                      <View style={{ width: "80%" }}>
-                        <HBar pct={pct} color={tint} height={5} />
-                      </View>
-                    </View>
-                    <Text
-                      style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: tint }}
-                    >
-                      {fmt(rev)}
-                    </Text>
-                  </View>
-                }
-                detail={
-                  <KV
-                    items={[
-                      { label: "Ad revenue", value: fmt(m?.adRevenue ?? 0), color: colors.accent },
-                      { label: "MRR", value: fmt(m?.mrr ?? 0), color: colors.accentViolet },
-                      { label: "DAU", value: formatInteger(m?.dau ?? 0), color: colors.blue },
-                      { label: "Type", value: prop.type.replace("_", " ").toUpperCase() },
-                    ]}
-                  />
-                }
-              />
-            );
-          })
-        )}
-        <View style={{ height: 8 }} />
-      </CardSection>
-
-    </>
-  );
-}
-
-// ─── Subs tab ─────────────────────────────────────────────────────────────────
-
-function SubsView({
-  fmt,
-  chartW,
-  activeSubs,
-  trial,
-  projectId,
-  queriesEnabled,
-}: {
-  fmt: (n: number) => string;
-  chartW: number;
-  activeSubs: number;
-  trial: number | null;
-  projectId?: string | undefined;
-  queriesEnabled: boolean;
-}) {
-  const [openMrr, setOpenMrr] = useState<string | null>(null);
-  const [showAllMoves, setShowAllMoves] = useState(false);
-  const mrr = useMrrMovement(projectId, { enabled: queriesEnabled });
-  const moves = useMemo(() => mrr.data?.segments ?? [], [mrr.data?.segments]);
-  const visibleMoves = showAllMoves ? moves : moves.slice(0, TOP_N);
-  // Time:  O(n) movement count; Space: O(1) auxiliary.
-  // Note:  Single pass avoids allocating an intermediate absolute-value array.
-  const maxAbs = useMemo(() => {
-    let max = 1;
-    for (const move of moves) {
-      max = Math.max(max, Math.abs(move.value));
-    }
-    return max;
-  }, [moves]);
-  const segColor = (v: number) => (v >= 0 ? colors.green : colors.accentDanger);
-
-  // Real daily MRR series (metrics table) → real trend chart + delta.
-  const mrrDetail = useMetricDetail("mrr", { enabled: queriesEnabled });
-  const mrrSeries = (mrrDetail.data?.series ?? []).map((p) => p.value);
-  const mrrDelta =
-    mrrSeries.length >= 2 && mrrSeries[0]! > 0
-      ? Number((((mrrSeries[mrrSeries.length - 1]! - mrrSeries[0]!) / mrrSeries[0]!) * 100).toFixed(1))
-      : undefined;
-
-  return (
-    <>
-      {/* MRR movement */}
-      <CardSection
-        index="01"
-        title="MRR movement"
-        {...(mrr.data ? { action: `net ${mrr.data.net >= 0 ? "+" : ""}${fmt(mrr.data.net)}` } : {})}
-        pt={14}
-      >
-        {!queriesEnabled ? (
-          <EmptyHint>LOADING…</EmptyHint>
-        ) : !projectId ? (
-          <EmptyHint>SELECT A PROJECT</EmptyHint>
-        ) : mrr.isLoading ? (
-          <EmptyHint>LOADING…</EmptyHint>
-        ) : moves.length === 0 ? (
-          <EmptyHint>NO MRR MOVEMENT DATA</EmptyHint>
-        ) : (
-          <>
-          {visibleMoves.map((m, i) => {
-            const open = openMrr === m.label;
-            const pct = Math.round((Math.abs(m.value) / maxAbs) * 100);
-            const color = segColor(m.value);
-            return (
-              <Row
-                key={m.label}
-                open={open}
-                onToggle={() => {
-                  haptic.tap();
-                  setOpenMrr(open ? null : m.label);
-                }}
-                isLast={i === visibleMoves.length - 1}
-                header={
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                    <Text
-                      style={{
-                        fontFamily: "Geist-600",
-                        fontSize: type.body,
-                        color: colors.fgPrimary,
-                        width: 88,
-                        letterSpacing: -0.2,
-                        textTransform: "capitalize",
-                      }}
-                      numberOfLines={1}
-                    >
-                      {m.label}
-                    </Text>
-                    <View style={{ flex: 1 }}>
-                      <HBar pct={pct} color={color} height={6} />
-                    </View>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-600",
-                        fontSize: type.body,
-                        color,
-                        width: 72,
-                        textAlign: "right",
-                      }}
-                    >
-                      {m.value > 0 ? "+" : ""}
-                      {fmt(m.value)}
-                    </Text>
-                  </View>
-                }
-                detail={
-                  <KV
-                    items={[
-                      {
-                        label: "Amount",
-                        value: `${m.value > 0 ? "+" : ""}${fmt(m.value)}`,
-                        color,
-                      },
-                      { label: "Share of movement", value: `${pct}%` },
-                    ]}
-                  />
-                }
-              />
-            );
-          })}
-          <ShowMore
-            hidden={moves.length - TOP_N}
-            expanded={showAllMoves}
-            onPress={() => {
-              haptic.tap();
-              setShowAllMoves((v) => !v);
-            }}
-          />
-          </>
-        )}
-        <View style={{ height: 8 }} />
-      </CardSection>
-
-      <FullDivider />
-
-      {/* Subscription stats — real only (active subs + trials) */}
-      <CardSection index="02" title="Subscriptions" pt={14}>
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            paddingHorizontal: 16,
-            paddingTop: 4,
-            paddingBottom: 16,
-            gap: 8,
-          }}
-        >
-          {(
-            [
-              { label: "Active subs", value: formatInteger(activeSubs), color: colors.green },
-              { label: "Trials", value: trial != null ? formatInteger(trial) : "—", color: colors.accentViolet },
-            ] as const
-          ).map((stat) => (
-            <View
-              key={stat.label}
-              style={{
-                width: "47%",
-                padding: 12,
-                borderRadius: 14,
-                backgroundColor: "rgba(255,255,255,0.04)",
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.07)",
-                gap: 4,
-              }}
-            >
-              <Eyebrow size={9}>{stat.label}</Eyebrow>
-              <Text
-                style={{
-                  fontFamily: "GeistMono-600",
-                  fontSize: type.stat,
-                  color: stat.color,
-                  letterSpacing: -0.5,
-                }}
-              >
-                {stat.value}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </CardSection>
-
-      <FullDivider />
-
-      {/* MRR trend — real daily MRR series from the metrics table */}
-      <CardSection index="03" title="MRR trend" pt={14}>
-        <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 8 }}>
-          {!queriesEnabled || mrrDetail.isLoading ? (
-            <EmptyHint>LOADING…</EmptyHint>
-          ) : mrrSeries.length < 2 ? (
-            <EmptyHint>NO MRR DATA</EmptyHint>
-          ) : (
-            <>
-              <AreaChart data={mrrSeries} width={chartW - 8} height={72} color={colors.accentViolet} />
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgSubtle }}>
-                  {mrrSeries.length} days
-                </Text>
-                {mrrDelta != null ? (
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    <Delta value={mrrDelta} size={10} invert={false} />
-                    <Text style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgMuted }}>
-                      over window
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-            </>
-          )}
-        </View>
-      </CardSection>
-    </>
-  );
-}
-
-// ─── Payouts tab ──────────────────────────────────────────────────────────────
-
-function PayoutsView({
-  fmt,
-  projectId,
-  queriesEnabled,
-}: {
-  fmt: (n: number) => string;
-  projectId?: string | undefined;
-  queriesEnabled: boolean;
-}) {
-  const [openPayout, setOpenPayout] = useState<string | null>(null);
-  const [showAllRecent, setShowAllRecent] = useState(false);
-  const q = usePayouts(projectId, { enabled: queriesEnabled });
-  const pending = useMemo(() => q.data?.pending ?? [], [q.data?.pending]);
-  const recent = useMemo(() => q.data?.recent ?? [], [q.data?.recent]);
-  const visibleRecent = showAllRecent ? recent : recent.slice(0, TOP_N);
-
-  // Pending'i kaynağa göre topla.
-  // Time:  O(n) pending payouts; Space: O(s) unique sources.
-  // Note:  Map gives O(1) average source aggregation without nested scans.
-  const pendingBySource = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const p of pending) m.set(p.source, (m.get(p.source) ?? 0) + p.amount);
-    return [...m.entries()].map(([source, amount]) => ({ source, amount }));
-  }, [pending]);
-
-  const PENDING_COLORS = [colors.accent, colors.accentViolet, colors.blue];
-
-  return (
-    <>
-      {/* Pending balance */}
-      <CardSection index="01" title="Pending balance" pt={14}>
-        <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 8 }}>
-          {!queriesEnabled ? (
-            <EmptyHint>LOADING…</EmptyHint>
-          ) : !projectId ? (
-            <EmptyHint>SELECT A PROJECT</EmptyHint>
-          ) : q.isLoading ? (
-            <EmptyHint>LOADING…</EmptyHint>
-          ) : pendingBySource.length === 0 ? (
-            <EmptyHint>NO PENDING PAYOUTS</EmptyHint>
-          ) : (
-            <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-              {pendingBySource.map((block, i) => {
-                const color = PENDING_COLORS[i % PENDING_COLORS.length]!;
-                return (
-                  <View
-                    key={block.source}
-                    style={{
-                      flex: 1,
-                      minWidth: "45%",
-                      padding: 16,
-                      borderRadius: 16,
-                      backgroundColor: "rgba(255,255,255,0.04)",
-                      borderWidth: 1,
-                      borderColor: `${color}33`,
-                      gap: 8,
-                    }}
-                  >
-                    <Eyebrow size={9} color={color}>
-                      {block.source}
-                    </Eyebrow>
-                    <Text
-                      style={{
-                        fontFamily: "GeistMono-600",
-                        fontSize: type.stat,
-                        color,
-                        letterSpacing: -0.5,
-                      }}
-                      adjustsFontSizeToFit
-                      numberOfLines={1}
-                    >
-                      {fmt(block.amount)}
-                    </Text>
-                    <Text
-                      style={{ fontFamily: "GeistMono-500", fontSize: type.label, color: colors.fgMuted }}
-                    >
-                      PENDING
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </View>
-      </CardSection>
-
-      <FullDivider />
-
-      {/* Recent payouts */}
-      <CardSection index="02" title="Recent payouts" {...(recent.length ? { count: recent.length } : {})} pt={14}>
-        {!queriesEnabled ? (
-          <EmptyHint>LOADING…</EmptyHint>
-        ) : !projectId ? (
-          <EmptyHint>SELECT A PROJECT</EmptyHint>
-        ) : q.isLoading ? (
-          <EmptyHint>LOADING…</EmptyHint>
-        ) : recent.length === 0 ? (
-          <EmptyHint>NO RECENT PAYOUTS</EmptyHint>
-        ) : (
-          <>
-          {visibleRecent.map((p, i) => {
-            const key = `${p.source}-${p.arrival_date}-${i}`;
-            const open = openPayout === key;
-            return (
-              <Row
-                key={key}
-                open={open}
-                onToggle={() => {
-                  haptic.tap();
-                  setOpenPayout(open ? null : key);
-                }}
-                isLast={i === visibleRecent.length - 1}
-                header={
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <View style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: colors.green }} />
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text
-                        style={{
-                          fontFamily: "Geist-600",
-                          fontSize: type.body,
-                          color: colors.fgPrimary,
-                          letterSpacing: -0.2,
-                        }}
-                        numberOfLines={1}
-                      >
-                        {p.source}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: "GeistMono-500",
-                          fontSize: type.label,
-                          color: colors.fgMuted,
-                          letterSpacing: 0.4,
-                        }}
-                      >
-                        {p.arrival_date} · {p.status.toUpperCase()}
-                      </Text>
-                    </View>
-                    <Text style={{ fontFamily: "GeistMono-600", fontSize: type.body, color: colors.green }}>
-                      +{fmt(p.net)}
-                    </Text>
-                  </View>
-                }
-                detail={
-                  <KV
-                    items={[
-                      { label: "Net", value: fmt(p.net), color: colors.green },
-                      { label: "Currency", value: p.currency },
-                      { label: "Status", value: p.status },
-                      { label: "Arrival", value: p.arrival_date },
-                    ]}
-                  />
-                }
-              />
-            );
-          })}
-          <ShowMore
-            hidden={recent.length - TOP_N}
-            expanded={showAllRecent}
-            onPress={() => {
-              haptic.tap();
-              setShowAllRecent((v) => !v);
-            }}
-          />
-          </>
-        )}
-        <View style={{ height: 8 }} />
-      </CardSection>
-    </>
-  );
-}
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
+const sum = (xs: readonly number[]): number => xs.reduce((a, b) => a + b, 0);
 
 export default function Revenue() {
-  const { width } = useWindowDimensions();
-  const chartW = width - 44;
-
+  const { theme } = useTheme();
   const fmt = useFormatCurrency();
-  const [period, setPeriod] = useState<Period>("30D");
-  const [view, setView] = useState<TabView>("Mix");
+  const [period, setPeriod] = useState<Period>("30G");
+  const [view, setView] = useState<View_>("Kırılım");
   const { selectedPropertyId, prioritizeRevenueRequests } = usePreferences();
   const { refreshing, onRefresh } = useScreenRefresh();
+  const [replayKey, setReplayKey] = useState(0);
 
   const adRev = useMetricDetail("ad_revenue");
-  const primaryRevenueReady = adRev.data != null || adRev.isError;
-  const secondaryQueriesEnabled =
-    !prioritizeRevenueRequests || primaryRevenueReady;
-  const kpis = useCockpitKpis({ enabled: secondaryQueriesEnabled });
-  const properties = useProperties({
-    enabled: secondaryQueriesEnabled && view !== "Mix",
-  });
-  // Payouts edge tek proje scope'lu — "all" ise ilk projeye düş.
+  // Birincil sorgu bitmeden ikincilleri tetikleme — bu ekranin gelir rakami
+  // en onemli sey, sebeke onu beklesin.
+  const ready = !prioritizeRevenueRequests || adRev.data != null || adRev.isError;
+  const kpis = useCockpitKpis({ enabled: ready });
+  const properties = useProperties({ enabled: ready && view !== "Kırılım" });
   const projectId =
     selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
-  const trialDetail = useMetricDetail("subs_trial", {
-    enabled: secondaryQueriesEnabled && view === "Subs",
-  });
-  const trialSeries = trialDetail.data?.series ?? [];
-  const trialVal = trialSeries.length > 0 ? trialSeries[trialSeries.length - 1]!.value : null;
-  // Real ad_revenue daily series (~30d window). 7D = last 7; 30D/90D = full
-  // available window (metrics only holds ~30d, so we don't fabricate 90d).
-  const series = useMemo(() => {
-    const real = (adRev.data?.series ?? []).map((p) => p.value);
-    return period === "7D" ? real.slice(-7) : real;
-  }, [adRev.data, period]);
-  const heroValue = useMemo(() => sumSeries(series), [series]);
+  const mix = useRevenueMix();
+  const movement = useMrrMovement(projectId, { enabled: ready && view === "Abonelik" });
+  const payouts = usePayouts(projectId, { enabled: ready && view === "Ödeme" });
+  const trial = useMetricDetail("subs_trial", { enabled: ready && view === "Abonelik" });
 
-  // ARPU derived from real KPIs (monthly recurring revenue per user).
+  const points = useMemo(() => {
+    const all = adRev.data?.series ?? [];
+    return period === "7G" ? all.slice(-7) : all;
+  }, [adRev.data, period]);
+
+  const periodTotal = useMemo(() => sum(points.map((p) => p.value)), [points]);
+
+  const handleRefresh = () => {
+    void onRefresh().then(() => setReplayKey((k) => k + 1));
+  };
+
+  if (adRev.isLoading) return <ScreenStatus label="Yükleniyor…" />;
+  if (adRev.isError) return <ScreenStatus label="Gelir yüklenemedi" tone="danger" />;
+
   const totalUsers = kpis.data?.totalUsers ?? 0;
   const arpu = totalUsers > 0 ? (kpis.data?.mrr ?? 0) / totalUsers : 0;
-
-  const heroStats: HeroStat[] = [
-    {
-      label: "MRR",
-      value: fmt(kpis.data?.mrr ?? 0),
-      delta: kpis.data?.mrrDelta ?? undefined,
-    },
-    { label: "ARPU", value: fmt(arpu) },
-    { label: "Active subs", value: formatInteger(kpis.data?.activeSubs ?? 0) },
-  ];
+  const trialSeries = trial.data?.series ?? [];
+  const trialNow = trialSeries.length > 0 ? trialSeries[trialSeries.length - 1]!.value : null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bgBase }}>
-      <LiquidBackground />
-      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-        <LiquidHeader />
+    <View className="flex-1 bg-canvas">
+      <BentoBackground />
+      <SafeAreaView edges={["top"]} className="flex-1">
+        <BentoHeader
+          eyebrow="GELİR"
+          title="Kazanç"
+          onSync={handleRefresh}
+          syncing={refreshing}
+        />
+
         <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
+          contentContainerStyle={{
+            paddingHorizontal: space.screenX,
+            paddingBottom: 120,
+            gap: space.tileGap,
+          }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
-              tintColor={colors.fgPrimary}
+              tintColor={theme.fg}
               refreshing={refreshing}
-              onRefresh={onRefresh}
+              onRefresh={handleRefresh}
             />
           }
         >
-          {/* Hero */}
-          <OpenHero
-            eyebrow={`Reklam geliri · ${period}`}
-            live
-            right={
-              <View style={{ width: 150 }}>
-                <NativeSegmented<Period>
-                  value={period}
-                  options={["7D", "30D", "90D"]}
-                  onChange={(v) => {
-                    haptic.tap();
-                    setPeriod(v);
-                  }}
+          {/* Hero — cam, accent DEGIL: Overview'daki accent hero "bugun" icin;
+              burada donem toplami var, iki ekranda iki lime hero rekabet ederdi. */}
+          <Rise index={0} replayKey={replayKey}>
+            <BentoTile padding={space.tilePadLg}>
+              <View className="flex-row items-center justify-between">
+                <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
+                  REKLAM GELİRİ
+                </Text>
+                <BentoSegment options={PERIODS} value={period} onChange={setPeriod} />
+              </View>
+
+              <CountUp
+                value={periodTotal}
+                format={fmt}
+                fitOneLine
+                style={{ ...HERO_NUMBER, color: theme.fg }}
+              />
+              <Text className="mt-[6px] text-meta text-fg2">
+                Son {period === "7G" ? "7" : "30"} gün · tüm projeler
+              </Text>
+
+              <View className="mt-tilePad">
+                <BentoBars
+                  points={points}
+                  activeColor="#D4FF4D"
+                  dimColor={theme.line}
+                  height={70}
+                  gap={3}
+                  replayKey={replayKey}
                 />
               </View>
-            }
-            value={heroValue}
-            format={(n) => fmt(n)}
-            caption="Ad revenue · all projects"
-            chartWidth={chartW}
-            chartData={series.length >= 2 ? series : [heroValue, heroValue]}
-            color={colors.accent}
-            chartH={116}
-            stats={heroStats}
-          />
+            </BentoTile>
+          </Rise>
 
-          {/* Tab card */}
-          <LiquidGlass padding={0}>
-            <View style={{ padding: 12 }}>
-              <NativeSegmented<TabView>
-                value={view}
-                options={["Mix", "Subs", "Payouts"]}
-                onChange={(v) => {
-                  haptic.tap();
-                  setView(v);
-                }}
-              />
-            </View>
-            <FullDivider />
+          {/* Uc stat — MRR accent dolu (tasarim boyle), digerleri cam */}
+          <View className="flex-row gap-tileGap">
+            <Rise index={1} replayKey={replayKey} style={{ flex: 1 }}>
+              <SolidTile color="#D4FF4D" padding={space.tilePadSm}>
+                <Text className="font-mono-medium text-eyebrow tracking-wide text-accent-ink/[0.78]">
+                  MRR
+                </Text>
+                <Text
+                  className="mt-sm font-semibold text-stat tracking-tightest text-accent-ink"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {fmt(kpis.data?.mrr ?? 0)}
+                </Text>
+              </SolidTile>
+            </Rise>
+            <MiniTile index={2} replayKey={replayKey} label="ARPU" value={fmt(arpu)} />
+            <MiniTile
+              index={3}
+              replayKey={replayKey}
+              label="ABONE"
+              value={formatInteger(kpis.data?.activeSubs ?? 0)}
+            />
+          </View>
 
-            {view === "Mix" ? (
-              <MixView fmt={fmt} queriesEnabled={secondaryQueriesEnabled} />
-            ) : view === "Subs" ? (
-              <SubsView
-                fmt={fmt}
-                chartW={chartW}
-                activeSubs={kpis.data?.activeSubs ?? 0}
-                trial={trialVal}
-                projectId={projectId}
-                queriesEnabled={secondaryQueriesEnabled}
-              />
-            ) : (
-              <PayoutsView
-                fmt={fmt}
-                projectId={projectId}
-                queriesEnabled={secondaryQueriesEnabled}
-              />
-            )}
-          </LiquidGlass>
+          {/* Alt sekmeler */}
+          <Rise index={4} replayKey={replayKey}>
+            <BentoSegment
+              options={VIEWS}
+              value={view}
+              onChange={setView}
+              tone="chrome"
+              mono={false}
+              fill
+            />
+          </Rise>
+
+          {view === "Kırılım" ? (
+            <MixView mix={mix} fmt={fmt} replayKey={replayKey} />
+          ) : view === "Abonelik" ? (
+            <SubsView
+              movement={movement}
+              fmt={fmt}
+              replayKey={replayKey}
+              activeSubs={kpis.data?.activeSubs ?? 0}
+              trial={trialNow}
+            />
+          ) : (
+            <PayoutsView payouts={payouts} fmt={fmt} replayKey={replayKey} />
+          )}
         </ScrollView>
       </SafeAreaView>
     </View>
+  );
+}
+
+// ─── Alt gorunumler ───────────────────────────────────────────────────────────
+
+const SERIES_TINTS = ["#D4FF4D", "#B89CFF", "#7AA8FF", "#FF8A3D"] as const;
+
+function MixView({
+  mix,
+  fmt,
+  replayKey,
+}: {
+  mix: ReturnType<typeof useRevenueMix>;
+  fmt: (n: number) => string;
+  replayKey: number;
+}) {
+  const segments = mix.data?.segments ?? [];
+  const total = mix.data?.total ?? 0;
+
+  return (
+    <Rise index={5} replayKey={replayKey}>
+      <BentoTile>
+        <Text className="font-semibold text-emph tracking-tight text-fg">
+          Gelir kırılımı
+        </Text>
+
+        {segments.length === 0 ? (
+          <Empty label={mix.isLoading ? "YÜKLENİYOR…" : "KIRILIM VERİSİ YOK"} />
+        ) : (
+          <>
+            <View className="mt-headerY">
+              <BentoStack
+                parts={segments.map((s, i) => ({
+                  ratio: total > 0 ? s.value / total : 0,
+                  color: SERIES_TINTS[i % SERIES_TINTS.length]!,
+                }))}
+              />
+            </View>
+            <View className="mt-tilePadSm gap-[10px]">
+              {segments.map((s, i) => (
+                <View key={s.metric} className="flex-row items-center gap-[10px]">
+                  <View
+                    className="h-[9px] w-[9px] rounded-bar"
+                    style={{ backgroundColor: SERIES_TINTS[i % SERIES_TINTS.length]! }}
+                  />
+                  <Text className="flex-1 font-medium text-row text-fg">{s.label}</Text>
+                  <Text className="font-semibold text-row tracking-tight text-fg">
+                    {fmt(s.value)}
+                  </Text>
+                  <Text className="w-[34px] text-right font-mono-medium text-[11px] text-fg3">
+                    %{Math.round(s.pct)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+      </BentoTile>
+    </Rise>
+  );
+}
+
+function SubsView({
+  movement,
+  fmt,
+  replayKey,
+  activeSubs,
+  trial,
+}: {
+  movement: ReturnType<typeof useMrrMovement>;
+  fmt: (n: number) => string;
+  replayKey: number;
+  activeSubs: number;
+  trial: number | null;
+}) {
+  const { theme } = useTheme();
+  const segments = movement.data?.segments ?? [];
+  const net = movement.data?.net ?? 0;
+
+  // Oranlar en buyuk MUTLAK degere gore — negatif kalemler de gorunur olsun.
+  const peak = Math.max(...segments.map((s) => Math.abs(s.value)), 1);
+  const rows: RailRow[] = segments.map((s) => ({
+    label: s.label,
+    value: `${s.value >= 0 ? "+" : "−"}${fmt(Math.abs(s.value))}`,
+    ratio: Math.abs(s.value) / peak,
+    color: s.value >= 0 ? theme.pos : theme.neg,
+  }));
+
+  return (
+    <>
+      <Rise index={5} replayKey={replayKey}>
+        <BentoTile>
+          <View className="flex-row items-center justify-between">
+            <Text className="font-semibold text-emph tracking-tight text-fg">
+              MRR hareketi
+            </Text>
+            <Text
+              className="font-mono-semibold text-body"
+              style={{ color: net >= 0 ? theme.pos : theme.neg }}
+            >
+              net {net >= 0 ? "+" : "−"}
+              {fmt(Math.abs(net))}
+            </Text>
+          </View>
+          {rows.length === 0 ? (
+            <Empty label={movement.isLoading ? "YÜKLENİYOR…" : "HAREKET VERİSİ YOK"} />
+          ) : (
+            <View className="mt-tilePadSm">
+              <BentoRails rows={rows} replayKey={replayKey} />
+            </View>
+          )}
+        </BentoTile>
+      </Rise>
+
+      <View className="flex-row gap-tileGap">
+        <MiniTile
+          index={6}
+          replayKey={replayKey}
+          label="AKTİF ABONE"
+          value={formatInteger(activeSubs)}
+        />
+        <MiniTile
+          index={7}
+          replayKey={replayKey}
+          label="DENEME"
+          value={trial != null ? formatInteger(trial) : "—"}
+        />
+      </View>
+    </>
+  );
+}
+
+function PayoutsView({
+  payouts,
+  fmt,
+  replayKey,
+}: {
+  payouts: ReturnType<typeof usePayouts>;
+  fmt: (n: number) => string;
+  replayKey: number;
+}) {
+  // Kaynaga gore topla. Para birimi DONUSTURULMUYOR — eski ekranin davranisi
+  // buydu; finansal gosterimi sessizce degistirmek yanlis olur.
+  // Time: O(n), Space: O(s) — s = benzersiz kaynak sayisi.
+  const bySource = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of payouts.data?.pending ?? []) {
+      m.set(p.source, (m.get(p.source) ?? 0) + p.amount);
+    }
+    return [...m.entries()];
+  }, [payouts.data]);
+
+  return (
+    <Rise index={5} replayKey={replayKey}>
+      <BentoTile>
+        <View className="flex-row items-center justify-between">
+          <Text className="font-semibold text-emph tracking-tight text-fg">
+            Bekleyen ödeme
+          </Text>
+          <Text className="font-mono-medium text-[11px] text-fg3">
+            {bySource.length} KAYNAK
+          </Text>
+        </View>
+
+        {bySource.length === 0 ? (
+          <Empty label={payouts.isLoading ? "YÜKLENİYOR…" : "BEKLEYEN ÖDEME YOK"} />
+        ) : (
+          <View className="mt-headerY flex-row gap-tileGap">
+            {bySource.map(([source, amount]) => (
+              <View key={source} className="flex-1 rounded-inner bg-tile2 p-boxPad">
+                <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
+                  {source.toLocaleUpperCase("tr-TR")}
+                </Text>
+                <Text
+                  className="mt-[6px] font-semibold text-statSm tracking-tighter text-fg"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {fmt(amount)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </BentoTile>
+    </Rise>
+  );
+}
+
+// ─── Ortak parcalar ───────────────────────────────────────────────────────────
+
+function MiniTile({
+  index,
+  replayKey,
+  label,
+  value,
+}: {
+  index: number;
+  replayKey: number;
+  label: string;
+  value: string;
+}) {
+  return (
+    <Rise index={index} replayKey={replayKey} style={{ flex: 1 }}>
+      <BentoTile padding={space.tilePadSm}>
+        <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
+          {label}
+        </Text>
+        <Text
+          className="mt-sm font-semibold text-stat tracking-tightest text-fg"
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          {value}
+        </Text>
+      </BentoTile>
+    </Rise>
+  );
+}
+
+function Empty({ label }: { label: string }) {
+  return (
+    <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
+      {label}
+    </Text>
   );
 }
