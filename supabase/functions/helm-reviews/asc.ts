@@ -151,13 +151,20 @@ export async function fetchAscReviews(
       }
     }
 
+    // sinceDate ARTIK SATIRLARI ELEMEZ, yalnizca sayfalamayi durdurur.
+    //
+    // Neden degisti: eskiden ilk kez gorulen "eski" yorumda dongu kirilirdi, yani
+    // bir yorum bir kez kaydedildikten sonra BIR DAHA hic okunmazdi. Gelistirici
+    // yaniti (developer_response) yoruma sonradan yazildigi icin o yanit
+    // veritabanina asla dusmezdi — istek `include=response` ile dogru sorsa bile.
+    // Ilk sayfa (200 yorum, en yeniden eskiye) zaten cekiliyor; onu tam islemenin
+    // ek API maliyeti yok. Derin sayfalamaya devam etmemek icin bayrak korunur.
     let reachedSince = false;
     for (const rev of page.data ?? []) {
       const attrs = rev.attributes ?? {};
       const createdAt = attrs.createdDate ?? null;
       if (input.sinceDate && createdAt && createdAt <= input.sinceDate) {
         reachedSince = true;
-        break;
       }
       const respId = rev.relationships?.response?.data?.id;
       const respAttrs = respId ? responseById.get(respId) : undefined;
