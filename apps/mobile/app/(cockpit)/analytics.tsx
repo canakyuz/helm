@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -9,13 +9,19 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { useState } from "react";
-import { duration, space, radius as R } from "@helm/design";
+import { duration, radius as R, space } from "@helm/design";
+import {
+  AD_FORMAT_LABEL,
+  GAME_STEP_LABEL,
+  instrumentationWarnings,
+  orderedGameSteps,
+} from "@helm/api";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useProperties } from "~/hooks/use-properties";
-import { useGeoBreakdown, useRetention } from "~/hooks/use-analytics";
+import { useGeoBreakdown } from "~/hooks/use-analytics";
+import { useGameFunnels } from "~/hooks/use-game-funnels";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger } from "~/lib/format";
 import { usePreferences } from "~/lib/preferences";
@@ -31,12 +37,17 @@ import {
   Rise,
   type RailRow,
 } from "~/components/bento";
+import {
+  FunnelTile,
+  InstrumentationTile,
+  PerfTile,
+  PlatformTile,
+  type FunnelRow,
+} from "~/components/analytics";
 
-/** Tasarim 14 cubuk kullaniyor. */
 const SPARK_BARS = 14;
 const TOP_COUNTRIES = 5;
 
-/** Seri ladder'i — pos/neg/warn DURUM renkleri, seri degil. */
 /** Ilki secili accent — geri kalani sabit seri ladder'i. */
 const tintsFor = (accent: string): readonly string[] => [accent, "#B89CFF", "#7AA8FF", "#FF8A3D"];
 
@@ -48,6 +59,8 @@ const HERO_NUMBER = {
   letterSpacing: -2,
 } as const;
 
+const pct = (r: number | null): string => (r == null ? "—" : `%${Math.round(r * 100)}`);
+
 function fmtSession(sec: number): string {
   return `${Math.floor(sec / 60)}d ${Math.round(sec % 60)}s`;
 }
@@ -58,7 +71,6 @@ export default function Analytics() {
   const [replayKey, setReplayKey] = useState(0);
   const { selectedPropertyId } = usePreferences();
   const properties = useProperties();
-  // PostHog uclari tek proje scope'lu — "all" ise ilk projeye duser.
   const projectId =
     selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
 
@@ -67,7 +79,7 @@ export default function Analytics() {
   const mauDetail = useMetricDetail("mau");
   const sessDetail = useMetricDetail("avg_session_sec");
   const geo = useGeoBreakdown(projectId);
-  const retention = useRetention(projectId);
+  const funnels = useGameFunnels(30);
 
   const handleRefresh = () => {
     void onRefresh().then(() => setReplayKey((k) => k + 1));
@@ -75,7 +87,7 @@ export default function Analytics() {
 
   if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
   if (kpis.isError || !kpis.data)
-    return <ScreenStatus label="Analitik yüklenemedi" tone="danger" />;
+    return <ScreenStatus label="Analiz yüklenemedi" tone="danger" />;
 
   const last = (d: typeof mauDetail): number | null => {
     const s = d.data?.series ?? [];
@@ -88,6 +100,63 @@ export default function Analytics() {
   const stickiness = mau > 0 ? Math.round((dau / mau) * 100) : null;
   const dauPoints = (dauDetail.data?.series ?? []).slice(-SPARK_BARS);
 
+  const f = funnels.data;
+  const warnings = f != null ? instrumentationWarnings(f) : [];
+
+  // ── Oturum hunisi: platform basina baslayan / kapanan ──
+  const sessionRows: FunnelRow[] = (f?.sessions ?? []).map((s) => ({
+    label: s.platform,
+    value: `${formatInteger(s.ended)} / ${formatInteger(s.started)}`,
+    ratio: s.started > 0 ? s.ended / s.started : 0,
+    note:
+      s.unclosedRate != null && s.unclosed > 0
+        ? `${formatInteger(s.unclosed)} oturum kapanmadı · ${pct(s.unclosedRate)}`
+        : undefined,
+    tone: s.unclosedRate != null && s.unclosedRate >= 0.5 ? "loss" : "normal",
+  }));
+
+  // ── Reklam hunisi: bicim basina gosterim / hata ──
+  const adRows: FunnelRow[] = (f?.ads ?? []).map((a) => ({
+    label: AD_FORMAT_LABEL[a.format] ?? a.format,
+    value: `${formatInteger(a.shown)} / ${formatInteger(a.shown + a.failed)}`,
+    ratio: a.failureRate != null ? 1 - a.failureRate : 1,
+    note: a.failed > 0 ? `${formatInteger(a.failed)} hata · ${pct(a.failureRate)}` : undefined,
+    tone: a.failureRate != null && a.failureRate >= 0.3 ? "loss" : "normal",
+  }));
+
+  // ── Oyun akisi: sabit sirada, en buyuk adima gore oranli ──
+  const steps = f != null ? orderedGameSteps(f.game) : [];
+  const stepPeak = Math.max(...steps.map((s) => s.count), 1);
+  const gameRows: FunnelRow[] = steps.map((s) => ({
+    label: GAME_STEP_LABEL[s.key] ?? s.key,
+    value: formatInteger(s.count),
+    ratio: s.count / stepPeak,
+  }));
+
+  // ── Satin alma: magaza acilisi → satin alma ──
+  const shopOpened = f?.game.find((g) => g.key === "shop_opened")?.count ?? 0;
+  const purchaseTotal = (f?.purchases ?? []).reduce((a, p) => a + p.count, 0);
+  const purchaseRows: FunnelRow[] =
+    shopOpened === 0 && purchaseTotal === 0
+      ? []
+      : [
+          {
+            label: "Mağaza açıldı",
+            value: formatInteger(shopOpened),
+            ratio: 1,
+          },
+          {
+            label: "Satın alındı",
+            value: formatInteger(purchaseTotal),
+            ratio: shopOpened > 0 ? Math.min(1, purchaseTotal / shopOpened) : 1,
+            note:
+              shopOpened > 0
+                ? `dönüşüm %${Math.round((purchaseTotal / shopOpened) * 100)}`
+                : "mağaza açılışı ölçülmüyor",
+            tone: shopOpened === 0 ? "warn" : "normal",
+          },
+        ];
+
   const countries = (geo.data?.rows ?? []).slice(0, TOP_COUNTRIES);
   const peak = Math.max(...countries.map((c) => c.users), 1);
   const countryRows: RailRow[] = countries.map((c, i) => ({
@@ -97,15 +166,13 @@ export default function Analytics() {
     color: tintsFor(theme.accent)[i % 4]!,
   }));
 
-  const cohorts = retention.data?.cohorts ?? [];
-
   return (
     <View className="flex-1 bg-canvas">
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="ANALİTİK"
-          title="Kullanıcılar"
+          eyebrow="ANALİZ"
+          title="Davranış"
           onSync={handleRefresh}
           syncing={refreshing}
         />
@@ -125,6 +192,7 @@ export default function Analytics() {
             />
           }
         >
+          {/* Kim — sayaç. Geri kalan ekran "ne yapıyorlar"ı anlatır. */}
           <Rise index={0} replayKey={replayKey}>
             <BentoTile padding={space.tilePadLg}>
               <View className="flex-row items-center justify-between">
@@ -148,13 +216,14 @@ export default function Analytics() {
               <Text className="mt-[6px] text-meta text-fg2">
                 MAU {formatInteger(mau)}
                 {stickiness != null ? ` · yapışkanlık %${stickiness}` : ""}
+                {session != null ? ` · oturum ${fmtSession(session)}` : ""}
               </Text>
 
               {dauPoints.length > 1 ? (
                 <View className="mt-tilePad">
                   <BentoBars
                     points={dauPoints}
-                    activeColor="#7AA8FF"
+                    activeColor={theme.blue}
                     dimColor={glass.chartDim}
                     height={76}
                     gap={3}
@@ -165,69 +234,69 @@ export default function Analytics() {
             </BentoTile>
           </Rise>
 
-          <View className="flex-row gap-tileGap">
-            <MiniTile
-              index={1}
+          {/* Ölçüm şüpheleri EN ÜSTTE: aşağıdaki her okumayı nitelendiriyor. */}
+          <Rise index={1} replayKey={replayKey}>
+            <InstrumentationTile warnings={warnings} />
+          </Rise>
+
+          <Rise index={2} replayKey={replayKey}>
+            <FunnelTile
+              title="Oturum"
+              count={f != null ? `${f.days} GÜN` : undefined}
+              rows={sessionRows}
+              empty={funnels.isLoading ? "YÜKLENİYOR…" : "OTURUM OLAYI YOK"}
               replayKey={replayKey}
-              label="OTURUM"
-              value={session != null ? fmtSession(session) : "—"}
             />
-            <MiniTile
-              index={2}
-              replayKey={replayKey}
-              label="YENİ"
-              value={formatInteger(kpis.data.newUsers ?? 0)}
-            />
-          </View>
+          </Rise>
 
           <Rise index={3} replayKey={replayKey}>
+            <FunnelTile
+              title="Reklam"
+              count="GÖSTERİM / TOPLAM"
+              rows={adRows}
+              empty={funnels.isLoading ? "YÜKLENİYOR…" : "REKLAM OLAYI YOK"}
+              replayKey={replayKey}
+            />
+          </Rise>
+
+          <Rise index={4} replayKey={replayKey}>
+            <FunnelTile
+              title="Oyun akışı"
+              rows={gameRows}
+              empty={funnels.isLoading ? "YÜKLENİYOR…" : "OYUN OLAYI YOK"}
+              replayKey={replayKey}
+            />
+          </Rise>
+
+          <Rise index={5} replayKey={replayKey}>
+            <FunnelTile
+              title="Satın alma"
+              rows={purchaseRows}
+              empty={funnels.isLoading ? "YÜKLENİYOR…" : "SATIN ALMA OLAYI YOK"}
+              replayKey={replayKey}
+            />
+          </Rise>
+
+          <Rise index={6} replayKey={replayKey}>
+            <PerfTile rows={f?.perf ?? []} />
+          </Rise>
+
+          <Rise index={7} replayKey={replayKey}>
+            <PlatformTile rows={f?.platforms ?? []} />
+          </Rise>
+
+          <Rise index={8} replayKey={replayKey}>
             <BentoTile>
               <Text className="font-semibold text-emph tracking-tight text-fg">
                 Ülkeler
               </Text>
               {countryRows.length === 0 ? (
-                <Empty label={geo.isLoading ? "YÜKLENİYOR…" : "ÜLKE VERİSİ YOK"} />
+                <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
+                  {geo.isLoading ? "YÜKLENİYOR…" : "ÜLKE VERİSİ YOK"}
+                </Text>
               ) : (
                 <View className="mt-tilePadSm">
                   <BentoRails rows={countryRows} replayKey={replayKey} />
-                </View>
-              )}
-            </BentoTile>
-          </Rise>
-
-          <Rise index={4} replayKey={replayKey}>
-            <BentoTile>
-              <View className="flex-row items-center justify-between">
-                <Text className="font-semibold text-emph tracking-tight text-fg">
-                  Tutundurma
-                </Text>
-                <Text className="font-mono-medium text-[11px] text-fg3">
-                  {cohorts.map((c) => c.day.toLocaleUpperCase("tr-TR")).join(" · ")}
-                </Text>
-              </View>
-              {cohorts.length === 0 ? (
-                <Empty
-                  label={retention.isLoading ? "YÜKLENİYOR…" : "TUTUNDURMA VERİSİ YOK"}
-                />
-              ) : (
-                <View className="mt-tilePadSm flex-row gap-tileGap">
-                  {cohorts.map((c) => (
-                    <View
-                      key={c.day}
-                      className="flex-1 items-center rounded-inner bg-tile2 p-boxPad"
-                    >
-                      <Text
-                        className="font-semibold text-statSm tracking-tighter text-fg"
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                      >
-                        %{Math.round(c.pct)}
-                      </Text>
-                      <Text className="mt-xs font-mono-medium text-eyebrow tracking-wide text-fg3">
-                        {c.day.toLocaleUpperCase("tr-TR")}
-                      </Text>
-                    </View>
-                  ))}
                 </View>
               )}
             </BentoTile>
@@ -264,42 +333,5 @@ function LiveDot({ color }: { color: string }) {
         animated,
       ]}
     />
-  );
-}
-
-function MiniTile({
-  index,
-  replayKey,
-  label,
-  value,
-}: {
-  index: number;
-  replayKey: number;
-  label: string;
-  value: string;
-}) {
-  return (
-    <Rise index={index} replayKey={replayKey} style={{ flex: 1 }}>
-      <BentoTile padding={space.tilePadSm}>
-        <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-          {label}
-        </Text>
-        <Text
-          className="mt-sm font-semibold text-stat tracking-tightest text-fg"
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          {value}
-        </Text>
-      </BentoTile>
-    </Rise>
-  );
-}
-
-function Empty({ label }: { label: string }) {
-  return (
-    <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
-      {label}
-    </Text>
   );
 }

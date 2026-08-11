@@ -22,3 +22,4 @@ export * from "./revenue-mix";
 export * from "./payouts";
 export * from "./mrr-movement";
 export * from "./revenue-history";
+export * from "./game-funnels";
