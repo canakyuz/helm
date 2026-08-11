@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ScrollView, Text, View, useWindowDimensions } from "react-native";
+import { RefreshControl, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
@@ -11,6 +11,7 @@ import { useRevenueMix } from "~/hooks/use-revenue-mix";
 import { useMrrMovement } from "~/hooks/use-mrr-movement";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { usePreferences } from "~/lib/preferences";
+import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { colors, type } from "~/theme/tokens";
@@ -640,6 +641,7 @@ export default function Revenue() {
   const [period, setPeriod] = useState<Period>("30D");
   const [view, setView] = useState<TabView>("Mix");
   const { selectedPropertyId, prioritizeRevenueRequests } = usePreferences();
+  const { refreshing, onRefresh } = useScreenRefresh();
 
   const adRev = useMetricDetail("ad_revenue");
   const primaryRevenueReady = adRev.data != null || adRev.isError;
@@ -687,6 +689,13 @@ export default function Revenue() {
         <ScrollView
           contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              tintColor={colors.fgPrimary}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
         >
           {/* Hero */}
           <OpenHero

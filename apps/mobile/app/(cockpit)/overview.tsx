@@ -12,6 +12,7 @@ import { useFxRates } from "~/hooks/use-fx-rates";
 import { useRevenueGoal } from "~/hooks/use-revenue-goal";
 import { useRevenueMix } from "~/hooks/use-revenue-mix";
 import { useGeoBreakdown } from "~/hooks/use-analytics";
+import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { toUsd, FX_FALLBACK } from "@helm/api";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
@@ -328,6 +329,7 @@ export default function Overview() {
   const geoProjectId =
     selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
   const geo = useGeoBreakdown(geoProjectId);
+  const { refreshing, onRefresh } = useScreenRefresh();
   const [dismissedAlerts, setDismissedAlerts] = useState<Record<number, boolean>>({});
 
   if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
@@ -383,18 +385,8 @@ export default function Overview() {
           refreshControl={
             <RefreshControl
               tintColor={colors.fgPrimary}
-              refreshing={kpis.isRefetching}
-              onRefresh={() => {
-                haptic.tap();
-                kpis.refetch();
-                alerts.refetch();
-                properties.refetch();
-                revenue.refetch();
-                crashFree.refetch();
-                goal.refetch();
-                mix.refetch();
-                geo.refetch();
-              }}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
             />
           }
         >
