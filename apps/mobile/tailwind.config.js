@@ -48,8 +48,9 @@ module.exports = {
         "mono-semibold": ["GeistMono-600", "Menlo"],
       },
       letterSpacing: {
+        ...bento.letterSpacing,
+        // Gecis donemi — liquid ekranlari bu adlari kullaniyor.
         widest: "0.18em",
-        tightest: "-0.04em",
       },
     },
   },

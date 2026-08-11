@@ -18,7 +18,7 @@ import { dirname, join } from "node:path";
 
 import { nativewindVars } from "../../../packages/design/src/css.ts";
 import { brand } from "../../../packages/design/src/palette.ts";
-import { radius, space, type } from "../../../packages/design/src/scale.ts";
+import { radius, space, tracking, type } from "../../../packages/design/src/scale.ts";
 import { darkTheme } from "../../../packages/design/src/themes.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -76,7 +76,21 @@ const px = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, `${v}
 writeFileSync(
   join(here, "..", "tailwind.tokens.js"),
   `/* ${BANNER} */
-module.exports = ${JSON.stringify({ colors, spacing: px(space), borderRadius: px(radius), fontSize: px(type) }, null, 2)};
+module.exports = ${JSON.stringify(
+    {
+      colors,
+      spacing: px(space),
+      borderRadius: px(radius),
+      fontSize: px(type),
+      // em olarak yazilir — NativeWind bunu fontSize'a gore cozer. Mutlak px
+      // yazilamaz cunku ayni tracking farkli punto'da farkli nokta degeri demek.
+      letterSpacing: Object.fromEntries(
+        Object.entries(tracking).map(([k, v]) => [k, `${v}em`]),
+      ),
+    },
+    null,
+    2,
+  )};
 `,
   "utf8",
 );
