@@ -9,6 +9,7 @@ import { useProperties } from "~/hooks/use-properties";
 import { usePayouts } from "~/hooks/use-payouts";
 import { useMrrMovement } from "~/hooks/use-mrr-movement";
 import { useRevenueHistory } from "~/hooks/use-revenue-history";
+import { useRevenueEvents } from "~/hooks/use-revenue-events";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
@@ -18,6 +19,7 @@ import { usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
+import { LiveEventsTile } from "~/components/revenue";
 import {
   BentoBackground,
   BentoBars,
@@ -103,6 +105,7 @@ export default function Revenue() {
   const [replayKey, setReplayKey] = useState(0);
 
   const history = useRevenueHistory();
+  const events = useRevenueEvents();
   const ready = !prioritizeRevenueRequests || history.data != null || history.isError;
   const kpis = useCockpitKpis({ enabled: ready });
   const properties = useProperties({ enabled: ready });
@@ -289,7 +292,16 @@ export default function Revenue() {
             />
           </View>
 
+          {/* Gercek zamanli akis — donem toplamiyla TOPLANMAZ, ayri soru. */}
           <Rise index={5} replayKey={replayKey}>
+            <LiveEventsTile
+              events={events.data ?? []}
+              loading={events.isLoading}
+              fmtAmount={fmt}
+            />
+          </Rise>
+
+          <Rise index={6} replayKey={replayKey}>
             <BentoSegment
               options={VIEWS}
               value={view}
