@@ -38,12 +38,18 @@ export function BentoBackground() {
   const { width, height } = useWindowDimensions();
   const [minGlow, maxGlow] = glass.auroraOpacity;
 
+  // Blob'lar EKRANIN ORTASINA yayilir, tepeye degil.
+  //
+  // Ilk denemede en parlak blob tepedeydi; ama tepede opak accent hero oturuyor
+  // ve auroryi tamamen kapatiyordu. Cam tile'lar ise fade'in bittigi, aurora'nin
+  // hic kalmadigi bolgedeydi — yani camin kiracagi sey yanlis yerdeydi ve
+  // tile'lar duz gri okunuyordu. Isik, camin OLDUGU yerde olmali.
   const blobs = useMemo(
     () => [
-      { cx: width * 0.1, cy: 0, r: 230, color: "#D4FF4D", glow: maxGlow },
-      { cx: width * 0.95, cy: height * 0.3, r: 200, color: theme.violet, glow: minGlow },
-      { cx: width * 0.0, cy: height * 0.9, r: 190, color: theme.blue, glow: minGlow },
-      { cx: width, cy: height * 0.95, r: 150, color: theme.amber, glow: minGlow },
+      { cx: width * 0.08, cy: height * 0.34, r: 240, color: "#D4FF4D", glow: maxGlow },
+      { cx: width * 1.02, cy: height * 0.46, r: 210, color: theme.violet, glow: maxGlow },
+      { cx: width * -0.05, cy: height * 0.72, r: 200, color: theme.blue, glow: minGlow },
+      { cx: width * 1.05, cy: height * 0.9, r: 170, color: theme.amber, glow: minGlow },
     ],
     [width, height, theme.violet, theme.blue, theme.amber, minGlow, maxGlow],
   );
@@ -62,13 +68,14 @@ export function BentoBackground() {
             </Circle>
           ))}
         </Group>
-        {/* Asagi dogru zemine soldur — icerik yogunlastikca aurora cekilir. */}
+        {/* Uclarda yumusat, ORTAYI ACIK BIRAK. Eski egri %70'te tamamen opaklasip
+            auroryi olduruyordu; cam tile'larin cogu o bolgede yasiyor. */}
         <Rect x={0} y={0} width={width} height={height}>
           <LinearGradient
             start={vec(0, 0)}
             end={vec(0, height)}
-            colors={[rgba(theme.bg, 0), rgba(theme.bg, 0.8), theme.bg]}
-            positions={[0, 0.32, 0.7]}
+            colors={[rgba(theme.bg, 0.55), rgba(theme.bg, 0), rgba(theme.bg, 0.45)]}
+            positions={[0, 0.5, 1]}
           />
         </Rect>
       </Canvas>
