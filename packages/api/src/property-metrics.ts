@@ -1,7 +1,22 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { fetchFxRates, metricValueUsd } from "./fx-rates";
 
-export type PropertyMetric = { adRevenue: number; mrr: number; dau: number };
+export type PropertyMetric = {
+  adRevenue: number;
+  mrr: number;
+  dau: number;
+  /**
+   * adRevenue'nun HANGI GUNE ait oldugu (YYYY-MM-DD), veri yoksa null.
+   *
+   * Neden tasiniyor: bu sorgunun tarih filtresi yok, "en son satir"i alir. Ingest
+   * durursa o satir haftalar oncesine ait olabilir. Deger tek basina tasinirsa
+   * arayuz onu "bugun" diye etiketler ve bayat rakam guncelmis gibi gorunur —
+   * panelin onlemesi gereken sey tam olarak bu. Tarihi da tasiyip etiketi
+   * gercege gore kurdurmak, degeri atmaktan daha dogru: dun senkron olmus bir
+   * projeyi sifir gostermek de yanlis olurdu.
+   */
+  adRevenueDate: string | null;
+};
 export type PropertyMetricsMap = Record<string, PropertyMetric>;
 
 type Row = {
@@ -33,9 +48,19 @@ export async function fetchPropertyMetrics(
     const key = `${r.project_id}|${r.metric}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    const entry = (out[r.project_id] ??= { adRevenue: 0, mrr: 0, dau: 0 });
+    const entry = (out[r.project_id] ??= {
+      adRevenue: 0,
+      mrr: 0,
+      dau: 0,
+      adRevenueDate: null,
+    });
     const v = metricValueUsd(r.metric, Number(r.value), r.currency, rates);
-    if (r.metric === "ad_revenue") entry.adRevenue = v;
+    if (r.metric === "ad_revenue") {
+      entry.adRevenue = v;
+      // Satirlar date DESC geldigi ve her (proje, metrik) ilk gorulende
+      // kilitlendigi icin bu, o projenin EN GUNCEL ad_revenue gunudur.
+      entry.adRevenueDate = r.date;
+    }
     else if (r.metric === "mrr") entry.mrr = v;
     else if (r.metric === "dau") entry.dau = v;
   }

@@ -60,6 +60,25 @@ const STATUS_LABEL: Record<PropertyStatus, string> = {
   down: "Down",
   unknown: "Unknown",
 };
+
+/** Cihazin yerel gunu, metrics.date ile ayni YYYY-MM-DD formatinda. */
+function todayIso(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+/**
+ * Gelir satirinin etiketi. Deger bugune aitse "Revenue today", degilse hangi gune
+ * ait oldugunu SOYLER — cunku bu sorgu tarih filtresiz calisir ve ingest durdugunda
+ * gunler oncesinin rakamini dondurur. Sabit "today" etiketi o durumda yaniltir.
+ */
+function revenueLabel(date: string | null): string {
+  if (date == null) return "Revenue · no data";
+  if (date === todayIso()) return "Revenue today";
+  return `Revenue · ${date.slice(5)}`;
+}
 function statusColor(s: PropertyStatus): string {
   return STATUS_COLOR[s];
 }
@@ -152,7 +171,15 @@ function ProjectRows({
                   ) : pm != null ? (
                     <KV
                       items={[
-                        { label: "Revenue today", value: fmt(pm.adRevenue), color: colors.accent },
+                        {
+                          // Etiket veriyi takip eder, tersi degil: fetchPropertyMetrics
+                          // tarih filtresiz calisip "en son satir"i alir, ingest
+                          // durursa o satir gunler oncesine ait olabilir. Sabit
+                          // "today" yazmak bayat rakami guncelmis gibi gosterir.
+                          label: revenueLabel(pm.adRevenueDate),
+                          value: fmt(pm.adRevenue),
+                          color: pm.adRevenueDate === todayIso() ? colors.accent : colors.accentWarn,
+                        },
                         { label: "MRR", value: fmt(pm.mrr), color: colors.accentViolet },
                         { label: "DAU", value: formatInteger(pm.dau), color: colors.blue },
                         { label: "Status", value: statusLabel(p.status), color: statusColor(p.status) },
