@@ -140,6 +140,7 @@ export default function Analytics() {
           title="Kullanıcılar"
           onSync={handleRefresh}
           syncing={refreshing}
+          picker
         />
 
         <ScrollView

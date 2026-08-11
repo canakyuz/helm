@@ -12,6 +12,7 @@ import { duration, press } from "@helm/design";
 
 import { haptic } from "~/lib/haptics";
 import { useTheme } from "~/theme/use-theme";
+import { PropertyPicker } from "./property-picker";
 
 type Props = {
   /** Ust satir — BUYUK HARF, mono, genis tracking. */
@@ -21,10 +22,23 @@ type Props = {
   syncing: boolean;
   /** Acik uyari sayisi. 0 ise rozet gizlenir. */
   alertCount?: number;
+  /**
+   * Baslik yerine proje secici goster. Portfoy kapsamli ekranlarda (Ozet, Gelir,
+   * Kullanici, Saglik) acik olmali — secili proje ekranin ne gosterdigini
+   * belirliyor ve degistirmenin baska yolu yok. Ayarlar'da anlamsiz.
+   */
+  picker?: boolean;
 };
 
 /** Bes cockpit ekraninin ortak baslik seridi. */
-export function BentoHeader({ eyebrow, title, onSync, syncing, alertCount = 0 }: Props) {
+export function BentoHeader({
+  eyebrow,
+  title,
+  onSync,
+  syncing,
+  alertCount = 0,
+  picker = false,
+}: Props) {
   const { theme } = useTheme();
 
   return (
@@ -33,9 +47,15 @@ export function BentoHeader({ eyebrow, title, onSync, syncing, alertCount = 0 }:
         <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
           {eyebrow}
         </Text>
-        <Text className="mt-[3px] font-semibold text-title tracking-tighter text-fg">
-          {title}
-        </Text>
+        {picker ? (
+          <View className="mt-[3px]">
+            <PropertyPicker />
+          </View>
+        ) : (
+          <Text className="mt-[3px] font-semibold text-title tracking-tighter text-fg">
+            {title}
+          </Text>
+        )}
       </View>
 
       <View className="flex-row gap-sm">

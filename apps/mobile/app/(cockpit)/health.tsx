@@ -109,6 +109,7 @@ export default function Health() {
           title="Kararlılık"
           onSync={handleRefresh}
           syncing={refreshing}
+          picker
           alertCount={fatalCount}
         />
 

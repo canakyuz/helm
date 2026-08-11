@@ -155,6 +155,7 @@ export default function Revenue() {
           title="Kazanç"
           onSync={handleRefresh}
           syncing={refreshing}
+          picker
         />
 
         <ScrollView
