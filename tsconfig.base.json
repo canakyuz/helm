@@ -12,7 +12,8 @@
       "@helm/api": ["./packages/api/src/index.ts"],
       "@helm/queries": ["./packages/queries/src/index.ts"],
       "@helm/domain": ["./packages/domain/src/index.ts"],
-      "@helm/config": ["./packages/config/src/index.ts"]
+      "@helm/config": ["./packages/config/src/index.ts"],
+      "@helm/design": ["./packages/design/src/index.ts"]
     }
   }
 }
