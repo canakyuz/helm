@@ -235,16 +235,67 @@ kazandırdığı bir şey yok. Skia eğri/gradyan/ring gerektiren yerlerde kalı
 
 ---
 
-## 8. Durum
+## 8. Gelir ekranının mantığı da değişti
 
-**Tamam:** token paketi · üretim hattı · tema çözümleyici · 6 bento primitifi ·
-Overview ekranı · kısık aurora. Typecheck temiz, 3 commit.
+Görsel geçişin yanında Gelir ekranının **veri mantığı** yeniden kuruldu. Gerekçe
+ölçümden geldi: `metrics` tablosu **2026-02-18'den beri** veri tutuyor, ama
+`metric-detail.ts` sorguyu `gte("date", sinceIso)` ile 30 günle sınırlıyordu.
+Nisan–Ağustos arası 5 aylık gelir geçmişi elde olduğu halde hiç gösterilmiyordu.
 
-**Kalan:** Revenue · Users(Analytics) · Health · Settings · login ekranları ·
-alt sekme çubuğu kararı (tasarım custom pill kullanıyor, uygulama `NativeTabs`
-kullanıyor — `design.md` §6 native diyor, çözülmedi) · `design.md` yeniden yazımı ·
-`CLAUDE.md` §7 güncellemesi (light mode yasağı kalkacak) · geçiş dönemi palet
-bloğunun silinmesi · `apps/web` token tüketimi.
+| ay | reklam geliri | gün |
+|---|---|---|
+| 2026-04 | 29.24 | 28 |
+| 2026-05 | 109.24 | 28 |
+| 2026-06 | 616.06 | 30 |
+| 2026-07 | 1665.45 | 31 |
+| 2026-08 | 1164.98 | 11 |
 
-**Doğrulanmadı:** cam + kısık aurora kararı simulator'da görülmedi. Bu spec'in en
-büyük açık riski budur.
+**Yeni model** (`packages/api/src/revenue-history.ts`): tek sorgu tüm geçmişi
+getirir, bellekte ay ve hafta kovalarına ayrılır. Dönem değiştirmek ağ turu
+istemez. Yalnızca **verisi olan** dönemler listelenir.
+
+### Çift sayım düzeltildi
+
+Ölçüm: `app_revenue` ile `subscription_revenue` **aynı para** — toplamları
+(92.49) ve sıfır-dışı gün sayıları (8) birebir aynı. İki isim altında tek kayıt.
+Overview `ad + app`, Kırılım `ad + subs + iap` topluyordu; iki ekran iki farklı
+tanım kullanıyordu.
+
+**Kanonik tanım:** `ad_revenue + subscription_revenue + iap_revenue`.
+`app_revenue` gösterimden düştü.
+
+### Sıfır kaynaklar gizlenir
+
+`iap_revenue` 80 satırın 80'inde sıfır — kaynak bağlı değil. Sıfır kalan kaynak
+listelenmez; ilk sıfır-dışı değerde `activeSources` üzerinden kendiliğinden geri
+gelir. Gerekçe: sürekli `₺0.00` göstermek "bağlı ama üretmiyor" izlenimi verir ve
+ekranda ölü satır taşır.
+
+---
+
+## 9. Durum
+
+**Tamam ve cihazda doğrulandı:** token paketi · üretim hattı · tema çözümleyici ·
+9 bento primitifi · **Özet · Gelir · Kullanıcı · Sağlık** ekranları · belirgin cam ·
+light + dark. 13 commit.
+
+**Kalan:** **Ayar** ve **login** ekranları · alt sekme çubuğu kararı (tasarım
+custom pill kullanıyor, uygulama `NativeTabs` — `design.md` §6 native diyor) ·
+`design.md` yeniden yazımı · `CLAUDE.md` §7 güncellemesi (light mode yasağı) ·
+geçiş dönemi palet bloğunun silinmesi · `apps/web` token tüketimi.
+
+**Ayar ekranı neden bekletildi:** mevcut `settings.tsx` 549 satır ve gerçek
+işlevsellik taşıyor — gelir hedefi düzenleyici, para birimi, gelir çarpanı, uyarı
+kuralları. Aceleyle yeniden yazmak çalışan özellikleri sessizce düşürme riski
+taşır. Tema seçici (Sistem/Koyu/Açık) oraya bağlanacak; `preferences.themeMode`
+hazır ama henüz onu değiştirecek arayüz yok.
+
+## 10. Bilinen ortam sorunları
+
+- **Metro, yeni dosya oluşturulunca çöküyor.** NativeWind 4.1 ile Expo SDK 56'nın
+  Metro'su arasında uyumsuzluk: `react-native-css-interop/dist/metro/index.js:179`
+  → `Cannot read properties of undefined (reading 'addedFiles')`. `bun run gen:design`
+  de aynı çökmeyi tetikler. Geçici çözüm: dosyaları Metro kapalıyken oluştur.
+- **CocoaPods UTF-8 locale gerektiriyor.** `LANG`/`LC_ALL` boşken `pod install`
+  `Encoding::CompatibilityError` ile düşüyor. `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`
+  ile çalışıyor.
