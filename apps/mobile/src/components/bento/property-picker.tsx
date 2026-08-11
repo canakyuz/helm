@@ -3,12 +3,22 @@ import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { press, radius as R, space } from "@helm/design";
 
-import { useProperties } from "~/hooks/use-properties";
+import { useProperties, type PropertyType } from "~/hooks/use-properties";
 import { haptic } from "~/lib/haptics";
 import { preferences, usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
 
 const ALL = "Tüm projeler";
+
+/** Tür etiketi. brandName KULLANILMIYOR: çoğu projede marka adı proje adıyla
+ *  aynı ve satır "Block Forge · Block Forge" diye tekrar ediyordu. */
+const TYPE_LABEL: Record<PropertyType, string> = {
+  website: "Web",
+  web_app: "Web app",
+  mobile_app: "Uygulama",
+  desktop_app: "Masaüstü",
+  game: "Oyun",
+};
 
 /**
  * Proje seçici — portföy cockpit'inin en temel kontrolü.
@@ -99,7 +109,7 @@ export function PropertyPicker() {
                 <Option
                   key={p.id}
                   label={p.name}
-                  sub={p.brandName ?? p.type}
+                  sub={TYPE_LABEL[p.type] ?? p.type}
                   active={p.id === selectedPropertyId}
                   onPress={() => pick(p.id)}
                 />

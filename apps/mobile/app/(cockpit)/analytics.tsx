@@ -89,14 +89,23 @@ export default function Analytics() {
 
   const f = funnels.data;
 
-  // ── Oyun akisi: sabit sirada, en buyuk adima gore oranli ──
-  const steps = f != null ? orderedGameSteps(f.game) : [];
-  const stepPeak = Math.max(...steps.map((s) => s.count), 1);
-  const gameRows: FunnelRow[] = steps.map((s) => ({
-    label: GAME_STEP_LABEL[s.key] ?? s.key,
-    value: formatInteger(s.count),
-    ratio: s.count / stepPeak,
-  }));
+  // ── Oyun akisi ──
+  //
+  // Her oyunun kendi olay sozlugu var; toplamak anlamsiz veri uretir. "Tum
+  // projeler" seciliyken proje basina ayri kart, tek proje seciliyken tek kart.
+  const toRows = (rows: readonly { key: string; count: number }[]): FunnelRow[] => {
+    const ordered = orderedGameSteps(rows);
+    const peak = Math.max(...ordered.map((r) => r.count), 1);
+    return ordered.map((r) => ({
+      label: GAME_STEP_LABEL[r.key] ?? r.key,
+      value: formatInteger(r.count),
+      ratio: r.count / peak,
+    }));
+  };
+
+  const perProject = f?.gameByProject ?? [];
+  const splitFlow = selectedPropertyId === "all" && perProject.length > 1;
+  const gameRows = toRows(f?.game ?? []);
 
   // ── Satin alma: magaza acilisi → satin alma ──
   const shopOpened = f?.game.find((g) => g.key === "shop_opened")?.count ?? 0;
@@ -200,14 +209,27 @@ export default function Analytics() {
             </BentoTile>
           </Rise>
 
-          <Rise index={1} replayKey={replayKey}>
-            <FunnelTile
-              title="Oyun akışı"
-              rows={gameRows}
-              empty={funnels.isLoading ? "YÜKLENİYOR…" : "OYUN OLAYI YOK"}
-              replayKey={replayKey}
-            />
-          </Rise>
+          {splitFlow ? (
+            perProject.map((proj, i) => (
+              <Rise key={proj.projectId} index={1 + i} replayKey={replayKey}>
+                <FunnelTile
+                  title={`Akış · ${proj.projectName}`}
+                  rows={toRows(proj.steps)}
+                  empty="OYUN OLAYI YOK"
+                  replayKey={replayKey}
+                />
+              </Rise>
+            ))
+          ) : (
+            <Rise index={1} replayKey={replayKey}>
+              <FunnelTile
+                title="Oyun akışı"
+                rows={gameRows}
+                empty={funnels.isLoading ? "YÜKLENİYOR…" : "OYUN OLAYI YOK"}
+                replayKey={replayKey}
+              />
+            </Rise>
+          )}
 
           <Rise index={2} replayKey={replayKey}>
             <FunnelTile

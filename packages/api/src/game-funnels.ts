@@ -33,6 +33,19 @@ export type CountRow = { key: string; count: number };
 
 export type PlatformRow = { platform: string; events: number };
 
+/**
+ * Proje basina oyun akisi.
+ *
+ * NEDEN AYRI: her oyunun kendi olay sozlugu var. Block Forge'un "oyun bitti"si
+ * ile Echo'nun "seviye tamamlandi"si ayni kutuya girerse anlamsiz bir toplam
+ * cikar. "Tum projeler" seciliyken UI proje basina ayri kart gosterir.
+ */
+export type ProjectFunnel = {
+  projectId: string;
+  projectName: string;
+  steps: CountRow[];
+};
+
 export type PerfRow = {
   key: string;
   samples: number;
@@ -49,6 +62,7 @@ export type GameFunnels = {
   sessions: SessionRow[];
   ads: AdRow[];
   game: CountRow[];
+  gameByProject: ProjectFunnel[];
   purchases: CountRow[];
   platforms: PlatformRow[];
   perf: PerfRow[];
@@ -60,6 +74,7 @@ type RawFunnels = {
   sessions: Array<{ platform: string; started: number; ended: number }>;
   ads: Array<{ format: string; shown: number; failed: number }>;
   game: CountRow[];
+  gameByProject: ProjectFunnel[];
   purchases: CountRow[];
   platforms: PlatformRow[];
   perf: PerfRow[];
@@ -71,6 +86,7 @@ const EMPTY: GameFunnels = {
   sessions: [],
   ads: [],
   game: [],
+  gameByProject: [],
   purchases: [],
   platforms: [],
   perf: [],
@@ -144,6 +160,7 @@ export async function fetchGameFunnels(
       return { ...a, failureRate: total > 0 ? a.failed / total : null };
     }),
     game: raw.game ?? [],
+    gameByProject: raw.gameByProject ?? [],
     purchases: raw.purchases ?? [],
     platforms: raw.platforms ?? [],
     perf: raw.perf ?? [],
