@@ -1,3 +1,43 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* URETILMIS DOSYA — elle duzenleme.
+   Kaynak: packages/design/src/
+   Yeniden uret: bun run gen:design */
+
+@layer base {
+  :root {
+  --bg: 241 241 237;
+  --tile: 255 255 255;
+  --tile2: 247 247 243;
+  --line: 231 231 225;
+  --fg: 20 21 26;
+  --fg2: 95 96 103;
+  --fg3: 109 109 115;
+  --pos: 27 81 45;
+  --neg: 212 36 60;
+  --warn: 149 100 9;
+  --chrome: 255 255 255;
+  --violet: 109 79 209;
+  --blue: 47 107 216;
+  --amber: 180 81 13;
+  }
+
+  .dark:root {
+  --bg: 10 10 12;
+  --tile: 19 19 24;
+  --tile2: 26 26 33;
+  --line: 31 31 38;
+  --fg: 246 246 241;
+  --fg2: 140 140 148;
+  --fg3: 130 130 137;
+  --pos: 194 248 203;
+  --neg: 255 92 122;
+  --warn: 255 177 0;
+  --chrome: 23 23 28;
+  --violet: 184 156 255;
+  --blue: 122 168 255;
+  --amber: 255 138 61;
+  }
+}
