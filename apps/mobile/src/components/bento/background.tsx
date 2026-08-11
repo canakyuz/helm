@@ -46,12 +46,12 @@ export function BentoBackground() {
   // tile'lar duz gri okunuyordu. Isik, camin OLDUGU yerde olmali.
   const blobs = useMemo(
     () => [
-      { cx: width * 0.08, cy: height * 0.34, r: 240, color: "#D4FF4D", glow: maxGlow },
+      { cx: width * 0.08, cy: height * 0.34, r: 240, color: theme.accent, glow: maxGlow },
       { cx: width * 1.02, cy: height * 0.46, r: 210, color: theme.violet, glow: maxGlow },
       { cx: width * -0.05, cy: height * 0.72, r: 200, color: theme.blue, glow: minGlow },
       { cx: width * 1.05, cy: height * 0.9, r: 170, color: theme.amber, glow: minGlow },
     ],
-    [width, height, theme.violet, theme.blue, theme.amber, minGlow, maxGlow],
+    [width, height, theme.accent, theme.violet, theme.blue, theme.amber, minGlow, maxGlow],
   );
 
   return (

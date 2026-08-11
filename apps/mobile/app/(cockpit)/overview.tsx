@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { toUsd, FX_FALLBACK, type AlertSeverity } from "@helm/api";
-import { space, type Theme } from "@helm/design";
+import { space, withAlpha, type Theme } from "@helm/design";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
@@ -74,7 +74,6 @@ const HERO_NUMBER = {
   fontSize: 48,
   lineHeight: 50,
   letterSpacing: -2.2,
-  color: "#11130A",
 } as const;
 
 /**
@@ -208,15 +207,22 @@ export default function Overview() {
           {/* Hero — accent dolgu, cam DEGIL: accent'in altinda bulaniklastiracak
               bir sey yok, cam orada sadece rengi kirletirdi. */}
           <Rise index={0} replayKey={replayKey}>
-            <SolidTile color="#D4FF4D" padding={space.tilePadLg}>
+            <SolidTile color={theme.accent} padding={space.tilePadLg}>
               <View className="flex-row items-center justify-between">
                 {/* .60 alfa 10px'te 4.70:1 ile sinirdaydi; .78 → 8.64:1. */}
-                <Text className="font-mono-medium text-eyebrow tracking-wider text-accent-ink/[0.78]">
+                <Text className="font-mono-medium text-eyebrow tracking-wider"
+                  style={{ color: withAlpha(theme.accentInk, 0.78) }}>
                   {picked != null ? formatDayLabel(picked.date) : "BUGÜN · GELİR"}
                 </Text>
                 {picked == null ? (
-                  <View className="rounded-pill bg-accent-ink/[0.14] px-sm py-[3px]">
-                    <Text className="font-mono-semibold text-[11px] text-accent-ink">
+                  <View
+                    className="rounded-pill px-sm py-[3px]"
+                    style={{ backgroundColor: withAlpha(theme.accentInk, 0.14) }}
+                  >
+                    <Text
+                      className="font-mono-semibold text-[11px]"
+                      style={{ color: theme.accentInk }}
+                    >
                       {revDelta >= 0 ? "+" : ""}
                       {revDelta.toFixed(1)}%
                     </Text>
@@ -233,7 +239,8 @@ export default function Overview() {
                       setSelectedDay(null);
                     }}
                     suppressHighlighting
-                    className="rounded-pill px-sm py-[3px] font-mono-semibold text-[11px] text-accent-ink/[0.78]"
+                    className="rounded-pill px-sm py-[3px] font-mono-semibold text-[11px]"
+                    style={{ color: withAlpha(theme.accentInk, 0.78) }}
                   >
                     BUGÜNE DÖN ✕
                   </Text>
@@ -246,21 +253,21 @@ export default function Overview() {
                 <Text
                   numberOfLines={1}
                   adjustsFontSizeToFit
-                  style={HERO_NUMBER}
+                  style={[HERO_NUMBER, { color: theme.accentInk }]}
                 >
                   {fmt(picked.value)}
                 </Text>
               ) : (
-                <CountUp value={todayRevenue} format={fmt} fitOneLine style={HERO_NUMBER} />
+                <CountUp value={todayRevenue} format={fmt} fitOneLine style={[HERO_NUMBER, { color: theme.accentInk }]} />
               )}
 
               <View className="mt-tilePadSm">
                 <BentoBars
                   points={sparkPoints}
-                  activeColor="#11130A"
+                  activeColor={theme.accentInk}
                   // .22 alfa zemine karsi 1.61:1 idi — grafik goruunmuyordu.
                   // .50 → 3.42:1 (non-text esigi 3:1) ve vurgulu barla 4.75:1.
-                  dimColor="rgba(17,19,10,0.50)"
+                  dimColor={withAlpha(theme.accentInk, 0.5)}
                   height={44}
                   selectedIndex={selectedDay}
                   onSelect={(i) => {
@@ -318,7 +325,7 @@ export default function Overview() {
               <View className="mt-headerY">
                 <SegmentMeter
                   ratio={goalRatio}
-                  filledColor="#D4FF4D"
+                  filledColor={theme.accent}
                   emptyColor={theme.line}
                   replayKey={replayKey}
                 />
@@ -353,7 +360,7 @@ export default function Overview() {
                       <View className="h-[36px] w-[36px] items-center justify-center rounded-icon bg-tile2">
                         <Text
                           className="font-semibold text-meta"
-                          style={{ color: TINTS[i % TINTS.length]! }}
+                          style={{ color: tintsFor(theme.accent)[i % 4]! }}
                         >
                           {monogram(p.name)}
                         </Text>
@@ -408,8 +415,8 @@ export default function Overview() {
                     <View className="mt-headerY flex-row gap-sm">
                       <Pill
                         label="Çöz"
-                        background="#D4FF4D"
-                        color="#11130A"
+                        background={theme.accent}
+                        color={theme.accentInk}
                         onPress={() => {
                           haptic.tap();
                           ack.mutate(a.id);
@@ -435,7 +442,8 @@ export default function Overview() {
 }
 
 /** Proje monogram renkleri — seri ladder'i (pos/neg/warn DURUM renkleridir, seri degil). */
-const TINTS = ["#D4FF4D", "#B89CFF", "#7AA8FF", "#FF8A3D"] as const;
+/** Proje monogram renkleri. Ilki secili accent — geri kalani sabit seri ladder'i. */
+const tintsFor = (accent: string): readonly string[] => [accent, "#B89CFF", "#7AA8FF", "#FF8A3D"];
 
 function SEVERITY_COLOR(theme: Theme, severity: AlertSeverity): string {
   if (severity === "critical") return theme.neg;

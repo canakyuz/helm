@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { colorScheme, useColorScheme } from "nativewind";
 import {
+  buildTheme,
   glass as glassRecipes,
-  themes,
   type GlassRecipe,
   type Theme,
   type ThemeName,
@@ -31,7 +31,7 @@ export type ResolvedTheme = {
  * Time: O(1). Space: O(1).
  */
 export function useTheme(): ResolvedTheme {
-  const { themeMode } = usePreferences();
+  const { themeMode, accent } = usePreferences();
   const { colorScheme: active } = useColorScheme();
 
   // Yan etki render sirasinda calistirilmaz — NativeWind global store'a yazar.
@@ -43,5 +43,5 @@ export function useTheme(): ResolvedTheme {
   // undefined gelebilecegi icin dark'a duseriz (uygulamanin varsayilani).
   const name: ThemeName = active === "light" ? "light" : "dark";
 
-  return { name, theme: themes[name], glass: glassRecipes[name] };
+  return { name, theme: buildTheme(name, accent), glass: glassRecipes[name] };
 }
