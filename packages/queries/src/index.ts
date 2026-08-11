@@ -16,3 +16,4 @@ export * from "./property-metric-totals";
 export * from "./property-metrics";
 export * from "./analytics";
 export * from "./revenue";
+export * from "./game-funnels";
