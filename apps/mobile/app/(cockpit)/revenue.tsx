@@ -55,7 +55,7 @@ const HERO_NUMBER = {
 const sum = (xs: readonly number[]): number => xs.reduce((a, b) => a + b, 0);
 
 export default function Revenue() {
-  const { theme } = useTheme();
+  const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
   const [period, setPeriod] = useState<Period>("30G");
   const [view, setView] = useState<View_>("Kırılım");
@@ -146,7 +146,9 @@ export default function Revenue() {
                 <BentoBars
                   points={points}
                   activeColor="#D4FF4D"
-                  dimColor={theme.line}
+                  // theme.line cam yuzeyde kayboluyordu — yari saydam beyaz
+                  // hangi yuzeye duserse dussun ayni oranda ayrisir.
+                  dimColor={glass.chartDim}
                   height={70}
                   gap={3}
                   replayKey={replayKey}
@@ -215,6 +217,15 @@ export default function Revenue() {
 
 const SERIES_TINTS = ["#D4FF4D", "#B89CFF", "#7AA8FF", "#FF8A3D"] as const;
 
+// API etiketleri Ingilizce ve web ile paylasiliyor (packages/api revenue-mix.ts).
+// Metrik anahtari uzerinden cevriliyor — etiket metnine gore degil, o degisirse
+// sessizce kirilirdi. Bilinmeyen metrik API etiketine duser.
+const MIX_LABEL_TR: Record<string, string> = {
+  subscription_revenue: "Abonelik",
+  iap_revenue: "Uygulama içi",
+  ad_revenue: "Reklam",
+};
+
 function MixView({
   mix,
   fmt,
@@ -253,7 +264,9 @@ function MixView({
                     className="h-[9px] w-[9px] rounded-bar"
                     style={{ backgroundColor: SERIES_TINTS[i % SERIES_TINTS.length]! }}
                   />
-                  <Text className="flex-1 font-medium text-row text-fg">{s.label}</Text>
+                  <Text className="flex-1 font-medium text-row text-fg">
+                    {MIX_LABEL_TR[s.metric] ?? s.label}
+                  </Text>
                   <Text className="font-semibold text-row tracking-tight text-fg">
                     {fmt(s.value)}
                   </Text>
