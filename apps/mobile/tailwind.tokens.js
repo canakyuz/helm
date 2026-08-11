@@ -54,5 +54,13 @@ module.exports = {
     "statSm": "22px",
     "stat": "28px",
     "hero": "48px"
+  },
+  "letterSpacing": {
+    "hero": "-0.045em",
+    "tightest": "-0.04em",
+    "tighter": "-0.03em",
+    "tight": "-0.02em",
+    "wide": "0.16em",
+    "wider": "0.18em"
   }
 };
