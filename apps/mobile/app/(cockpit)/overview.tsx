@@ -11,9 +11,11 @@ import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { useFxRates } from "~/hooks/use-fx-rates";
 import { useRevenueGoal } from "~/hooks/use-revenue-goal";
 import { useRevenueMix } from "~/hooks/use-revenue-mix";
+import { useGeoBreakdown } from "~/hooks/use-analytics";
 import { toUsd, FX_FALLBACK } from "@helm/api";
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
+import { usePreferences } from "~/lib/preferences";
 import { colors } from "~/theme/tokens";
 import { ScreenStatus } from "~/components/screen-status";
 import {
@@ -34,6 +36,7 @@ import {
   Eyebrow,
   EmptyHint,
   ShowMore,
+  AudienceMap,
 } from "~/components/liquid";
 import type { HeroStat } from "~/components/liquid";
 
@@ -291,6 +294,13 @@ export default function Overview() {
   const crashFree = useMetricDetail("crash_free_sessions");
   const goal = useRevenueGoal();
   const mix = useRevenueMix();
+  // Geo edge PostHog-backed, tek proje scope'lu (analytics.tsx / revenue.tsx ile
+  // aynı desen) — "all" seçiliyken diğer hook'lar gibi otomatik toplanamaz, o yüzden
+  // seçili projeyi burada kendimiz çözüyoruz; kaynak yine usePreferences.
+  const { selectedPropertyId } = usePreferences();
+  const geoProjectId =
+    selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
+  const geo = useGeoBreakdown(geoProjectId);
   const [dismissedAlerts, setDismissedAlerts] = useState<Record<number, boolean>>({});
 
   if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
@@ -356,6 +366,7 @@ export default function Overview() {
                 crashFree.refetch();
                 goal.refetch();
                 mix.refetch();
+                geo.refetch();
               }}
             />
           }
@@ -429,6 +440,12 @@ export default function Overview() {
               </Text>
             )}
           </LiquidGlass>
+
+          {/* audience map — veri yokken (yükleniyor/hata/boş) hiç render etme:
+              boş harita "hiç oyuncun yok" gibi okunur, bu yanıltıcı olur. */}
+          {geo.data && geo.data.rows.length > 0 ? (
+            <AudienceMap rows={geo.data.rows} height={220} />
+          ) : null}
 
           {/* projects + needs attention */}
           <LiquidGlass padding={0}>
