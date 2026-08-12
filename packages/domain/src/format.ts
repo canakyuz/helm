@@ -40,14 +40,45 @@ export function formatRelativeTime(iso: string | Date): string {
 
   for (const [factor, unit] of UNITS) {
     if (value < factor) {
-      return past ? `${value}${unit} önce` : `${value}${unit} sonra`;
+      return past ? `${value} ${unit} önce` : `${value} ${unit} sonra`;
     }
     value = Math.round(value / factor);
   }
-  return past ? `${value}y önce` : `${value}y sonra`;
+  return past ? `${value} y önce` : `${value} y sonra`;
 }
 
-export function formatPercent(value: number): string {
-  const sign = value > 0 ? "+" : "";
-  return `${sign}${value.toFixed(1)}%`;
+// ---------------------------------------------------------------------------
+// Yuzde — TEK kural: sayi once, `%` sonek (`98%`). Ekranlarin bir kismi elde
+// Turkce onek (`%98`) yaziyordu; ayni uygulamada iki kural yasamasin diye
+// hepsi buraya baglandi. Ondalik basamak metrige gore degisir (huni orani 0,
+// crash-free 1) — degisen SADECE hassasiyet, gosterim degil.
+// ---------------------------------------------------------------------------
+
+/** Zaten yuzde olan deger (0–100). Isaretsiz. */
+export function formatPercent(value: number, decimals = 0): string {
+  return `${value.toFixed(decimals)}%`;
+}
+
+/** Oran (0–1) → yuzde. Cagri yerlerinde `* 100` unutmasin diye ayri fonksiyon. */
+export function formatRatio(ratio: number, decimals = 0): string {
+  return formatPercent(ratio * 100, decimals);
+}
+
+// Yuvarlandiginda sifira dusen degisim "degismedi" demektir; "+0.0%" yazmak
+// yanlis bir yon ima eder. Renk mantigi da ayni esigi kullanmali, bu yuzden
+// esik disari aciliyor.
+export const FLAT_DELTA_EPSILON = 0.05;
+
+export function isFlatDelta(value: number): boolean {
+  return Math.abs(value) < FLAT_DELTA_EPSILON;
+}
+
+/**
+ * Degisim yuzdesi — isaretli. Negatifte typografik eksi (U+2212) kullanilir:
+ * mono'da rakamlarla ayni genislikte ve tire'den uzun, sutunlar kaymaz.
+ */
+export function formatDelta(value: number, decimals = 1): string {
+  if (isFlatDelta(value)) return `${(0).toFixed(decimals)}%`;
+  const sign = value > 0 ? "+" : "−";
+  return `${sign}${Math.abs(value).toFixed(decimals)}%`;
 }

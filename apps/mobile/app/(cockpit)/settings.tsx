@@ -68,9 +68,12 @@ export default function Settings() {
 
   function promptGoal() {
     haptic.tap();
+    // Para birimi BASLIKTA yaziyor: hedef, o anki goruntuleme para birimiyle
+    // kaydediliyor. Sormadan kaydetmek sessiz bir tuzak — "90000" yazan biri
+    // TL sanip GBP kaydedebiliyordu (olculdu: 90.000 GBP hedefi ~₺5,8M cikti).
     Alert.prompt(
-      "Aylık gelir hedefi",
-      "Hedef tutarı gir. İlerleme ayın gerçek gelir toplamından hesaplanır.",
+      `Aylık gelir hedefi (${currency})`,
+      `Tutarı ${currency} cinsinden gir. İlerleme ayın gerçek gelir toplamından hesaplanır. Para birimini değiştirmek için önce yukarıdan seç.`,
       (text) => {
         const n = Number((text ?? "").replace(/[^\d.]/g, ""));
         if (!Number.isFinite(n) || n < 0) return;

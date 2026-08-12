@@ -10,7 +10,7 @@ import {
 import {
   formatCurrency,
   formatInteger,
-  formatPercent,
+  formatDelta,
 } from "~/lib/format";
 import type { Currency } from "~/lib/preferences";
 
@@ -72,7 +72,7 @@ export function buildWidgetPayload(
     ),
     mrrDelta: data.mrrDelta,
     mrrDeltaText:
-      data.mrrDelta !== null ? formatPercent(data.mrrDelta) : null,
+      data.mrrDelta !== null ? formatDelta(data.mrrDelta) : null,
     openAlerts: data.openAlerts,
     ...(sparkline && sparkline.length >= 7
       ? { sparkline: sparkline.slice(0, 7) }

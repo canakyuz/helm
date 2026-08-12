@@ -12,7 +12,7 @@ import { SparkLine } from "~/components/spark-line";
 import { Icon } from "~/components/ui/icon";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
-import { formatInteger, formatPercent } from "~/lib/format";
+import { formatInteger, formatDelta } from "~/lib/format";
 import { colors } from "~/theme/tokens";
 
 type Props = {
@@ -190,7 +190,7 @@ export function RichMetricTile({
                   fontVariant: ["tabular-nums"],
                 }}
               >
-                {formatPercent(delta)}
+                {formatDelta(delta)}
               </Text>
               <Text
                 style={{

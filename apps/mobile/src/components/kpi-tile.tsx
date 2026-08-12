@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 
 import { Icon, type IconName } from "~/components/ui/icon";
 import { LiquidGlassPanel } from "~/components/ui/liquid-glass";
-import { formatPercent } from "~/lib/format";
+import { formatDelta } from "~/lib/format";
 import { colors } from "~/theme/tokens";
 
 type Tone = "default" | "danger" | "warn" | "info";
@@ -91,7 +91,7 @@ export function KpiTile({ icon, label, value, delta, tone = "default" }: Props) 
                   color: deltaPositive ? colors.accent : colors.accentDanger,
                 }}
               >
-                {formatPercent(delta)}
+                {formatDelta(delta)}
               </Text>
             </View>
           ) : null}

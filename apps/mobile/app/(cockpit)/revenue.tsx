@@ -296,7 +296,7 @@ export default function Revenue() {
           {/* Anlik/kesin mutabakat — hangi para dogrulandi, hangisi bekliyor. */}
           {picked != null && picked.legs.length > 0 ? (
             <Rise index={5} replayKey={replayKey}>
-              <ReconciliationTile legs={picked.legs} />
+              <ReconciliationTile legs={picked.legs} fmt={fmt} />
             </Rise>
           ) : null}
 

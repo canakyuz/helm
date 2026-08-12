@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 
-import { formatPercent } from "~/lib/format";
+import { formatDelta } from "~/lib/format";
 
 type Props = {
   label: string;
@@ -22,7 +22,7 @@ export function KpiCard({ label, value, delta, tone = "default" }: Props) {
       <Text className="text-fg-primary text-2xl font-semibold">{value}</Text>
       {delta !== undefined && delta !== null && (
         <Text className={delta >= 0 ? "text-accent text-xs" : "text-accent-danger text-xs"}>
-          {formatPercent(delta)}
+          {formatDelta(delta)}
         </Text>
       )}
     </View>

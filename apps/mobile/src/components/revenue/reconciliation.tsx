@@ -31,7 +31,14 @@ const STATE_LABEL: Record<ReconState, string> = {
  * onaylamadi. Google Play icin dogrulama kaynagi HENUZ YOK — Play baglayicisi
  * yazilana kadar o bacak kalici olarak bekliyor gorunur, ki bu da dogru sinyal.
  */
-export function ReconciliationTile({ legs }: { legs: readonly RevenueLeg[] }) {
+export function ReconciliationTile({
+  legs,
+  fmt,
+}: {
+  legs: readonly RevenueLeg[];
+  /** Tutarlar USD'ye normalize gelir; gosterim secili para birimine cevrilir. */
+  fmt: (n: number) => string;
+}) {
   const { theme } = useTheme();
   if (legs.length === 0) return null;
 
@@ -40,8 +47,6 @@ export function ReconciliationTile({ legs }: { legs: readonly RevenueLeg[] }) {
     : s === "mismatch" ? theme.neg
     : s === "pending" ? theme.warn
     : theme.fg3;
-
-  const fmt = (n: number) => n.toFixed(2);
 
   return (
     <BentoTile>
