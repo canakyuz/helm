@@ -23,6 +23,28 @@ export type IntegrationHealth = {
   lastSyncError: string | null;
 };
 
+/**
+ * Saglayici kimligi → insan okunur ad.
+ *
+ * NEDEN: `provider` bir DB enum'u (bkz 0012_sentry_provider.sql) ve arayuz onu
+ * oldugu gibi basiyordu — kullaniciya `app_store_connect`, `admob` goruunuyordu.
+ * Ham teknik kimlik ekranda "bitmemis" okunur. AD_FORMAT_LABEL ile ayni desen.
+ *
+ * Bilinmeyen bir saglayici gelirse cagri yeri `?? provider` ile ham degere
+ * duser: yeni connector eklendiginde ekran bos kalmaz, sadece cirkin olur.
+ */
+export const PROVIDER_LABEL: Record<string, string> = {
+  admob: "AdMob",
+  app_store_connect: "App Store Connect",
+  plausible: "Plausible",
+  posthog: "PostHog",
+  rest: "REST",
+  revenuecat: "RevenueCat",
+  sentry: "Sentry",
+  stripe: "Stripe",
+  supabase: "Supabase",
+};
+
 export type SystemHealth = {
   integrations: IntegrationHealth[];
   totalIntegrations: number;

@@ -10,7 +10,7 @@ import { useAlertRulesCount } from "~/hooks/use-property-metrics";
 import { useRevenueGoal, useSetRevenueGoal } from "~/hooks/use-revenue-goal";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
-import { formatRelativeTime } from "~/lib/format";
+import { formatCurrency, formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import {
   normalizeRevenueMultiplier,
@@ -213,9 +213,12 @@ export default function Settings() {
               <Row
                 label="Aylık gelir hedefi"
                 onPress={promptGoal}
+                // Kayitli para birimiyle gosterilir (secili olanla DEGIL): hedef
+                // o birimde kaydedildi, cevirmek yaniltirdi. Ham sayi yerine
+                // formatCurrency — "90000" binlik ayraci olmayan tek sayiydi.
                 value={
                   goal.data?.target_amount != null
-                    ? `${goal.data.target_amount} ${goal.data.currency}`
+                    ? formatCurrency(goal.data.target_amount, goal.data.currency)
                     : "Belirle"
                 }
               />

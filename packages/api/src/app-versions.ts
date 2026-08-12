@@ -15,6 +15,22 @@ export type AppVersionStatus =
   | "removed"
   | "unknown";
 
+/**
+ * Surum durumu → Turkce etiket. Ham degerler App Store Connect / Play sozlugu
+ * ve arayuze oldugu gibi basiliyordu ("App Store · live"), Turkce bir ekranda
+ * yabanci duruyordu. TestFlight bir urun adi, cevrilmez.
+ */
+export const VERSION_STATUS_LABEL: Record<AppVersionStatus, string> = {
+  live: "yayında",
+  in_review: "incelemede",
+  ready: "yayına hazır",
+  testflight: "TestFlight",
+  rejected: "reddedildi",
+  expired: "süresi doldu",
+  removed: "kaldırıldı",
+  unknown: "bilinmiyor",
+};
+
 export type AppVersion = {
   id: number;
   propertyId: string;

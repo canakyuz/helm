@@ -175,7 +175,12 @@ export default function Analytics() {
             <BentoTile padding={space.tilePadLg}>
               <View className="flex-row items-center justify-between">
                 <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
-                  AKTİF KULLANICI · 30G
+                  {/* "· 30G" DEGIL: bu rakam kpis.dau, yani GUNLUK aktif
+                      kullanici — Ozet'teki "DAU" tile'i ile ayni deger. 30 gun
+                      yazmak metrigi 30 gunluk sanmaya yol aciyordu; ustelik
+                      alttaki grafik de 30 degil 14 gun. 30 gunluk olcu zaten
+                      yandaki MAU. */}
+                  GÜNLÜK AKTİF KULLANICI
                 </Text>
                 <View className="flex-row items-center gap-[6px]">
                   <LiveDot color={theme.accent} />
