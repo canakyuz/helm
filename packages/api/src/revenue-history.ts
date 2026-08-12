@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SelectedPropertyId } from "@helm/types";
-import { FX_FALLBACK, fetchFxRates, metricValueUsd } from "./fx-rates";
+import { FX_FALLBACK, fetchFxRates, metricValueUsd, toUsd } from "./fx-rates";
 
 /**
  * Gelirin KANONIK tanimi.
@@ -72,7 +72,12 @@ export type RevenueHistory = {
 };
 
 type Row = { date: string; metric: string; value: number; currency: string | null };
-type EventRow = { store: string | null; amount: string | number | null; occurred_at: string };
+type EventRow = {
+  store: string | null;
+  amount: string | number | null;
+  currency: string | null;
+  occurred_at: string;
+};
 
 /** Kurus farklari mutabakati bozmasin — bu esigin altindaki fark "ayni" sayilir. */
 const RECON_TOLERANCE = 0.01;
@@ -144,7 +149,7 @@ export async function fetchRevenueHistory(
   // magaza metrikleriyle ayni gidis-donuste biter.
   let eq = client
     .from("revenue_events")
-    .select("store, amount, occurred_at")
+    .select("store, amount, currency, occurred_at")
     .gte("occurred_at", `${from}T00:00:00Z`)
     .not("amount", "is", null);
   if (propertyId !== "all") eq = eq.eq("project_id", propertyId);
@@ -177,7 +182,10 @@ export async function fetchRevenueHistory(
   for (const e of (events ?? []) as EventRow[]) {
     const day = e.occurred_at.slice(0, 10);
     const store = e.store ?? "BILINMIYOR";
-    const amt = Number(e.amount) || 0;
+    // USD'ye normalize SART: webhook tutari SATIN ALMA para biriminde saklanir,
+    // magaza metrikleri ise USD'ye normalize edilmis. Cevirmeden karsilastirmak
+    // EUR/GBP satin almalarda mutabakati yanlis "uyusmuyor" gosterirdi.
+    const amt = toUsd(Number(e.amount) || 0, e.currency, fx);
     let m = provByDay.get(day);
     if (m == null) {
       m = new Map();
