@@ -57,6 +57,29 @@ interface RcEvent {
   price_in_purchased_currency?: number;
   // RC bazi surumlerde mikro-birim kullanir.
   purchased_at_ms?: number;
+  transaction_id?: string;
+  original_transaction_id?: string;
+  environment?: string;
+}
+
+/** Odemenin dogal anahtari — REST geri doldurmasiyla ORTAK.
+ *
+ *  Neden RC olay kimligi degil: geri doldurma REST API'sinden okur, orada olay
+ *  kimligi yoktur. Iki taraf ayni parayi ayni anahtarla bulamazsa webhook
+ *  kesintisi sonrasi geri doldurma cift sayim uretir (bkz. migration 0038).
+ *
+ *  Yenilemede transaction_id degisir, original_transaction_id degismez; ayirici
+ *  olan donem baslangicidir (purchased_at_ms). Bu yuzden original kullaniliyor.
+ *
+ *  Gelir uretmeyen olay parayla ayrisamaz — iptal, satin almanin kopyasi sanilip
+ *  yutulmasin diye olay kimligiyle anahtarlanir. */
+function txnKey(ev: RcEvent, occurredMs: number, isRevenue: boolean): string {
+  if (!isRevenue) return `evt:${ev.id}`;
+  const orig = ev.original_transaction_id ?? ev.transaction_id;
+  // Magaza kimligi yoksa (promo, test, Amazon...) olay kimligine dus: tekillik
+  // korunur, sadece REST tarafiyla eslesme kaybolur.
+  if (!orig) return `evt:${ev.id}`;
+  return `${ev.store ?? "unknown"}:${orig}:${occurredMs}`;
 }
 
 Deno.serve(async (req) => {
@@ -85,6 +108,12 @@ Deno.serve(async (req) => {
     return json({ error: "event.id veya event.type yok" }, 400);
   }
 
+  // Sandbox/test satin almalari gercek gelir DEGIL. 200 donuyoruz ki RevenueCat
+  // teslimati basarili saysin ve tekrar tekrar denemesin.
+  if ((ev.environment ?? "PRODUCTION").toUpperCase() !== "PRODUCTION") {
+    return json({ ok: true, skipped: "sandbox", event_id: ev.id });
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -102,15 +131,18 @@ Deno.serve(async (req) => {
     .maybeSingle();
 
   const occurredMs = ev.purchased_at_ms ?? ev.event_timestamp_ms ?? Date.now();
-  const amount = REVENUE_TYPES.has(ev.type)
+  const isRevenue = REVENUE_TYPES.has(ev.type);
+  const amount = isRevenue
     ? (ev.price_in_purchased_currency ?? ev.price ?? null)
     : null;
 
   // upsert + ignoreDuplicates: RC teslimati garanti etmek icin ayni olayi
-  // tekrar gonderebilir. event_id unique; ikinci gonderim sessizce yutulur.
+  // tekrar gonderebilir. Catisma hedefi txn_key — hem RC'nin tekrar gonderimini
+  // hem de REST geri doldurmasinin ayni odemeyi yazmasini ayni anda yutar.
   const { error } = await supabase.from("revenue_events").upsert(
     {
       project_id: integ?.project_id ?? null,
+      txn_key: txnKey(ev, occurredMs, isRevenue),
       event_id: ev.id,
       event_type: ev.type,
       store: ev.store ?? null,
@@ -122,7 +154,7 @@ Deno.serve(async (req) => {
       occurred_at: new Date(occurredMs).toISOString(),
       raw: body,
     },
-    { onConflict: "event_id", ignoreDuplicates: true },
+    { onConflict: "txn_key", ignoreDuplicates: true },
   );
 
   if (error) return json({ error: error.message }, 500);
