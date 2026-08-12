@@ -1,5 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "./_shared/cors.ts";
+// SAAT DILIMI NOTU: baglayicilar rapor penceresini UTC'ye gore kurar ama
+// saglayicilar HESABIN saat diliminde raporlar (AdMob'da Europe/Istanbul, UTC+3).
+// Pencere UTC bugune sabitlenirse, yerel gun donumu ile UTC gun donumu arasindaki
+// ~3 saatte saglayicinin GUNCEL gunu hic istenmez — panel "bugun" diye dunun
+// rakamini gosterir. admob.ts bitisi UTC yarina uzatir; yeni baglayici yazarken
+// ayni tuzaga dikkat.
+
 import { type Connector } from "./connectors/types.ts";
 import { fetchRevenueCat } from "./connectors/revenuecat.ts";
 import { fetchAdMob } from "./connectors/admob.ts";
