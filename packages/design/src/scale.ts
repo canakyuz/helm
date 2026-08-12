@@ -7,6 +7,17 @@
 
 /** Boşluk. Yeni sayı ekleme; bir kullanım buraya sığmıyorsa isim ekle. */
 export const space = {
+  /**
+   * Etiket–değer arası, rozet dikey padding. Satır içi en küçük nefes.
+   *
+   * NEDEN SONRADAN EKLENDİ: `mt-xs` / `mb-xs` ekranlarda ZATEN yazılıydı ama
+   * ölçekte karşılığı yoktu — Tailwind'in varsayılan spacing'inde de `xs`/`sm`
+   * anahtarı yok, dolayısıyla o sınıflar hiç üretilmiyor, sessizce SIFIR
+   * boşluk veriyordu. Hero'daki delta rozetinin yatay padding'i bu yüzden yoktu.
+   */
+  xs: 6,
+  /** Rozet yatay padding, yan yana ikon butonları arası. */
+  sm: 8,
   /** Ekran yatay padding. */
   screenX: 16,
   /** Tile'lar arası dikey/yatay boşluk. */

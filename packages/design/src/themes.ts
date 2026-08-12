@@ -15,8 +15,12 @@ export type Theme = {
   tile: string;
   /** Tile İÇİ kutu. Asla cam değil (cam içinde cam = çamur + 2x maliyet). */
   tile2: string;
-  /** Hairline ayraç, dolmamış rail. */
+  /** Hairline ayraç. SADECE 1px çizgi — dolmamış rail için `track` kullan. */
   line: string;
+  /** Dolmamış rail / metre yolu. `line`'dan AYRI bir token, çünkü rollerin
+   *  kontrast ihtiyacı farklı: hairline'ın görünmemesi normaldir, boş yolun
+   *  görünmemesi ise metreyi tamamen yok eder (bkz Özet "aylık hedef"). */
+  track: string;
   /** Başlık, büyük rakam. */
   fg: string;
   /** Gövde metni, ikincil değer. */

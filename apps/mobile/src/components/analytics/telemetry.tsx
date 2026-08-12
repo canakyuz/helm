@@ -2,7 +2,7 @@ import { Text, View } from "react-native";
 import { radius as R, space } from "@helm/design";
 import type { PerfRow, PlatformRow } from "@helm/api";
 
-import { formatInteger } from "~/lib/format";
+import { formatInteger, formatRatio } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
 import { BentoTile } from "~/components/bento";
 
@@ -91,7 +91,7 @@ export function PlatformTile({ rows }: { rows: readonly PlatformRow[] }) {
                 <Text className="font-mono-semibold text-body text-fg2">
                   {formatInteger(r.events)}
                   <Text className="text-fg3">
-                    {"  "}%{total > 0 ? Math.round((r.events / total) * 100) : 0}
+                    {"  "}{formatRatio(total > 0 ? r.events / total : 0)}
                   </Text>
                 </Text>
               </View>

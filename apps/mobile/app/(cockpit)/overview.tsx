@@ -14,7 +14,7 @@ import { useFxRates } from "~/hooks/use-fx-rates";
 import { useRevenueGoal } from "~/hooks/use-revenue-goal";
 import { useRevenueMix } from "~/hooks/use-revenue-mix";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
-import { formatInteger, formatRelativeTime } from "~/lib/format";
+import { formatDelta, formatInteger, formatPercent, formatRelativeTime, isFlatDelta } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
@@ -216,16 +216,20 @@ export default function Overview() {
                   {picked != null ? formatDayLabel(picked.date) : "BUGÜN · GELİR"}
                 </Text>
                 {picked == null ? (
+                  // Rozet accent zeminin UZERINDE duruyor. Onceki hal ink'i .14
+                  // alfayla zemine katiyordu: hem koyu hem acik temada rozet
+                  // accent'ten ayirt edilemiyordu (alti da ustu de ayni renk
+                  // ailesi). Cozum ters kontrast — hero sayisinin kullandigi
+                  // ink/accent ciftinin AYNISI, sadece yer degistirmis halde.
                   <View
                     className="rounded-pill px-sm py-[3px]"
-                    style={{ backgroundColor: withAlpha(theme.accentInk, 0.14) }}
+                    style={{ backgroundColor: theme.accentInk }}
                   >
                     <Text
                       className="font-mono-semibold text-[11px]"
-                      style={{ color: theme.accentInk }}
+                      style={{ color: theme.accent }}
                     >
-                      {revDelta >= 0 ? "+" : ""}
-                      {revDelta.toFixed(1)}%
+                      {formatDelta(revDelta)}
                     </Text>
                   </View>
                 ) : (
@@ -301,7 +305,7 @@ export default function Overview() {
               index={3}
               replayKey={replayKey}
               label="CRASH"
-              value={cfNow != null ? cfNow.toFixed(1) : "—"}
+              value={cfNow != null ? formatPercent(cfNow, 1) : "—"}
               delta={cfDelta}
             />
           </View>
@@ -467,9 +471,10 @@ function StatTile({
 }) {
   const { theme } = useTheme();
   const hasDelta = delta != null && Number.isFinite(delta);
-  // Yuvarlandiginda sifira dusen degisim "degismedi" demektir — "+0.0" yazmak
-  // yanlis bir yon ima eder. Notr renkte, isaretsiz gosterilir.
-  const flat = hasDelta && Math.abs(delta) < 0.05;
+  // Yuvarlandiginda sifira dusen degisim "degismedi" demektir — "+0.0%" yazmak
+  // yanlis bir yon ima eder. Notr renkte, isaretsiz gosterilir. Esik
+  // formatDelta ile ORTAK (isFlatDelta): renk ve metin ayrisamaz.
+  const flat = hasDelta && isFlatDelta(delta);
   const positive = (delta ?? 0) >= 0;
 
   return (
@@ -485,17 +490,26 @@ function StatTile({
         >
           {value}
         </Text>
-        {hasDelta ? (
-          <Text
-            className="mt-[6px] font-mono-medium text-[11px]"
-            style={{ color: flat ? theme.fg3 : positive ? theme.pos : theme.neg }}
-          >
-            {flat ? "" : positive ? "+" : "−"}
-            {Math.abs(delta).toFixed(1)}
-          </Text>
-        ) : (
-          <View className="mt-[6px] h-[13px]" />
-        )}
+        {/* Delta yoksa da AYNI Text render edilir, sadece seffaf. Onceki hal
+            sabit `h-[13px]` bir View koyuyordu; gercek satir yuksekligi font
+            metriginden geliyor ve 13px degil — bu yuzden delta'si olmayan kart
+            (CRASH) komsulariyla hizasiz duruyordu. Ayni dugum = ayni yukseklik. */}
+        <Text
+          className="mt-[6px] font-mono-medium text-[11px]"
+          style={{
+            color: !hasDelta
+              ? "transparent"
+              : flat
+                ? theme.fg3
+                : positive
+                  ? theme.pos
+                  : theme.neg,
+          }}
+          accessibilityElementsHidden={!hasDelta}
+          importantForAccessibility={hasDelta ? "auto" : "no-hide-descendants"}
+        >
+          {hasDelta ? formatDelta(delta) : "0.0%"}
+        </Text>
       </BentoTile>
     </Rise>
   );

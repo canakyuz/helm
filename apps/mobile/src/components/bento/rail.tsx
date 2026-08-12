@@ -18,10 +18,19 @@ export type RailRow = {
   label: string;
   /** Sagda gosterilen deger — bicimlenmis metin. */
   value: string;
-  /** Dolum orani, 0–1. */
+  /** Dolum orani, 0–1. 1'i asmasi VERI HATASIDIR; asagida ozel isleniyor. */
   ratio: number;
   color: string;
 };
+
+/**
+ * Oran 1'i asarsa bu bir olcum hatasi (orn. "63 bitis / 60 baslangic").
+ * Onceki hal `Math.min(1, ratio)` ile sessizce kirpiyordu; sonuc gercek bir
+ * 5/5 ile ayni dolu cubuk oluyordu — yani hata BASARI gibi goruunuyordu.
+ * Ustelik Saglik ekraninin ust karti ayni veriyi "olcum supheli" diye
+ * raporluyor: tek ekranda iki celisen ifade.
+ */
+const OVERFLOW_MARK = " ⚠";
 
 /**
  * Etiketli oran rail'i — "Yeni +$1,840" gibi satirlar.
@@ -55,9 +64,14 @@ function Rail({
   index: number;
   replayKey: number;
 }) {
-  const { theme } = useTheme();
+  const { theme, glass } = useTheme();
   const fill = useSharedValue(0);
   const noMotion = useReducedMotion();
+  const overflow = row.ratio > 1;
+  // Tasma durumunda cubuk hala tam dolu cizilir (baska bir sey cizilemez),
+  // ama rengi warn'a doner ve degerin yaninda isaret cikar. Boylece "tamam"
+  // ile "olculemedi" ayni goruunmez.
+  const railColor = overflow ? theme.warn : row.color;
 
   useEffect(() => {
     fill.value = 0;
@@ -73,15 +87,16 @@ function Rail({
     <View>
       <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" }}>
         <Text className="font-medium text-row text-fg">{row.label}</Text>
-        <Text className="font-mono-semibold text-body" style={{ color: row.color }}>
+        <Text className="font-mono-semibold text-body" style={{ color: railColor }}>
           {row.value}
+          {overflow ? OVERFLOW_MARK : ""}
         </Text>
       </View>
       <View
         style={{
           height: 4,
           borderRadius: R.pill,
-          backgroundColor: theme.line,
+          backgroundColor: glass.chartDim,
           marginTop: 7,
           overflow: "hidden",
         }}
@@ -92,7 +107,7 @@ function Rail({
               width: `${Math.max(0, Math.min(1, row.ratio)) * 100}%`,
               height: "100%",
               borderRadius: R.pill,
-              backgroundColor: row.color,
+              backgroundColor: railColor,
               transformOrigin: "left",
             },
             animated,

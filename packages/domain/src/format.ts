@@ -47,6 +47,21 @@ export function formatRelativeTime(iso: string | Date): string {
   return past ? `${value} y önce` : `${value} y sonra`;
 }
 
+/**
+ * Saat damgasi — "10:12". Cihazin YEREL saatinde.
+ *
+ * Intl'e gidilmiyor: Hermes'te `Intl.DateTimeFormat` var ama hour12 davranisi
+ * cihaz bolgesine gore degisiyor; 24 saat sabit olsun (panel Turkce ve
+ * tum ekranlarda ayni okunmali).
+ */
+export function formatClock(iso: string | Date): string {
+  const date = typeof iso === "string" ? new Date(iso) : iso;
+  if (Number.isNaN(date.getTime())) return "—";
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
 // ---------------------------------------------------------------------------
 // Yuzde — TEK kural: sayi once, `%` sonek (`98%`). Ekranlarin bir kismi elde
 // Turkce onek (`%98`) yaziyordu; ayni uygulamada iki kural yasamasin diye

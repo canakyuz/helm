@@ -10,7 +10,7 @@ import { useAppVersions } from "~/hooks/use-app-versions";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useGameFunnels } from "~/hooks/use-game-funnels";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
-import { formatInteger, formatRelativeTime } from "~/lib/format";
+import { formatInteger, formatPercent, formatRatio, formatRelativeTime } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { Ring } from "~/components/liquid";
@@ -70,7 +70,7 @@ export default function Health() {
 
   const f = funnels.data;
   const warnings = f != null ? instrumentationWarnings(f) : [];
-  const pct = (r: number | null): string => (r == null ? "—" : `%${Math.round(r * 100)}`);
+  const pct = (r: number | null): string => (r == null ? "—" : formatRatio(r));
 
   // Oturum: degeri "kac oturum" degil, KAPANMAYAN oran — cokme gostergesi.
   const sessionRows: FunnelRow[] = (f?.sessions ?? []).map((s) => ({
@@ -140,7 +140,7 @@ export default function Health() {
                   trackColor={theme.line}
                 >
                   <Text className="font-semibold text-title tracking-tighter text-fg">
-                    {cfNow != null ? `%${cfNow.toFixed(1)}` : "—"}
+                    {cfNow != null ? formatPercent(cfNow, 1) : "—"}
                   </Text>
                 </Ring>
 
