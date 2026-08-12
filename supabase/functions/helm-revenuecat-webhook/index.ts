@@ -6,14 +6,19 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // geliyor ve Apple gunluk raporlari T-1 + isleme gecikmesi tasiyor; bir satin alma
 // panelde 1-2 gun sonra goruluyor. RevenueCat olayi aninda biliyor.
 //
-// RevenueCat panelinde ayarlanacak (Project → Integrations → Webhooks):
-//   URL     : https://<PROJE>.supabase.co/functions/v1/helm-revenuecat-webhook
-//   Header  : Authorization: Bearer <RC_WEBHOOK_SECRET>
+// Sir IKI YOLDAN da kabul edilir:
+//   1) Authorization: Bearer <RC_WEBHOOK_SECRET>   — RC panelinden elle
+//   2) ?k=<RC_WEBHOOK_SECRET>                      — URL'in kendisinde
 //
-// RC_WEBHOOK_SECRET edge function secret'i olarak tanimlanmali:
-//   supabase secrets set RC_WEBHOOK_SECRET=<rastgele-uzun-dize>
+// NEDEN IKISI: RevenueCat v2 API'si webhook kaydinda authorization BASLIGI
+// ayarlamaya izin vermiyor (kayit yaniti boyle bir alan dondurmuyor) — baslik
+// yalnizca panelden girilebiliyor. Sir URL'de tasinabilirse kayit tamamen
+// API'den yapilabilir, panele hic girilmez.
 //
-// Yetkilendirme neden gerekli: bu uc herkese aciktir. Secret olmadan biri sahte
+// URL'deki sirrin bedeli: istek loglarinda gorunur. Tek kullanicili bir arac
+// icin kabul edilebilir; loglar da zaten ayni kisinin.
+//
+// Yetkilendirme neden gerekli: bu uc herkese aciktir. Sir olmadan biri sahte
 // satin alma POST'layip gelir tablosunu kirletebilir.
 
 const cors = {
@@ -61,10 +66,12 @@ Deno.serve(async (req) => {
   const secret = Deno.env.get("RC_WEBHOOK_SECRET");
   if (!secret) return json({ error: "RC_WEBHOOK_SECRET tanimli degil" }, 500);
 
-  const auth = req.headers.get("authorization") ?? "";
-  // Sabit zamanli karsilastirma gerekmiyor: secret uzun ve rastgele, ayrica
-  // basarisiz denemede hicbir bilgi sizmiyor.
-  if (auth !== `Bearer ${secret}`) return json({ error: "yetkisiz" }, 401);
+  // Sabit zamanli karsilastirma gerekmiyor: sir uzun ve rastgele, basarisiz
+  // denemede hicbir bilgi sizmiyor.
+  const header = req.headers.get("authorization") ?? "";
+  const fromUrl = new URL(req.url).searchParams.get("k") ?? "";
+  const ok = header === `Bearer ${secret}` || fromUrl === secret;
+  if (!ok) return json({ error: "yetkisiz" }, 401);
 
   let body: { event?: RcEvent; api_version?: string };
   try {
