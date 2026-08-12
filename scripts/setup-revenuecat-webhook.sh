@@ -24,8 +24,11 @@ cd "$(dirname "$0")/.."
 # shellcheck disable=SC1091
 set -a; . ./.env; set +a
 
-: "${HELM_SUPABASE_PROJECT_ID:?HELM_SUPABASE_PROJECT_ID .env'de tanimli degil}"
-: "${HELM_DB_URL:?HELM_DB_URL .env'de tanimli degil}"
+# Apostrof YOK: bash, ${VAR:?mesaj} icindeki ' karakterini tirnak acilisi sayar.
+# Burada iki tane oldugu icin tesadufen dengeleniyordu; biri silinseydi dosyanin
+# geri kalani (heredoc dahil) yanlis ayrisirdi.
+: "${HELM_SUPABASE_PROJECT_ID:?HELM_SUPABASE_PROJECT_ID .env dosyasinda tanimli degil}"
+: "${HELM_DB_URL:?HELM_DB_URL .env dosyasinda tanimli degil}"
 
 FN=helm-revenuecat-webhook
 URL_BASE="https://${HELM_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/${FN}"
