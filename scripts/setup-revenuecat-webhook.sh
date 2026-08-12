@@ -103,7 +103,18 @@ else:
     action = "olusturuldu"
 
 if st not in (200, 201):
-    sys.exit(f"Webhook {action.split()[0]} basarisiz: {st} {res}")
+    # 403 = API anahtarinin integrations yazma yetkisi yok. Kurulumun geri kalani
+    # tamam; geriye yalnizca URL'i girmek kaliyor. Adresi basiyoruz ki elle
+    # yapistirilabilsin — sir zaten URL'in icinde.
+    print(f"  ! RevenueCat kaydi API'den guncellenemedi: {st}")
+    if "integrations:read_write" in str(res):
+        print("    Sebep: RC API anahtarinda project_configuration:integrations:read_write yetkisi yok.")
+    print()
+    print("    ELLE GIR — RevenueCat > Project > Integrations > Webhooks:")
+    print(f"    {target}")
+    print()
+    print("    (Alternatif: RC panelinden API anahtarina yukaridaki yetkiyi ver, betigi tekrar calistir.)")
+    sys.exit(0)
 
 print(f"  ✓ Webhook {action}")
 print(f"    hedef: {url_base}?k=***")
