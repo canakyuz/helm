@@ -7,3 +7,4 @@ export { BentoBackground } from "./background";
 export { BentoSegment } from "./segment";
 export { BentoRails, BentoStack, type RailRow } from "./rail";
 export { PropertyPicker } from "./property-picker";
+export { HERO_NUMBER, MiniTile, Empty, InfoRow } from "./tiles";

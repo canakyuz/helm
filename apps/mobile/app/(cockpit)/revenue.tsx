@@ -16,12 +16,15 @@ import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger, formatRatio } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { usePreferences } from "~/lib/preferences";
+import { monthLabel, MONTHS_SHORT, localToday } from "~/lib/labels";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
 import { PaymentsTile, ReconciliationTile } from "~/components/revenue";
 import {
   BentoBackground,
+  HERO_NUMBER,
+  MiniTile,
   BentoBars,
   BentoHeader,
   BentoRails,
@@ -39,16 +42,6 @@ const PILL_H = 40;
 const GRAINS = ["Ay", "Hafta"] as const;
 type Grain = (typeof GRAINS)[number];
 
-const VIEWS = ["Abonelik", "Ödeme"] as const;
-type View_ = (typeof VIEWS)[number];
-
-const HERO_NUMBER = {
-  marginTop: 12,
-  fontFamily: "Geist-600",
-  fontSize: 44,
-  lineHeight: 46,
-  letterSpacing: -2,
-} as const;
 
 /** Kaynak renkleri — seri ladder'i (pos/neg/warn DURUM renkleri, seri degil). */
 /** Kaynak renkleri. Reklam = secili accent (ana gelir kalemi), digerleri sabit seri. */
@@ -66,18 +59,6 @@ const SOURCE_LABEL: Record<string, string> = {
   iap_revenue: "Uygulama içi",
 };
 
-const MONTHS_TR = [
-  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
-  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
-];
-const MONTHS_SHORT = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
-
-/** "2026-08" → "Ağustos" (bu yil) / "Ağustos 25" (onceki yillar). */
-function monthLabel(key: string): string {
-  const [y, m] = key.split("-").map(Number);
-  const name = MONTHS_TR[(m ?? 1) - 1] ?? key;
-  return y === new Date().getFullYear() ? name : `${name} ${String(y).slice(2)}`;
-}
 
 /** Hafta kovasi → "5–11 Ağu". */
 function weekLabel(bucket: RevenueBucket): string {
@@ -87,19 +68,12 @@ function weekLabel(bucket: RevenueBucket): string {
   return `${fd}–${td} ${MONTHS_SHORT[(tm ?? 1) - 1]}`;
 }
 
-/** Cihazin yerel gunu, metrics.date ile ayni YYYY-MM-DD formatinda. */
-function localToday(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
 export default function Revenue() {
   const todayIso = localToday();
   const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
   const [grain, setGrain] = useState<Grain>("Ay");
   const [pickedKey, setPickedKey] = useState<string | null>(null);
-  const [view, setView] = useState<View_>("Abonelik");
   const { selectedPropertyId, prioritizeRevenueRequests } = usePreferences();
   const { refreshing, onRefresh } = useScreenRefresh();
   const [replayKey, setReplayKey] = useState(0);
@@ -111,10 +85,7 @@ export default function Revenue() {
   const properties = useProperties({ enabled: ready });
   const projectId =
     selectedPropertyId !== "all" ? selectedPropertyId : properties.data?.[0]?.id;
-  const movement = useMrrMovement(projectId, { enabled: ready && view === "Abonelik" });
-  const payouts = usePayouts(projectId, { enabled: ready && view === "Ödeme" });
-  const trial = useMetricDetail("subs_trial", { enabled: ready && view === "Abonelik" });
-
+      
   const buckets = useMemo(
     () => (grain === "Ay" ? (history.data?.months ?? []) : (history.data?.weeks ?? [])),
     [history.data, grain],
@@ -137,8 +108,6 @@ export default function Revenue() {
   const periodMrr = picked?.mrr ?? kpis.data?.mrr ?? 0;
   const periodSubs = picked?.activeSubs ?? kpis.data?.activeSubs ?? 0;
   const arppu = periodSubs > 0 ? periodMrr / periodSubs : 0;
-  const trialSeries = trial.data?.series ?? [];
-  const trialNow = trialSeries.length > 0 ? trialSeries[trialSeries.length - 1]!.value : null;
 
   // Sifir kalan kaynak gizlenir — "bagli ama uretmiyor" izlenimi vermesin.
   // Ilk sifir-disi degerde kendiliginden geri gelir (activeSources API'den).
@@ -382,166 +351,5 @@ function PeriodStrip({
 
 // ─── Alt gorunumler ───────────────────────────────────────────────────────────
 
-function SubsView({
-  movement,
-  fmt,
-  replayKey,
-  activeSubs,
-  trial,
-}: {
-  movement: ReturnType<typeof useMrrMovement>;
-  fmt: (n: number) => string;
-  replayKey: number;
-  activeSubs: number;
-  trial: number | null;
-}) {
-  const { theme } = useTheme();
-  const segments = movement.data?.segments ?? [];
-  const net = movement.data?.net ?? 0;
-  const peak = Math.max(...segments.map((s) => Math.abs(s.value)), 1);
-  const rows: RailRow[] = segments.map((s) => ({
-    label: s.label,
-    value: `${s.value >= 0 ? "+" : "−"}${fmt(Math.abs(s.value))}`,
-    ratio: Math.abs(s.value) / peak,
-    color: s.value >= 0 ? theme.pos : theme.neg,
-  }));
-
-  return (
-    <>
-      <Rise index={6} replayKey={replayKey}>
-        <BentoTile>
-          <View className="flex-row items-center justify-between">
-            <Text className="font-semibold text-emph tracking-tight text-fg">
-              MRR hareketi
-            </Text>
-            <Text
-              className="font-mono-semibold text-body"
-              style={{ color: net >= 0 ? theme.pos : theme.neg }}
-            >
-              net {net >= 0 ? "+" : "−"}
-              {fmt(Math.abs(net))}
-            </Text>
-          </View>
-          {rows.length === 0 ? (
-            <Empty label={movement.isLoading ? "YÜKLENİYOR…" : "HAREKET VERİSİ YOK"} />
-          ) : (
-            <View className="mt-tilePadSm">
-              <BentoRails rows={rows} replayKey={replayKey} />
-            </View>
-          )}
-        </BentoTile>
-      </Rise>
-
-      <View className="flex-row gap-tileGap">
-        <MiniTile
-          index={7}
-          replayKey={replayKey}
-          label="AKTİF ABONE"
-          value={formatInteger(activeSubs)}
-        />
-        <MiniTile
-          index={8}
-          replayKey={replayKey}
-          label="DENEME"
-          value={trial != null ? formatInteger(trial) : "—"}
-        />
-      </View>
-    </>
-  );
-}
-
-function PayoutsView({
-  payouts,
-  fmt,
-  replayKey,
-}: {
-  payouts: ReturnType<typeof usePayouts>;
-  fmt: (n: number) => string;
-  replayKey: number;
-}) {
-  // Kaynaga gore topla. Para birimi DONUSTURULMUYOR — eski ekranin davranisi
-  // buydu; finansal gosterimi sessizce degistirmek yanlis olur.
-  // Time: O(n), Space: O(s).
-  const bySource = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const p of payouts.data?.pending ?? []) {
-      m.set(p.source, (m.get(p.source) ?? 0) + p.amount);
-    }
-    return [...m.entries()];
-  }, [payouts.data]);
-
-  return (
-    <Rise index={6} replayKey={replayKey}>
-      <BentoTile>
-        <View className="flex-row items-center justify-between">
-          <Text className="font-semibold text-emph tracking-tight text-fg">
-            Bekleyen ödeme
-          </Text>
-          <Text className="font-mono-medium text-[11px] text-fg3">
-            {bySource.length} KAYNAK
-          </Text>
-        </View>
-
-        {bySource.length === 0 ? (
-          <Empty label={payouts.isLoading ? "YÜKLENİYOR…" : "BEKLEYEN ÖDEME YOK"} />
-        ) : (
-          <View className="mt-headerY flex-row gap-tileGap">
-            {bySource.map(([source, amount]) => (
-              <View key={source} className="flex-1 rounded-inner bg-tile2 p-boxPad">
-                <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-                  {source.toLocaleUpperCase("tr-TR")}
-                </Text>
-                <Text
-                  className="mt-[6px] font-semibold text-statSm tracking-tighter text-fg"
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {fmt(amount)}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </BentoTile>
-    </Rise>
-  );
-}
-
 // ─── Ortak parcalar ───────────────────────────────────────────────────────────
 
-function MiniTile({
-  index,
-  replayKey,
-  label,
-  value,
-}: {
-  index: number;
-  replayKey: number;
-  label: string;
-  value: string;
-}) {
-  return (
-    <Rise index={index} replayKey={replayKey} style={{ flex: 1 }}>
-      <BentoTile padding={space.tilePadSm}>
-        <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-          {label}
-        </Text>
-        <Text
-          className="mt-sm font-semibold text-stat tracking-tightest text-fg"
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          {value}
-        </Text>
-      </BentoTile>
-    </Rise>
-  );
-}
-
-function Empty({ label }: { label: string }) {
-  return (
-    <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
-      {label}
-    </Text>
-  );
-}

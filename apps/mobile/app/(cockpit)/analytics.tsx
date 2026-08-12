@@ -20,6 +20,7 @@ import { useGameFunnels } from "~/hooks/use-game-funnels";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger, formatRatio } from "~/lib/format";
 import { usePreferences } from "~/lib/preferences";
+import { seriesTints } from "~/lib/labels";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
@@ -36,9 +37,6 @@ import { FunnelTile, PlatformTile, type FunnelRow } from "~/components/analytics
 
 const SPARK_BARS = 14;
 const TOP_COUNTRIES = 5;
-
-/** Ilki secili accent — geri kalani sabit seri ladder'i. */
-const tintsFor = (accent: string): readonly string[] => [accent, "#B89CFF", "#7AA8FF", "#FF8A3D"];
 
 const HERO_NUMBER = {
   marginTop: 12,
@@ -142,7 +140,7 @@ export default function Analytics() {
     label: `${flagOf(c.code)}  ${c.code}`,
     value: formatInteger(c.value),
     ratio: c.value / peak,
-    color: tintsFor(theme.accent)[i % 4]!,
+    color: seriesTints(theme.accent)[i % 4]!,
   }));
 
   return (
@@ -203,7 +201,10 @@ export default function Analytics() {
                 <View className="mt-tilePad">
                   <BentoBars
                     points={dauPoints}
-                    activeColor={theme.blue}
+                    // `theme.blue` DEGILDI: blue bir SERI rengi (palette.ts bu
+                    // ayrimi acikca yaziyor), vurgu rengi degil. Ayni grafigin
+                    // aktif cubugu Gelir'de accent, burada mavi cikiyordu.
+                    activeColor={theme.accent}
                     dimColor={glass.chartDim}
                     height={76}
                     gap={3}

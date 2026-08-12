@@ -10,9 +10,20 @@ import Animated, {
 } from "react-native-reanimated";
 import { duration, press } from "@helm/design";
 
+import { useLastSync } from "~/hooks/use-last-sync";
+import { formatClock } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { useTheme } from "~/theme/use-theme";
 import { PropertyPicker } from "./property-picker";
+
+/**
+ * Bu suredan eski veri "bayat" sayilir ve damga uyari rengine doner.
+ *
+ * NEDEN 90 DAKIKA: cron saat basi calisiyor (0013_cron_hourly.sql). Bir saatlik
+ * gecikme NORMAL — onu kirmiziya boyamak alarmi anlamsizlastirirdi. 90 dakika
+ * "bir tur kacti" demektir; bakilmasi gereken tek durum bu.
+ */
+const STALE_AFTER_MS = 90 * 60_000;
 
 type Props = {
   /** Ust satir — BUYUK HARF, mono, genis tracking. */
@@ -58,7 +69,9 @@ export function BentoHeader({
         )}
       </View>
 
-      <View className="flex-row gap-sm">
+      <View className="flex-row items-center gap-sm">
+        <SyncStamp />
+
         <Pressable
           onPress={() => {
             haptic.tap();
@@ -79,6 +92,42 @@ export function BentoHeader({
         ) : null}
       </View>
     </View>
+  );
+}
+
+/**
+ * "SON 10:12" — verinin hub'a en son ne zaman indigi.
+ *
+ * NEDEN BUTONUN YANINDA: yenile butonu tek basina ne zaman basilmasi gerektigini
+ * soylemiyordu. Rakam degismeyince "uygulama mi bozuk, veri mi ayni" ayrimi
+ * yapilamiyordu — damga bu belirsizligi kaldiriyor. Kaynak sync_runs, yani
+ * HUB'in son calismasi; telefonun son istek attigi an degil (bkz. fetchLastSync).
+ */
+function SyncStamp() {
+  const { theme } = useTheme();
+  const { data } = useLastSync();
+  if (!data) return null;
+
+  const stale = Date.now() - new Date(data.at).getTime() > STALE_AFTER_MS;
+  const clock = formatClock(data.at);
+
+  // Suren calismada bitis saati HENUZ yok; started_at'i "bitti" gibi sunmamak
+  // icin ayri bir metin.
+  const label = data.running ? "SÜRÜYOR" : `SON ${clock}`;
+  // Renk kosullu oldugu icin token yerine tema degeri — bento'daki diger
+  // kosullu renkler de boyle (StatTile delta rengi).
+  const color = data.failed ? theme.neg : stale && !data.running ? theme.warn : theme.fg3;
+
+  return (
+    <Text
+      className="font-mono-medium text-eyebrow tracking-wide"
+      style={{ color }}
+      accessibilityLabel={
+        data.running ? "Senkronizasyon sürüyor" : `Son güncelleme saat ${clock}`
+      }
+    >
+      {label}
+    </Text>
   );
 }
 

@@ -2,7 +2,13 @@ import { useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { space } from "@helm/design";
-import { AD_FORMAT_LABEL, instrumentationWarnings, type SentryLevel } from "@helm/api";
+import {
+  AD_FORMAT_LABEL,
+  PROVIDER_LABEL,
+  VERSION_STATUS_LABEL,
+  instrumentationWarnings,
+  type SentryLevel,
+} from "@helm/api";
 
 import { useSentryIssues } from "~/hooks/use-sentry-issues";
 import { useSystemHealth } from "~/hooks/use-system-health";
@@ -30,7 +36,7 @@ const HEALTHY_AT = 99.5;
 const DEGRADED_AT = 99.0;
 
 export default function Health() {
-  const { theme } = useTheme();
+  const { theme, glass } = useTheme();
   const { refreshing, onRefresh } = useScreenRefresh();
   const [replayKey, setReplayKey] = useState(0);
 
@@ -77,10 +83,14 @@ export default function Health() {
     label: s.platform,
     value: `${formatInteger(s.ended)} / ${formatInteger(s.started)}`,
     ratio: s.started > 0 ? s.ended / s.started : 0,
+    // Not her satirda dolu: hatasiz satirlarda bos birakinca liste ritmi
+    // bozuluyordu (kimi satir iki, kimi tek satir).
     note:
       s.unclosedRate != null && s.unclosed > 0
         ? `${formatInteger(s.unclosed)} oturum kapanmadı · ${pct(s.unclosedRate)}`
-        : undefined,
+        : s.ended > s.started
+          ? "bitiş sayısı başlangıçtan fazla — ölçüm hatalı"
+          : "tümü kapandı",
     tone: s.unclosedRate != null && s.unclosedRate >= 0.5 ? "loss" : "normal",
   }));
 
@@ -89,7 +99,7 @@ export default function Health() {
     label: AD_FORMAT_LABEL[a.format] ?? a.format,
     value: `${formatInteger(a.shown)} / ${formatInteger(a.shown + a.failed)}`,
     ratio: a.failureRate != null ? 1 - a.failureRate : 1,
-    note: a.failed > 0 ? `${formatInteger(a.failed)} hata · ${pct(a.failureRate)}` : undefined,
+    note: a.failed > 0 ? `${formatInteger(a.failed)} hata · ${pct(a.failureRate)}` : "hatasız",
     tone: a.failureRate != null && a.failureRate >= 0.3 ? "loss" : "normal",
   }));
 
@@ -137,7 +147,9 @@ export default function Health() {
                   size={96}
                   stroke={9}
                   color={verdict.color}
-                  trackColor={theme.line}
+                  // Ray rengi: hairline degil. `theme.line` cam yuzeye karsi
+                  // ~1.3:1 ve halkanin bos kismi goruunmuyordu.
+                  trackColor={glass.chartDim}
                 >
                   <Text className="font-semibold text-title tracking-tighter text-fg">
                     {cfNow != null ? formatPercent(cfNow, 1) : "—"}
@@ -218,7 +230,7 @@ export default function Health() {
           <Rise index={3} replayKey={replayKey}>
             <FunnelTile
               title="Oturum kapanma"
-              count={f != null ? `${f.days} GÜN` : undefined}
+              count={f != null ? `${f.days}G` : undefined}
               rows={sessionRows}
               empty={funnels.isLoading ? "YÜKLENİYOR…" : "OTURUM OLAYI YOK"}
               replayKey={replayKey}
@@ -274,7 +286,7 @@ export default function Health() {
                           className="font-medium text-meta"
                           style={{ color: bad ? theme.neg : theme.fg }}
                         >
-                          {i.provider}
+                          {PROVIDER_LABEL[i.provider] ?? i.provider}
                           {bad ? " · hata" : ""}
                         </Text>
                       </View>
@@ -306,7 +318,7 @@ export default function Health() {
                     </Text>
                     <Text className="flex-1 text-meta text-fg2" numberOfLines={1}>
                       {v.source === "ios" ? "App Store" : "Play Store"}
-                      {v.status != null ? ` · ${v.status}` : ""}
+                      {v.status != null ? ` · ${VERSION_STATUS_LABEL[v.status]}` : ""}
                     </Text>
                     <Text className="font-mono-medium text-[11px] text-fg3">
                       {v.releaseDate != null ? formatRelativeTime(v.releaseDate) : "—"}

@@ -22,6 +22,8 @@ module.exports = {
     "accent-soft": "#A8CC3D"
   },
   "spacing": {
+    "xs": "6px",
+    "sm": "8px",
     "screenX": "16px",
     "tileGap": "10px",
     "tilePad": "18px",

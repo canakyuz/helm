@@ -96,8 +96,19 @@ function Step({
 
   const animated = useAnimatedStyle(() => ({ transform: [{ scaleX: fill.value }] }));
 
-  const barColor =
-    row.tone === "loss" ? theme.neg : row.tone === "warn" ? theme.warn : theme.accent;
+  // Oran 1'i asarsa bu bir OLCUM HATASI, basari degil ("63 bitis / 60 baslangic").
+  // Kirpma sessizce yapiliyordu ve sonuc gercek bir 5/5 ile ayni dolu accent
+  // cubuk oluyordu — ustelik ayni ekranin ust karti bunu "olcum supheli" diye
+  // hata sayiyor. Tek ekranda iki celisen ifade kalmasin diye warn'a doner.
+  const overflow = row.ratio > 1;
+
+  const barColor = overflow
+    ? theme.warn
+    : row.tone === "loss"
+      ? theme.neg
+      : row.tone === "warn"
+        ? theme.warn
+        : theme.accent;
 
   return (
     <View>
@@ -105,7 +116,13 @@ function Step({
         <Text className="flex-1 font-medium text-row text-fg" numberOfLines={1}>
           {row.label}
         </Text>
-        <Text className="ml-rowY font-mono-semibold text-body text-fg2">{row.value}</Text>
+        <Text
+          className="ml-rowY font-mono-semibold text-body"
+          style={{ color: overflow ? theme.warn : theme.fg2 }}
+        >
+          {row.value}
+          {overflow ? " ⚠" : ""}
+        </Text>
       </View>
 
       <View
@@ -131,14 +148,17 @@ function Step({
         />
       </View>
 
-      {row.note != null ? (
-        <Text
-          className="mt-[5px] text-meta"
-          style={{ color: row.tone === "loss" ? theme.neg : theme.fg3 }}
-        >
-          {row.note}
-        </Text>
-      ) : null}
+      {/* Not HER ZAMAN basilir. Onceden opsiyoneldi ve hatasiz satirlarda hic
+          cikmiyordu; ayni listede kimi satir iki, kimi tek satir oluyor, ritim
+          bozuluyordu. Cagri yerleri "hatasiz" gibi notr bir onay metni verir. */}
+      <Text
+        className="mt-[5px] text-meta"
+        style={{
+          color: overflow ? theme.warn : row.tone === "loss" ? theme.neg : theme.fg3,
+        }}
+      >
+        {row.note ?? ""}
+      </Text>
     </View>
   );
 }
