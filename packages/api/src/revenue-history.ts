@@ -18,6 +18,36 @@ export const REVENUE_SOURCES = [
 
 export type RevenueSource = (typeof REVENUE_SOURCES)[number]["metric"];
 
+/**
+ * Bir gelir kaleminin iki bacagi.
+ *
+ * ANLIK  — RevenueCat webhook'u. Satin alma aninda gelir, revize olabilir.
+ * KESIN  — magaza raporu (App Store Connect / Play). T-1 gecikmeli ama mutabakatli;
+ *          komisyon, iade ve kur farki bu rakama yansir.
+ *
+ * NEDEN IKISI BIRDEN: yalnizca kesin gosterirsek bugunun geliri 1-2 gun gorunmez.
+ * Yalnizca anligi gosterirsek iade ve komisyon hic yansimaz. Ikisini SESSIZCE
+ * degistirmek de yanlis olurdu — o zaman magaza farkli bir rakam soyledigi anda
+ * fark kaybolurdu. Durum acikca tasinir.
+ */
+export type ReconState =
+  /** Anlik var, magaza henuz raporlamadi. Bugun ve dun icin normal. */
+  | "pending"
+  /** Ikisi de var ve ortusuyor. */
+  | "confirmed"
+  /** Ikisi de var ama farkli — iade, komisyon veya ayristirma hatasi. */
+  | "mismatch"
+  /** Yalnizca magaza raporu var. Webhook'tan onceki gunler icin normal. */
+  | "storeOnly";
+
+export type RevenueLeg = {
+  /** RevenueCat magaza kodu: APP_STORE, PLAY_STORE, STRIPE… */
+  store: string;
+  provisional: number;
+  confirmed: number;
+  state: ReconState;
+};
+
 export type RevenueBucket = {
   /** "2026-08" (ay) veya "2026-W32" (hafta). */
   key: string;
@@ -29,6 +59,8 @@ export type RevenueBucket = {
   bySource: Record<string, number>;
   /** Gunluk toplamlar — bar grafigi icin. */
   days: Array<{ date: string; value: number }>;
+  /** Magaza bazinda anlik/kesin mutabakat. Bos ise webhook verisi yok. */
+  legs: RevenueLeg[];
 };
 
 export type RevenueHistory = {
@@ -40,6 +72,16 @@ export type RevenueHistory = {
 };
 
 type Row = { date: string; metric: string; value: number; currency: string | null };
+type EventRow = { store: string | null; amount: string | number | null; occurred_at: string };
+
+/** Kurus farklari mutabakati bozmasin — bu esigin altindaki fark "ayni" sayilir. */
+const RECON_TOLERANCE = 0.01;
+
+function reconcile(provisional: number, confirmed: number): ReconState {
+  if (provisional > 0 && confirmed === 0) return "pending";
+  if (provisional === 0 && confirmed > 0) return "storeOnly";
+  return Math.abs(provisional - confirmed) <= RECON_TOLERANCE ? "confirmed" : "mismatch";
+}
 
 /** ISO haftasinin pazartesisi. Tarih string'i uzerinden, saat dilimi karismaz. */
 function mondayOf(iso: string): string {
@@ -98,7 +140,20 @@ export async function fetchRevenueHistory(
 
   if (propertyId !== "all") q = q.eq("project_id", propertyId);
 
-  const [{ data, error }, rates] = await Promise.all([q, fetchFxRates()]);
+  // Webhook olaylari ayni pencerede: anlik bacak. Ayri sorgu ama paralel —
+  // magaza metrikleriyle ayni gidis-donuste biter.
+  let eq = client
+    .from("revenue_events")
+    .select("store, amount, occurred_at")
+    .gte("occurred_at", `${from}T00:00:00Z`)
+    .not("amount", "is", null);
+  if (propertyId !== "all") eq = eq.eq("project_id", propertyId);
+
+  const [{ data, error }, { data: events }, rates] = await Promise.all([
+    q,
+    eq,
+    fetchFxRates(),
+  ]);
   if (error) throw error;
 
   const rows = (data ?? []) as Row[];
@@ -116,13 +171,28 @@ export async function fetchRevenueHistory(
     day.set(r.metric, (day.get(r.metric) ?? 0) + usd);
   }
 
+  // Gun -> magaza -> anlik tutar. occurred_at UTC damgali; gun anahtarini
+  // metrics ile ayni bicimde (YYYY-MM-DD) cikariyoruz ki kovalar ortussun.
+  const provByDay = new Map<string, Map<string, number>>();
+  for (const e of (events ?? []) as EventRow[]) {
+    const day = e.occurred_at.slice(0, 10);
+    const store = e.store ?? "BILINMIYOR";
+    const amt = Number(e.amount) || 0;
+    let m = provByDay.get(day);
+    if (m == null) {
+      m = new Map();
+      provByDay.set(day, m);
+    }
+    m.set(store, (m.get(store) ?? 0) + amt);
+  }
+
   const bucket = (keyOf: (iso: string) => string): RevenueBucket[] => {
     const acc = new Map<string, RevenueBucket>();
     for (const [date, sources] of byDay) {
       const key = keyOf(date);
       let b = acc.get(key);
       if (b == null) {
-        b = { key, start: date, end: date, total: 0, bySource: {}, days: [] };
+        b = { key, start: date, end: date, total: 0, bySource: {}, days: [], legs: [] };
         acc.set(key, b);
       }
       let dayTotal = 0;
@@ -135,7 +205,35 @@ export async function fetchRevenueHistory(
       if (date < b.start) b.start = date;
       if (date > b.end) b.end = date;
     }
-    for (const b of acc.values()) b.days.sort((x, y) => (x.date < y.date ? -1 : 1));
+    // Anlik/kesin mutabakati kova bazinda. Kesin taraf: magaza raporundan gelen
+    // abonelik + uygulama-ici toplami (reklam geliri magaza degil, disarida kalir).
+    for (const b of acc.values()) {
+      b.days.sort((x, y) => (x.date < y.date ? -1 : 1));
+
+      const provByStore = new Map<string, number>();
+      for (const d of b.days) {
+        for (const [store, amt] of provByDay.get(d.date) ?? []) {
+          provByStore.set(store, (provByStore.get(store) ?? 0) + amt);
+        }
+      }
+      const storeConfirmed =
+        (b.bySource["subscription_revenue"] ?? 0) + (b.bySource["iap_revenue"] ?? 0);
+
+      if (provByStore.size === 0 && storeConfirmed === 0) continue;
+
+      if (provByStore.size === 0) {
+        b.legs = [{ store: "APP_STORE", provisional: 0, confirmed: storeConfirmed,
+                    state: reconcile(0, storeConfirmed) }];
+        continue;
+      }
+
+      // Magaza raporu tek rakam veriyor (Apple); anlik taraf magazaya ayrilmis.
+      // Apple'in rakamini APP_STORE bacagina yaziyoruz, digerleri dogrulanamaz.
+      b.legs = [...provByStore.entries()].map(([store, provisional]) => {
+        const confirmed = store === "APP_STORE" ? storeConfirmed : 0;
+        return { store, provisional, confirmed, state: reconcile(provisional, confirmed) };
+      });
+    }
     // Yeniden eskiye — kullanici en cok guncel donemi acar.
     return [...acc.values()].sort((a, b) => (a.key < b.key ? 1 : -1));
   };

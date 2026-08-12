@@ -19,7 +19,7 @@ import { usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
-import { LiveEventsTile } from "~/components/revenue";
+import { LiveEventsTile, ReconciliationTile } from "~/components/revenue";
 import {
   BentoBackground,
   BentoBars,
@@ -293,8 +293,15 @@ export default function Revenue() {
             />
           </View>
 
+          {/* Anlik/kesin mutabakat — hangi para dogrulandi, hangisi bekliyor. */}
+          {picked != null && picked.legs.length > 0 ? (
+            <Rise index={5} replayKey={replayKey}>
+              <ReconciliationTile legs={picked.legs} />
+            </Rise>
+          ) : null}
+
           {/* Gercek zamanli akis — donem toplamiyla TOPLANMAZ, ayri soru. */}
-          <Rise index={5} replayKey={replayKey}>
+          <Rise index={6} replayKey={replayKey}>
             <LiveEventsTile
               events={events.data ?? []}
               loading={events.isLoading}
@@ -302,7 +309,7 @@ export default function Revenue() {
             />
           </Rise>
 
-          <Rise index={6} replayKey={replayKey}>
+          <Rise index={7} replayKey={replayKey}>
             <BentoSegment
               options={VIEWS}
               value={view}
