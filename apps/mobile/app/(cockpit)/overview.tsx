@@ -16,11 +16,21 @@ import { useRevenueMix } from "~/hooks/use-revenue-mix";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatDelta, formatInteger, formatPercent, formatRelativeTime, isFlatDelta } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
+import {
+  longDayLabel,
+  monogram,
+  MONTHS_TR,
+  seriesTints,
+  STATUS_LABEL,
+  TYPE_LABEL,
+} from "~/lib/labels";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
+import { Pill, SEVERITY_COLOR, StatTile } from "~/components/overview";
 import {
   BentoBackground,
+  HERO_NUMBER,
   BentoBars,
   BentoHeader,
   BentoTile,
@@ -34,48 +44,7 @@ const SPARK_BARS = 10;
 /** Listede gosterilen proje sayisi; toplam basliktaki sayida kalir. */
 const TOP_N = 5;
 
-const TYPE_LABEL: Record<PropertyType, string> = {
-  website: "Web",
-  web_app: "Web app",
-  mobile_app: "Uygulama",
-  desktop_app: "Masaüstü",
-  game: "Oyun",
-};
-
-const STATUS_LABEL: Record<PropertyStatus, string> = {
-  healthy: "sağlıklı",
-  stale: "veri bayat",
-  down: "kapalı",
-  unknown: "bilinmiyor",
-};
-
-const MONTHS_TR = [
-  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
-  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
-];
-
-/**
- * Proje monogrami — ad'in ilk iki harfi. "Orbit Runner" → "OR".
- *
- * Noktalama ATILIR: "Wesan · Corporate site" ikinci kelime olarak "·" veriyordu,
- * monogram "W·" cikiyordu.
- */
-function monogram(name: string): string {
-  const words = name.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
-  const first = words[0]?.[0] ?? "?";
-  const second = words[1]?.[0] ?? words[0]?.[1] ?? "";
-  return (first + second).toUpperCase();
-}
-
 /** Hero rakaminin stili — CountUp ve duz Text ayni gorunmeli. */
-const HERO_NUMBER = {
-  marginTop: 14,
-  fontFamily: "Geist-600",
-  fontSize: 48,
-  lineHeight: 50,
-  letterSpacing: -2.2,
-} as const;
-
 /**
  * Iki gunluk seriyi tarihe gore toplar.
  *
@@ -97,17 +66,8 @@ function mergeSeries(
     .map(([date, value]) => ({ date, value }));
 }
 
-/** "2026-08-09" → "9 AĞUSTOS". Secili gun eyebrow'da tarihi gosterir. */
-function formatDayLabel(iso: string): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  if (y == null || m == null || d == null) return iso;
-  return new Date(y, m - 1, d)
-    .toLocaleDateString("tr-TR", { day: "numeric", month: "long" })
-    .toLocaleUpperCase("tr-TR");
-}
-
 export default function Overview() {
-  const { theme } = useTheme();
+  const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
   const { data: rates } = useFxRates();
   const kpis = useCockpitKpis();
@@ -213,7 +173,7 @@ export default function Overview() {
                 {/* .60 alfa 10px'te 4.70:1 ile sinirdaydi; .78 → 8.64:1. */}
                 <Text className="font-mono-medium text-eyebrow tracking-wider"
                   style={{ color: withAlpha(theme.accentInk, 0.78) }}>
-                  {picked != null ? formatDayLabel(picked.date) : "BUGÜN · GELİR"}
+                  {picked != null ? longDayLabel(picked.date) : "BUGÜN · GELİR"}
                 </Text>
                 {picked == null ? (
                   // Rozet accent zeminin UZERINDE duruyor. Onceki hal ink'i .14
@@ -221,8 +181,11 @@ export default function Overview() {
                   // accent'ten ayirt edilemiyordu (alti da ustu de ayni renk
                   // ailesi). Cozum ters kontrast — hero sayisinin kullandigi
                   // ink/accent ciftinin AYNISI, sadece yer degistirmis halde.
+                  // px-sm / py-xs ARTIK gercek deger uretiyor: olcekte `sm` ve
+                  // `xs` yoktu, Tailwind'in varsayilaninda da yok — rozet
+                  // padding'siz, metin kenara yapisik duruyordu (scale.ts).
                   <View
-                    className="rounded-pill px-sm py-[3px]"
+                    className="rounded-pill px-sm py-xs"
                     style={{ backgroundColor: theme.accentInk }}
                   >
                     <Text
@@ -244,7 +207,7 @@ export default function Overview() {
                       setSelectedDay(null);
                     }}
                     suppressHighlighting
-                    className="rounded-pill px-sm py-[3px] font-mono-semibold text-[11px]"
+                    className="rounded-pill px-sm py-xs font-mono-semibold text-[11px]"
                     style={{ color: withAlpha(theme.accentInk, 0.78) }}
                   >
                     BUGÜNE DÖN ✕
@@ -331,7 +294,10 @@ export default function Overview() {
                 <SegmentMeter
                   ratio={goalRatio}
                   filledColor={theme.accent}
-                  emptyColor={theme.line}
+                  // `theme.line` DEGIL: hairline rengi cam yuzeye karsi 1.3:1,
+                  // bos segmentler her iki temada da tamamen kayboluyordu.
+                  // chartDim bu is icin olculmus token (bkz glass.ts).
+                  emptyColor={glass.chartDim}
                   replayKey={replayKey}
                 />
               </View>
@@ -365,7 +331,7 @@ export default function Overview() {
                       <View className="h-[36px] w-[36px] items-center justify-center rounded-icon bg-tile2">
                         <Text
                           className="font-semibold text-meta"
-                          style={{ color: tintsFor(theme.accent)[i % 4]! }}
+                          style={{ color: seriesTints(theme.accent)[i % 4]! }}
                         >
                           {monogram(p.name)}
                         </Text>
@@ -446,94 +412,6 @@ export default function Overview() {
   );
 }
 
-/** Proje monogram renkleri — seri ladder'i (pos/neg/warn DURUM renkleridir, seri degil). */
-/** Proje monogram renkleri. Ilki secili accent — geri kalani sabit seri ladder'i. */
-const tintsFor = (accent: string): readonly string[] => [accent, "#B89CFF", "#7AA8FF", "#FF8A3D"];
 
-function SEVERITY_COLOR(theme: Theme, severity: AlertSeverity): string {
-  if (severity === "critical") return theme.neg;
-  if (severity === "warn") return theme.warn;
-  return theme.blue;
-}
 
-function StatTile({
-  index,
-  replayKey,
-  label,
-  value,
-  delta,
-}: {
-  index: number;
-  replayKey: number;
-  label: string;
-  value: string;
-  delta: number | null | undefined;
-}) {
-  const { theme } = useTheme();
-  const hasDelta = delta != null && Number.isFinite(delta);
-  // Yuvarlandiginda sifira dusen degisim "degismedi" demektir — "+0.0%" yazmak
-  // yanlis bir yon ima eder. Notr renkte, isaretsiz gosterilir. Esik
-  // formatDelta ile ORTAK (isFlatDelta): renk ve metin ayrisamaz.
-  const flat = hasDelta && isFlatDelta(delta);
-  const positive = (delta ?? 0) >= 0;
 
-  return (
-    <Rise index={index} replayKey={replayKey} style={{ flex: 1 }}>
-      <BentoTile padding={space.tilePadSm}>
-        <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-          {label}
-        </Text>
-        <Text
-          className="mt-sm font-semibold text-stat tracking-tightest text-fg"
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          {value}
-        </Text>
-        {/* Delta yoksa da AYNI Text render edilir, sadece seffaf. Onceki hal
-            sabit `h-[13px]` bir View koyuyordu; gercek satir yuksekligi font
-            metriginden geliyor ve 13px degil — bu yuzden delta'si olmayan kart
-            (CRASH) komsulariyla hizasiz duruyordu. Ayni dugum = ayni yukseklik. */}
-        <Text
-          className="mt-[6px] font-mono-medium text-[11px]"
-          style={{
-            color: !hasDelta
-              ? "transparent"
-              : flat
-                ? theme.fg3
-                : positive
-                  ? theme.pos
-                  : theme.neg,
-          }}
-          accessibilityElementsHidden={!hasDelta}
-          importantForAccessibility={hasDelta ? "auto" : "no-hide-descendants"}
-        >
-          {hasDelta ? formatDelta(delta) : "0.0%"}
-        </Text>
-      </BentoTile>
-    </Rise>
-  );
-}
-
-function Pill({
-  label,
-  background,
-  color,
-  onPress,
-}: {
-  label: string;
-  background: string;
-  color: string;
-  onPress: () => void;
-}) {
-  return (
-    <Text
-      onPress={onPress}
-      suppressHighlighting
-      className="rounded-btn px-[18px] py-[9px] font-semibold text-meta"
-      style={{ backgroundColor: background, color }}
-    >
-      {label}
-    </Text>
-  );
-}
