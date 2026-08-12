@@ -38,7 +38,13 @@ export function StatTile({
 
   return (
     <Rise index={index} replayKey={replayKey} style={{ flex: 1 }}>
-      <BentoTile padding={space.tilePadSm}>
+      {/* `flex: 1` — tile ESNETILMIS kapsayicisini doldursun diye. Rise satir
+          icinde en uzun kardese gore uzuyordu ama tile kendi icerik
+          yuksekliginde kaliyordu: uzun bir deger (₺2,338.66) adjustsFontSizeToFit
+          ile kuculunce o kartin govdesi de kisaliyor, uc kartin ALT kenari
+          ayrisiyordu. Ust kenari `transparent` delta metni hizaliyor, alt
+          kenari bu. */}
+      <BentoTile padding={space.tilePadSm} style={{ flex: 1 }}>
         <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
           {label}
         </Text>

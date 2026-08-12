@@ -64,8 +64,19 @@ export function FunnelTile({
         </Text>
       ) : (
         <View className="mt-tilePadSm" style={{ gap: 14 }}>
+          {/* Not satiri TILE BAZINDA ya hep ya hic. Satirlarin bir kismi notlu
+              bir kismi notsuz oldugunda yukseklikler ayrisiyor (Saglik'ta
+              hatasiz satirlar tek, hatalilar iki satirdi); ama HIC notu olmayan
+              bir huni icin de her satira bos satir ayirmak 9 satirda ~126px
+              olu bosluk demek. Karar satira degil kartin tamamina bakar. */}
           {rows.map((r, i) => (
-            <Step key={r.label} row={r} index={index + i} replayKey={replayKey} />
+            <Step
+              key={r.label}
+              row={r}
+              index={index + i}
+              replayKey={replayKey}
+              reserveNote={rows.some((x) => x.note != null)}
+            />
           ))}
         </View>
       )}
@@ -77,10 +88,12 @@ function Step({
   row,
   index,
   replayKey,
+  reserveNote,
 }: {
   row: FunnelRow;
   index: number;
   replayKey: number;
+  reserveNote: boolean;
 }) {
   const { theme, glass } = useTheme();
   const fill = useSharedValue(0);
@@ -148,17 +161,19 @@ function Step({
         />
       </View>
 
-      {/* Not HER ZAMAN basilir. Onceden opsiyoneldi ve hatasiz satirlarda hic
-          cikmiyordu; ayni listede kimi satir iki, kimi tek satir oluyor, ritim
-          bozuluyordu. Cagri yerleri "hatasiz" gibi notr bir onay metni verir. */}
-      <Text
-        className="mt-[5px] text-meta"
-        style={{
-          color: overflow ? theme.warn : row.tone === "loss" ? theme.neg : theme.fg3,
-        }}
-      >
-        {row.note ?? ""}
-      </Text>
+      {/* Kart icinde en az bir notlu satir varsa TUM satirlar not satirini
+          ayirir (bos olsa bile) — yoksa yukseklikler ayrisir. Hicbir satirda
+          not yoksa satir hic basilmaz. */}
+      {reserveNote ? (
+        <Text
+          className="mt-[5px] text-meta"
+          style={{
+            color: overflow ? theme.warn : row.tone === "loss" ? theme.neg : theme.fg3,
+          }}
+        >
+          {row.note ?? ""}
+        </Text>
+      ) : null}
     </View>
   );
 }

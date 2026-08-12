@@ -60,12 +60,22 @@ const SOURCE_LABEL: Record<string, string> = {
 };
 
 
-/** Hafta kovasi → "5–11 Ağu". */
+/**
+ * Hafta kovasi → "5–11 Ağu", ay siniri asiliyorsa "27 Tem–2 Ağu".
+ *
+ * NEDEN IKI AY: onceki hal her zaman SADECE bitis ayini yaziyordu, yani
+ * 27 Temmuz–2 Agustos araligi "27–2 Ağu" olarak cikiyordu. Bu okunusta 27
+ * Agustos'tan 2 Agustos'a gidiyor gibi duruyor — hem anlamsiz hem yanlis.
+ */
 function weekLabel(bucket: RevenueBucket): string {
   const { from, to } = weekRange(bucket);
-  const [, , fd] = from.split("-").map(Number);
+  const [, fm, fd] = from.split("-").map(Number);
   const [, tm, td] = to.split("-").map(Number);
-  return `${fd}–${td} ${MONTHS_SHORT[(tm ?? 1) - 1]}`;
+  const toMonth = MONTHS_SHORT[(tm ?? 1) - 1];
+  if (fm !== tm) {
+    return `${fd} ${MONTHS_SHORT[(fm ?? 1) - 1]}–${td} ${toMonth}`;
+  }
+  return `${fd}–${td} ${toMonth}`;
 }
 
 export default function Revenue() {
