@@ -48,6 +48,26 @@ export type RevenueLeg = {
   state: ReconState;
 };
 
+/**
+ * Tek bir odeme satiri.
+ *
+ * IKI GRANULARITE: webhook baglandiktan sonrasi ISLEM bazinda (hangi urun, hangi
+ * magaza, hangi tur), oncesi GUN bazinda (magaza raporu yalnizca gunluk toplam
+ * verir). Ayrimi saklamiyoruz — "gunluk toplam" satirinin tek bir satin alma
+ * oldugunu ima etmek yanlis olurdu.
+ */
+export type PaymentRow = {
+  date: string;
+  /** Urun kimligi veya kalem adi. */
+  label: string;
+  /** Olay turu (yeni abonelik, yenileme…) veya "gunluk toplam". */
+  kind: string;
+  store: string | null;
+  /** USD'ye normalize. */
+  amount: number;
+  granularity: "transaction" | "day";
+};
+
 export type RevenueBucket = {
   /** "2026-08" (ay) veya "2026-W32" (hafta). */
   key: string;
@@ -61,6 +81,12 @@ export type RevenueBucket = {
   days: Array<{ date: string; value: number }>;
   /** Magaza bazinda anlik/kesin mutabakat. Bos ise webhook verisi yok. */
   legs: RevenueLeg[];
+  /** Donem SONUNDAKI MRR. Nokta-zaman metrigi — donemin toplami degil. */
+  mrr: number | null;
+  /** Donem sonundaki aktif abone. */
+  activeSubs: number | null;
+  /** Donemdeki odemeler, yeniden eskiye. */
+  payments: PaymentRow[];
 };
 
 export type RevenueHistory = {
@@ -77,6 +103,8 @@ type EventRow = {
   amount: string | number | null;
   currency: string | null;
   occurred_at: string;
+  product_id: string | null;
+  event_type: string | null;
 };
 
 /** Kurus farklari mutabakati bozmasin — bu esigin altindaki fark "ayni" sayilir. */
@@ -139,7 +167,7 @@ export async function fetchRevenueHistory(
   let q = client
     .from("metrics")
     .select("date, metric, value, currency")
-    .in("metric", REVENUE_SOURCES.map((s) => s.metric))
+    .in("metric", [...REVENUE_SOURCES.map((s) => s.metric), "mrr", "active_subs"])
     .gte("date", from)
     .order("date", { ascending: true });
 
@@ -149,7 +177,7 @@ export async function fetchRevenueHistory(
   // magaza metrikleriyle ayni gidis-donuste biter.
   let eq = client
     .from("revenue_events")
-    .select("store, amount, currency, occurred_at")
+    .select("store, amount, currency, occurred_at, product_id, event_type")
     .gte("occurred_at", `${from}T00:00:00Z`)
     .not("amount", "is", null);
   if (propertyId !== "all") eq = eq.eq("project_id", propertyId);
@@ -166,7 +194,20 @@ export async function fetchRevenueHistory(
 
   // Gun + kaynak kirilimini tek gecliste kur.
   const byDay = new Map<string, Map<string, number>>();
+  // Nokta-zaman metrikleri (mrr, active_subs) TOPLANMAZ — donem sonundaki deger
+  // alinir. Toplamak "Temmuz'da 43.99 x 31 gun MRR" gibi anlamsiz bir sayi verirdi.
+  const pointInTime = new Map<string, Map<string, number>>();
   for (const r of rows) {
+    if (r.metric === "mrr" || r.metric === "active_subs") {
+      let d = pointInTime.get(r.date);
+      if (d == null) {
+        d = new Map();
+        pointInTime.set(r.date, d);
+      }
+      const usd = metricValueUsd(r.metric, Number(r.value), r.currency, fx);
+      d.set(r.metric, (d.get(r.metric) ?? 0) + usd);
+      continue;
+    }
     const usd = metricValueUsd(r.metric, Number(r.value), r.currency, fx);
     let day = byDay.get(r.date);
     if (day == null) {
@@ -179,6 +220,7 @@ export async function fetchRevenueHistory(
   // Gun -> magaza -> anlik tutar. occurred_at UTC damgali; gun anahtarini
   // metrics ile ayni bicimde (YYYY-MM-DD) cikariyoruz ki kovalar ortussun.
   const provByDay = new Map<string, Map<string, number>>();
+  const txByDay = new Map<string, PaymentRow[]>();
   for (const e of (events ?? []) as EventRow[]) {
     const day = e.occurred_at.slice(0, 10);
     const store = e.store ?? "BILINMIYOR";
@@ -192,6 +234,17 @@ export async function fetchRevenueHistory(
       provByDay.set(day, m);
     }
     m.set(store, (m.get(store) ?? 0) + amt);
+
+    const list = txByDay.get(day) ?? [];
+    list.push({
+      date: day,
+      label: e.product_id ?? "—",
+      kind: e.event_type ?? "—",
+      store: e.store,
+      amount: amt,
+      granularity: "transaction",
+    });
+    txByDay.set(day, list);
   }
 
   const bucket = (keyOf: (iso: string) => string): RevenueBucket[] => {
@@ -200,7 +253,10 @@ export async function fetchRevenueHistory(
       const key = keyOf(date);
       let b = acc.get(key);
       if (b == null) {
-        b = { key, start: date, end: date, total: 0, bySource: {}, days: [], legs: [] };
+        b = {
+          key, start: date, end: date, total: 0, bySource: {}, days: [],
+          legs: [], mrr: null, activeSubs: null, payments: [],
+        };
         acc.set(key, b);
       }
       let dayTotal = 0;
@@ -224,23 +280,48 @@ export async function fetchRevenueHistory(
           provByStore.set(store, (provByStore.get(store) ?? 0) + amt);
         }
       }
+      // Nokta-zaman: donemin SON gunundeki deger.
+      const lastWithPit = [...pointInTime.keys()]
+        .filter((d) => d >= b.start && d <= b.end)
+        .sort()
+        .pop();
+      if (lastWithPit != null) {
+        const pit = pointInTime.get(lastWithPit)!;
+        b.mrr = pit.get("mrr") ?? null;
+        b.activeSubs = pit.get("active_subs") ?? null;
+      }
+
+      // Odemeler: islem varsa islem, yoksa o gunun magaza toplami. Ayni gun icin
+      // ikisini birden listelemek CIFT SAYIM olurdu.
+      const payments: PaymentRow[] = [];
+      for (const d of b.days) {
+        const tx = txByDay.get(d.date);
+        if (tx != null && tx.length > 0) {
+          payments.push(...tx);
+          continue;
+        }
+        const sub = byDay.get(d.date)?.get("subscription_revenue") ?? 0;
+        const iap = byDay.get(d.date)?.get("iap_revenue") ?? 0;
+        if (sub > 0) payments.push({ date: d.date, label: "Abonelik", kind: "günlük toplam", store: null, amount: sub, granularity: "day" });
+        if (iap > 0) payments.push({ date: d.date, label: "Uygulama içi", kind: "günlük toplam", store: null, amount: iap, granularity: "day" });
+      }
+      b.payments = payments.sort((x, y) => (x.date < y.date ? 1 : -1));
+
       const storeConfirmed =
         (b.bySource["subscription_revenue"] ?? 0) + (b.bySource["iap_revenue"] ?? 0);
 
-      if (provByStore.size === 0 && storeConfirmed === 0) continue;
-
-      if (provByStore.size === 0) {
+      if (provByStore.size === 0 && storeConfirmed === 0) {
+        b.legs = [];
+      } else if (provByStore.size === 0) {
         b.legs = [{ store: "APP_STORE", provisional: 0, confirmed: storeConfirmed,
                     state: reconcile(0, storeConfirmed) }];
-        continue;
+      } else {
+        // Magaza raporu tek rakam veriyor (Apple); anlik taraf magazaya ayrilmis.
+        b.legs = [...provByStore.entries()].map(([store, provisional]) => {
+          const confirmed = store === "APP_STORE" ? storeConfirmed : 0;
+          return { store, provisional, confirmed, state: reconcile(provisional, confirmed) };
+        });
       }
-
-      // Magaza raporu tek rakam veriyor (Apple); anlik taraf magazaya ayrilmis.
-      // Apple'in rakamini APP_STORE bacagina yaziyoruz, digerleri dogrulanamaz.
-      b.legs = [...provByStore.entries()].map(([store, provisional]) => {
-        const confirmed = store === "APP_STORE" ? storeConfirmed : 0;
-        return { store, provisional, confirmed, state: reconcile(provisional, confirmed) };
-      });
     }
     // Yeniden eskiye — kullanici en cok guncel donemi acar.
     return [...acc.values()].sort((a, b) => (a.key < b.key ? 1 : -1));

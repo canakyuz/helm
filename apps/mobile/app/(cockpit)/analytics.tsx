@@ -18,7 +18,7 @@ import { useProperties } from "~/hooks/use-properties";
 import { useCountryMetrics } from "~/hooks/use-country-metrics";
 import { useGameFunnels } from "~/hooks/use-game-funnels";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
-import { formatInteger } from "~/lib/format";
+import { formatInteger, formatRatio } from "~/lib/format";
 import { usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
@@ -84,7 +84,9 @@ export default function Analytics() {
   const dau = kpis.data.dau;
   const mau = last(mauDetail) ?? kpis.data.totalUsers ?? 0;
   const session = last(sessDetail);
-  const stickiness = mau > 0 ? Math.round((dau / mau) * 100) : null;
+  // Oran olarak tutulur, yuvarlanmaz: DAU/MAU tipik olarak %1–%5 bandinda ve
+  // tam sayiya yuvarlayinca 1.34 ile 1.49 ayni "%1" oluyordu.
+  const stickiness = mau > 0 ? dau / mau : null;
   const dauPoints = (dauDetail.data?.series ?? []).slice(-SPARK_BARS);
 
   const f = funnels.data;
@@ -125,7 +127,7 @@ export default function Analytics() {
             ratio: shopOpened > 0 ? Math.min(1, purchaseTotal / shopOpened) : 1,
             note:
               shopOpened > 0
-                ? `dönüşüm %${Math.round((purchaseTotal / shopOpened) * 100)}`
+                ? `dönüşüm ${formatRatio(purchaseTotal / shopOpened)}`
                 : "mağaza açılışı ölçülmüyor",
             tone: shopOpened === 0 ? "warn" : "normal",
           },
@@ -193,7 +195,7 @@ export default function Analytics() {
               />
               <Text className="mt-[6px] text-meta text-fg2">
                 MAU {formatInteger(mau)}
-                {stickiness != null ? ` · yapışkanlık %${stickiness}` : ""}
+                {stickiness != null ? ` · yapışkanlık ${formatRatio(stickiness, 1)}` : ""}
                 {session != null ? ` · oturum ${fmtSession(session)}` : ""}
               </Text>
 

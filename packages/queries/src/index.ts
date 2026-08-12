@@ -19,3 +19,4 @@ export * from "./revenue";
 export * from "./game-funnels";
 export * from "./revenue-events";
 export * from "./country-metrics";
+export * from "./last-sync";

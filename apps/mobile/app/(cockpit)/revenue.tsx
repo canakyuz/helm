@@ -13,13 +13,13 @@ import { useRevenueEvents } from "~/hooks/use-revenue-events";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
-import { formatInteger } from "~/lib/format";
+import { formatInteger, formatRatio } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
-import { LiveEventsTile, ReconciliationTile } from "~/components/revenue";
+import { PaymentsTile, ReconciliationTile } from "~/components/revenue";
 import {
   BentoBackground,
   BentoBars,
@@ -134,8 +134,9 @@ export default function Revenue() {
   if (history.isLoading) return <ScreenStatus label="Yükleniyor…" />;
   if (history.isError) return <ScreenStatus label="Gelir yüklenemedi" tone="danger" />;
 
-  const totalUsers = kpis.data?.totalUsers ?? 0;
-  const arpu = totalUsers > 0 ? (kpis.data?.mrr ?? 0) / totalUsers : 0;
+  const periodMrr = picked?.mrr ?? kpis.data?.mrr ?? 0;
+  const periodSubs = picked?.activeSubs ?? kpis.data?.activeSubs ?? 0;
+  const arppu = periodSubs > 0 ? periodMrr / periodSubs : 0;
   const trialSeries = trial.data?.series ?? [];
   const trialNow = trialSeries.length > 0 ? trialSeries[trialSeries.length - 1]!.value : null;
 
@@ -227,7 +228,7 @@ export default function Revenue() {
                           {fmt(s.value)}
                         </Text>
                         <Text className="w-[38px] text-right font-mono-medium text-[11px] text-fg3">
-                          %{picked.total > 0 ? Math.round((s.value / picked.total) * 100) : 0}
+                          {formatRatio(picked.total > 0 ? s.value / picked.total : 0)}
                         </Text>
                       </View>
                     ))}
@@ -280,16 +281,19 @@ export default function Revenue() {
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
-                  {fmt(kpis.data?.mrr ?? 0)}
+                  {fmt(picked?.mrr ?? kpis.data?.mrr ?? 0)}
                 </Text>
               </SolidTile>
             </Rise>
-            <MiniTile index={3} replayKey={replayKey} label="ARPU" value={fmt(arpu)} />
+            {/* ARPPU: donem MRR'i / donem abonesi. Eskiden ARPU idi ama donem
+                MRR'ini GUNCEL kullanici sayisina bolmek iki farkli zamani
+                karistiriyordu. */}
+            <MiniTile index={3} replayKey={replayKey} label="ARPPU" value={fmt(arppu)} />
             <MiniTile
               index={4}
               replayKey={replayKey}
               label="ABONE"
-              value={formatInteger(kpis.data?.activeSubs ?? 0)}
+              value={formatInteger(picked?.activeSubs ?? kpis.data?.activeSubs ?? 0)}
             />
           </View>
 
@@ -300,37 +304,13 @@ export default function Revenue() {
             </Rise>
           ) : null}
 
-          {/* Gercek zamanli akis — donem toplamiyla TOPLANMAZ, ayri soru. */}
           <Rise index={6} replayKey={replayKey}>
-            <LiveEventsTile
-              events={events.data ?? []}
-              loading={events.isLoading}
-              fmtAmount={fmt}
-            />
-          </Rise>
-
-          <Rise index={7} replayKey={replayKey}>
-            <BentoSegment
-              options={VIEWS}
-              value={view}
-              onChange={setView}
-              tone="chrome"
-              mono={false}
-              fill
-            />
-          </Rise>
-
-          {view === "Abonelik" ? (
-            <SubsView
-              movement={movement}
+            <PaymentsTile
+              payments={picked?.payments ?? []}
+              loading={history.isLoading}
               fmt={fmt}
-              replayKey={replayKey}
-              activeSubs={kpis.data?.activeSubs ?? 0}
-              trial={trialNow}
             />
-          ) : (
-            <PayoutsView payouts={payouts} fmt={fmt} replayKey={replayKey} />
-          )}
+          </Rise>
         </ScrollView>
       </SafeAreaView>
     </View>
