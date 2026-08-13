@@ -29,8 +29,13 @@ type Props = {
   /** Ust satir — BUYUK HARF, mono, genis tracking. */
   eyebrow: string;
   title: string;
-  onSync: () => void;
-  syncing: boolean;
+  /**
+   * Yenile butonu. VERILMEZSE BUTON CIZILMEZ — Ayarlar alt ekranlarinda
+   * (gorunum, veri, hakkinda) yenilenecek uzak veri yok; calismayan bir buton
+   * koymak `rows.tsx`'te bilerek temizlenen "dekoratif buton" hatasinin aynisi.
+   */
+  onSync?: () => void;
+  syncing?: boolean;
   /** Acik uyari sayisi. 0 ise rozet gizlenir. */
   alertCount?: number;
   /**
@@ -39,51 +44,79 @@ type Props = {
    * belirliyor ve degistirmenin baska yolu yok. Ayarlar'da anlamsiz.
    */
   picker?: boolean;
+  /** Verilirse solda geri okunu cizer. Ayarlar alt ekranlari icin. */
+  onBack?: () => void;
 };
 
-/** Bes cockpit ekraninin ortak baslik seridi. */
+/** Cockpit ekranlarinin ve Ayarlar alt ekranlarinin ortak baslik seridi. */
 export function BentoHeader({
   eyebrow,
   title,
   onSync,
-  syncing,
+  syncing = false,
   alertCount = 0,
   picker = false,
+  onBack,
 }: Props) {
   const { theme } = useTheme();
 
   return (
     <View className="flex-row items-center justify-between px-tilePadLg pt-headerY pb-tilePadSm">
-      <View>
-        <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
-          {eyebrow}
-        </Text>
-        {picker ? (
-          <View className="mt-[3px]">
-            <PropertyPicker />
-          </View>
-        ) : (
-          <Text className="mt-[3px] font-semibold text-title tracking-tighter text-fg">
-            {title}
+      <View className="flex-1 flex-row items-center gap-sm">
+        {onBack != null ? (
+          <Pressable
+            onPress={() => {
+              haptic.tap();
+              onBack();
+            }}
+            style={({ pressed }) => pressed && { opacity: press.opacity }}
+            className="h-[34px] w-[34px] items-center justify-center rounded-btn bg-chrome"
+            accessibilityRole="button"
+            accessibilityLabel="Geri"
+          >
+            <Text style={{ fontSize: 16, color: theme.fg2 }}>‹</Text>
+          </Pressable>
+        ) : null}
+
+        <View className="flex-1">
+          <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
+            {eyebrow}
           </Text>
-        )}
+          {picker ? (
+            <View className="mt-[3px]">
+              <PropertyPicker />
+            </View>
+          ) : (
+            <Text
+              className="mt-[3px] font-semibold text-title tracking-tighter text-fg"
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+          )}
+        </View>
       </View>
 
       <View className="flex-row items-center gap-sm">
-        <SyncStamp />
+        {/* Damga yenile butonuna BAGLI: var olma sebebi "ne zaman basmaliyim"
+            sorusunu cevaplamak (bkz. SyncStamp yorumu). Buton yoksa damga
+            cevapsiz bir bilgi olarak orada kalirdi. */}
+        {onSync != null ? <SyncStamp /> : null}
 
-        <Pressable
-          onPress={() => {
-            haptic.tap();
-            onSync();
-          }}
-          style={({ pressed }) => pressed && { opacity: press.opacity }}
-          className="h-[34px] w-[34px] items-center justify-center rounded-btn bg-chrome"
-          accessibilityRole="button"
-          accessibilityLabel="Yenile"
-        >
-          <SyncGlyph spinning={syncing} color={theme.fg2} />
-        </Pressable>
+        {onSync != null ? (
+          <Pressable
+            onPress={() => {
+              haptic.tap();
+              onSync();
+            }}
+            style={({ pressed }) => pressed && { opacity: press.opacity }}
+            className="h-[34px] w-[34px] items-center justify-center rounded-btn bg-chrome"
+            accessibilityRole="button"
+            accessibilityLabel="Yenile"
+          >
+            <SyncGlyph spinning={syncing} color={theme.fg2} />
+          </Pressable>
+        ) : null}
 
         {alertCount > 0 ? (
           <View className="h-[34px] w-[34px] items-center justify-center rounded-btn bg-chrome">
