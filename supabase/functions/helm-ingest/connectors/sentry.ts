@@ -99,11 +99,16 @@ export const fetchSentry: Connector = async (config) => {
   //
   // SIMDI: org-level stats_v2. category=error + outcome=accepted, yani Sentry'nin
   // gercekten kabul ettigi hata olaylari. Slug kabul etmedigi icin numerik id sart.
+  // outcome FILTRESI YOK, groupBy VAR: "kabul edilen hata sayisi" ile "SDK hic
+  // konusuyor mu" ayri sorular. Yalnizca accepted sorulunca ikisi ayrilamiyor ve
+  // susmus bir SDK her gun "0 hata" yazip SAGLIKLI okunuyor — Empire Inc'te tam
+  // olarak bu oldu: 55 gun boyunca gunluk 0 yazildi, panel yesil gorundu, oysa
+  // uygulama Sentry'ye hic ulasmiyordu (DSN baska bir organizasyonu gosteriyor).
   const projectId = await resolveProjectId(host, config);
   const qs = new URLSearchParams({
     field: "sum(quantity)",
     category: "error",
-    outcome: "accepted",
+    groupBy: "outcome",
     interval: "1d",
     statsPeriod: "90d",
     project: projectId,
@@ -117,25 +122,49 @@ export const fetchSentry: Connector = async (config) => {
   }
   const data = (await res.json()) as {
     intervals?: string[];
-    groups?: Array<{ series?: Record<string, Array<number | null>> }>;
+    groups?: Array<{
+      by?: { outcome?: string };
+      series?: Record<string, Array<number | null>>;
+    }>;
   };
   const intervals = data.intervals ?? [];
-  const series = data.groups?.[0]?.series?.["sum(quantity)"] ?? [];
+
+  // Gun basina: kabul edilen hata sayisi, ve TUM outcome'larin toplami.
+  // Toplam, "SDK o gun Sentry ile konustu mu" sorusunun cevabi — istemci
+  // tarafinda elenen (client_discard) veya kotaya takilan olaylar da sayilir.
+  const accepted = new Array<number>(intervals.length).fill(0);
+  const anyVolume = new Array<number>(intervals.length).fill(0);
+  for (const g of data.groups ?? []) {
+    const s = g.series?.["sum(quantity)"] ?? [];
+    for (let i = 0; i < intervals.length; i++) {
+      const v = Number(s[i] ?? 0);
+      anyVolume[i]! += v;
+      if (g.by?.outcome === "accepted") accepted[i]! += v;
+    }
+  }
+
   const points: MetricPoint[] = [];
   for (let i = 0; i < intervals.length; i++) {
+    // HIC olay yoksa YAZMA. Onceki hal 0 yaziyordu ve "olcum gelmiyor" ile
+    // "hata yok" ayni goruntuyu uretiyordu. Sifir ancak SDK konustuysa
+    // anlamlidir: o zaman gercekten hatasiz bir gun demektir.
+    // Ayni kural crash_free_sessions'ta zaten uygulaniyordu (rate == null).
+    if (anyVolume[i] === 0) continue;
     points.push({
       date: intervals[i].slice(0, 10),
       metric: "errors",
-      // null = o aralikta olay yok → gercekten 0.
-      value: Number(series[i] ?? 0),
+      value: accepted[i]!,
     });
   }
 
-  // crash_free_sessions — opsiyonel, hata errors'ı bloklamaz
+  // crash_free_sessions — opsiyonel, hata errors'i bloklamaz.
   try {
     points.push(...(await fetchCrashFree(host, config)));
-  } catch {
-    // release-health yoksa / scope yetmezse sessizce atla
+  } catch (e) {
+    // SESSIZ YUTMA YOK: bos `catch {}` yuzunden release-health arizasi hicbir
+    // yerde gorunmuyordu. Hata hala errors akisini bloklamiyor ama artik
+    // senkron loguna dusuyor.
+    console.error("[sentry] crash_free_sessions alinamadi:", String(e));
   }
 
   return points;
