@@ -19,7 +19,7 @@ import { dirname, join } from "node:path";
 import { nativewindVars } from "../../../packages/design/src/css.ts";
 import { brand } from "../../../packages/design/src/palette.ts";
 import { radius, space, tracking, type } from "../../../packages/design/src/scale.ts";
-import { darkTheme } from "../../../packages/design/src/themes.ts";
+import { darkTheme, themes } from "../../../packages/design/src/themes.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -95,4 +95,37 @@ module.exports = ${JSON.stringify(
   "utf8",
 );
 
-console.log("global.css + tailwind.tokens.js yazildi");
+// ---- widget/HelmDesignTokens.swift -----------------------------------------
+
+// NEDEN: iOS widget'i ayri bir derleme birimi; TypeScript import edemez. Renkleri
+// Swift'e elle kopyalamak generator'in onlemek icin var oldugu seyin ta kendisi —
+// nitekim kaymisti (widget grafik gradyani #FF6B6B/#C56CF0/#4834D4 paletin
+// hicbir yerinde yoktu, base #0C0C10 ise bg #0A0A0C degildi). Artik tek kaynak.
+//
+// Widget yalnizca KOYU temayi boyar (kendi containerBackground'unu cizer), bu
+// yuzden sadece dark tema uretilir.
+
+const swiftColor = (hex) => {
+  const c = hex.replace("#", "");
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(c.slice(i, i + 2), 16));
+  return `Color(red: ${r} / 255, green: ${g} / 255, blue: ${b} / 255)`;
+};
+
+const swiftLines = Object.entries(themes.dark)
+  .map(([k, hex]) => `  static let ${k} = ${swiftColor(hex)}`)
+  .join("\n");
+
+writeFileSync(
+  join(here, "..", "targets", "widget", "HelmDesignTokens.swift"),
+  `// ${BANNER.replace(/\n\s+/g, "\n// ")}
+
+import SwiftUI
+
+enum HelmTokens {
+${swiftLines}
+}
+`,
+  "utf8",
+);
+
+console.log("global.css + tailwind.tokens.js + HelmDesignTokens.swift yazildi");
