@@ -10,6 +10,7 @@ import { usePayouts } from "~/hooks/use-payouts";
 import { useMrrMovement } from "~/hooks/use-mrr-movement";
 import { useRevenueHistory } from "~/hooks/use-revenue-history";
 import { useRevenueEvents } from "~/hooks/use-revenue-events";
+import { useAdEconomics } from "~/hooks/use-ad-economics";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
@@ -20,7 +21,7 @@ import { monthLabel, MONTHS_SHORT, localToday } from "~/lib/labels";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
-import { PaymentsTile, ReconciliationTile } from "~/components/revenue";
+import { AdEconomicsTile, PaymentsTile, ReconciliationTile } from "~/components/revenue";
 import {
   BentoBackground,
   HERO_NUMBER,
@@ -107,6 +108,10 @@ export default function Revenue() {
     () => buckets.find((b) => b.key === pickedKey) ?? buckets[0] ?? null,
     [buckets, pickedKey],
   );
+
+  // Reklam kirilimi SECILI DONEMI izler — sabit "son 7 gun" degil. Kova
+  // yoksa bos aralik gecer ve hook istek atmaz.
+  const ads = useAdEconomics(picked?.start ?? "", picked?.end ?? "");
 
   const handleRefresh = () => {
     void onRefresh().then(() => setReplayKey((k) => k + 1));
@@ -276,14 +281,29 @@ export default function Revenue() {
             />
           </View>
 
+          {/* Reklam ekonomisi — gelirin buyuk kismi buradan geliyor, o yuzden
+              mutabakatin USTUNDE. Kirilimi olmayan projede kart cizilmez;
+              "FORMAT KIRILIMI YOK" yazan bos bir kutu her ekranda gurultu. */}
+          {(ads.data?.rows.length ?? 0) > 0 || ads.isLoading || ads.isError ? (
+            <Rise index={5} replayKey={replayKey}>
+              <AdEconomicsTile
+                data={ads.data}
+                loading={ads.isLoading}
+                error={ads.error}
+                fmt={fmt}
+                replayKey={replayKey}
+              />
+            </Rise>
+          ) : null}
+
           {/* Anlik/kesin mutabakat — hangi para dogrulandi, hangisi bekliyor. */}
           {picked != null && picked.legs.length > 0 ? (
-            <Rise index={5} replayKey={replayKey}>
+            <Rise index={6} replayKey={replayKey}>
               <ReconciliationTile legs={picked.legs} fmt={fmt} />
             </Rise>
           ) : null}
 
-          <Rise index={6} replayKey={replayKey}>
+          <Rise index={7} replayKey={replayKey}>
             <PaymentsTile
               payments={picked?.payments ?? []}
               loading={history.isLoading}

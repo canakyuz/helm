@@ -104,9 +104,11 @@ Deno.serve(async (req) => {
       if (!connector) throw new Error(`Bilinmeyen sağlayıcı: ${it.provider}`);
 
       const result = await connector(it.config ?? {});
-      // Geriye uyumluluk: connector ya düz dizi ya da {points, byCountry} döner.
+      // Geriye uyumluluk: connector ya düz dizi ya da {points, byCountry,
+      // byFormat} döner.
       const points = Array.isArray(result) ? result : result.points;
       const byCountry = Array.isArray(result) ? [] : (result.byCountry ?? []);
+      const byFormat = Array.isArray(result) ? [] : (result.byFormat ?? []);
 
       // Kaynak para birimi — config'ten (AdMob TRY, App Store vendor ccy…),
       // yoksa USD (RevenueCat/Stripe USD raporlar). Değer HAM saklanır; gösterim
@@ -147,7 +149,28 @@ Deno.serve(async (req) => {
         if (ccErr) throw new Error(ccErr.message);
       }
 
-      ingested += rows.length + byCountry.length;
+      // Reklam formatı kırılımı — metrics_format tablosuna. currency ANA
+      // tabloyla aynı kaynaktan: ad_revenue burada da para taşıyor, birimsiz
+      // yazılırsa iki tablonun toplamı karşılaştırılamaz.
+      if (byFormat.length > 0) {
+        const formatRows = byFormat.map((p) => ({
+          project_id: it.project_id,
+          date: p.date,
+          source: it.provider,
+          metric: p.metric,
+          format: p.format,
+          value: p.value,
+          currency: sourceCurrency,
+        }));
+        const { error: fmtErr } = await hub
+          .from("metrics_format")
+          .upsert(formatRows, {
+            onConflict: "project_id,date,source,metric,format",
+          });
+        if (fmtErr) throw new Error(fmtErr.message);
+      }
+
+      ingested += rows.length + byCountry.length + byFormat.length;
       okCount++;
       await hub
         .from("project_integrations")
