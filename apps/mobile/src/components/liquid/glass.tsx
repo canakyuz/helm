@@ -14,7 +14,7 @@ import { colors, glass } from "~/theme/tokens";
 
 export type GlassTone =
   | "default"
-  | "lime"
+  | "accent"
   | "danger"
   | "warn"
   | "info"
@@ -33,7 +33,7 @@ type Props = {
 
 const toneBorder: Record<GlassTone, string> = {
   default: glass.border,
-  lime: `${colors.accent}40`,
+  accent: `${colors.accent}40`,
   danger: `${colors.accentDanger}45`,
   warn: `${colors.accentWarn}40`,
   info: `${colors.accentInfo}40`,

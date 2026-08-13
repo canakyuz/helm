@@ -13,9 +13,11 @@ export const colors = {
   border: "#1C1C24",
   borderStrong: "#2A2A33",
   borderGlow: "#3A3A46",
-  accent: "#D4FF4D",
+  // İkondan türetilen varsayılan accent (camgöbeği). Tek kaynak
+  // packages/design/src/accents.ts — buradaki kopya legacy inline kullanımlar için.
+  accent: "#06B9EF",
   accentInk: "#11130A",
-  accentSoft: "#A8CC3D",
+  accentSoft: "#037FAB",
   accentDanger: "#FF5C7A",
   accentWarn: "#FFB100",
   accentInfo: "#7AA8FF",

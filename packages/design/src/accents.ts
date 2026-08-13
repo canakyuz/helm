@@ -1,21 +1,34 @@
 // Accent aileleri.
 //
+// KAYNAK: uygulama ikonu (assets/icon.png). Bes yaprak, bes aile. Renkler
+// ikondan PIKSEL BAZINDA orneklendi, gozle tahmin edilmedi:
+//   indigo #496BFB · pembe #F3538C · camgobegi #02B8EE · teal #13CED0 · yesil #65CD64
+//
 // ACCENT TEK BIR HEX DEGILDIR — cifttir. Koyu temada accent'in ACIK olmasi
 // gerekir (koyu tile uzerinde metin olarak okunsun, dolgusunun ustune siyah
-// murekkep gitsin); acik temada tam tersi. Olculdu: gonderilen renklerin hepsi
-// tam olarak bu iki gruba ayriliyor, hicbiri ikisini birden yapamiyor.
+// murekkep gitsin); acik temada tam tersi. Murekkep kurali tek satir: koyu tema
+// accent'i hep acik renktir, uzerine koyu murekkep; acik tema accent'i hep koyu
+// renktir, uzerine beyaz.
 //
-//   #C2F8CB  ink ustunde 15.68 ✓   beyaz ustunde 1.19 ✗   → yalnizca KOYU tema
-//   #1B512D  ink ustunde  2.02 ✗   beyaz ustunde 9.29 ✓   → yalnizca ACIK tema
+// OLCUM YUZEYI: "cam" sutunu #353438'e karsi olculur, #131318'e DEGIL. GlassView
+// malzemesi tile'i gercekte ~#353438 olarak render ediyor (bkz themes.ts fg2
+// yorumu). Bu yuzeyi kullanmazsan olcumler gercekte tutmayan degerler uretir.
 //
-// Bu yuzden murekkep kurali tek satir: koyu tema accent'i hep acik renktir, uzerine
-// koyu murekkep; acik tema accent'i hep koyu renktir, uzerine beyaz.
+// IKON RENGI NEDEN AYNEN ALINMADI: palette.ts durum renklerinin her accent'ten
+// Lab ΔE ile ayrik olmasini sart kosuyor (renk korlugunde ton ayrimi kaybolur,
+// geriye sadece parlaklik/doygunluk farki kalir). Ham ikon renkleri bu sarti iki
+// yerde kiriyordu:
+//   yesil #65CD64 ↔ pos #4ADE80 → ΔE 12.4   (kabul bari 30)
+//   pembe #F3538C ↔ neg #FB7185 → ΔE 15.6
+// Cozum dosyanin kendi yontemi: ton korunur, parlaklik + doygunluk ayrisana
+// kadar kaydirilir. Asagidaki degerler "AA + ΔE≥30 (durum) + ΔE≥25 (diger
+// accent)" kisitlarini saglayan, ikon rengine EN YAKIN cozumlerdir. Her satirda
+// ikon renginden ne kadar saptigi (ΔE) yaziyor — sifira yakin olan ikonla birebir.
 //
-// ROSE FLAME (#E63946) ve INFERNO (#FF3030) accent listesinde YOK: ikisi de orta
-// parlaklikta, hicbir yuzeyde 4.5:1'i tutturmuyor (olculdu: 2.96–4.49). Durum
-// rengi olarak bir islevleri olabilir, accent olarak kullanilamazlar.
+// ROSE FLAME (#E63946) ve INFERNO (#FF3030) hala listede YOK: ikisi de orta
+// parlaklikta, hicbir yuzeyde 4.5:1'i tutturmuyor.
 
-export type AccentId = "lime" | "yesil" | "teal" | "cyan" | "kirmizi";
+export type AccentId = "camgobegi" | "teal" | "indigo" | "pembe" | "yesil";
 
 export type AccentFamily = {
   id: AccentId;
@@ -30,41 +43,43 @@ export type AccentFamily = {
 /** Accent dolgusu UZERINDEKI metin. Tema adina gore, aileden bagimsiz. */
 export const ACCENT_INK = { dark: "#11130A", light: "#FFFFFF" } as const;
 
-// Olculen en kotu kontrast degerleri yorumda: (tile'da metin / murekkeple dolgu).
+// Yorumdaki sayilar: (cam yuzeyde metin / murekkeple dolgu) · ikondan sapma ΔE.
 export const ACCENTS: readonly AccentFamily[] = [
   {
-    id: "lime",
-    label: "Lime",
-    dark: "#D4FF4D", // 10.71 / 16.24
-    light: "#627523", //  4.54 /  5.14  — turetildi, lime tonu korunarak
-  },
-  {
-    id: "yesil",
-    label: "Yeşil",
-    dark: "#C2F8CB", // 10.35 / 15.68  — TEA GREEN
-    light: "#1B512D", //  8.20 /  9.29  — FOREST GREEN
+    id: "camgobegi",
+    label: "Camgöbeği",
+    dark: "#06B9EF", // 5.41 / 8.20 · ΔE 0.4 — ikonla neredeyse birebir
+    light: "#037FAB", // 4.54          · ΔE 22.2
   },
   {
     id: "teal",
     label: "Teal",
-    dark: "#40E0D0", //  7.53 / 11.41  — TURQUOISE
-    light: "#006666", //  6.00 /  6.79  — DEEP TEAL
+    dark: "#11CED0", // 6.33 / 9.60 · ΔE 0.1 — ikonla birebir
+    light: "#05857E", // 4.50          · ΔE 27.9
   },
   {
-    id: "cyan",
-    label: "Cyan",
-    dark: "#B2FFFF", // 10.97 / 16.62  — PALE AQUA
-    light: "#007A7C", //  4.55 /  5.15  — turetildi (TROPICAL CYAN beyazda 2.28 kaliyordu)
+    id: "indigo",
+    label: "İndigo",
+    dark: "#8F92FE", // 4.54 / 6.88 · ΔE 27.1 — acildi, ham ton camda 3.1'de kaliyordu
+    light: "#4668F6", // 4.59          · ΔE 1.5 — ikonla neredeyse birebir
   },
   {
-    id: "kirmizi",
-    label: "Kırmızı",
-    dark: "#CB8B98", //  4.52 /  6.85  — turetildi (RUBY tonundan)
-    light: "#8E0320", //  8.49 /  9.62  — RUBY RED
+    id: "pembe",
+    label: "Pembe",
+    dark: "#F99ACC", // 6.19 / 9.38 · ΔE 31.0 — neg'den ayrismak icin acildi
+    light: "#D7287E", // 4.67          · ΔE 13.5
+  },
+  {
+    id: "yesil",
+    label: "Yeşil",
+    dark: "#36B71A", // 4.67 / 7.09 · ΔE 22.9 — pos'tan ayrismak icin doyuruldu
+    light: "#1F8925", // 4.50          · ΔE 24.6
   },
 ] as const;
 
-export const DEFAULT_ACCENT: AccentId = "lime";
+// Ikonun baskin tonu ve ikon rengine en sadik aile (ΔE 0.4). Listenin de basi:
+// accentById bilinmeyen id'de ACCENTS[0]'a duser, boylece fallback == varsayilan.
+export const DEFAULT_ACCENT: AccentId = "camgobegi";
 
 export function accentById(id: string): AccentFamily {
   return ACCENTS.find((a) => a.id === id) ?? ACCENTS[0]!;

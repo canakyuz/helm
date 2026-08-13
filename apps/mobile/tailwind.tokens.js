@@ -17,9 +17,9 @@ module.exports = {
     "violet": "rgb(var(--violet) / <alpha-value>)",
     "blue": "rgb(var(--blue) / <alpha-value>)",
     "amber": "rgb(var(--amber) / <alpha-value>)",
-    "accent": "#D4FF4D",
+    "accent": "#06B9EF",
     "accent-ink": "#11130A",
-    "accent-soft": "#A8CC3D"
+    "accent-soft": "#037FAB"
   },
   "spacing": {
     "xs": "6px",
