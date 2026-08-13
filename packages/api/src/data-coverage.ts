@@ -89,6 +89,7 @@ type CoveragePayload = {
  *  tutanlar. Aksi halde 30 metrigin her sessizligi uyari uretirdi. */
 const WATCHED_METRICS: Record<string, string> = {
   crash_free_sessions: "Çökmesiz oturum",
+  errors: "Hata takibi",
   dau: "Günlük aktif kullanıcı",
   mau: "Aylık aktif kullanıcı",
   mrr: "MRR",
