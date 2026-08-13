@@ -40,7 +40,14 @@ CLAUDE.md kazanır. Backend-only / non-UI işlerde bu skill'ler gerekmez.
 
 - **Tek kullanıcı:** Can. Multi-tenant değil, multi-user değil.
 - **Veri kaynağı:** `helm` ile aynı Supabase projesi. Anon key + RLS.
-- **Sadece okuma + hafif aksiyonlar:** Alert ack, settings. Veri yazma minimum.
+- **Okuma + yapılandırma:** Alert ack, tercihler, ve **entegrasyon yönetimi**
+  (Ayarlar → Kaynaklar: bağla / düzenle / aç-kapa / sil). Metrik verisi yazılmaz.
+  - *Bu madde eskiden "veri yazma minimum" diyordu; entegrasyon yönetimi mobile
+    taşınınca doğruluğunu yitirdi.*
+  - **Sır kuralı:** `project_integrations.config` düz metin jsonb ve RLS
+    "authenticated full access" (`0001_init.sql:64`). Mobil, kayıtlı sır
+    değerlerini **çekmez**; yalnızca yazar, ekranda `••••• kayıtlı` gösterir
+    (`packages/api/src/project-integrations.ts`). Bu davranışı bozma.
 - **TestFlight only:** App Store submission YOK. Internal testing track.
 - **YAGNI:** Push notification ileride, çok dilli destek YOK, dark mode varsayılan ve tek.
 
