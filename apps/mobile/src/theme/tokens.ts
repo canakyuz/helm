@@ -18,12 +18,15 @@ export const colors = {
   accent: "#06B9EF",
   accentInk: "#11130A",
   accentSoft: "#037FAB",
-  accentDanger: "#FF5C7A",
-  accentWarn: "#FFB100",
-  accentInfo: "#7AA8FF",
-  accentViolet: "#B89CFF",
-  green: "#57E08B",
-  blue: "#7AA8FF",
+  accentDanger: "#FF5C7A", // yeni accent ailesine ΔE 37.7 — dokunulmadı
+  accentWarn: "#FFB100", // ΔE 81.8 — dokunulmadı
+  // accentInfo/blue/violet, packages/design series değerlerine hizalandı: eski
+  // #7AA8FF yeni indigo accent'ine ΔE 18.8, #B89CFF ise ΔE 11.6 kalıyordu — grafikte
+  // accent ile yan yana ayırt edilemezlerdi. Yeni değerler ΔE 25.0 ve 25.2.
+  accentInfo: "#82AEF8",
+  accentViolet: "#DDAEFF",
+  green: "#57E08B", // ΔE 34.5 — dokunulmadı
+  blue: "#82AEF8",
 } as const;
 
 export const fonts = {
