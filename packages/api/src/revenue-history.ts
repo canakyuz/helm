@@ -87,6 +87,10 @@ export type RevenueBucket = {
   activeSubs: number | null;
   /** Donemdeki odemeler, yeniden eskiye. */
   payments: PaymentRow[];
+  /** bySource'ta tutari MAGAZA RAPORUNDAN DEGIL webhook'tan gelen kaynaklar.
+   *  Para gercek ama magaza henuz dogrulamadi — UI bunu "anlık" diye
+   *  isaretlemeli, yoksa kesin rakamla ayni agirlikta okunur. */
+  provisionalSources: string[];
 };
 
 export type RevenueHistory = {
@@ -220,6 +224,9 @@ export async function fetchRevenueHistory(
   // Gun -> magaza -> anlik tutar. occurred_at UTC damgali; gun anahtarini
   // metrics ile ayni bicimde (YYYY-MM-DD) cikariyoruz ki kovalar ortussun.
   const provByDay = new Map<string, Map<string, number>>();
+  // Gun -> KAYNAK -> anlik tutar. provByDay magazaya, bu kaynaga kirar.
+  // Ikisi ayri: mutabakat magaza bazinda yapilir, kirilim kaynak bazinda.
+  const provSourceByDay = new Map<string, Map<string, number>>();
   const txByDay = new Map<string, PaymentRow[]>();
   for (const e of (events ?? []) as EventRow[]) {
     const day = e.occurred_at.slice(0, 10);
@@ -235,6 +242,17 @@ export async function fetchRevenueHistory(
     }
     m.set(store, (m.get(store) ?? 0) + amt);
 
+    // Tek seferlik satin alma "uygulama ici", geri kalan her gelir ureten olay
+    // (ilk satin alma, yenileme, iptal iptali, paket degisimi) abonelik.
+    const metric =
+      e.event_type === "NON_RENEWING_PURCHASE" ? "iap_revenue" : "subscription_revenue";
+    let sm = provSourceByDay.get(day);
+    if (sm == null) {
+      sm = new Map();
+      provSourceByDay.set(day, sm);
+    }
+    sm.set(metric, (sm.get(metric) ?? 0) + amt);
+
     const list = txByDay.get(day) ?? [];
     list.push({
       date: day,
@@ -247,23 +265,68 @@ export async function fetchRevenueHistory(
     txByDay.set(day, list);
   }
 
+  const EMPTY: ReadonlyMap<string, number> = new Map();
+
   const bucket = (keyOf: (iso: string) => string): RevenueBucket[] => {
     const acc = new Map<string, RevenueBucket>();
-    for (const [date, sources] of byDay) {
+    // Mutabakat icin YALNIZCA magaza raporundan gelen toplam — asagida bySource
+    // anlik tarafi da icerebilecegi icin oradan okunamaz, yoksa dogrulanmamis
+    // para "DOGRULANDI" gorunurdu.
+    const confirmedStore = new Map<string, number>();
+    // kova -> metrik -> anlik toplam, ve kova -> gun -> metrik -> anlik tutar.
+    // Anlik taraf ILK GECISTE TOPLAMA KATILMAZ; karar kova bazinda ikinci
+    // gecişte veriliyor (nedeni asagida).
+    const provByBucket = new Map<string, Map<string, number>>();
+    const provByBucketDay = new Map<string, Map<string, Map<string, number>>>();
+
+    // Gunler IKI KAYNAGIN BIRLESIMI. Onceki hal yalnizca metrics gunlerini
+    // geziyordu: magaza raporu hic satir yazmamis bir gunde gelen odeme
+    // (webhook ANINDA bilir, Apple T-1) hicbir kovaya girmiyordu.
+    const dayKeys = [...new Set([...byDay.keys(), ...provSourceByDay.keys()])].sort();
+
+    for (const date of dayKeys) {
       const key = keyOf(date);
       let b = acc.get(key);
       if (b == null) {
         b = {
           key, start: date, end: date, total: 0, bySource: {}, days: [],
-          legs: [], mrr: null, activeSubs: null, payments: [],
+          legs: [], mrr: null, activeSubs: null, payments: [], provisionalSources: [],
         };
         acc.set(key, b);
       }
+
+      const confirmed = byDay.get(date) ?? EMPTY;
+
       let dayTotal = 0;
-      for (const [metric, value] of sources) {
+      for (const [metric, value] of confirmed) {
         b.bySource[metric] = (b.bySource[metric] ?? 0) + value;
         dayTotal += value;
       }
+
+      const provisional = provSourceByDay.get(date);
+      if (provisional != null) {
+        let pm = provByBucket.get(key);
+        if (pm == null) {
+          pm = new Map();
+          provByBucket.set(key, pm);
+        }
+        let pd = provByBucketDay.get(key);
+        if (pd == null) {
+          pd = new Map();
+          provByBucketDay.set(key, pd);
+        }
+        pd.set(date, new Map(provisional));
+        for (const [metric, amount] of provisional) {
+          pm.set(metric, (pm.get(metric) ?? 0) + amount);
+        }
+      }
+
+      const dayConfirmedStore =
+        (confirmed.get("subscription_revenue") ?? 0) + (confirmed.get("iap_revenue") ?? 0);
+      if (dayConfirmedStore !== 0) {
+        confirmedStore.set(key, (confirmedStore.get(key) ?? 0) + dayConfirmedStore);
+      }
+
       b.total += dayTotal;
       b.days.push({ date, value: dayTotal });
       if (date < b.start) b.start = date;
@@ -273,6 +336,41 @@ export async function fetchRevenueHistory(
     // abonelik + uygulama-ici toplami (reklam geliri magaza degil, disarida kalir).
     for (const b of acc.values()) {
       b.days.sort((x, y) => (x.date < y.date ? -1 : 1));
+
+      // ANLIK GELIRIN KOVAYA KATILMASI — karar KOVA BAZINDA, gun bazinda DEGIL.
+      //
+      // Neden gun bazinda olmaz (olculdu): Apple geliri TAHSILAT gunune yazar,
+      // RevenueCat ise SATIN ALMA anina. Ayni para iki farkli gune duser. Gun
+      // bazinda "magaza sustuysa anligi al" denince Temmuz ₺5,082 → ₺10,933
+      // cikti; abonelik 3,417'den 9,268'e sisti. Ayni para iki kez sayilmisti.
+      //
+      // Kova bazinda kural: magaza bu donemde o kaynak icin RAKAM VERDIYSE
+      // anlik taraf TAMAMEN yok sayilir. Vermediyse (bugunku Agustos: Apple
+      // henuz hic abonelik raporlamadi) anlik tutar gosterilir.
+      //
+      // Bedeli: magaza donemin bir kismini raporlamis ama son gunleri
+      // raporlamamissa o gunlerin parasi TOPLAMDA gorunmez. Bilerek: eksik
+      // gostermek, fazla gostermekten iyidir — ustelik eksik kalan tutar
+      // mutabakat kartinda "anlık / bekliyor" olarak zaten duruyor.
+      const prov = provByBucket.get(b.key);
+      if (prov != null) {
+        const used = new Set<string>();
+        for (const [metric, amount] of prov) {
+          if ((b.bySource[metric] ?? 0) > 0) continue;
+          used.add(metric);
+          b.bySource[metric] = amount;
+          b.total += amount;
+          b.provisionalSources.push(metric);
+        }
+        if (used.size > 0) {
+          const perDay = provByBucketDay.get(b.key);
+          for (const d of b.days) {
+            const m = perDay?.get(d.date);
+            if (m == null) continue;
+            for (const metric of used) d.value += m.get(metric) ?? 0;
+          }
+        }
+      }
 
       const provByStore = new Map<string, number>();
       for (const d of b.days) {
@@ -307,8 +405,10 @@ export async function fetchRevenueHistory(
       }
       b.payments = payments.sort((x, y) => (x.date < y.date ? 1 : -1));
 
-      const storeConfirmed =
-        (b.bySource["subscription_revenue"] ?? 0) + (b.bySource["iap_revenue"] ?? 0);
+      // bySource ARTIK anlik tarafi da icerebilir; mutabakatin "kesin" bacagi
+      // yalnizca magaza raporundan okunmali, yoksa dogrulanmamis para kendi
+      // kendini dogrular ve durum hep "DOGRULANDI" cikar.
+      const storeConfirmed = confirmedStore.get(b.key) ?? 0;
 
       if (provByStore.size === 0 && storeConfirmed === 0) {
         b.legs = [];
@@ -334,6 +434,11 @@ export async function fetchRevenueHistory(
   // demektir; UI onu gizler, ilk gercek degerde kendiliginden geri gelir.
   const active = new Set<string>();
   for (const day of byDay.values()) {
+    for (const [metric, value] of day) if (value !== 0) active.add(metric);
+  }
+  // Anlik tarafi da sayar: magaza raporu henuz sifirken gelen abonelik geliri
+  // aksi halde "uretmiyor" sayilip kirilimdan tamamen gizleniyordu.
+  for (const day of provSourceByDay.values()) {
     for (const [metric, value] of day) if (value !== 0) active.add(metric);
   }
 
