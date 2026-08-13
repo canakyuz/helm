@@ -28,3 +28,4 @@ export * from "./country-metrics";
 export * from "./last-sync";
 export * from "./ad-economics";
 export * from "./data-coverage";
+export * from "./project-integrations";
