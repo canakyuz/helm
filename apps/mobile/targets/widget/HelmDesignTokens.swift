@@ -16,9 +16,9 @@ enum HelmTokens {
   static let neg = Color(red: 251 / 255, green: 113 / 255, blue: 133 / 255)
   static let warn = Color(red: 255 / 255, green: 177 / 255, blue: 0 / 255)
   static let chrome = Color(red: 23 / 255, green: 23 / 255, blue: 28 / 255)
-  static let violet = Color(red: 184 / 255, green: 156 / 255, blue: 255 / 255)
-  static let blue = Color(red: 122 / 255, green: 168 / 255, blue: 255 / 255)
-  static let amber = Color(red: 255 / 255, green: 138 / 255, blue: 61 / 255)
-  static let accent = Color(red: 212 / 255, green: 255 / 255, blue: 77 / 255)
+  static let violet = Color(red: 221 / 255, green: 174 / 255, blue: 255 / 255)
+  static let blue = Color(red: 130 / 255, green: 174 / 255, blue: 248 / 255)
+  static let amber = Color(red: 254 / 255, green: 138 / 255, blue: 62 / 255)
+  static let accent = Color(red: 6 / 255, green: 185 / 255, blue: 239 / 255)
   static let accentInk = Color(red: 17 / 255, green: 19 / 255, blue: 10 / 255)
 }

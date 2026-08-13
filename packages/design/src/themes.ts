@@ -64,11 +64,14 @@ export const darkTheme: Omit<Theme, "accent" | "accentInk"> = {
   // Light tema etkilenmez, orada tile opak beyaz (bkz lightTheme).
   fg2: "#9E9EA4",
   fg3: "#9E9EA4",
-  // Accent aileleri artık yeşil ve kırmızıyı da içeriyor; durum renkleri onlardan
-  // AYRIK olmak zorunda. Lab uzayında ΔE ile ölçüldü: #4ADE80 en yakın accent'e
-  // (#C2F8CB) ΔE 41.1, kontrast 7.09:1. Eski #C2F8CB artık accent ailesi.
-  pos: "#4ADE80",
-  neg: "#FB7185", // ΔE 30.8 en yakın accent'e (#CB8B98), kontrast 4.59:1
+  // Accent aileleri yeşili ve pembeyi de içeriyor; durum renkleri onlardan AYRIK
+  // olmak zorunda (renk körlüğünde ton ayrımı kaybolur). Lab ΔE ile ölçüldü,
+  // accent'ler ikondan yeniden türetildikten SONRA:
+  //   pos ↔ yesil (#36B71A) ΔE 30.0 · neg ↔ pembe (#F99ACC) ΔE 30.2
+  // Kabul barı 30; ikisi de sınırda ama geçiyor. Accent ailesine yeni bir yeşil
+  // veya pembe eklenecekse bu iki değer YENİDEN ölçülmeli.
+  pos: "#4ADE80", // kontrast 7.09:1
+  neg: "#FB7185", // kontrast 4.59:1
   warn: "#FFB100",
   chrome: "#17171C",
   violet: series.dark.violet,
