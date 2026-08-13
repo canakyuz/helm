@@ -80,11 +80,13 @@ export default function Analytics() {
   };
 
   const dau = kpis.data.dau;
-  const mau = last(mauDetail) ?? kpis.data.totalUsers ?? 0;
+  // `?? 0` YOK: mau serisi de toplam kullanici da olculmemisse dogru cevap
+  // "bilmiyoruz". Sifir yazmak DAU ile ayni yalani soyler.
+  const mau = last(mauDetail) ?? kpis.data.totalUsers;
   const session = last(sessDetail);
   // Oran olarak tutulur, yuvarlanmaz: DAU/MAU tipik olarak %1–%5 bandinda ve
   // tam sayiya yuvarlayinca 1.34 ile 1.49 ayni "%1" oluyordu.
-  const stickiness = mau > 0 ? dau / mau : null;
+  const stickiness = dau != null && mau != null && mau > 0 ? dau / mau : null;
   const dauPoints = (dauDetail.data?.series ?? []).slice(-SPARK_BARS);
 
   const f = funnels.data;
@@ -190,14 +192,21 @@ export default function Analytics() {
                 </View>
               </View>
 
-              <CountUp
-                value={dau}
-                format={(v) => formatInteger(v)}
-                fitOneLine
-                style={{ ...HERO_NUMBER, color: theme.fg }}
-              />
+              {/* Olcum yoksa "—": bu projede kullanici kaynagi bagli degil,
+                  "0 kullanici" demek DEGIL. Sifir yazmak "kimse oynamiyor"
+                  diye okunur ve yanlis bir panik uretir. */}
+              {dau != null ? (
+                <CountUp
+                  value={dau}
+                  format={(v) => formatInteger(v)}
+                  fitOneLine
+                  style={{ ...HERO_NUMBER, color: theme.fg }}
+                />
+              ) : (
+                <Text style={{ ...HERO_NUMBER, color: theme.fg3 }}>—</Text>
+              )}
               <Text className="mt-[6px] text-meta text-fg2">
-                MAU {formatInteger(mau)}
+                MAU {mau != null ? formatInteger(mau) : "—"}
                 {stickiness != null ? ` · yapışkanlık ${formatRatio(stickiness, 1)}` : ""}
                 {session != null ? ` · oturum ${fmtSession(session)}` : ""}
               </Text>

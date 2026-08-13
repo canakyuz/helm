@@ -301,7 +301,7 @@ export default function Overview() {
               index={1}
               replayKey={replayKey}
               label="MRR"
-              value={picked != null ? (mrrDay != null ? fmt(mrrDay.value) : "—") : fmt(data.mrr)}
+              value={picked != null ? (mrrDay != null ? fmt(mrrDay.value) : "—") : data.mrr != null ? fmt(data.mrr) : "—"}
               delta={picked != null ? mrrDay?.delta : data.mrrDelta}
             />
             <StatTile
@@ -311,7 +311,9 @@ export default function Overview() {
               value={
                 picked != null
                   ? (dauDay != null ? formatInteger(dauDay.value) : "—")
-                  : formatInteger(data.dau)
+                  : data.dau != null
+                    ? formatInteger(data.dau)
+                    : "—"
               }
               delta={picked != null ? dauDay?.delta : data.dauDelta}
             />
