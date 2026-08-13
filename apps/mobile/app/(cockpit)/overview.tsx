@@ -66,6 +66,33 @@ function mergeSeries(
     .map(([date, value]) => ({ date, value }));
 }
 
+/**
+ * Bir gunun serideki degeri ve bir onceki OLCUME gore yuzde degisimi.
+ *
+ * date verilmezse (gun secili degil) null doner — cagiran taraf bugunun
+ * kpi'sine duser. Seride o gun YOKSA da null: sifir gostermek "o gun sifirdi"
+ * demek olurdu, oysa dogru cevap "olcum yok".
+ *
+ * Onceki nokta takvimsel dun DEGIL, seride bir onceki gun: veri bosluklu
+ * oldugunda "dune gore" demek yaniltirdi.
+ */
+function dayPoint(
+  series: ReadonlyArray<{ date: string; value: number }>,
+  date: string | undefined,
+  /** "percent" yuzde degisim; "points" ham fark. Crash-free zaten bir yuzde —
+   *  %99.5'ten %99.0'a dusus "%0.5 dustu" degil "0.5 PUAN dustu"dur. */
+  deltaMode: "percent" | "points" = "percent",
+): { value: number; delta: number | null } | null {
+  if (date == null) return null;
+  const i = series.findIndex((p) => p.date === date);
+  if (i < 0) return null;
+  const value = series[i]!.value;
+  const prev = i > 0 ? series[i - 1]!.value : null;
+  if (prev == null) return { value, delta: null };
+  if (deltaMode === "points") return { value, delta: Number((value - prev).toFixed(1)) };
+  return { value, delta: prev !== 0 ? ((value - prev) / prev) * 100 : null };
+}
+
 export default function Overview() {
   const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
@@ -78,6 +105,12 @@ export default function Overview() {
   const revenue = useMetricDetail("ad_revenue");
   const appRevDetail = useMetricDetail("app_revenue");
   const crashFree = useMetricDetail("crash_free_sessions");
+  // Gun secilince alttaki kartlar da O GUNU gostermeli. kpis yalnizca bugunun
+  // anlik goruntusu; onceki hal gecmis bir gun secilince hero'yu degistirip
+  // altindaki uc karti bugunde birakiyordu — ekran iki farkli gunu ayni anda
+  // gosteriyor ve secim calismiyormus gibi duruyordu.
+  const mrrDetail = useMetricDetail("mrr");
+  const dauDetail = useMetricDetail("dau");
   const goal = useRevenueGoal();
   const mix = useRevenueMix();
   const { refreshing, onRefresh } = useScreenRefresh();
@@ -128,6 +161,11 @@ export default function Overview() {
   // Secili gun. Yenileme seriyi kisaltabilecegi icin indeks dogrulanir —
   // aksi halde eski bir indeks undefined'a duser.
   const picked = selectedDay != null ? (sparkPoints[selectedDay] ?? null) : null;
+
+  // Secili gun varsa kartlar o gunun serisinden okur; yoksa bugunun kpi'si.
+  const mrrDay = dayPoint(mrrDetail.data?.series ?? [], picked?.date);
+  const dauDay = dayPoint(dauDetail.data?.series ?? [], picked?.date);
+  const cfDay = dayPoint(crashFree.data?.series ?? [], picked?.date, "points");
 
   const openAlerts = (alerts.data ?? []).filter((a) => !dismissed[a.id]);
   const allProjects = properties.data ?? [];
@@ -250,26 +288,40 @@ export default function Overview() {
 
           {/* Uc kucuk stat — cam */}
           <View className="flex-row gap-tileGap">
+            {/* Gun secildiginde uc kart da O GUNU gosterir. Secili gun seride
+                yoksa "—": o gun icin olcum yok demek, sifir demek degil. */}
             <StatTile
               index={1}
               replayKey={replayKey}
               label="MRR"
-              value={fmt(data.mrr)}
-              delta={data.mrrDelta}
+              value={picked != null ? (mrrDay != null ? fmt(mrrDay.value) : "—") : fmt(data.mrr)}
+              delta={picked != null ? mrrDay?.delta : data.mrrDelta}
             />
             <StatTile
               index={2}
               replayKey={replayKey}
               label="DAU"
-              value={formatInteger(data.dau)}
-              delta={data.dauDelta}
+              value={
+                picked != null
+                  ? (dauDay != null ? formatInteger(dauDay.value) : "—")
+                  : formatInteger(data.dau)
+              }
+              delta={picked != null ? dauDay?.delta : data.dauDelta}
             />
             <StatTile
               index={3}
               replayKey={replayKey}
               label="CRASH"
-              value={cfNow != null ? formatPercent(cfNow, 1) : "—"}
-              delta={cfDelta}
+              value={
+                picked != null
+                  ? (cfDay != null ? formatPercent(cfDay.value, 1) : "—")
+                  : cfNow != null
+                    ? formatPercent(cfNow, 1)
+                    : "—"
+              }
+              // Crash-free'de delta YUZDE DEGISIM degil PUAN farki: %99.5'ten
+              // %99.0'a dusus "%0.5 dustu" degil "0.5 puan dustu".
+              delta={picked != null ? cfDay?.delta : cfDelta}
             />
           </View>
 

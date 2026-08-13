@@ -207,6 +207,17 @@ export default function Revenue() {
                         />
                         <Text className="flex-1 font-medium text-row text-fg">
                           {SOURCE_LABEL[s.metric] ?? s.metric}
+                          {/* "anlık": tutar webhook'tan geliyor, magaza raporu
+                              henuz dogrulamadi. Isaretlenmezse kesin rakamla
+                              ayni agirlikta okunur. */}
+                          {picked.provisionalSources.includes(s.metric) ? (
+                            <Text
+                              className="font-mono-medium text-[11px]"
+                              style={{ color: theme.warn }}
+                            >
+                              {"  anlık"}
+                            </Text>
+                          ) : null}
                         </Text>
                         <Text className="font-semibold text-row tracking-tight text-fg">
                           {fmt(s.value)}
