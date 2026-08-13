@@ -58,6 +58,15 @@ type SourceRow = {
   ageDays: number | null;
 };
 
+type MetricRow = {
+  projectId: string;
+  projectName: string;
+  source: string;
+  metric: string;
+  lastDate: string | null;
+  ageDays: number | null;
+};
+
 type ProjectRow = {
   projectId: string;
   projectName: string;
@@ -71,7 +80,21 @@ type ProjectRow = {
 type CoveragePayload = {
   today: string;
   sources: SourceRow[];
+  metrics: MetricRow[];
   projects: ProjectRow[];
+};
+
+/** Ekranlarda kutu kaplayan metriklerin okunur adi. Listede olmayanlar
+ *  bildirilmez: her metrik bir uyariyi hak etmiyor, yalnizca kokpitte yer
+ *  tutanlar. Aksi halde 30 metrigin her sessizligi uyari uretirdi. */
+const WATCHED_METRICS: Record<string, string> = {
+  crash_free_sessions: "Çökmesiz oturum",
+  dau: "Günlük aktif kullanıcı",
+  mau: "Aylık aktif kullanıcı",
+  mrr: "MRR",
+  active_subs: "Aktif abone",
+  ad_revenue: "Reklam geliri",
+  avg_session_sec: "Ortalama oturum süresi",
 };
 
 const label = (source: string): string => PROVIDER_LABEL[source] ?? source;
@@ -85,7 +108,7 @@ export async function fetchDataCoverage(
   const { data, error } = await client.rpc("data_coverage");
   if (error) throw error;
 
-  const payload = (data ?? { today: "", sources: [], projects: [] }) as CoveragePayload;
+  const payload = (data ?? { today: "", sources: [], metrics: [], projects: [] }) as CoveragePayload;
   const issues: CoverageIssue[] = [];
 
   const inScope = (projectId: string) =>
@@ -108,10 +131,30 @@ export async function fetchDataCoverage(
     });
   }
 
+  // 2) Olmus METRIK — kaynak hala yaziyor ama bu olcum durmus. Kaynak bazinda
+  //    bakmak bunu kaciriyordu: sentry her gun `errors` yazarken
+  //    `crash_free_sessions` 32 gundur gelmiyor ve ekranda yalnizca bos bir
+  //    kutu kaliyor. Kutuyu bos birakip sebebini soylememek en kotusu.
+  for (const m of payload.metrics ?? []) {
+    if (!inScope(m.projectId) || m.ageDays == null) continue;
+    const name = WATCHED_METRICS[m.metric];
+    if (name == null) continue;
+    const budget = (EXPECTED_LAG[m.source] ?? DEFAULT_LAG) + GRACE_DAYS;
+    const over = m.ageDays - budget;
+    if (over <= 0) continue;
+    issues.push({
+      id: `metric:${m.projectId}:${m.metric}`,
+      severity: over >= CRITICAL_AFTER ? "critical" : "warn",
+      title: `${name} ölçümü durdu`,
+      detail: `${m.projectName} · ${label(m.source)} · son kayıt ${m.lastDate} (${dayWord(m.ageDays)} önce)`,
+      projectId: m.projectId,
+    });
+  }
+
   for (const p of payload.projects) {
     if (!inScope(p.projectId)) continue;
 
-    // 2) Telemetri akiyor ama hicbir gelir/magaza kaynagi bagli degil.
+    // 3) Telemetri akiyor ama hicbir gelir/magaza kaynagi bagli degil.
     //    Block Forge tam olarak boyle: 27bin olay gonderiyor, geliri "—".
     if (p.integrations === 0 && (p.eventRows > 0 || p.metricRows > 0)) {
       issues.push({
@@ -125,7 +168,7 @@ export async function fetchDataCoverage(
       continue;
     }
 
-    // 3) Hicbir verisi olmayan proje. "info": bilinen bir eksik, ariza degil —
+    // 4) Hicbir verisi olmayan proje. "info": bilinen bir eksik, ariza degil —
     //    henuz kurulmamis bir proje uyari kirmizisini hak etmez.
     if (p.integrations === 0 && p.metricRows === 0 && p.eventRows === 0) {
       issues.push({

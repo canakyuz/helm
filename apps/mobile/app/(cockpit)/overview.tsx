@@ -10,7 +10,7 @@ import { useDataCoverage } from "~/hooks/use-data-coverage";
 import { useAlerts, useAckAlert } from "~/hooks/use-alerts";
 import { useProperties, type PropertyStatus, type PropertyType } from "~/hooks/use-properties";
 import { usePropertyMetrics } from "~/hooks/use-property-metrics";
-import { useFormatCurrency } from "~/hooks/use-format-currency";
+import { useFormatCurrency, useFormatCurrencyCompact } from "~/hooks/use-format-currency";
 import { useFxRates } from "~/hooks/use-fx-rates";
 import { useRevenueGoal } from "~/hooks/use-revenue-goal";
 import { useRevenueMix } from "~/hooks/use-revenue-mix";
@@ -28,7 +28,7 @@ import {
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
-import { AttentionTile, StatTile, toItems } from "~/components/overview";
+import { AttentionTile, StatTile, statFontSize, toItems } from "~/components/overview";
 import {
   BentoBackground,
   HERO_NUMBER,
@@ -97,6 +97,8 @@ function dayPoint(
 export default function Overview() {
   const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
+  // Stat kutularinda kurussuz: uzun deger tum satirin punto'sunu dusuruyordu.
+  const fmtStat = useFormatCurrencyCompact();
   const { data: rates } = useFxRates();
   const kpis = useCockpitKpis();
   const alerts = useAlerts();
@@ -168,6 +170,25 @@ export default function Overview() {
   const mrrDay = dayPoint(mrrDetail.data?.series ?? [], picked?.date);
   const dauDay = dayPoint(dauDetail.data?.series ?? [], picked?.date);
   const cfDay = dayPoint(crashFree.data?.series ?? [], picked?.date, "points");
+
+  // Uc kutunun metinleri once uretilir; ortak rakam boyutu EN UZUNUNA gore
+  // secilip ucune de verilir (bkz. statFontSize). Aksi halde her kutu kendi
+  // basina kuculuyor ve satirin tipografik ritmi bozuluyordu.
+  const mrrText =
+    picked != null ? (mrrDay != null ? fmtStat(mrrDay.value) : "—") : data.mrr != null ? fmtStat(data.mrr) : "—";
+  const dauText =
+    picked != null
+      ? (dauDay != null ? formatInteger(dauDay.value) : "—")
+      : data.dau != null
+        ? formatInteger(data.dau)
+        : "—";
+  const crashText =
+    picked != null
+      ? (cfDay != null ? formatPercent(cfDay.value, 1) : "—")
+      : cfNow != null
+        ? formatPercent(cfNow, 1)
+        : "—";
+  const statSize = statFontSize([mrrText, dauText, crashText]);
 
   // Kaydedilmis uyarilar ve turetilen veri sinyalleri TEK LISTE: kullanici
   // acisindan ikisi de "dikkat gerektiren sey". Kaynak ayrimi aksiyonlarda
@@ -301,33 +322,27 @@ export default function Overview() {
               index={1}
               replayKey={replayKey}
               label="MRR"
-              value={picked != null ? (mrrDay != null ? fmt(mrrDay.value) : "—") : data.mrr != null ? fmt(data.mrr) : "—"}
+              value={mrrText}
               delta={picked != null ? mrrDay?.delta : data.mrrDelta}
+              fontSize={statSize}
+              note={mrrText === "—" ? "ölçüm yok" : undefined}
             />
             <StatTile
               index={2}
               replayKey={replayKey}
               label="DAU"
-              value={
-                picked != null
-                  ? (dauDay != null ? formatInteger(dauDay.value) : "—")
-                  : data.dau != null
-                    ? formatInteger(data.dau)
-                    : "—"
-              }
+              value={dauText}
               delta={picked != null ? dauDay?.delta : data.dauDelta}
+              fontSize={statSize}
+              note={dauText === "—" ? "ölçüm yok" : undefined}
             />
             <StatTile
               index={3}
               replayKey={replayKey}
               label="CRASH"
-              value={
-                picked != null
-                  ? (cfDay != null ? formatPercent(cfDay.value, 1) : "—")
-                  : cfNow != null
-                    ? formatPercent(cfNow, 1)
-                    : "—"
-              }
+              value={crashText}
+              note={crashText === "—" ? "ölçüm yok" : undefined}
+              fontSize={statSize}
               // Crash-free'de delta YUZDE DEGISIM degil PUAN farki: %99.5'ten
               // %99.0'a dusus "%0.5 dustu" degil "0.5 puan dustu".
               delta={picked != null ? cfDay?.delta : cfDelta}

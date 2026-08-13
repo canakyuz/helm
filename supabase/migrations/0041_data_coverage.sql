@@ -30,6 +30,24 @@ as $$
     from public.metrics m
     group by 1, 2
   ),
+  -- KAYNAK granulerligi YETMIYOR: sentry hala `errors` yaziyor ama
+  -- `crash_free_sessions` 12 Temmuz'da olmus. Kaynak "taze" gorunurken tek bir
+  -- metrik sessizce olebiliyor ve ekranda yalnizca bos bir kutu kaliyor.
+  --
+  -- KAYNAGA GORE DEGIL METRIGE GORE gruplanir: ayni metrigi birden fazla kaynak
+  -- yazabilir. `dau`'yu posthog 24 Mayis'ta birakmis ama supabase her gun
+  -- yaziyor — metrik SAG. Kaynak-metrik ciftiyle gruplansaydi ilk acilista
+  -- yanlis alarm cikardi ve alarm yorgunlugu gercek uyariyi korlestirirdi.
+  per_metric as (
+    select
+      m.project_id,
+      m.metric,
+      max(m.date) as last_date,
+      -- Mesajda "hangi kaynak" yazabilmek icin en son yazani tutuyoruz.
+      (array_agg(m.source order by m.date desc))[1] as source
+    from public.metrics m
+    group by 1, 2
+  ),
   per_project as (
     select
       p.id, p.name, p.type,
@@ -52,6 +70,20 @@ as $$
       ) order by (current_date - ps.last_date) desc, pr.name)
       from per_source ps
       join public.properties pr on pr.id = ps.project_id
+    ), '[]'::jsonb),
+    'metrics', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'projectId',   pm.project_id,
+        'projectName', pr.name,
+        'source',      pm.source,
+        'metric',      pm.metric,
+        'lastDate',    pm.last_date,
+        'ageDays',     current_date - pm.last_date
+      ) order by (current_date - pm.last_date) desc, pr.name)
+      from per_metric pm
+      join public.properties pr on pr.id = pm.project_id
+      -- Yalnizca GECIKMIS olanlar: tum metrik x proje carpimi bosuna yuk.
+      where current_date - pm.last_date > 2
     ), '[]'::jsonb),
     'projects', coalesce((
       select jsonb_agg(jsonb_build_object(

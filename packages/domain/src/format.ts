@@ -15,6 +15,22 @@ export function formatCurrency(value: number, currency = "USD"): string {
   return `${sign}${symbol}${withSeparator}.${decPart}`;
 }
 
+/**
+ * Stat kutusu için para — KURUŞSUZ.
+ *
+ * NEDEN: üç küçük kutunun rakam boyutu en uzun değere göre seçiliyor
+ * (statFontSize). "₺2,340.78" 9 karakter ve tüm satırı 18pt'e düşürüyordu;
+ * "₺2,341" 6 karakter, satır 24pt'te kalıyor. Kuruş bu ölçekte zaten yanlış
+ * hassasiyet: MRR'ın 78 kuruşu bir karar değiştirmiyor, hareketi delta satırı
+ * taşıyor. Tam tutarın gerektiği yerlerde formatCurrency kullanılmaya devam eder.
+ */
+export function formatCurrencyCompact(value: number, currency = "USD"): string {
+  const symbol = CURRENCY_SYMBOLS[currency] ?? `${currency} `;
+  const sign = value < 0 ? "-" : "";
+  const rounded = Math.round(Math.abs(value)).toString();
+  return `${sign}${symbol}${rounded.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+}
+
 // Tam sayı metric'ler (DAU, kullanıcı sayısı vb) — binlik separator, ondalık yok.
 export function formatInteger(value: number): string {
   return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
