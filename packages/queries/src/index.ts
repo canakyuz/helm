@@ -21,3 +21,4 @@ export * from "./revenue-events";
 export * from "./country-metrics";
 export * from "./last-sync";
 export * from "./ad-economics";
+export * from "./data-coverage";
