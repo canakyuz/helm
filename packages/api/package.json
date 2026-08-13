@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@helm/domain": "workspace:*",
     "@helm/types": "workspace:*"
   },
   "peerDependencies": {

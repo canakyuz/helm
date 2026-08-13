@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 import type { AppVersion, IntegrationHealth, SentryIssue, SentryLevel } from "@helm/api";
-import { PROVIDER_LABEL, VERSION_STATUS_LABEL } from "@helm/api";
+import { VERSION_STATUS_LABEL } from "@helm/api";
+import { providerLabel } from "@helm/domain";
 
 import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
@@ -110,7 +111,7 @@ export function IntegrationsTile({
                   className="font-medium text-meta"
                   style={{ color: bad ? theme.neg : theme.fg }}
                 >
-                  {PROVIDER_LABEL[i.provider] ?? i.provider}
+                  {providerLabel(i.provider)}
                   {bad ? " · hata" : ""}
                 </Text>
               </View>

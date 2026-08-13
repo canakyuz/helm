@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SelectedPropertyId } from "@helm/types";
 
-import { PROVIDER_LABEL } from "./system-health";
+import { providerLabel } from "@helm/domain";
 
 /**
  * Veri kapsami — hangi kaynak susmus, hangi proje hic baglanmamis.
@@ -98,7 +98,7 @@ const WATCHED_METRICS: Record<string, string> = {
   avg_session_sec: "Ortalama oturum süresi",
 };
 
-const label = (source: string): string => PROVIDER_LABEL[source] ?? source;
+const label = (source: string): string => providerLabel(source);
 
 const dayWord = (n: number): string => `${n} gün`;
 
