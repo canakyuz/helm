@@ -1,7 +1,8 @@
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { PROVIDER_LABEL, type IntegrationHealth } from "@helm/api";
+import { type IntegrationHealth } from "@helm/api";
+import { providerLabel } from "@helm/domain";
 import { space } from "@helm/design";
 
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
@@ -103,7 +104,7 @@ function SourceRow({ item, divider }: { item: IntegrationHealth; divider: boolea
         <View style={{ width: 7, height: 7, borderRadius: 999, backgroundColor: dot }} />
         <View className="flex-1">
           <Text className="font-medium text-row text-fg" numberOfLines={1}>
-            {PROVIDER_LABEL[item.provider] ?? item.provider}
+            {providerLabel(item.provider)}
           </Text>
           {item.propertyName != null ? (
             <Text className="mt-[1px] text-meta text-fg3" numberOfLines={1}>
