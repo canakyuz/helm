@@ -18,7 +18,8 @@ export type TileDef = {
   label: string;
   // formatCurrency parametresine düşmesi gereken değerler için flag.
   isCurrency?: boolean;
-  pick: (k: CockpitKpis) => number;
+  /** null = olcum yok — kart "—" gostermeli, 0 DEGIL. */
+  pick: (k: CockpitKpis) => number | null;
 };
 
 // Modüllere göre tile registry. "core" tiles her zaman görünür (modülden bağımsız).

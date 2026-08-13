@@ -2,15 +2,24 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SelectedPropertyId } from "@helm/types";
 import { fetchFxRates, metricValueUsd, type FxRates } from "./fx-rates";
 
+/**
+ * Kokpitin ust satiri.
+ *
+ * OLCUM METRIKLERI NULLABLE: `null` = olcum yok (o kaynak bu projeye bagli
+ * degil), `0` = olculdu ve sifir. Ikisini 0'a katlamak, kullanici olcumu
+ * olmayan bir projede "DAU 0" yazdirir ve bu "kimse oynamiyor" diye okunur —
+ * dogru cevap "bilmiyoruz". Sayaclar (openAlerts, syncIngested) nullable
+ * DEGIL: onlar her zaman sayilabilir, yoklugu gercekten sifirdir.
+ */
 export type CockpitKpis = {
-  mrr: number;
+  mrr: number | null;
   mrrDelta: number | null;
-  dau: number;
+  dau: number | null;
   dauDelta: number | null;
-  totalUsers: number;
-  adRevenue: number;
-  activeSubs: number;
-  newUsers: number;
+  totalUsers: number | null;
+  adRevenue: number | null;
+  activeSubs: number | null;
+  newUsers: number | null;
   openAlerts: number;
   criticalAlerts: number;
   lastSyncAt: string | null;
@@ -51,15 +60,21 @@ function sumByDate(
   return acc;
 }
 
-function latestTwo(map: Map<string, number>): [number, number | null] {
+/**
+ * Serideki son iki olcum.
+ *
+ * `null` = OLCUM YOK, `0` = olculdu ve sifir. Onceki hal ikisini de 0'a
+ * ceviriyordu: kullanici olcumu hic baglanmamis bir projede "DAU 0" yaziyordu
+ * ve bu "kimse oynamiyor" diye okunuyordu — oysa dogru cevap "bilmiyoruz".
+ * Ayni ayrimi gelir tarafinda da yaptik (bkz. revenue-history provisionalSources).
+ */
+function latestTwo(map: Map<string, number>): [number | null, number | null] {
   const sorted = [...map.entries()].sort(([a], [b]) => (a < b ? 1 : -1));
-  const current = sorted[0]?.[1] ?? 0;
-  const previous = sorted[1]?.[1];
-  return [current, previous ?? null];
+  return [sorted[0]?.[1] ?? null, sorted[1]?.[1] ?? null];
 }
 
-function deltaPercent(current: number, previous: number | null): number | null {
-  if (previous === null || previous === 0) return null;
+function deltaPercent(current: number | null, previous: number | null): number | null {
+  if (current === null || previous === null || previous === 0) return null;
   return ((current - previous) / previous) * 100;
 }
 

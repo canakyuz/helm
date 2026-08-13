@@ -48,9 +48,11 @@ export function getWidgetStorageDiagnostics(): WidgetBridgeDiagnostics | null {
 
 export function buildWidgetPayload(
   data: {
-    dau: number;
-    adRevenue: number;
-    mrr: number;
+    // null = olcum yok. Metin alanlari "—" gosterir; SAYISAL alan (liveUsers)
+    // widget'in duzeni icin 0'a duser — orada gosterilecek bir metin yok.
+    dau: number | null;
+    adRevenue: number | null;
+    mrr: number | null;
     mrrDelta: number | null;
     openAlerts: number;
   },
@@ -60,16 +62,20 @@ export function buildWidgetPayload(
 ): HelmWidgetPayload {
   // KPI değerleri USD baz; fxRate = USD → seçili currency.
   const toDisplay = (usdValue: number) => usdValue * fxRate;
+  /** Olcum yoksa "—". Widget'ta sifir yazmak "kazanc yok" diye okunur. */
+  const money = (v: number | null) =>
+    v != null ? formatCurrency(toDisplay(v), currency) : "—";
+  // Toplam ancak IKI bacak da olculduyse anlamli; biri eksikken toplamak
+  // eksigi sifir saymak demektir.
+  const total =
+    data.adRevenue != null && data.mrr != null ? data.adRevenue + data.mrr : null;
 
   return {
-    liveUsers: data.dau,
-    liveUsersText: formatInteger(data.dau),
-    adRevenueText: formatCurrency(toDisplay(data.adRevenue), currency),
-    incomingPaymentsText: formatCurrency(toDisplay(data.mrr), currency),
-    totalRevenueText: formatCurrency(
-      toDisplay(data.adRevenue + data.mrr),
-      currency,
-    ),
+    liveUsers: data.dau ?? 0,
+    liveUsersText: data.dau != null ? formatInteger(data.dau) : "—",
+    adRevenueText: money(data.adRevenue),
+    incomingPaymentsText: money(data.mrr),
+    totalRevenueText: money(total),
     mrrDelta: data.mrrDelta,
     mrrDeltaText:
       data.mrrDelta !== null ? formatDelta(data.mrrDelta) : null,
