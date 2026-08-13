@@ -54,6 +54,8 @@ with psycopg.connect(os.environ["HELM_DB_URL"]) as conn, conn.cursor() as cur:
         "where provider='admob' and enabled"
     )
     integrations = cur.fetchall()
+    cur.execute("select id::text, name from properties")
+    names = dict(cur.fetchall())
 if not integrations:
     sys.exit("Etkin AdMob entegrasyonu yok")
 
@@ -75,7 +77,8 @@ def ymd(ts):
     return {"year": t.tm_year, "month": t.tm_mon, "day": t.tm_mday}
 
 
-rows = []
+rows = []        # metrics_format satirlari
+daily_rows = []  # metrics satirlari (gunluk toplam)
 for project_id, cfg in integrations:
     at = token(cfg)
     # Bitis UTC YARIN: AdMob hesabin saat diliminde raporlar (bizde UTC+3), UTC
@@ -131,11 +134,38 @@ for project_id, cfg in integrations:
         for metric, value in metrics.items():
             rows.append((project_id, date, "admob", metric, fmt, value, currency))
 
-print(f"▸ {len(rows)} satir hazir ({len(integrations)} entegrasyon, {days} gun)")
+    # GUNLUK TOPLAMLAR da yazilir (metrics tablosu). Kirilim tek basina yetmez:
+    # ekranlarin cogu ad_revenue'yu metrics'ten okur, metrics_format yalnizca
+    # "Reklam ekonomisi" kartini besler. Ikisi ayni gecisten cikiyor, yani
+    # birbiriyle tutarli olmak zorunda.
+    per_day = {}
+    for (date, _fmt), metrics in agg.items():
+        acc = per_day.setdefault(date, {})
+        for metric, value in metrics.items():
+            acc[metric] = acc.get(metric, 0) + value
+    for date, metrics in per_day.items():
+        for metric, value in metrics.items():
+            daily_rows.append((project_id, date, "admob", metric, value, currency))
+        # eCPM TOPLANAMAZ — oranlarin ortalamasi oran degildir. Toplanmis gelir
+        # ve gosterimden yeniden hesaplanir (connector ile ayni kural).
+        imp = metrics.get("ad_impressions", 0)
+        rev = metrics.get("ad_revenue", 0)
+        daily_rows.append((project_id, date, "admob", "ad_ecpm",
+                           (rev / imp * 1000) if imp > 0 else 0, currency))
+
+print(f"▸ {len(rows)} kirilim + {len(daily_rows)} gunluk satir hazir "
+      f"({len(integrations)} entegrasyon, {days} gun)")
 
 if dry:
+    by_project = {}
+    for project_id, _d, _s, metric, value, _c in daily_rows:
+        if metric == "ad_revenue":
+            by_project[project_id] = by_project.get(project_id, 0) + value
+    print("\n  proje basina toplam gelir:")
+    for pid, v in sorted(by_project.items(), key=lambda x: -x[1]):
+        print(f"    {names.get(str(pid), str(pid)):<24}{v:>10.2f}")
     seen = {}
-    for _, date, _, metric, fmt, value, _ in rows:
+    for _p, _d, _s, metric, fmt, value, _c in rows:
         if metric == "ad_revenue":
             seen[fmt] = seen.get(fmt, 0) + value
     print("\n  format basina toplam gelir:")
@@ -157,7 +187,20 @@ with psycopg.connect(os.environ["HELM_DB_URL"]) as conn, conn.cursor() as cur:
         """,
         rows,
     )
+    # metrics PK'si (project_id, date, source, metric) — ingest ile AYNI catisma
+    # hedefi, yani betik ile zamanlanmis senkron birbirinin ustune guvenle yazar.
+    cur.executemany(
+        """
+        insert into public.metrics (project_id, date, source, metric, value, currency)
+        values (%s, %s, %s, %s, %s, %s)
+        on conflict (project_id, date, source, metric)
+        do update set value = excluded.value,
+                      currency = excluded.currency,
+                      ingested_at = now()
+        """,
+        daily_rows,
+    )
     conn.commit()
 
-print(f"✓ {len(rows)} satir yazildi")
+print(f"✓ {len(rows)} kirilim + {len(daily_rows)} gunluk satir yazildi")
 PY
