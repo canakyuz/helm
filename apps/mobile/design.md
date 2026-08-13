@@ -46,15 +46,26 @@ Inline kullanım: `import { colors } from "~/theme/tokens"` → `colors.accent`.
 ### Accent & semantik
 | Token | Hex | Anlam |
 |---|---|---|
-| `accent` | `#D4FF4D` | **Marka lime** — CTA, pozitif, canlı |
+| `accent` | `#06B9EF` | **Marka camgöbeği** — CTA, pozitif, canlı |
 | `accentInk` | `#11130A` | Accent dolgu üstü metin |
-| `accentViolet` | `#B89CFF` | Abonelik / MRR |
-| `blue` / `accentInfo` | `#7AA8FF` | Analitik / kullanıcılar |
+| `accentSoft` | `#037FAB` | Accent'in sakin tonu |
+| `accentViolet` | `#DDAEFF` | Abonelik / MRR |
+| `blue` / `accentInfo` | `#82AEF8` | Analitik / kullanıcılar |
 | `green` | `#57E08B` | Sağlık / crash-free / başarı |
 | `accentWarn` | `#FFB100` | Uyarı / degraded / DEMO çipi |
 | `accentDanger` | `#FF5C7A` | Kritik / fatal / refund |
 
+> **Accent artık sabit değil.** Kullanıcı Ayarlar'dan beş aileden birini seçiyor
+> (`packages/design/src/accents.ts`): camgöbeği · teal · indigo · pembe · yeşil.
+> Renkler uygulama ikonundan piksel bazında örneklendi. Yukarıdaki `accent`
+> değeri varsayılan ailenin (camgöbeği) koyu tema değeri; runtime'da `theme.accent`
+> oku. **Tek kaynak `packages/design/src/`** — buradaki `tokens.ts` legacy kopya.
+
 **Kural:** Yeni hex uydurma. Harmonik ton gerekirse alpha-suffix (`` `${colors.accent}40` ``) ya da `rgba(...)`. Her projeye tint olarak bu accent'lerden biri.
+
+**Accent ailesine yeni renk eklerken:** Lab ΔE ölçmeden ekleme. Durum renklerinden
+(`pos`/`neg`/`warn`) ΔE ≥ 30, seri renklerinden ve diğer accent'lerden ΔE ≥ 25
+olmak zorunda — yoksa renk körlüğünde grafikte iki seri ayırt edilemez hale gelir.
 
 ---
 
@@ -96,7 +107,7 @@ Sayılar daima mono + tabular (RN'de Geist Mono zaten tabular akar). Eyebrow `<E
 - iOS 26: `GlassView` (`expo-glass-effect`, `glassEffectStyle="regular"`, `colorScheme="dark"`).
 - iOS<26: `BlurView` (`intensity 60`, `tint dark`). Android: `bgElevated` düz.
 - **KRİTİK:** GlassView koyu zemin üstünde tek başına görünmez → **her zaman** üstüne beyaz-tint fill (`rgba(255,255,255,0.07)`) konur, yoksa kartlar kaybolur. (Bkz memory: liquid-glass-cards-need-fill.)
-- Props: `tone` (default/lime/danger/warn/info/violet), `radius`, `padding`, `glow` (accent ışık lekesi), `deco` (CornerTicks slot), `onPress`, `style`.
+- Props: `tone` (default/accent/danger/warn/info/violet), `radius`, `padding`, `glow` (accent ışık lekesi), `deco` (CornerTicks slot), `onPress`, `style`.
 - `LiquidGlass padding={0} style={{marginHorizontal:16}}` → tek büyük kart deseni.
 
 ### Arka plan — `<LiquidBackground>` (`background.tsx`, Skia)
