@@ -149,24 +149,24 @@ private extension View {
 
 // MARK: - Glass tokens
 
+// Tum degerler HelmDesignTokens.swift'ten — o dosya `bun run gen:design` ile
+// packages/design/src/themes.ts'ten uretilir. Buraya ham hex YAZMA: widget'in
+// eski paleti (grafik gradyani #FF6B6B/#C56CF0/#4834D4, base #0C0C10) sistemde
+// hicbir yerde yoktu, cunku elle kopyalanmisti.
 private enum G {
-  static let base = Color(red: 12 / 255, green: 12 / 255, blue: 16 / 255)
-  static let glass = Color(red: 28 / 255, green: 28 / 255, blue: 34 / 255).opacity(0.72)
-  static let text = Color.white
-  static let mute = Color.white.opacity(0.55)
-  static let dim = Color.white.opacity(0.35)
+  static let base = HelmTokens.bg
+  static let glass = HelmTokens.tile.opacity(0.72)
+  static let text = HelmTokens.fg
+  static let mute = HelmTokens.fg2
+  // fg3 == fg2 bilincli: cam yuzeyde AA ile uc kademeli gri merdiven mumkun
+  // degil, ayrimi tipografi tasiyor (9-10pt, BUYUK HARF). Bkz themes.ts.
+  static let dim = HelmTokens.fg3
   static let track = Color.white.opacity(0.1)
-  static let up = Color(red: 52 / 255, green: 199 / 255, blue: 89 / 255)
-  static let down = Color(red: 255 / 255, green: 69 / 255, blue: 58 / 255)
-  static let barTop = Color(red: 255 / 255, green: 107 / 255, blue: 107 / 255)
-  static let barMid = Color(red: 197 / 255, green: 108 / 255, blue: 240 / 255)
-  static let barBot = Color(red: 72 / 255, green: 52 / 255, blue: 212 / 255)
-
-  static let barGradient = LinearGradient(
-    colors: [barTop, barMid, barBot],
-    startPoint: .top,
-    endPoint: .bottom
-  )
+  static let up = HelmTokens.pos
+  static let down = HelmTokens.neg
+  // Grafik: tek accent, son bar vurgulu (design.md §7 — Bars).
+  static let bar = HelmTokens.accent
+  static let barDim = HelmTokens.accent.opacity(0.42)
 }
 
 // MARK: - Provider
@@ -388,7 +388,10 @@ private struct HelmWeekChart: View {
             RoundedRectangle(cornerRadius: 5, style: .continuous)
               .fill(style == .accented ? Color.primary.opacity(0.15) : G.track)
               .frame(height: barHeight)
-            chartBar(height: max(4, barHeight * CGFloat(weights[i])))
+            chartBar(
+              height: max(4, barHeight * CGFloat(weights[i])),
+              isLast: i == min(7, weights.count) - 1
+            )
           }
           .frame(maxWidth: .infinity)
 
@@ -403,12 +406,12 @@ private struct HelmWeekChart: View {
   }
 
   @ViewBuilder
-  private func chartBar(height: CGFloat) -> some View {
+  private func chartBar(height: CGFloat, isLast: Bool) -> some View {
     let shape = RoundedRectangle(cornerRadius: 5, style: .continuous)
     if style == .accented {
       shape.fill(Color.primary).frame(height: height).widgetAccentable()
     } else {
-      shape.fill(G.barGradient).frame(height: height)
+      shape.fill(isLast ? G.bar : G.barDim).frame(height: height)
     }
   }
 }
