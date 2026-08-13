@@ -2,13 +2,7 @@ import { useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { space } from "@helm/design";
-import {
-  AD_FORMAT_LABEL,
-  PROVIDER_LABEL,
-  VERSION_STATUS_LABEL,
-  instrumentationWarnings,
-  type SentryLevel,
-} from "@helm/api";
+import { AD_FORMAT_LABEL, instrumentationWarnings } from "@helm/api";
 
 import { useSentryIssues } from "~/hooks/use-sentry-issues";
 import { useSystemHealth } from "~/hooks/use-system-health";
@@ -16,27 +10,25 @@ import { useAppVersions } from "~/hooks/use-app-versions";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useGameFunnels } from "~/hooks/use-game-funnels";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
-import { formatInteger, formatPercent, formatRatio, formatRelativeTime } from "~/lib/format";
+import { formatInteger, formatRatio } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
-import { Ring } from "~/components/liquid";
-import { BentoBackground, BentoHeader, BentoTile, Rise } from "~/components/bento";
+import { BentoBackground, BentoHeader, Rise } from "~/components/bento";
 import {
   FunnelTile,
   InstrumentationTile,
   PerfTile,
   type FunnelRow,
 } from "~/components/analytics";
-
-const TOP_CRASHES = 4;
-const TOP_VERSIONS = 4;
-
-/** Crash-free esikleri — tasarimin "Saglikli" metnini bunlar belirler. */
-const HEALTHY_AT = 99.5;
-const DEGRADED_AT = 99.0;
+import {
+  CrashFreeHero,
+  CrashTile,
+  IntegrationsTile,
+  VersionsTile,
+} from "~/components/health";
 
 export default function Health() {
-  const { theme, glass } = useTheme();
+  const { theme } = useTheme();
   const { refreshing, onRefresh } = useScreenRefresh();
   const [replayKey, setReplayKey] = useState(0);
 
@@ -64,15 +56,6 @@ export default function Health() {
 
   const cfSeries = (crashFree.data?.series ?? []).map((p) => p.value);
   const cfNow = cfSeries.length > 0 ? cfSeries[cfSeries.length - 1]! : null;
-
-  const verdict =
-    cfNow == null
-      ? { label: "Veri yok", color: theme.fg3 }
-      : cfNow >= HEALTHY_AT
-        ? { label: "Sağlıklı", color: theme.pos }
-        : cfNow >= DEGRADED_AT
-          ? { label: "Zayıflamış", color: theme.warn }
-          : { label: "Kritik", color: theme.neg };
 
   const f = funnels.data;
   const warnings = f != null ? instrumentationWarnings(f) : [];
@@ -103,13 +86,6 @@ export default function Health() {
     tone: a.failureRate != null && a.failureRate >= 0.3 ? "loss" : "normal",
   }));
 
-  const levelColor = (level: SentryLevel): string => {
-    if (level === "fatal") return theme.neg;
-    if (level === "error") return theme.neg;
-    if (level === "warning") return theme.warn;
-    return theme.fg3;
-  };
-
   return (
     <View className="flex-1 bg-canvas">
       <BentoBackground />
@@ -138,88 +114,17 @@ export default function Health() {
             />
           }
         >
-          {/* Hero — gauge + durum, yan yana */}
           <Rise index={0} replayKey={replayKey}>
-            <BentoTile padding={space.tilePadLg}>
-              <View className="flex-row items-center gap-tilePadLg">
-                <Ring
-                  value={cfNow ?? 0}
-                  size={96}
-                  stroke={9}
-                  color={verdict.color}
-                  // Ray rengi: hairline degil. `theme.line` cam yuzeye karsi
-                  // ~1.3:1 ve halkanin bos kismi goruunmuyordu.
-                  trackColor={glass.chartDim}
-                >
-                  <Text className="font-semibold text-title tracking-tighter text-fg">
-                    {cfNow != null ? formatPercent(cfNow, 1) : "—"}
-                  </Text>
-                </Ring>
-
-                <View className="min-w-0 flex-1">
-                  <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
-                    CRASH-FREE OTURUM
-                  </Text>
-                  <Text
-                    className="mt-[6px] font-semibold text-statSm tracking-tighter"
-                    style={{ color: verdict.color }}
-                  >
-                    {verdict.label}
-                  </Text>
-                  <Text className="mt-xs text-meta leading-[18px] text-fg2">
-                    {issues.length} aktif sorun · {fatalCount} fatal ·{" "}
-                    {formatInteger(totalEvents)} olay
-                  </Text>
-                </View>
-              </View>
-            </BentoTile>
+            <CrashFreeHero
+              crashFree={cfNow}
+              issueCount={issues.length}
+              fatalCount={fatalCount}
+              totalEvents={totalEvents}
+            />
           </Rise>
 
-          {/* Crash'ler */}
           <Rise index={1} replayKey={replayKey}>
-            <BentoTile>
-              <View className="flex-row items-center justify-between">
-                <Text className="font-semibold text-emph tracking-tight text-fg">
-                  Crash'ler
-                </Text>
-                <Text className="font-mono-medium text-[11px] text-fg3">
-                  {issues.length}
-                </Text>
-              </View>
-
-              {issues.length === 0 ? (
-                <Empty
-                  label={issuesQuery.isLoading ? "YÜKLENİYOR…" : "AÇIK CRASH YOK"}
-                />
-              ) : (
-                issues.slice(0, TOP_CRASHES).map((c) => (
-                  <View
-                    key={c.id}
-                    className="flex-row items-center gap-rowY border-t border-line py-rowY"
-                  >
-                    <View
-                      className="h-sm w-sm rounded-bar"
-                      style={{ backgroundColor: levelColor(c.level) }}
-                    />
-                    <View className="min-w-0 flex-1">
-                      <Text
-                        className="font-medium text-row tracking-tight text-fg"
-                        numberOfLines={1}
-                      >
-                        {c.title}
-                      </Text>
-                      <Text className="mt-[1px] text-meta text-fg3" numberOfLines={1}>
-                        {c.propertyName ?? "—"} · {c.level} ·{" "}
-                        {formatRelativeTime(c.lastSeen)}
-                      </Text>
-                    </View>
-                    <Text className="font-mono-semibold text-body text-fg2">
-                      {formatInteger(c.count)}
-                    </Text>
-                  </View>
-                ))
-              )}
-            </BentoTile>
+            <CrashTile issues={issues} loading={issuesQuery.isLoading} />
           </Rise>
 
           {/* Ölçüm şüpheleri — aşağıdaki her okumayı nitelendiriyor */}
@@ -251,93 +156,20 @@ export default function Health() {
             <PerfTile rows={f?.perf ?? []} />
           </Rise>
 
-          {/* Entegrasyonlar */}
           <Rise index={6} replayKey={replayKey}>
-            <BentoTile>
-              <View className="flex-row items-center justify-between">
-                <Text className="font-semibold text-emph tracking-tight text-fg">
-                  Entegrasyonlar
-                </Text>
-                <Text
-                  className="font-mono-medium text-[11px]"
-                  style={{ color: okCount === totalIntegrations ? theme.pos : theme.warn }}
-                >
-                  {okCount}/{totalIntegrations} OK
-                </Text>
-              </View>
-
-              {integrations.length === 0 ? (
-                <Empty
-                  label={healthQuery.isLoading ? "YÜKLENİYOR…" : "ENTEGRASYON YOK"}
-                />
-              ) : (
-                <View className="mt-headerY flex-row flex-wrap gap-sm">
-                  {integrations.map((i) => {
-                    const bad = i.status === "error";
-                    return (
-                      <View
-                        key={i.id}
-                        className="rounded-field px-headerY py-[9px]"
-                        style={{
-                          backgroundColor: bad ? `${theme.neg}1F` : theme.tile2,
-                        }}
-                      >
-                        <Text
-                          className="font-medium text-meta"
-                          style={{ color: bad ? theme.neg : theme.fg }}
-                        >
-                          {PROVIDER_LABEL[i.provider] ?? i.provider}
-                          {bad ? " · hata" : ""}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </View>
-              )}
-            </BentoTile>
+            <IntegrationsTile
+              integrations={integrations}
+              okCount={okCount}
+              total={totalIntegrations}
+              loading={healthQuery.isLoading}
+            />
           </Rise>
 
-          {/* Surumler */}
           <Rise index={7} replayKey={replayKey}>
-            <BentoTile>
-              <Text className="font-semibold text-emph tracking-tight text-fg">
-                Sürümler
-              </Text>
-              {versions.length === 0 ? (
-                <Empty
-                  label={versionsQuery.isLoading ? "YÜKLENİYOR…" : "SÜRÜM KAYDI YOK"}
-                />
-              ) : (
-                versions.slice(0, TOP_VERSIONS).map((v) => (
-                  <View
-                    key={v.id}
-                    className="flex-row items-center gap-rowY border-t border-line py-[11px]"
-                  >
-                    <Text className="w-[52px] font-mono-semibold text-body text-fg">
-                      {v.version}
-                    </Text>
-                    <Text className="flex-1 text-meta text-fg2" numberOfLines={1}>
-                      {v.source === "ios" ? "App Store" : "Play Store"}
-                      {v.status != null ? ` · ${VERSION_STATUS_LABEL[v.status]}` : ""}
-                    </Text>
-                    <Text className="font-mono-medium text-[11px] text-fg3">
-                      {v.releaseDate != null ? formatRelativeTime(v.releaseDate) : "—"}
-                    </Text>
-                  </View>
-                ))
-              )}
-            </BentoTile>
+            <VersionsTile versions={versions} loading={versionsQuery.isLoading} />
           </Rise>
         </ScrollView>
       </SafeAreaView>
     </View>
-  );
-}
-
-function Empty({ label }: { label: string }) {
-  return (
-    <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
-      {label}
-    </Text>
   );
 }

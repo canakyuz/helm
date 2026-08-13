@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
-import { ACCENTS, press, radius as R, space } from "@helm/design";
+import { press, space } from "@helm/design";
 
 import { useProperties } from "~/hooks/use-properties";
 import { useSystemHealth } from "~/hooks/use-system-health";
@@ -16,7 +16,6 @@ import {
   normalizeRevenueMultiplier,
   preferences,
   usePreferences,
-  type Accent,
   type Currency,
   type ThemeMode,
 } from "~/lib/preferences";
@@ -31,6 +30,7 @@ import {
   Rise,
   SolidTile,
 } from "~/components/bento";
+import { AccentPicker, SettingsRow as Row } from "~/components/settings";
 
 const CURRENCIES: readonly Currency[] = ["USD", "EUR", "GBP", "TRY"];
 
@@ -281,109 +281,5 @@ export default function Settings() {
         </ScrollView>
       </SafeAreaView>
     </View>
-  );
-}
-
-/**
- * Ayar satiri. onPress verilmezse basilamaz — dekoratif buton yok.
- *
- * Eski ekranda dokuz satir `onPress={() => haptic.tap()}` idi: basinca titriyor,
- * baska hicbir sey yapmiyordu. Redesign'da tasinmadilar; calismayan bir butonu
- * yeniden cizmek onu calisiyormus gibi gosterir.
- */
-/**
- * Accent secici — renk orneklerinin kendisi.
- *
- * Ad yerine RENK gosteriliyor: "Teal" yazisi hangi tonu sececegini soylemez,
- * ornek soyler. Secili olan halka ile isaretlenir; renk korlugunde de ayirt
- * edilebilsin diye ayrim yalnizca renge birakilmiyor.
- */
-function AccentPicker({ value }: { value: Accent }) {
-  const { name, theme } = useTheme();
-
-  return (
-    <View className="flex-row gap-sm">
-      {ACCENTS.map((a) => {
-        const swatch = name === "dark" ? a.dark : a.light;
-        const active = a.id === value;
-        return (
-          <Pressable
-            key={a.id}
-            onPress={() => {
-              if (active) return;
-              haptic.tap();
-              preferences.setAccent(a.id);
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={a.label}
-            accessibilityState={{ selected: active }}
-          >
-            {({ pressed }) => (
-              <View
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: R.pill,
-                  backgroundColor: swatch,
-                  borderWidth: active ? 2 : 0,
-                  borderColor: theme.fg,
-                  opacity: pressed && !active ? press.opacity : 1,
-                }}
-              />
-            )}
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-function Row({
-  label,
-  sub,
-  value,
-  right,
-  divider,
-  onPress,
-}: {
-  label: string;
-  sub?: string;
-  value?: string;
-  right?: React.ReactNode;
-  divider?: boolean;
-  onPress?: () => void;
-}) {
-  const body = (
-    <View
-      className="flex-row items-center justify-between py-headerY"
-      style={
-        divider
-          ? { borderTopWidth: 1, borderTopColor: "rgba(128,128,128,0.18)" }
-          : undefined
-      }
-    >
-      <View className="mr-rowY flex-1">
-        <Text className="font-medium text-emph text-fg">{label}</Text>
-        {sub != null ? (
-          <Text className="mt-[1px] text-meta text-fg3">{sub}</Text>
-        ) : null}
-      </View>
-      {right ?? (
-        <Text className="font-mono-semibold text-body text-fg2">
-          {value}
-          {onPress != null ? " ›" : ""}
-        </Text>
-      )}
-    </View>
-  );
-
-  if (onPress == null) return body;
-
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button">
-      {({ pressed }) => (
-        <View style={pressed ? { opacity: press.opacity } : undefined}>{body}</View>
-      )}
-    </Pressable>
   );
 }
