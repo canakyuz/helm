@@ -71,10 +71,14 @@ export function InfoRow({
   value: string;
   divider?: boolean;
 }) {
+  // Bolucu `border-line` — tema-duyarli tek token. Elle yazilmis
+  // rgba(128,128,128,0.18) hem acik temada yanlis tarafa dusuyor hem de
+  // olculdugunde cam yuzeyde daha DUSUK kontrast veriyordu (1.24:1 / 1.33:1).
   return (
     <View
-      className="flex-row items-center justify-between py-rowY"
-      style={divider ? { borderTopWidth: 1, borderTopColor: "rgba(128,128,128,0.18)" } : undefined}
+      className={`flex-row items-center justify-between py-rowY${
+        divider === true ? " border-t border-line" : ""
+      }`}
     >
       <Text className="mr-rowY flex-1 font-medium text-row text-fg" numberOfLines={1}>
         {label}
