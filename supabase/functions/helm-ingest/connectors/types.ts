@@ -12,12 +12,18 @@ export interface CountryMetricPoint extends MetricPoint {
   country_code: string; // ISO 3166-1 alpha-2 (US, TR, DE...)
 }
 
-/** Geriye uyumlu connector çıktısı: düz dizi veya {points, byCountry}. */
+/** Reklam formatı kırılımlı metrik noktası — metrics_format tablosuna yazılır. */
+export interface FormatMetricPoint extends MetricPoint {
+  format: string; // app_open, banner, interstitial, rewarded
+}
+
+/** Geriye uyumlu connector çıktısı: düz dizi veya {points, byCountry, byFormat}. */
 export type ConnectorResult =
   | MetricPoint[]
   | {
       points: MetricPoint[];
       byCountry?: CountryMetricPoint[];
+      byFormat?: FormatMetricPoint[];
     };
 
 export type ConnectorConfig = Record<string, string>;
