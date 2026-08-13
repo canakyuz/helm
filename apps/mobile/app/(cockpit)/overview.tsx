@@ -6,6 +6,7 @@ import { space, withAlpha, type Theme } from "@helm/design";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
+import { useDataCoverage } from "~/hooks/use-data-coverage";
 import { useAlerts, useAckAlert } from "~/hooks/use-alerts";
 import { useProperties, type PropertyStatus, type PropertyType } from "~/hooks/use-properties";
 import { usePropertyMetrics } from "~/hooks/use-property-metrics";
@@ -27,7 +28,7 @@ import {
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
-import { Pill, SEVERITY_COLOR, StatTile } from "~/components/overview";
+import { AttentionTile, StatTile, toItems } from "~/components/overview";
 import {
   BentoBackground,
   HERO_NUMBER,
@@ -99,6 +100,7 @@ export default function Overview() {
   const { data: rates } = useFxRates();
   const kpis = useCockpitKpis();
   const alerts = useAlerts();
+  const coverage = useDataCoverage();
   const ack = useAckAlert();
   const properties = useProperties();
   const propMetrics = usePropertyMetrics();
@@ -115,7 +117,7 @@ export default function Overview() {
   const mix = useRevenueMix();
   const { refreshing, onRefresh } = useScreenRefresh();
 
-  const [dismissed, setDismissed] = useState<Record<number, boolean>>({});
+  const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
   // Yenileme sayaci: giris animasyonlarini SADECE taze veri geldiginde tekrar
   // oynatir. Sekme degisiminde oynatmaz — o siklikta animasyon gecikme demek
   // (packages/design/src/motion.ts → replayOn).
@@ -167,7 +169,12 @@ export default function Overview() {
   const dauDay = dayPoint(dauDetail.data?.series ?? [], picked?.date);
   const cfDay = dayPoint(crashFree.data?.series ?? [], picked?.date, "points");
 
-  const openAlerts = (alerts.data ?? []).filter((a) => !dismissed[a.id]);
+  // Kaydedilmis uyarilar ve turetilen veri sinyalleri TEK LISTE: kullanici
+  // acisindan ikisi de "dikkat gerektiren sey". Kaynak ayrimi aksiyonlarda
+  // duruyor (turetilende "Çöz" yok).
+  const attention = toItems(alerts.data ?? [], coverage.data ?? []).filter(
+    (it) => !dismissed[it.key],
+  );
   const allProjects = properties.data ?? [];
   const visibleProjects = allProjects.slice(0, TOP_N);
 
@@ -185,7 +192,7 @@ export default function Overview() {
           onSync={handleRefresh}
           syncing={refreshing}
           picker
-          alertCount={openAlerts.length}
+          alertCount={attention.length}
         />
 
         <ScrollView
@@ -414,50 +421,20 @@ export default function Overview() {
             </BentoTile>
           </Rise>
 
-          {/* Dikkat gerekiyor */}
-          {openAlerts.length > 0 ? (
-            <Rise index={6} replayKey={replayKey}>
-              <BentoTile>
-                <Text className="font-semibold text-emph tracking-tight text-fg">
-                  Dikkat gerekiyor
-                </Text>
-                {openAlerts.slice(0, 2).map((a) => (
-                  <View
-                    key={a.id}
-                    className="mt-headerY border-l-2 pl-headerY"
-                    // Tasarim tek kirmizi kenar kullaniyordu; elimizde gercek
-                    // siddet var, onu gostermemek bilgi saklamak olurdu.
-                    style={{ borderLeftColor: SEVERITY_COLOR(theme, a.severity) }}
-                  >
-                    <Text className="font-medium text-row tracking-tight text-fg">
-                      {a.ruleName}
-                    </Text>
-                    <Text className="mt-[3px] text-meta leading-[18px] text-fg2">
-                      {a.message} · {formatRelativeTime(a.triggeredAt)}
-                    </Text>
-                    <View className="mt-headerY flex-row gap-sm">
-                      <Pill
-                        label="Çöz"
-                        background={theme.accent}
-                        color={theme.accentInk}
-                        onPress={() => {
-                          haptic.tap();
-                          ack.mutate(a.id);
-                          setDismissed((d) => ({ ...d, [a.id]: true }));
-                        }}
-                      />
-                      <Pill
-                        label="Sustur"
-                        background={theme.tile2}
-                        color={theme.fg}
-                        onPress={() => setDismissed((d) => ({ ...d, [a.id]: true }))}
-                      />
-                    </View>
-                  </View>
-                ))}
-              </BentoTile>
-            </Rise>
-          ) : null}
+          {/* Dikkat gerekiyor — kaydedilmis uyarilar + turetilen veri sinyalleri */}
+          <Rise index={6} replayKey={replayKey}>
+            <AttentionTile
+              items={attention}
+              onResolve={(eventId, key) => {
+                ack.mutate(eventId);
+                setDismissed((d) => ({ ...d, [key]: true }));
+              }}
+              onMute={(key) => {
+                haptic.tap();
+                setDismissed((d) => ({ ...d, [key]: true }));
+              }}
+            />
+          </Rise>
         </ScrollView>
       </SafeAreaView>
     </View>
