@@ -4,6 +4,7 @@ import { PROVIDER_FIELDS, type FieldDef, type ProviderName } from "@helm/domain"
 import { press, radius as R, space } from "@helm/design";
 
 import { haptic } from "~/lib/haptics";
+import { useT } from "~/lib/i18n";
 import { useTheme } from "~/theme/use-theme";
 
 type Props = {
@@ -30,6 +31,7 @@ export function IntegrationForm({
   onSubmit,
 }: Props) {
   const { theme } = useTheme();
+  const t = useT();
   const fields = PROVIDER_FIELDS[provider];
   const [values, setValues] = useState<Record<string, string>>(() => ({ ...initial }));
 
@@ -83,7 +85,7 @@ export function IntegrationForm({
               className="font-semibold text-emph"
               style={{ color: canSubmit ? theme.accentInk : theme.fg3 }}
             >
-              {submitting ? "Kaydediliyor…" : submitLabel}
+              {submitting ? t("Kaydediliyor…") : submitLabel}
             </Text>
           </View>
         )}
@@ -91,7 +93,9 @@ export function IntegrationForm({
 
       {missing.length > 0 ? (
         <Text className="text-meta text-fg3">
-          Eksik zorunlu alan: {missing.map((f) => f.label.split(" (")[0]).join(", ")}
+          {t("Eksik zorunlu alan: {list}", {
+            list: missing.map((f) => f.label.split(" (")[0]).join(", "),
+          })}
         </Text>
       ) : null}
     </View>
@@ -110,11 +114,12 @@ function Field({
   onChange: (v: string) => void;
 }) {
   const { theme } = useTheme();
+  const t = useT();
 
   // Kayitli sir: DEGER GELMEZ. Kullaniciya "dolu ama gostermiyorum" denir;
   // bos birakirsa mevcut deger korunur (bkz. updateIntegrationConfig).
   const placeholder = alreadySet
-    ? "••••••••  kayıtlı — değiştirmek için yeni değer gir"
+    ? t("••••••••  kayıtlı — değiştirmek için yeni değer gir")
     : def.placeholder;
 
   return (
@@ -122,7 +127,7 @@ function Field({
       <Text className="font-medium text-row text-fg">
         {def.label}
         {def.optional === true ? (
-          <Text className="text-meta text-fg3">  opsiyonel</Text>
+          <Text className="text-meta text-fg3">  {t("opsiyonel")}</Text>
         ) : null}
       </Text>
       <TextInput

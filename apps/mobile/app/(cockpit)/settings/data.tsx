@@ -6,6 +6,7 @@ import { space } from "@helm/design";
 import { useRevenueGoal, useSetRevenueGoal } from "~/hooks/use-revenue-goal";
 import { formatCurrency } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
+import { useT } from "~/lib/i18n";
 import {
   normalizeRevenueMultiplier,
   preferences,
@@ -22,6 +23,7 @@ const CURRENCIES: readonly Currency[] = ["USD", "EUR", "GBP", "TRY"];
 export default function DataSettings() {
   const router = useRouter();
   const { theme } = useTheme();
+  const t = useT();
   const { currency, revenueMultiplier, prioritizeRevenueRequests } = usePreferences();
   const goal = useRevenueGoal();
   const setGoal = useSetRevenueGoal();
@@ -32,8 +34,8 @@ export default function DataSettings() {
     // kaydediliyor. Sormadan kaydetmek sessiz bir tuzak — "90000" yazan biri
     // TL sanip GBP kaydedebiliyordu (olculdu: 90.000 GBP hedefi ~₺5,8M cikti).
     Alert.prompt(
-      `Aylık gelir hedefi (${currency})`,
-      `Tutarı ${currency} cinsinden gir. İlerleme ayın gerçek gelir toplamından hesaplanır. Para birimini değiştirmek için önce yukarıdan seç.`,
+      t("Aylık gelir hedefi ({cur})", { cur: currency }),
+      t("Tutarı {cur} cinsinden gir. İlerleme ayın gerçek gelir toplamından hesaplanır. Para birimini değiştirmek için önce yukarıdan seç.", { cur: currency }),
       (text) => {
         const n = Number((text ?? "").replace(/[^\d.]/g, ""));
         if (!Number.isFinite(n) || n < 0) return;
@@ -48,8 +50,8 @@ export default function DataSettings() {
   function promptMultiplier() {
     haptic.tap();
     Alert.prompt(
-      "Gelir çarpanı",
-      "1 ile 100 arası bir değer. Yalnızca yerel gösterimi etkiler, veriyi değiştirmez.",
+      t("Gelir çarpanı"),
+      t("1 ile 100 arası bir değer. Yalnızca yerel gösterimi etkiler, veriyi değiştirmez."),
       (text) => {
         const n = Number((text ?? "").replace(",", ".").replace(/[^\d.]/g, ""));
         if (!Number.isFinite(n)) return;
@@ -65,7 +67,7 @@ export default function DataSettings() {
     <View className="flex-1 bg-canvas">
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
-        <BentoHeader eyebrow="AYARLAR" title="Veri ve biçim" onBack={() => router.back()} />
+        <BentoHeader eyebrow={t("AYARLAR")} title={t("Veri ve biçim")} onBack={() => router.back()} />
 
         <ScrollView
           contentContainerStyle={{
@@ -80,8 +82,8 @@ export default function DataSettings() {
               {/* Para birimi artik burada, "Gorunum"de degil: hangi kur ile
                   okudugun bir bicimlendirme karari, gorsel tercih degil. */}
               <Row
-                label="Para birimi"
-                sub="tüm tutarlar bu birime çevrilir"
+                label={t("Para birimi")}
+                sub={t("tüm tutarlar bu birime çevrilir")}
                 right={
                   <BentoSegment
                     options={CURRENCIES}
@@ -91,7 +93,7 @@ export default function DataSettings() {
                 }
               />
               <Row
-                label="Aylık gelir hedefi"
+                label={t("Aylık gelir hedefi")}
                 divider
                 onPress={promptGoal}
                 // Kayitli para birimiyle gosterilir (secili olanla DEGIL): hedef
@@ -99,19 +101,19 @@ export default function DataSettings() {
                 value={
                   goal.data?.target_amount != null
                     ? formatCurrency(goal.data.target_amount, goal.data.currency)
-                    : "Belirle"
+                    : t("Belirle")
                 }
               />
               <Row
-                label="Gelir çarpanı"
-                sub="yalnızca yerel gösterim"
+                label={t("Gelir çarpanı")}
+                sub={t("yalnızca yerel gösterim")}
                 divider
                 onPress={promptMultiplier}
                 value={`×${revenueMultiplier}`}
               />
               <Row
-                label="Gelir önceliği"
-                sub="gelir sorgusu önce yüklensin"
+                label={t("Gelir önceliği")}
+                sub={t("gelir sorgusu önce yüklensin")}
                 divider
                 right={
                   <Toggle

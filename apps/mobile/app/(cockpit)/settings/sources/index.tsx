@@ -9,12 +9,14 @@ import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { useSystemHealth } from "~/hooks/use-system-health";
 import { formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
+import { useT } from "~/lib/i18n";
 import { useTheme } from "~/theme/use-theme";
 import { BentoBackground, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
 
 export default function Sources() {
   const router = useRouter();
   const { theme } = useTheme();
+  const t = useT();
   const { refreshing, onRefresh } = useScreenRefresh();
   const health = useSystemHealth();
 
@@ -25,8 +27,8 @@ export default function Sources() {
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="AYARLAR"
-          title="Kaynaklar"
+          eyebrow={t("AYARLAR")}
+          title={t("Kaynaklar")}
           onBack={() => router.back()}
           onSync={onRefresh}
           syncing={refreshing}
@@ -50,11 +52,11 @@ export default function Sources() {
           <Rise index={0}>
             <BentoTile>
               {health.isLoading && health.data == null ? (
-                <Empty label="YÜKLENİYOR" />
+                <Empty label={t("YÜKLENİYOR")} />
               ) : health.isError ? (
-                <Empty label="KAYNAKLAR OKUNAMADI" />
+                <Empty label={t("KAYNAKLAR OKUNAMADI")} />
               ) : integrations.length === 0 ? (
-                <Empty label="HENÜZ KAYNAK YOK" />
+                <Empty label={t("HENÜZ KAYNAK YOK")} />
               ) : (
                 integrations.map((it, i) => (
                   <SourceRow
@@ -90,7 +92,7 @@ export default function Sources() {
                       className="font-semibold text-emph"
                       style={{ color: theme.accent }}
                     >
-                      Yeni kaynak bağla
+                      {t("Yeni kaynak bağla")}
                     </Text>
                   </BentoTile>
                 </View>
@@ -120,16 +122,17 @@ function SourceRow({
   onPress: () => void;
 }) {
   const { theme } = useTheme();
+  const t = useT();
 
   const dot =
     item.status === "ok" ? theme.pos : item.status === "error" ? theme.neg : theme.warn;
 
   const right =
     item.status === "error"
-      ? "HATA"
+      ? t("HATA")
       : item.lastSyncedAt != null
         ? formatRelativeTime(item.lastSyncedAt)
-        : "BEKLİYOR";
+        : t("BEKLİYOR");
 
   return (
     <Pressable onPress={onPress} accessibilityRole="button">
@@ -147,7 +150,7 @@ function SourceRow({
             <View className="flex-1">
               <Text className="font-medium text-row text-fg" numberOfLines={1}>
                 {providerLabel(item.provider)}
-                {item.enabled ? "" : " · kapalı"}
+                {item.enabled ? "" : t(" · kapalı")}
               </Text>
               {item.propertyName != null ? (
                 <Text className="mt-[1px] text-meta text-fg3" numberOfLines={1}>

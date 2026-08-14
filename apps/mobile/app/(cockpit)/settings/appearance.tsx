@@ -1,28 +1,44 @@
+import { useMemo } from "react";
 import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { space } from "@helm/design";
 
-import { preferences, usePreferences } from "~/lib/preferences";
+import { useT } from "~/lib/i18n";
+import { preferences, usePreferences, type Language, type ThemeMode } from "~/lib/preferences";
 import { BentoBackground, BentoHeader, BentoSegment, BentoTile, Rise } from "~/components/bento";
 import {
   AccentPicker,
-  LABEL_TO_MODE,
-  MODE_TO_LABEL,
+  MODE_LABEL_KEY,
   SettingsRow as Row,
-  THEME_LABELS,
+  THEME_MODES,
 } from "~/components/settings";
+
+const LANGUAGES: readonly Language[] = ["tr", "en"];
+const LANGUAGE_LABEL: Record<Language, string> = { tr: "Türkçe", en: "English" };
 
 export default function Appearance() {
   const router = useRouter();
-  const { themeMode, accent } = usePreferences();
+  const t = useT();
+  const { themeMode, accent, language } = usePreferences();
+
+  // Etiket ceviriyle degistigi icin ters esleme RENDER SIRASINDA kuruluyor;
+  // sabit bir tabloda tutulamaz (bkz. labels.ts).
+  const themeOptions = useMemo(() => THEME_MODES.map((m) => t(MODE_LABEL_KEY[m])), [t]);
+  const labelToMode = useMemo(() => {
+    const map: Record<string, ThemeMode> = {};
+    THEME_MODES.forEach((m, i) => {
+      map[themeOptions[i]!] = m;
+    });
+    return map;
+  }, [themeOptions]);
 
   return (
     <View className="flex-1 bg-canvas">
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         {/* onSync yok: burada yenilenecek uzak veri yok, tercihler yerel. */}
-        <BentoHeader eyebrow="AYARLAR" title="Görünüm" onBack={() => router.back()} />
+        <BentoHeader eyebrow={t("AYARLAR")} title={t("Görünüm")} onBack={() => router.back()} />
 
         <ScrollView
           contentContainerStyle={{
@@ -35,22 +51,39 @@ export default function Appearance() {
           <Rise index={0}>
             <BentoTile>
               <Row
-                label="Tema"
-                sub="sistem / koyu / açık"
+                label={t("Tema")}
+                sub={t("sistem / koyu / açık")}
                 right={
                   <BentoSegment
-                    options={THEME_LABELS}
-                    value={MODE_TO_LABEL[themeMode]}
-                    onChange={(l) => preferences.setThemeMode(LABEL_TO_MODE[l])}
+                    options={themeOptions}
+                    value={t(MODE_LABEL_KEY[themeMode])}
+                    onChange={(l) => {
+                      const mode = labelToMode[l];
+                      if (mode != null) preferences.setThemeMode(mode);
+                    }}
                     mono={false}
                   />
                 }
               />
-              {/* Dil satiri BURAYA gelecek (i18n isi). Simdi eklenmiyor: calismayan
-                  bir satir koymak `rows.tsx`'te bilerek temizlenen hatanin aynisi. */}
               <Row
-                label="Vurgu rengi"
-                sub="dolgu ve aktif durumlar"
+                label={t("Dil")}
+                sub={t("arayüz dili")}
+                divider
+                right={
+                  <BentoSegment
+                    options={LANGUAGES.map((l) => LANGUAGE_LABEL[l])}
+                    value={LANGUAGE_LABEL[language]}
+                    onChange={(label) => {
+                      const next = LANGUAGES.find((l) => LANGUAGE_LABEL[l] === label);
+                      if (next != null) preferences.setLanguage(next);
+                    }}
+                    mono={false}
+                  />
+                }
+              />
+              <Row
+                label={t("Vurgu rengi")}
+                sub={t("dolgu ve aktif durumlar")}
                 divider
                 right={<AccentPicker value={accent} />}
               />

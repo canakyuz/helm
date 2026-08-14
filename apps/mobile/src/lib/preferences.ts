@@ -10,8 +10,17 @@ export type SelectedPropertyId = string | "all";
 export type ThemeMode = "system" | "dark" | "light";
 /** Accent ailesi kimligi — packages/design/src/accents.ts ile ayni kume. */
 export type Accent = AccentId;
+/**
+ * Arayuz dili. Kaynak dil TR; EN bir ceviri tablosu (bkz. src/lib/i18n.ts).
+ *
+ * CIHAZ DILI OKUNMUYOR: expo-localization native bir modul, eklemek yeni bir
+ * build gerektirir. Tek kullanicili bir uygulamada varsayilani TR birakip
+ * gecisi elle sunmak ayni sonucu bedava veriyor.
+ */
+export type Language = "tr" | "en";
 
 const THEME_MODES: readonly ThemeMode[] = ["system", "dark", "light"];
+const LANGUAGES: readonly Language[] = ["tr", "en"];
 
 export type Preferences = {
   selectedPropertyId: SelectedPropertyId;
@@ -20,6 +29,7 @@ export type Preferences = {
   prioritizeRevenueRequests: boolean;
   themeMode: ThemeMode;
   accent: Accent;
+  language: Language;
 };
 
 const KEYS = {
@@ -29,6 +39,7 @@ const KEYS = {
   prioritizeRevenueRequests: "pref.prioritizeRevenueRequests",
   themeMode: "pref.themeMode",
   accent: "pref.accent",
+  language: "pref.language",
 } as const;
 
 const DEFAULTS: Preferences = {
@@ -38,6 +49,7 @@ const DEFAULTS: Preferences = {
   prioritizeRevenueRequests: true,
   themeMode: "system",
   accent: DEFAULT_ACCENT,
+  language: "tr",
 };
 
 const MIN_REVENUE_MULTIPLIER = 1;
@@ -61,12 +73,18 @@ function readAccent(): Accent {
   return ACCENTS.some((a) => a.id === raw) ? (raw as Accent) : DEFAULTS.accent;
 }
 
+function readLanguage(): Language {
+  const raw = storage.getString(KEYS.language);
+  return LANGUAGES.includes(raw as Language) ? (raw as Language) : DEFAULTS.language;
+}
+
 function readCurrent(): Preferences {
   const prioritizeRevenueRequests = storage.getString(KEYS.prioritizeRevenueRequests);
 
   return {
     themeMode: readThemeMode(),
     accent: readAccent(),
+    language: readLanguage(),
     selectedPropertyId:
       storage.getString(KEYS.selectedPropertyId) ?? DEFAULTS.selectedPropertyId,
     currency:
@@ -118,6 +136,9 @@ export const preferences = {
   },
   setAccent(accent: Accent) {
     storage.set(KEYS.accent, accent);
+  },
+  setLanguage(language: Language) {
+    storage.set(KEYS.language, language);
   },
   setRevenueMultiplier(multiplier: number) {
     storage.set(

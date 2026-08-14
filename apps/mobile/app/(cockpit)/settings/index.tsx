@@ -8,15 +8,17 @@ import { useProperties } from "~/hooks/use-properties";
 import { useSystemHealth } from "~/hooks/use-system-health";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { haptic } from "~/lib/haptics";
+import { useT } from "~/lib/i18n";
 import { usePreferences } from "~/lib/preferences";
 import { supabase } from "~/lib/supabase";
 import { useTheme } from "~/theme/use-theme";
 import { BentoBackground, BentoHeader, BentoTile, Rise, SolidTile } from "~/components/bento";
-import { MODE_TO_LABEL, SettingsRow as Row } from "~/components/settings";
+import { MODE_LABEL_KEY, SettingsRow as Row } from "~/components/settings";
 
 export default function SettingsHub() {
   const router = useRouter();
   const { theme } = useTheme();
+  const t = useT();
   const { currency, revenueMultiplier, themeMode, accent } = usePreferences();
   const { refreshing, onRefresh } = useScreenRefresh();
 
@@ -31,10 +33,10 @@ export default function SettingsHub() {
 
   function confirmSignOut() {
     haptic.tap();
-    Alert.alert("Çıkış yap", "Tekrar girmek için e-posta bağlantısı gerekecek.", [
-      { text: "Vazgeç", style: "cancel" },
+    Alert.alert(t("Çıkış yap"), t("Tekrar girmek için e-posta bağlantısı gerekecek."), [
+      { text: t("Vazgeç"), style: "cancel" },
       {
-        text: "Çıkış yap",
+        text: t("Çıkış yap"),
         style: "destructive",
         onPress: () => void supabase.auth.signOut(),
       },
@@ -47,16 +49,16 @@ export default function SettingsHub() {
     healthQuery.isLoading && healthQuery.data == null
       ? "—"
       : errorCount > 0
-        ? `${okCount} bağlı · ${errorCount} hata`
-        : `${okCount} bağlı`;
+        ? t("{n} bağlı · {m} hata", { n: okCount, m: errorCount })
+        : t("{n} bağlı", { n: okCount });
 
   return (
     <View className="flex-1 bg-canvas">
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="SİSTEM"
-          title="Ayarlar"
+          eyebrow={t("SİSTEM")}
+          title={t("Ayarlar")}
           onSync={onRefresh}
           syncing={refreshing}
         />
@@ -98,10 +100,10 @@ export default function SettingsHub() {
                 </SolidTile>
                 <View className="flex-1">
                   <Text className="font-semibold text-title tracking-tighter text-fg">
-                    Kişisel çalışma alanı
+                    {t("Kişisel çalışma alanı")}
                   </Text>
                   <Text className="mt-xs font-mono-medium text-eyebrow tracking-wide text-fg3">
-                    {projectCount} PROJE · {sources} KAYNAK
+                    {t("{n} PROJE · {m} KAYNAK", { n: projectCount, m: sources })}
                   </Text>
                 </View>
               </View>
@@ -111,14 +113,14 @@ export default function SettingsHub() {
           <Rise index={1}>
             <BentoTile>
               <Row
-                label="Görünüm"
-                sub="tema ve vurgu rengi"
-                value={`${MODE_TO_LABEL[themeMode]} · ${accentById(accent).label}`}
+                label={t("Görünüm")}
+                sub={t("tema ve vurgu rengi")}
+                value={`${t(MODE_LABEL_KEY[themeMode])} · ${t(accentById(accent).label)}`}
                 onPress={() => router.push("/settings/appearance")}
               />
               <Row
-                label="Veri ve biçim"
-                sub="para birimi, hedef, çarpan"
+                label={t("Veri ve biçim")}
+                sub={t("para birimi, hedef, çarpan")}
                 divider
                 // Para birimi eski ekranda "Gorunum" grubundaydi. Bicimlendirme
                 // ayari gorunum degil: hangi kur ile okudugun veriyle ilgili.
@@ -126,15 +128,15 @@ export default function SettingsHub() {
                 onPress={() => router.push("/settings/data")}
               />
               <Row
-                label="Kaynaklar"
-                sub="bağlı entegrasyonlar"
+                label={t("Kaynaklar")}
+                sub={t("bağlı entegrasyonlar")}
                 divider
                 value={sourcesSummary}
                 onPress={() => router.push("/settings/sources")}
               />
               <Row
-                label="Hakkında"
-                sub="sürüm ve senkron durumu"
+                label={t("Hakkında")}
+                sub={t("sürüm ve senkron durumu")}
                 divider
                 value={version}
                 onPress={() => router.push("/settings/about")}
@@ -148,7 +150,7 @@ export default function SettingsHub() {
                 <View style={pressed ? { opacity: press.opacity } : undefined}>
                   <BentoTile padding={space.tilePadSm}>
                     <Text className="font-semibold text-emph" style={{ color: theme.neg }}>
-                      Çıkış yap
+                      {t("Çıkış yap")}
                     </Text>
                   </BentoTile>
                 </View>
