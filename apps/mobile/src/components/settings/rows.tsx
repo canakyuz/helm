@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { ACCENTS, press, radius as R } from "@helm/design";
 
 import { haptic } from "~/lib/haptics";
+import { useT } from "~/lib/i18n";
 import { preferences, type Accent } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
 
@@ -71,6 +72,7 @@ export function SettingsRow({
  */
 export function AccentPicker({ value }: { value: Accent }) {
   const { name, theme } = useTheme();
+  const t = useT();
 
   return (
     <View className="flex-row gap-sm">
@@ -86,7 +88,7 @@ export function AccentPicker({ value }: { value: Accent }) {
               preferences.setAccent(a.id);
             }}
             accessibilityRole="button"
-            accessibilityLabel={a.label}
+            accessibilityLabel={t(a.label)}
             accessibilityState={{ selected: active }}
           >
             {({ pressed }) => (

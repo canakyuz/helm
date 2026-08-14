@@ -19,6 +19,7 @@ import {
   useUpdateIntegrationConfig,
 } from "~/hooks/use-integrations";
 import { haptic } from "~/lib/haptics";
+import { useT } from "~/lib/i18n";
 import { useTheme } from "~/theme/use-theme";
 import { Toggle } from "~/components/liquid";
 import { BentoBackground, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
@@ -27,6 +28,7 @@ import { IntegrationForm, SettingsRow as Row } from "~/components/settings";
 export default function SourceDetail() {
   const router = useRouter();
   const { theme } = useTheme();
+  const t = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const config = useIntegrationConfig(id ?? "");
@@ -40,12 +42,14 @@ export default function SourceDetail() {
     if (data == null) return;
     haptic.tap();
     Alert.alert(
-      "Kaynağı kaldır",
-      `${providerLabel(data.provider)} bağlantısı ve ayarları silinecek. Toplanmış metrikler kalır.`,
+      t("Kaynağı kaldır"),
+      t("{p} bağlantısı ve ayarları silinecek. Toplanmış metrikler kalır.", {
+        p: providerLabel(data.provider),
+      }),
       [
-        { text: "Vazgeç", style: "cancel" },
+        { text: t("Vazgeç"), style: "cancel" },
         {
-          text: "Kaldır",
+          text: t("Kaldır"),
           style: "destructive",
           onPress: () => remove.mutate(data.id, { onSuccess: () => router.back() }),
         },
@@ -58,8 +62,8 @@ export default function SourceDetail() {
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="KAYNAK"
-          title={data != null ? providerLabel(data.provider) : "Kaynak"}
+          eyebrow={t("KAYNAK")}
+          title={data != null ? providerLabel(data.provider) : t("Kaynak")}
           onBack={() => router.back()}
         />
 
@@ -80,13 +84,13 @@ export default function SourceDetail() {
             {config.isLoading && data == null ? (
               <Rise index={0}>
                 <BentoTile>
-                  <Empty label="YÜKLENİYOR" />
+                  <Empty label={t("YÜKLENİYOR")} />
                 </BentoTile>
               </Rise>
             ) : config.isError || data == null ? (
               <Rise index={0}>
                 <BentoTile>
-                  <Empty label="KAYNAK OKUNAMADI" />
+                  <Empty label={t("KAYNAK OKUNAMADI")} />
                 </BentoTile>
               </Rise>
             ) : (
@@ -94,8 +98,8 @@ export default function SourceDetail() {
                 <Rise index={0}>
                   <BentoTile>
                     <Row
-                      label="Etkin"
-                      sub={data.enabled ? "senkrona dahil" : "senkron dışı"}
+                      label={t("Etkin")}
+                      sub={data.enabled ? t("senkrona dahil") : t("senkron dışı")}
                       right={
                         <Toggle
                           on={data.enabled}
@@ -111,7 +115,7 @@ export default function SourceDetail() {
                     {data.lastSyncStatus === "error" && data.lastSyncError != null ? (
                       <View className="border-t border-line py-rowY">
                         <Text className="font-medium text-row" style={{ color: theme.neg }}>
-                          Son senkron hatası
+                          {t("Son senkron hatası")}
                         </Text>
                         {/* Ham hata mesaji: tek kullanicili ic arac, teshis
                             genellestirmekten daha degerli. */}
@@ -129,7 +133,7 @@ export default function SourceDetail() {
                       provider={data.provider}
                       initial={data.config}
                       secretKeysSet={data.secretKeysSet}
-                      submitLabel="Kaydet"
+                      submitLabel={t("Kaydet")}
                       submitting={update.isPending}
                       onSubmit={(patch) => update.mutate({ id: data.id, patch })}
                     />
@@ -147,7 +151,7 @@ export default function SourceDetail() {
                             className="font-semibold text-emph"
                             style={{ color: theme.neg }}
                           >
-                            Kaynağı kaldır
+                            {t("Kaynağı kaldır")}
                           </Text>
                         </BentoTile>
                       </View>

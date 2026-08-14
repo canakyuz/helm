@@ -6,6 +6,7 @@ import { space } from "@helm/design";
 
 import { useAlertRulesCount } from "~/hooks/use-property-metrics";
 import { useProperties } from "~/hooks/use-properties";
+import { useT } from "~/lib/i18n";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { useSystemHealth } from "~/hooks/use-system-health";
 import { formatRelativeTime } from "~/lib/format";
@@ -15,6 +16,7 @@ import { BentoBackground, BentoHeader, BentoTile, InfoRow, Rise } from "~/compon
 export default function About() {
   const router = useRouter();
   const { theme } = useTheme();
+  const t = useT();
   const { refreshing, onRefresh } = useScreenRefresh();
 
   const health = useSystemHealth();
@@ -30,8 +32,8 @@ export default function About() {
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="AYARLAR"
-          title="Hakkında"
+          eyebrow={t("AYARLAR")}
+          title={t("Hakkında")}
           onBack={() => router.back()}
           onSync={onRefresh}
           syncing={refreshing}
@@ -54,23 +56,23 @@ export default function About() {
         >
           <Rise index={0}>
             <BentoTile>
-              <InfoRow label="Sürüm" value={version} />
+              <InfoRow label={t("Sürüm")} value={version} />
               <InfoRow
-                label="Son senkron"
+                label={t("Son senkron")}
                 divider
                 value={lastSync != null ? formatRelativeTime(lastSync) : "—"}
               />
               {/* Cron saat basi calisiyor; 24 saatte beklenen ~24 tur. Ham sayi
                   "calisiyor mu" sorusunu tek bakista cevapliyor. */}
-              <InfoRow label="Son 24 saat" divider value={`${runs24h} tur`} />
+              <InfoRow label={t("Son 24 saat")} divider value={t("{n} tur", { n: runs24h })} />
             </BentoTile>
           </Rise>
 
           <Rise index={1}>
             <BentoTile>
-              <InfoRow label="Projeler" value={String(properties.data?.length ?? 0)} />
+              <InfoRow label={t("Projeler")} value={String(properties.data?.length ?? 0)} />
               <InfoRow
-                label="Uyarı kuralları"
+                label={t("Uyarı kuralları")}
                 divider
                 value={String(alertRules.data ?? 0)}
               />

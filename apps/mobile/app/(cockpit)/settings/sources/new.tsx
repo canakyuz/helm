@@ -8,6 +8,7 @@ import { press, radius as R, space, withAlpha } from "@helm/design";
 import { useCreateIntegration } from "~/hooks/use-integrations";
 import { useProperties } from "~/hooks/use-properties";
 import { haptic } from "~/lib/haptics";
+import { useT } from "~/lib/i18n";
 import { useTheme } from "~/theme/use-theme";
 import { BentoBackground, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
 import { IntegrationForm } from "~/components/settings";
@@ -15,6 +16,7 @@ import { IntegrationForm } from "~/components/settings";
 export default function NewSource() {
   const router = useRouter();
   const { theme } = useTheme();
+  const t = useT();
   const properties = useProperties();
   const create = useCreateIntegration();
 
@@ -29,7 +31,7 @@ export default function NewSource() {
     <View className="flex-1 bg-canvas">
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
-        <BentoHeader eyebrow="KAYNAKLAR" title="Yeni kaynak" onBack={() => router.back()} />
+        <BentoHeader eyebrow={t("KAYNAKLAR")} title={t("Yeni kaynak")} onBack={() => router.back()} />
 
         <KeyboardAvoidingView
           className="flex-1"
@@ -48,10 +50,10 @@ export default function NewSource() {
             <Rise index={0}>
               <BentoTile>
                 <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-                  PROJE
+                  {t("PROJE")}
                 </Text>
                 {projects.length === 0 ? (
-                  <Empty label="ÖNCE PROJE GEREKLİ" />
+                  <Empty label={t("ÖNCE PROJE GEREKLİ")} />
                 ) : (
                   <View className="mt-sm flex-row flex-wrap gap-sm">
                     {projects.map((p) => (
@@ -70,7 +72,7 @@ export default function NewSource() {
             <Rise index={1}>
               <BentoTile>
                 <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-                  SAĞLAYICI
+                  {t("SAĞLAYICI")}
                 </Text>
                 <View className="mt-sm flex-row flex-wrap gap-sm">
                   {PROVIDERS.map((p) => (
@@ -90,7 +92,7 @@ export default function NewSource() {
                 <BentoTile>
                   <IntegrationForm
                     provider={provider}
-                    submitLabel="Bağla"
+                    submitLabel={t("Bağla")}
                     submitting={create.isPending}
                     onSubmit={(config) =>
                       create.mutate(
@@ -106,8 +108,8 @@ export default function NewSource() {
                 <BentoTile>
                   <Text className="text-meta text-fg3">
                     {effectiveProjectId == null
-                      ? "Devam etmek için proje seç."
-                      : "Devam etmek için sağlayıcı seç."}
+                      ? t("Devam etmek için proje seç.")
+                      : t("Devam etmek için sağlayıcı seç.")}
                   </Text>
                 </BentoTile>
               </Rise>
