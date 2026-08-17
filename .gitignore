@@ -12,3 +12,6 @@ dist/
 
 # Ajan/editör yerel ayarları
 .claude/settings.local.json
+.zed
+.idea
+.claude
