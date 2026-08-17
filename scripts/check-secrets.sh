@@ -65,19 +65,19 @@ case "$MODE" in
     ;;
   history)
     # Tüm ref'lerdeki her blob. 2MB üstü binary atlanır.
-    git rev-list --objects --all > /tmp/.secrets-objects.$$
-    awk '{print $1}' /tmp/.secrets-objects.$$ \
+    # NOT: while'a pipe ile beslemek onu subshell'e sokar ve `found` kaybolur —
+    # tarama bulgu yazdırıp exit 0 döner. Process substitution şart.
+    objects=$(mktemp); trap 'rm -f "$objects"' EXIT
+    git rev-list --objects --all > "$objects"
+    while IFS= read -r sha; do
+      m=$(git cat-file blob "$sha" 2>/dev/null | scan_stdin)
+      [ -n "$m" ] || continue
+      p=$(grep -m1 "^$sha " "$objects" | cut -d' ' -f2-)
+      [ "$p" = "$SELF" ] && continue
+      report "$p  (blob $sha)" "$m"
+    done < <(awk '{print $1}' "$objects" \
       | git cat-file --batch-check='%(objectname) %(objecttype) %(objectsize)' 2>/dev/null \
-      | awk '$2=="blob" && $3<2000000 {print $1}' \
-      | while IFS= read -r sha; do
-          m=$(git cat-file blob "$sha" 2>/dev/null | scan_stdin)
-          if [ -n "$m" ]; then
-            p=$(grep -m1 "^$sha " /tmp/.secrets-objects.$$ | cut -d' ' -f2-)
-            [ "$p" = "$SELF" ] && continue
-            report "$p  (blob $sha)" "$m"
-          fi
-        done
-    rm -f /tmp/.secrets-objects.$$
+      | awk '$2=="blob" && $3<2000000 {print $1}')
     ;;
   *)
     echo "kullanım: $0 [staged|tree|history]" >&2; exit 2 ;;
