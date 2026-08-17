@@ -1,0 +1,37 @@
+# Helm — git hook'ları
+#
+# NEDEN LEFTHOOK: önceki kurulum ham bir `.githooks/pre-commit` dosyasıydı;
+# çalışıyordu ama tek kancaya bakıyordu ve commit formatını kimse denetlemiyordu.
+# Lefthook paralel koşum, aşama başına birden çok komut ve tek bir okunur config
+# veriyor. Kurulum: `make hooks`.
+#
+# Tarama motoru hâlâ scripts/check-secrets.sh — lefthook'suz da elle koşulabilir.
+
+pre-commit:
+  parallel: true
+  commands:
+    secrets:
+      # Yalnızca stage'lenmiş içerik. Repo genelini taramak her commit'i yavaşlatır;
+      # tam tarama CI'ın işi.
+      run: ./scripts/check-secrets.sh staged
+      tags: security
+
+commit-msg:
+  commands:
+    format:
+      run: ./scripts/check-commit-msg.sh {1}
+      tags: convention
+
+pre-push:
+  parallel: true
+  commands:
+    typecheck:
+      # Kırık tip main'e gitmesin. CI de bakıyor ama push öncesi 90 saniye,
+      # kırmızı bir CI'ı fark edip düzeltmekten ucuz.
+      run: bun run typecheck
+      tags: build
+
+    typecheck-web:
+      # Kök script web'i kapsamıyor — apps/web kendi tsconfig'iyle ayrı koşar.
+      run: cd apps/web && bun run typecheck
+      tags: build

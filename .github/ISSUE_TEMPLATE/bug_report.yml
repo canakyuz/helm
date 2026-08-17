@@ -1,0 +1,63 @@
+name: Hata bildirimi
+description: Bozuk bir davranış bildir
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Güvenlik açığı bulduysan burayı KULLANMA —
+        [Security Advisory](https://github.com/canakyuz/helm/security/advisories/new) aç.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Hangi katman
+      options:
+        - Mobil (Expo)
+        - Web (Refine)
+        - Edge function / migration
+        - Paylaşılan paket (@helm/*)
+        - Emin değilim
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ne olmasını bekliyordun
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Ne oldu
+      description: Hata mesajı veya log varsa ham haliyle yapıştır — anahtarları maskele.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Tekrar üretme adımları
+      placeholder: |
+        1. …
+        2. …
+        3. …
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Sürüm / commit
+      description: Hangi commit'te görüyorsun? (`git rev-parse --short HEAD`)
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Kontroller
+      options:
+        - label: Kendi Supabase kurulumumun yanlış yapılandırması olmadığından eminim
+        - label: Bildirimimde gerçek credential yok
+          required: true

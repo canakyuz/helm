@@ -1,0 +1,38 @@
+name: Özellik önerisi
+description: Yeni bir yetenek öner
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Helm önce tek kişilik bir ihtiyaç için yazıldı ve kapsam konusunda seçici.
+        Büyük bir şeye başlamadan önce burada konuşalım — reddedilen bir PR
+        ikimizin de zamanını yakar.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Hangi problemi çözüyor
+      description: Özelliği değil, problemi anlat. Şu an ne yapamıyorsun?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Önerin
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Denediğin alternatifler
+      description: Mevcut araçlarla neden çözülmüyor?
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Katkı
+      options:
+        - label: Bunu ben yazmak isterim

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Güvenlik açığı
+    url: https://github.com/canakyuz/helm/security/advisories/new
+    about: Açıkları public issue olarak AÇMA — buradan özel olarak bildir.
+  - name: Soru / fikir
+    url: https://github.com/canakyuz/helm/discussions
+    about: Hata değil de soru veya öneriyse tartışmalarda konuş.

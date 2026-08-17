@@ -1,0 +1,10 @@
+# Her PR varsayılan olarak Can'a düşer. Helm tek bakımcılı bir proje —
+# bu dosya bir ekip dağılımı değil, "kimse review'suz merge etmesin" kilidi.
+* @canakyuz
+
+# Sır bariyeri ve CI kapıları: bunları gevşeten bir değişiklik gözden kaçmamalı.
+/scripts/check-secrets.sh     @canakyuz
+/scripts/check-commit-msg.sh  @canakyuz
+/lefthook.yml                 @canakyuz
+/.github/workflows/           @canakyuz
+/SECURITY.md                  @canakyuz

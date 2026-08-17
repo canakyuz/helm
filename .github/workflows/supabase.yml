@@ -1,0 +1,91 @@
+# Hub katmanının kapısı: 40 edge function ve 38 migration şu ana kadar hiçbir
+# otomatik kontrolden geçmiyordu — bozuk bir function ancak deploy sonrası,
+# bozuk bir migration ancak `db push` sırasında ortaya çıkıyordu.
+#
+# NEDEN KENDİ ŞERİDİ: bu işler Deno'ya ihtiyaç duyar, mobil/web CI'ı ise Bun'a.
+# İkisini aynı job'a koymak her frontend değişikliğinde Deno kurdurur.
+name: Supabase
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/supabase.yml'
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/supabase.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  functions:
+    name: Edge function tip kontrolü
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # `deno check` her function'ın importlarını çözer ve tiplerini doğrular.
+      # Bir function'ı tek tek koşuyoruz ki hangisinin düştüğü özet tablosunda
+      # görünsün — toplu koşuda ilk hata gerisini gizliyor.
+      - name: Her function'ı ayrı doğrula
+        run: |
+          set -uo pipefail
+          failed=0
+          {
+            echo "### Edge function kontrolü"
+            echo ""
+            echo "| Function | Durum |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for dir in supabase/functions/*/; do
+            name=$(basename "$dir")
+            [ -f "$dir/index.ts" ] || continue
+            if deno check --no-lock "$dir/index.ts" > /tmp/check.log 2>&1; then
+              echo "| \`$name\` | ✅ |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| \`$name\` | ❌ |" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error title=$name::$(head -3 /tmp/check.log | tr '\n' ' ')"
+              failed=1
+            fi
+          done
+          exit $failed
+
+  migrations:
+    name: Migration sırası
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Aynı numarayı taşıyan iki migration, hangi sırayla uygulanacağı
+      # belirsiz bir şema demektir — iki dal birleşince sessizce oluşur.
+      - name: Numara çakışması ve isimlendirme
+        run: |
+          set -euo pipefail
+          cd supabase/migrations
+          # NOT: `ls` bilerek kullanılmıyor — kullanıcının `ls` alias'ı renk kodu
+          # basınca regex eşleşmiyor ve kontrol yanlış alarm veriyor.
+          names=$(printf '%s\n' *.sql)
+          dupes=$(printf '%s\n' "$names" | cut -d_ -f1 | sort | uniq -d)
+          if [ -n "$dupes" ]; then
+            echo "::error title=Migration çakışması::Aynı numarayı paylaşan dosyalar: $dupes"
+            exit 1
+          fi
+          bad=$(printf '%s\n' "$names" | grep -vE '^[0-9]{4}_[a-z0-9_]+\.sql$' || true)
+          if [ -n "$bad" ]; then
+            echo "::error title=Migration adı::NNNN_snake_case.sql beklenir: $bad"
+            exit 1
+          fi
+          count=$(printf '%s\n' "$names" | grep -c '')
+          echo "✅ $count migration, çakışma yok." >> "$GITHUB_STEP_SUMMARY"
