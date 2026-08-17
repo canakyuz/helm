@@ -350,6 +350,44 @@ const EN: Record<string, string> = {
   "{n} ay sonra": "in {n}mo",
   "{n} y sonra": "in {n}y",
   "ping yok": "no ping",
+
+  // Entegrasyon form alanlari — kaynak @helm/domain/integrations.ts
+  "App Store ID (App Store URL'inde id sonrası rakam — yorumlar için)":
+    "App Store ID (the number after `id` in the App Store URL — used for reviews)",
+  "App Store ülke kodları (virgülle ayır — yorumlar için)":
+    "App Store country codes (comma-separated — used for reviews)",
+  "CRM tabloları (virgülle ayır, opsiyonel `tablo:kolon`)":
+    "CRM tables (comma-separated, optional `table:column`)",
+  "Fiyat ondalığı (hep .99 ise — MRR kuruşunu RC yuvarlamasına rağmen ekler)":
+    "Price decimal (if prices always end in .99 — restores the cents RevenueCat rounds off)",
+  "Gönderen adı":
+    "Sender name",
+  "Gönderen e-posta (Resend'de doğrulanmış domain)":
+    "Sender email (must be a domain verified in Resend)",
+  "Host (self-hosted için)":
+    "Host (for self-hosted)",
+  "Huni adımları (virgülle ayır, event adları)":
+    "Funnel steps (comma-separated event names)",
+  "Issuer ID (Team Key için — Individual API Key'de BOŞ bırak)":
+    "Issuer ID (for a Team Key — leave EMPTY for an Individual API Key)",
+  "Package Name (opsiyonel — boşsa properties.google_play_id'den okunur)":
+    "Package name (optional — falls back to properties.google_play_id)",
+  "Para birimi (ISO kodu — RC raporlama, genelde USD)":
+    "Currency (ISO code — RevenueCat reporting, usually USD)",
+  "Para birimi (ISO kodu — TRY/USD/EUR)":
+    "Currency (ISO code — TRY/USD/EUR)",
+  "Private Key (.p8 içeriği — BEGIN/END dahil)":
+    "Private key (.p8 contents — including BEGIN/END)",
+  "Proceeds para birimi (ISO kodu)":
+    "Proceeds currency (ISO code)",
+  "Proje slug":
+    "Project slug",
+  "Service Account JSON (Google Cloud → IAM → Service Accounts → Keys → CREATE → JSON; içeriğin TAMAMINI yapıştır)":
+    "Service account JSON (Google Cloud → IAM → Service Accounts → Keys → CREATE → JSON; paste the WHOLE file)",
+  "Site ID (alan adı)":
+    "Site ID (domain)",
+  "Yorum çeviri dilleri (virgülle, opsiyonel — reviews için, versions etkilenmez)":
+    "Review translation languages (comma-separated, optional — affects reviews, not versions)",
 };
 
 export type TranslateVars = Record<string, string | number>;

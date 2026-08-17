@@ -94,7 +94,7 @@ export function IntegrationForm({
       {missing.length > 0 ? (
         <Text className="text-meta text-fg3">
           {t("Eksik zorunlu alan: {list}", {
-            list: missing.map((f) => f.label.split(" (")[0]).join(", "),
+            list: missing.map((f) => t(f.label).split(" (")[0]).join(", "),
           })}
         </Text>
       ) : null}
@@ -125,7 +125,7 @@ function Field({
   return (
     <View>
       <Text className="font-medium text-row text-fg">
-        {def.label}
+        {t(def.label)}
         {def.optional === true ? (
           <Text className="text-meta text-fg3">  {t("opsiyonel")}</Text>
         ) : null}
