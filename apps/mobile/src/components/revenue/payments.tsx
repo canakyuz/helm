@@ -76,7 +76,7 @@ export function PaymentsTile({
               </Text>
               <Text className="mt-[1px] text-meta text-fg3" numberOfLines={1}>
                 {p.granularity === "transaction"
-                  ? `${RC_EVENT_LABEL[p.kind] ?? p.kind}${p.store != null ? ` · ${STORE_SHORT[p.store] ?? p.store}` : ""}`
+                  ? `${t(RC_EVENT_LABEL[p.kind] ?? p.kind)}${p.store != null ? ` · ${STORE_SHORT[p.store] ?? p.store}` : ""}`
                   : p.kind}
               </Text>
             </View>

@@ -101,7 +101,7 @@ export default function Analytics() {
     const ordered = orderedGameSteps(rows);
     const peak = Math.max(...ordered.map((r) => r.count), 1);
     return ordered.map((r) => ({
-      label: GAME_STEP_LABEL[r.key] ?? r.key,
+      label: t(GAME_STEP_LABEL[r.key] ?? r.key),
       value: formatInteger(r.count),
       ratio: r.count / peak,
     }));
@@ -184,12 +184,12 @@ export default function Analytics() {
                       yazmak metrigi 30 gunluk sanmaya yol aciyordu; ustelik
                       alttaki grafik de 30 degil 14 gun. 30 gunluk olcu zaten
                       yandaki MAU. */}
-                  GÜNLÜK AKTİF KULLANICI
+                  {t("GÜNLÜK AKTİF KULLANICI")}
                 </Text>
                 <View className="flex-row items-center gap-[6px]">
                   <LiveDot color={theme.accent} />
                   <Text className="font-mono-medium text-eyebrow tracking-wide text-fg2">
-                    CANLI
+                    {t("CANLI")}
                   </Text>
                 </View>
               </View>
@@ -209,7 +209,7 @@ export default function Analytics() {
               )}
               <Text className="mt-[6px] text-meta text-fg2">
                 MAU {mau != null ? formatInteger(mau) : "—"}
-                {stickiness != null ? ` · yapışkanlık ${formatRatio(stickiness, 1)}` : ""}
+                {stickiness != null ? t("· yapışkanlık {value}", { value: formatRatio(stickiness, 1) }) : ""}
                 {session != null ? ` · oturum ${fmtSession(session)}` : ""}
               </Text>
 
