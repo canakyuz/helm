@@ -14,6 +14,7 @@ import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useFormatCurrency } from "~/hooks/use-format-currency";
 import { formatInteger, formatDelta } from "~/lib/format";
 import { colors } from "~/theme/tokens";
+import { useT } from "~/lib/i18n";
 
 type Props = {
   metric: string;
@@ -34,6 +35,7 @@ export function RichMetricTile({
   width,
   accent = colors.accent,
 }: Props) {
+  const t = useT();
   const fmt = useFormatCurrency();
   const { data, isLoading } = useMetricDetail(metric);
 
@@ -227,7 +229,7 @@ export function RichMetricTile({
           }}
         >
           <PeriodCell
-            label="DÜN"
+            label={t("DÜN")}
             value={data ? formatNumber(data.yesterday) : "—"}
           />
           <Divider />
@@ -237,7 +239,7 @@ export function RichMetricTile({
           />
           <Divider />
           <PeriodCell
-            label="GEÇEN AY"
+            label={t("GEÇEN AY")}
             value={data ? formatNumber(data.lastMonth) : "—"}
           />
         </View>

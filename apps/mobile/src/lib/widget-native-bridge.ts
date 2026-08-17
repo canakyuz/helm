@@ -92,7 +92,7 @@ export function writeWidgetPayloadNative(
       hasContainer: false,
       hasDefaults: false,
       reason:
-        "ExtensionStorage yazamadı — provisioning’de App Groups ve REGISTER_APP_GROUPS gerekir",
+        "ExtensionStorage write failed — provisioning needs App Groups and REGISTER_APP_GROUPS",
     };
   }
 
@@ -102,6 +102,6 @@ export function writeWidgetPayloadNative(
     hasContainer: false,
     hasDefaults: false,
     reason:
-      "Native modül yok (HelmAppGroup / ExtensionStorage) — EAS’tan yeni iOS build gerekir",
+      "Native module missing (HelmAppGroup / ExtensionStorage) — needs a fresh iOS build from EAS",
   };
 }

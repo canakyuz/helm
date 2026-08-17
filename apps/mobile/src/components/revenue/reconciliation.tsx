@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { Text, View } from "react-native";
 import { radius as R, space } from "@helm/design";
 import type { ReconState, RevenueLeg } from "@helm/api";
@@ -39,6 +40,7 @@ export function ReconciliationTile({
   /** Tutarlar USD'ye normalize gelir; gosterim secili para birimine cevrilir. */
   fmt: (n: number) => string;
 }) {
+  const t = useT();
   const { theme } = useTheme();
   if (legs.length === 0) return null;
 
@@ -77,7 +79,7 @@ export function ReconciliationTile({
                   className="font-mono-medium text-eyebrow tracking-wide"
                   style={{ color: tone(l.state) }}
                 >
-                  {STATE_LABEL[l.state]}
+                  {t(STATE_LABEL[l.state])}
                 </Text>
               </View>
             </View>

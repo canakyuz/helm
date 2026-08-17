@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { View, Text } from "react-native";
 
 import type { Alert, AlertSeverity } from "~/hooks/use-alerts";
@@ -24,8 +25,9 @@ const CONDITION_LABEL: Record<string, string> = {
 };
 
 export function AlertRow({ alert }: { alert: Alert }) {
+  const t = useT();
   const sev = SEVERITY_COLOR[alert.severity];
-  const conditionLabel = CONDITION_LABEL[alert.condition] ?? alert.condition;
+  const conditionLabel = t(CONDITION_LABEL[alert.condition] ?? alert.condition);
 
   return (
     <View

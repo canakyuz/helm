@@ -5,6 +5,7 @@ import type { PerfRow, PlatformRow } from "@helm/api";
 import { formatInteger, formatRatio } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
 import { BentoTile } from "~/components/bento";
+import { useT } from "~/lib/i18n";
 
 /** fps eşikleri — 60 hedef, 45 altı hissedilir, 30 altı kırık. */
 const FPS_OK = 45;
@@ -23,6 +24,7 @@ const PERF_LABEL: Record<string, string> = {
  * kotu olcum, kullanicinin gercekten hissettigi seydir.
  */
 export function PerfTile({ rows }: { rows: readonly PerfRow[] }) {
+  const t = useT();
   const { theme } = useTheme();
 
   const tone = (fps: number): string =>
@@ -38,7 +40,7 @@ export function PerfTile({ rows }: { rows: readonly PerfRow[] }) {
       </View>
 
       {rows.length === 0 ? (
-        <Empty label="FPS ÖLÇÜMÜ YOK" />
+        <Empty label={t("FPS ÖLÇÜMÜ YOK")} />
       ) : (
         <View className="mt-tilePadSm" style={{ gap: 10 }}>
           {rows.map((r) => (
@@ -49,7 +51,7 @@ export function PerfTile({ rows }: { rows: readonly PerfRow[] }) {
               <View className="mt-sm flex-row items-baseline" style={{ gap: 16 }}>
                 <Stat label="ortanca" value={r.p50} color={tone(r.p50)} />
                 <Stat label="alt %5" value={r.p05} color={tone(r.p05)} />
-                <Stat label="en kötü" value={r.worst} color={tone(r.worst)} />
+                <Stat label={t("en kötü")} value={r.worst} color={tone(r.worst)} />
               </View>
             </View>
           ))}
@@ -74,6 +76,7 @@ function Stat({ label, value, color }: { label: string; value: number; color: st
 
 /** Platform kirilimi — sorunun her yerde mi tek platformda mi oldugunu soyler. */
 export function PlatformTile({ rows }: { rows: readonly PlatformRow[] }) {
+  const t = useT();
   const { theme, glass } = useTheme();
   const total = rows.reduce((a, r) => a + r.events, 0);
 
@@ -81,7 +84,7 @@ export function PlatformTile({ rows }: { rows: readonly PlatformRow[] }) {
     <BentoTile>
       <Text className="font-semibold text-emph tracking-tight text-fg">Platformlar</Text>
       {rows.length === 0 ? (
-        <Empty label="PLATFORM VERİSİ YOK" />
+        <Empty label={t("PLATFORM VERİSİ YOK")} />
       ) : (
         <View className="mt-tilePadSm" style={{ gap: 12 }}>
           {rows.map((r) => (

@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { Text, View } from "react-native";
 import type { AppVersion, IntegrationHealth, SentryIssue, SentryLevel } from "@helm/api";
 import { VERSION_STATUS_LABEL } from "@helm/api";
@@ -26,6 +27,7 @@ export function CrashTile({
   issues: readonly SentryIssue[];
   loading: boolean;
 }) {
+  const t = useT();
   const { theme } = useTheme();
 
   return (
@@ -36,7 +38,7 @@ export function CrashTile({
       </View>
 
       {issues.length === 0 ? (
-        <Empty label={loading ? "YÜKLENİYOR…" : "AÇIK CRASH YOK"} />
+        <Empty label={loading ? t("YÜKLENİYOR…") : t("AÇIK CRASH YOK")} />
       ) : (
         issues.slice(0, TOP_CRASHES).map((c) => (
           <View
@@ -130,11 +132,12 @@ export function VersionsTile({
   versions: readonly AppVersion[];
   loading: boolean;
 }) {
+  const t = useT();
   return (
     <BentoTile>
       <Text className="font-semibold text-emph tracking-tight text-fg">Sürümler</Text>
       {versions.length === 0 ? (
-        <Empty label={loading ? "YÜKLENİYOR…" : "SÜRÜM KAYDI YOK"} />
+        <Empty label={loading ? t("YÜKLENİYOR…") : t("SÜRÜM KAYDI YOK")} />
       ) : (
         versions.slice(0, TOP_VERSIONS).map((v) => (
           <View

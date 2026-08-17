@@ -7,6 +7,7 @@ import { useProperties, type PropertyType } from "~/hooks/use-properties";
 import { haptic } from "~/lib/haptics";
 import { preferences, usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
+import { useT } from "~/lib/i18n";
 
 const ALL = "Tüm projeler";
 
@@ -29,6 +30,7 @@ const TYPE_LABEL: Record<PropertyType, string> = {
  * başlığa sığan kompakt ve tema-duyarlı bir sürüm.
  */
 export function PropertyPicker() {
+  const t = useT();
   const { theme } = useTheme();
   const { selectedPropertyId } = usePreferences();
   const properties = useProperties();
@@ -52,7 +54,7 @@ export function PropertyPicker() {
           setOpen(true);
         }}
         accessibilityRole="button"
-        accessibilityLabel="Proje seç"
+        accessibilityLabel={t("Proje seç")}
       >
         {({ pressed }) => (
           <View

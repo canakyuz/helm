@@ -6,6 +6,7 @@ import { haptic } from "~/lib/haptics";
 import { useTheme } from "~/theme/use-theme";
 import { BentoTile } from "~/components/bento";
 import { Pill, SEVERITY_COLOR } from "./tiles";
+import { useT } from "~/lib/i18n";
 
 /** Ekranda kac madde gosterilir. Kalan sayisi BASLIKTA yazilir — sessizce
  *  kirpmak "hepsi bu" diye okunur. */
@@ -57,6 +58,7 @@ export function AttentionTile({
   onResolve: (eventId: number, key: string) => void;
   onMute: (key: string) => void;
 }) {
+  const t = useT();
   const { theme } = useTheme();
   if (items.length === 0) return null;
 
@@ -92,7 +94,7 @@ export function AttentionTile({
                 Calismayan bir butonu cizmek onu calisiyormus gibi gosterir. */}
             {it.kind === "event" && it.eventId != null ? (
               <Pill
-                label="Çöz"
+                label={t("Çöz")}
                 background={theme.accent}
                 color={theme.accentInk}
                 onPress={() => {

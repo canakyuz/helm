@@ -1,3 +1,4 @@
+import { tr } from "~/lib/i18n";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { reviewsKeys } from "@helm/queries";
 import { submitReviewReply } from "@helm/api";
@@ -11,11 +12,11 @@ export function useReviewReply() {
     mutationFn: (input: { review_id: number; body: string }) =>
       submitReviewReply(supabase, input),
     onSuccess: () => {
-      toast.success("Yanıt gönderildi");
+      toast.success(tr("Yanıt gönderildi"));
       qc.invalidateQueries({ queryKey: reviewsKeys.all });
     },
     onError: (e: Error) => {
-      toast.error("Yanıt gönderilemedi", e.message);
+      toast.error(tr("Yanıt gönderilemedi"), e.message);
     },
   });
 }

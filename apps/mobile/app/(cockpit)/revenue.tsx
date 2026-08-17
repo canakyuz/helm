@@ -22,6 +22,7 @@ import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
 import { AdEconomicsTile, PaymentsTile, ReconciliationTile } from "~/components/revenue";
+import { useT } from "~/lib/i18n";
 import {
   BentoBackground,
   HERO_NUMBER,
@@ -80,6 +81,7 @@ function weekLabel(bucket: RevenueBucket): string {
 }
 
 export default function Revenue() {
+  const t = useT();
   const todayIso = localToday();
   const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
@@ -117,8 +119,8 @@ export default function Revenue() {
     void onRefresh().then(() => setReplayKey((k) => k + 1));
   };
 
-  if (history.isLoading) return <ScreenStatus label="Yükleniyor…" />;
-  if (history.isError) return <ScreenStatus label="Gelir yüklenemedi" tone="danger" />;
+  if (history.isLoading) return <ScreenStatus label={t("Yükleniyor…")} />;
+  if (history.isError) return <ScreenStatus label={t("Gelir yüklenemedi")} tone="danger" />;
 
   const periodMrr = picked?.mrr ?? kpis.data?.mrr ?? 0;
   const periodSubs = picked?.activeSubs ?? kpis.data?.activeSubs ?? 0;
@@ -136,8 +138,8 @@ export default function Revenue() {
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="GELİR"
-          title="Kazanç"
+          eyebrow={t("GELİR")}
+          title={t("Kazanç")}
           onSync={handleRefresh}
           syncing={refreshing}
           picker

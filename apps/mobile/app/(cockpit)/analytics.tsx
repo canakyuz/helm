@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { useEffect, useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -51,6 +52,7 @@ function fmtSession(sec: number): string {
 }
 
 export default function Analytics() {
+  const t = useT();
   const { theme, glass } = useTheme();
   const { refreshing, onRefresh } = useScreenRefresh();
   const [replayKey, setReplayKey] = useState(0);
@@ -70,9 +72,9 @@ export default function Analytics() {
     void onRefresh().then(() => setReplayKey((k) => k + 1));
   };
 
-  if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
+  if (kpis.isLoading) return <ScreenStatus label={t("Yükleniyor…")} />;
   if (kpis.isError || !kpis.data)
-    return <ScreenStatus label="Analiz yüklenemedi" tone="danger" />;
+    return <ScreenStatus label={t("Analiz yüklenemedi")} tone="danger" />;
 
   const last = (d: typeof mauDetail): number | null => {
     const s = d.data?.series ?? [];
@@ -117,12 +119,12 @@ export default function Analytics() {
       ? []
       : [
           {
-            label: "Mağaza açıldı",
+            label: t("Mağaza açıldı"),
             value: formatInteger(shopOpened),
             ratio: 1,
           },
           {
-            label: "Satın alındı",
+            label: t("Satın alındı"),
             value: formatInteger(purchaseTotal),
             ratio: shopOpened > 0 ? Math.min(1, purchaseTotal / shopOpened) : 1,
             note:
@@ -150,8 +152,8 @@ export default function Analytics() {
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="ANALİZ"
-          title="Kullanıcılar"
+          eyebrow={t("ANALİZ")}
+          title={t("Kullanıcılar")}
           onSync={handleRefresh}
           syncing={refreshing}
           picker
@@ -243,7 +245,7 @@ export default function Analytics() {
           ) : (
             <Rise index={1} replayKey={replayKey}>
               <FunnelTile
-                title="Oyun akışı"
+                title={t("Oyun akışı")}
                 rows={gameRows}
                 empty={funnels.isLoading ? "YÜKLENİYOR…" : "OYUN OLAYI YOK"}
                 replayKey={replayKey}
@@ -253,7 +255,7 @@ export default function Analytics() {
 
           <Rise index={2} replayKey={replayKey}>
             <FunnelTile
-              title="Satın alma"
+              title={t("Satın alma")}
               rows={purchaseRows}
               empty={funnels.isLoading ? "YÜKLENİYOR…" : "SATIN ALMA OLAYI YOK"}
               replayKey={replayKey}
@@ -276,7 +278,7 @@ export default function Analytics() {
               </View>
               {countryRows.length === 0 ? (
                 <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
-                  {geo.isLoading ? "YÜKLENİYOR…" : "ÜLKE VERİSİ YOK"}
+                  {geo.isLoading ? t("YÜKLENİYOR…") : t("ÜLKE VERİSİ YOK")}
                 </Text>
               ) : (
                 <View className="mt-tilePadSm">

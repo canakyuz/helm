@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "~/theme/tokens";
 import { useReviewReply } from "~/hooks/use-review-reply";
 import type { Review } from "~/hooks/use-reviews";
+import { useT } from "~/lib/i18n";
 
 interface Props {
   review: Review | null;
@@ -22,6 +23,7 @@ interface Props {
 const MAX = 350;
 
 export function ReviewReplySheet({ review, visible, onClose }: Props) {
+  const t = useT();
   const [body, setBody] = useState("");
   const mutation = useReviewReply();
 
@@ -78,7 +80,7 @@ export function ReviewReplySheet({ review, visible, onClose }: Props) {
                   color: colors.fgPrimary,
                 }}
               >
-                {review?.developer_response ? "Yanıtı Düzenle" : "Yanıt Yaz"}
+                {review?.developer_response ? t("Yanıtı Düzenle") : t("Yanıt Yaz")}
               </Text>
               <Pressable onPress={onClose} hitSlop={10}>
                 <Text style={{ color: colors.fgMuted, fontSize: 14 }}>
@@ -124,7 +126,7 @@ export function ReviewReplySheet({ review, visible, onClose }: Props) {
               onChangeText={setBody}
               multiline
               maxLength={MAX}
-              placeholder="Yanıtınız…"
+              placeholder={t("Yanıtınız…")}
               placeholderTextColor={colors.fgSubtle}
               style={{
                 minHeight: 100,
@@ -177,7 +179,7 @@ export function ReviewReplySheet({ review, visible, onClose }: Props) {
                     fontSize: 14,
                   }}
                 >
-                  {mutation.isPending ? "Gönderiliyor…" : "Gönder"}
+                  {mutation.isPending ? t("Gönderiliyor…") : t("Gönder")}
                 </Text>
               </Pressable>
             </View>
