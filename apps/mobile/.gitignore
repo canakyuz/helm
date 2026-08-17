@@ -5,10 +5,10 @@ web-build/
 *.log
 .DS_Store
 
-# Env
+# Env — .env.example dışında hiçbir env dosyası commit edilmez
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # Build artifacts (root prebuild only; keep expo module native sources)
 /ios/
