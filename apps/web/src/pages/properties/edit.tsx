@@ -32,7 +32,7 @@ const propertyEditSchema = z.object({
   name: z.string().min(1, "Property name is required"),
   slug: z
     .string()
-    .min(1, "Slug gerekli")
+    .min(1, "Slug is required")
     .regex(/^[a-z0-9-]+$/, "Lowercase letters, digits and hyphens only"),
   type: z.enum(PROPERTY_TYPES),
   enabled_modules: z.array(z.string()),
@@ -325,7 +325,7 @@ export const PropertyEdit = () => {
             <Button type="button" variant="outline" onClick={() => navigate(-1)}>
               Kapat
             </Button>
-            <Button type="submit">Kaydet</Button>
+            <Button type="submit">Save</Button>
           </div>
         </form>
       </Form>

@@ -64,7 +64,7 @@ export const PROVIDER_META: Record<ProviderName, ProviderMeta> = {
   sentry: {
     category: "monitoring",
     icon: "AlertOctagon",
-    description: "Hata izleme · stack trace · top issues",
+    description: "Error tracking · stack traces · top issues",
     docs: "https://docs.sentry.io",
   },
   resend: {

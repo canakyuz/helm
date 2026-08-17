@@ -188,12 +188,12 @@ export const PushPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Yeni Bildirim</CardTitle>
+          <CardTitle>New notification</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
           <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Hedef segment</Label>
+            <Label>Target segment</Label>
             <Select
               value={segmentId}
               onValueChange={setSegmentId}
@@ -220,7 +220,7 @@ export const PushPage = () => {
           <div className="space-y-2">
             <Label>Title</Label>
             <Input
-              placeholder="Yeni sezon!"
+              placeholder="New season!"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={!pushReady}
@@ -230,7 +230,7 @@ export const PushPage = () => {
             <Label>Mesaj</Label>
             <textarea
               className="min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-              placeholder="Bildirim metni…"
+              placeholder="Notification text…"
               value={body}
               onChange={(e) => setBody(e.target.value)}
               disabled={!pushReady}
@@ -329,7 +329,7 @@ export const PushPage = () => {
                   <TableHead>Title</TableHead>
                   <TableHead className="text-right">Cihaz</TableHead>
                   <TableHead className="text-right">Sent</TableHead>
-                  <TableHead className="text-right">Hata</TableHead>
+                  <TableHead className="text-right">Errors</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

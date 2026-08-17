@@ -298,7 +298,7 @@ export const MailPage = () => {
                   <TableHead>Konu</TableHead>
                   <TableHead className="text-right">Recipient</TableHead>
                   <TableHead className="text-right">Sent</TableHead>
-                  <TableHead className="text-right">Hata</TableHead>
+                  <TableHead className="text-right">Errors</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

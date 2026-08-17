@@ -114,7 +114,7 @@ describe("mergeSchema — governance", () => {
 
   it("dev tweak'i korunur: existing select vs inferred text", () => {
     const existing: CollectionSchema = {
-      fields: [{ name: "status", label: "Durum", kind: "select", options: [{ value: "a", label: "A" }] }],
+      fields: [{ name: "status", label: "Status", kind: "select", options: [{ value: "a", label: "A" }] }],
     };
     const inferredText = inferSchema([{ status: "a" }]); // tek örnek → text
     const { fields, report } = mergeSchema(existing, inferredText);

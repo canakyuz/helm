@@ -90,10 +90,10 @@ export const AssetsPage = () => {
   const handleDelete = async (asset: CmsAsset) => {
     try {
       await deleteAsset(supabaseClient, asset);
-      toast.success("Silindi");
+      toast.success("Deleted");
       invalidate({ resource: "cms_assets", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Silinemedi", {
+      toast.error("Could not delete", {
         description: e instanceof Error ? e.message : String(e),
       });
     }
@@ -109,7 +109,7 @@ export const AssetsPage = () => {
           {isAll && (
             <Select value={uploadProjectId} onValueChange={setUploadProjectId}>
               <SelectTrigger className="w-44">
-                <SelectValue placeholder="Proje" />
+                <SelectValue placeholder="Project" />
               </SelectTrigger>
               <SelectContent>
                 {projects.map((p) => (
@@ -193,7 +193,7 @@ export const AssetsPage = () => {
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-7" aria-label="Sil">
+                    <Button variant="ghost" size="icon" className="size-7" aria-label="Delete">
                       <Trash2 className="size-3" />
                     </Button>
                   </AlertDialogTrigger>

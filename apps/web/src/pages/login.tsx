@@ -25,7 +25,7 @@ export const LoginPage = () => {
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">E-posta</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -49,7 +49,7 @@ export const LoginPage = () => {
               className="w-full"
               disabled={isPending}
             >
-              Giriş yap
+              Sign in
             </Button>
           </form>
         </CardContent>

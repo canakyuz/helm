@@ -131,18 +131,18 @@ export const VersionsPage = () => {
       {/* KPI cluster */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <VerKpi
-          label="iOS Toplam"
+          label="iOS total"
           value={iosCount}
           icon={<Apple className="size-3.5" />}
         />
         <VerKpi
-          label="Android Toplam"
+          label="Android total"
           value={androidCount}
           icon={<Smartphone className="size-3.5" />}
           tone="emerald"
         />
         <VerKpi
-          label="En Yeni iOS"
+          label="Latest iOS"
           value={latestIos?.version ? `v${latestIos.version}` : "—"}
           icon={<Package className="size-3.5" />}
         />
@@ -213,7 +213,7 @@ export const VersionsPage = () => {
                         → <strong>Edit</strong> ile{" "}
                         <code>app_store_id</code> /{" "}
                         <code>google_play_id</code> gir. Sonra{" "}
-                        <strong>Yenile</strong> — iOS iTunes lookup, Android
+                        <strong>Refresh</strong> — iOS iTunes lookup, Android
                         Play Store scrape.
                       </>
                     ) : (

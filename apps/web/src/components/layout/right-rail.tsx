@@ -165,7 +165,7 @@ const SyncStatus = () => {
               <span className="font-mono tabular-nums">{last.ingested}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">OK / Hata</span>
+              <span className="text-muted-foreground">OK / errors</span>
               <span className="font-mono tabular-nums">
                 {last.ok_count}/{last.error_count}
               </span>

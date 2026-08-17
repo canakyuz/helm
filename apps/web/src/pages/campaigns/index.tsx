@@ -163,7 +163,7 @@ export const CampaignsPage = () => {
             icon={<MousePointerClick className="size-3" />}
           />
           <SummaryCard
-            label="Hata"
+            label="Errors"
             value={totals.failed}
             tone="destructive"
           />
@@ -200,12 +200,12 @@ export const CampaignsPage = () => {
                 <TableRow>
                   <TableHead>Zaman</TableHead>
                   <TableHead>Kanal</TableHead>
-                  {isAll && <TableHead>Proje</TableHead>}
+                  {isAll && <TableHead>Project</TableHead>}
                   <TableHead>Konu</TableHead>
                   <TableHead className="text-right">Sent</TableHead>
                   <TableHead className="text-right">Open rate</TableHead>
                   <TableHead className="text-right">Clicks</TableHead>
-                  <TableHead className="text-right">Hata</TableHead>
+                  <TableHead className="text-right">Errors</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -131,7 +131,7 @@ export const AuditPage = () => {
       {/* KPI cluster */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <AuditKpi
-          label="Toplam Aksiyon"
+          label="Total actions"
           value={stats.total}
         />
         <AuditKpi
@@ -199,11 +199,11 @@ export const AuditPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Zaman</TableHead>
-                  {isAll && <TableHead>Proje</TableHead>}
+                  {isAll && <TableHead>Project</TableHead>}
                   <TableHead>Yapan</TableHead>
-                  <TableHead>Aksiyon</TableHead>
+                  <TableHead>Action</TableHead>
                   <TableHead>User</TableHead>
-                  <TableHead>Detay</TableHead>
+                  <TableHead>Detail</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>

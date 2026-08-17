@@ -203,14 +203,14 @@ function App() {
                 {
                   name: "settings",
                   list: "/settings",
-                  meta: { label: "Ayarlar" },
+                  meta: { label: "Settings" },
                 },
                 {
                   // `projects` resource'u CMS publish targets edit'i için
                   // /projects/edit/:id'de kalıyor; create artık properties'e gider.
                   name: "projects",
                   edit: "/projects/edit/:id",
-                  meta: { label: "Proje (legacy CMS edit)" },
+                  meta: { label: "Project (legacy CMS edit)" },
                 },
                 {
                   name: "properties",

@@ -114,7 +114,7 @@ export const IntegrationsPage = () => {
           tone={stats.errored > 0 ? "destructive" : undefined}
         />
         <KpiPill
-          label="Beklemede"
+          label="Pending"
           value={stats.pending}
           icon={<RefreshCw className="size-3.5" />}
           tone={stats.pending > 0 ? "amber" : undefined}

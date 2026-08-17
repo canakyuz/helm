@@ -190,7 +190,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   ],
   sentry: [
     { key: "org_slug", label: "Sentry organizasyon slug" },
-    { key: "project_slug", label: "Proje slug" },
+    { key: "project_slug", label: "Project slug" },
     { key: "auth_token", label: "Auth Token", secret: true },
     {
       key: "host",
@@ -747,8 +747,8 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Tarih</TableHead>
-                        <TableHead>Metrik</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Metric</TableHead>
                         <TableHead className="text-right">Value</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -831,12 +831,12 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Tarih</TableHead>
-                        <TableHead>Metrik</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Metric</TableHead>
                         <TableHead className="text-right">Upstream</TableHead>
                         <TableHead className="text-right">DB</TableHead>
                         <TableHead className="text-right">Δ%</TableHead>
-                        <TableHead>Durum</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1030,7 +1030,7 @@ const ProviderCard = ({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="Sil"
+                    aria-label="Delete"
                   >
                     <Trash2 className="size-3.5 text-destructive" />
                   </Button>

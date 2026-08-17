@@ -74,7 +74,7 @@ export const CollectionEditPage = () => {
         </Button>
         <Button size="sm" onClick={handleSave} disabled={mutation.isPending}>
           <Save className="size-4" />
-          {mutation.isPending ? "Kaydediliyor…" : "Kaydet"}
+          {mutation.isPending ? "Kaydediliyor…" : "Save"}
         </Button>
       </div>
 
@@ -110,7 +110,7 @@ export const CollectionEditPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Alanlar</CardTitle>
+          <CardTitle>Fields</CardTitle>
         </CardHeader>
         <CardContent>
           <SchemaDesigner value={schema} onChange={setSchema} />

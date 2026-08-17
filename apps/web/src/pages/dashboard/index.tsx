@@ -350,7 +350,7 @@ export const DashboardPage = () => {
               ·{" "}
             </span>
             <span className="font-semibold">
-              {isAll ? "Cockpit" : (activeProject?.name ?? "Proje")}
+              {isAll ? "Cockpit" : (activeProject?.name ?? "Project")}
             </span>
           </div>
         </div>
@@ -483,26 +483,26 @@ export const DashboardPage = () => {
         {/* Cell 2: MRR — subscriptions */}
         {subsEnabled ? (
           <KpiCell
-            label={isAll ? "Toplam MRR" : "MRR"}
+            label={isAll ? "Total MRR" : "MRR"}
             value={formatMoney(mrrDisplay, displayCcy)}
             hint="Monthly recurring revenue"
             loading={loading}
           />
         ) : (
-          <KpiPlaceholder label={isAll ? "Toplam MRR" : "MRR"} module="Abonelik" />
+          <KpiPlaceholder label={isAll ? "Total MRR" : "MRR"} module="Abonelik" />
         )}
 
         {/* Cell 3: DAU — analytics */}
         {analyticsEnabled ? (
           <KpiCell
-            label={isAll ? "Toplam DAU" : "DAU"}
+            label={isAll ? "Total DAU" : "DAU"}
             value={compact(latest(metrics, "dau"))}
             delta={deltaPct(dauSeries)}
             hint="Daily active"
             loading={loading}
           />
         ) : (
-          <KpiPlaceholder label={isAll ? "Toplam DAU" : "DAU"} module="Analitik" />
+          <KpiPlaceholder label={isAll ? "Total DAU" : "DAU"} module="Analitik" />
         )}
 
         {/* Cell 4: isAll → Aktif Abone (subscriptions) | proje → eCPM (ads) */}
@@ -621,7 +621,7 @@ export const DashboardPage = () => {
         <Card className="overflow-hidden">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between text-sm">
-              <span>Projeler</span>
+              <span>Projects</span>
               <span className="text-[10px] font-normal text-muted-foreground">
                 {projects.length}
               </span>
@@ -637,7 +637,7 @@ export const DashboardPage = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="h-7 w-6 px-2" />
-                    <TableHead className="h-7 px-2 text-xs">Proje</TableHead>
+                    <TableHead className="h-7 px-2 text-xs">Project</TableHead>
                     <TableHead className="h-7 px-2 text-right text-xs">
                       MRR
                     </TableHead>

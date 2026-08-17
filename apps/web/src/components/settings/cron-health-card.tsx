@@ -95,7 +95,7 @@ export const CronHealthCard = () => {
             <RefreshCw
               className={loading ? "size-4 animate-spin" : "size-4"}
             />
-            <span className="ml-2">Yenile</span>
+            <span className="ml-2">Refresh</span>
           </Button>
         </CardAction>
       </CardHeader>
@@ -193,7 +193,7 @@ export const CronHealthCard = () => {
                             <span>Start</span>
                             <span>Result</span>
                             <span className="text-right">Duration</span>
-                            <span className="text-right">Durum</span>
+                            <span className="text-right">Status</span>
                           </div>
                           {j.last_runs.map((r) => {
                             const dur =
