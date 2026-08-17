@@ -72,10 +72,10 @@ export default function Health() {
     // bozuluyordu (kimi satir iki, kimi tek satir).
     note:
       s.unclosedRate != null && s.unclosed > 0
-        ? `${formatInteger(s.unclosed)} oturum kapanmadı · ${pct(s.unclosedRate)}`
+        ? t("{n} oturum kapanmadı · {rate}", { n: formatInteger(s.unclosed), rate: pct(s.unclosedRate) })
         : s.ended > s.started
-          ? "bitiş sayısı başlangıçtan fazla — ölçüm hatalı"
-          : "tümü kapandı",
+          ? t("bitiş sayısı başlangıçtan fazla — ölçüm hatalı")
+          : t("tümü kapandı"),
     tone: s.unclosedRate != null && s.unclosedRate >= 0.5 ? "loss" : "normal",
   }));
 
@@ -136,7 +136,7 @@ export default function Health() {
 
           <Rise index={3} replayKey={replayKey}>
             <FunnelTile
-              title="Oturum kapanma"
+              title={t("Oturum kapanma")}
               count={f != null ? `${f.days}G` : undefined}
               rows={sessionRows}
               empty={funnels.isLoading ? "YÜKLENİYOR…" : "OTURUM OLAYI YOK"}

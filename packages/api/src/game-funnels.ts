@@ -204,13 +204,32 @@ export function orderedGameSteps(rows: readonly CountRow[]): CountRow[] {
  * NEDEN AYRI: "oturumlarin %100'u kapanmiyor" bir urun bulgusu degil, olcum
  * hatasidir. Ayni kutuda gostermek yanlis karar aldirir.
  */
-export function instrumentationWarnings(f: GameFunnels): string[] {
-  const out: string[] = [];
+/**
+ * Ceviriye hazir uyari. `key` Turkce kaynak dizgi, `vars` yer tutucu degerleri.
+ *
+ * NEDEN HAZIR DIZGI DEGIL: eskiden bu fonksiyon bicimlenmis Turkce metin
+ * donuyordu ve ekran onu oldugu gibi basiyordu — Ingilizce arayuzde bu uc uyari
+ * Turkce kaliyordu, cevrilebilecek bir yer yoktu. Anahtar + degiskene ayirinca
+ * ceviri UI katmaninda yapilabiliyor ve paket dil bilmemeye devam ediyor.
+ */
+export type InstrumentationWarning = {
+  key: string;
+  vars: Record<string, string | number>;
+};
+
+export function instrumentationWarnings(f: GameFunnels): InstrumentationWarning[] {
+  const out: InstrumentationWarning[] = [];
   for (const s of f.sessions) {
     if (s.started > 0 && s.ended === 0) {
-      out.push(`${s.platform}: ${s.started} oturum başladı, hiçbiri kapanmadı`);
+      out.push({
+        key: "{platform}: {started} oturum başladı, hiçbiri kapanmadı",
+        vars: { platform: s.platform, started: s.started },
+      });
     } else if (s.ended > s.started) {
-      out.push(`${s.platform}: bitiş (${s.ended}) başlangıçtan (${s.started}) fazla`);
+      out.push({
+        key: "{platform}: bitiş ({ended}) başlangıçtan ({started}) fazla",
+        vars: { platform: s.platform, ended: s.ended, started: s.started },
+      });
     }
   }
   const starts = f.game
@@ -218,7 +237,10 @@ export function instrumentationWarnings(f: GameFunnels): string[] {
     .reduce((a, g) => a + g.count, 0);
   const overs = f.game.find((g) => g.key === "game_over_score")?.count ?? 0;
   if (starts > 0 && overs > starts * 1.5) {
-    out.push(`Oyun bitişi (${overs}) başlangıçtan (${starts}) fazla — başlangıç olayı eksik`);
+    out.push({
+      key: "Oyun bitişi ({overs}) başlangıçtan ({starts}) fazla — başlangıç olayı eksik",
+      vars: { overs, starts },
+    });
   }
   return out;
 }

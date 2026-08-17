@@ -5,6 +5,7 @@ import type { PerfRow, PlatformRow } from "@helm/api";
 import { formatInteger, formatRatio } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
 import { BentoTile } from "~/components/bento";
+import type { InstrumentationWarning } from "@helm/api";
 import { useT } from "~/lib/i18n";
 
 /** fps eşikleri — 60 hedef, 45 altı hissedilir, 30 altı kırık. */
@@ -131,7 +132,12 @@ export function PlatformTile({ rows }: { rows: readonly PlatformRow[] }) {
  * hatasidir. Kullanici davranisiyla ayni kutuda gostermek yanlis karar aldirir —
  * "kullanicilar kaciyor" diye okunur, oysa olay hic gonderilmiyordur.
  */
-export function InstrumentationTile({ warnings }: { warnings: readonly string[] }) {
+export function InstrumentationTile({
+  warnings,
+}: {
+  warnings: readonly InstrumentationWarning[];
+}) {
+  const t = useT();
   const { theme } = useTheme();
   if (warnings.length === 0) return null;
 
@@ -139,7 +145,7 @@ export function InstrumentationTile({ warnings }: { warnings: readonly string[] 
     <BentoTile>
       <View className="flex-row items-center justify-between">
         <Text className="font-semibold text-emph tracking-tight text-fg">
-          Ölçüm şüpheli
+          {t("Ölçüm şüpheli")}
         </Text>
         <Text
           className="font-mono-medium text-[11px]"
@@ -149,16 +155,16 @@ export function InstrumentationTile({ warnings }: { warnings: readonly string[] 
         </Text>
       </View>
       <Text className="mt-[6px] text-meta leading-[18px] text-fg2">
-        Aşağıdakiler kullanıcı davranışı değil, eksik veya hatalı olay gönderimi.
+        {t("Aşağıdakiler kullanıcı davranışı değil, eksik veya hatalı olay gönderimi.")}
       </Text>
       <View className="mt-headerY" style={{ gap: space.rowY }}>
         {warnings.map((w) => (
           <View
-            key={w}
+            key={w.key}
             className="border-l-2 pl-headerY"
             style={{ borderLeftColor: theme.warn }}
           >
-            <Text className="text-row text-fg">{w}</Text>
+            <Text className="text-row text-fg">{t(w.key, w.vars)}</Text>
           </View>
         ))}
       </View>
