@@ -145,7 +145,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Sistem",
     alwaysVisible: true,
-    items: [{ title: "Ayarlar", icon: Settings, url: "/settings" }],
+    items: [{ title: "Settings", icon: Settings, url: "/settings" }],
   },
 ];
 
@@ -344,7 +344,7 @@ const HeaderBar = ({ scrolled }: { scrolled: boolean }) => {
         </Link>
         <Link
           to="/settings"
-          aria-label="Ayarlar"
+          aria-label="Settings"
           className="grid size-9 place-items-center rounded-md ring-1 ring-foreground/5 transition-colors hover:bg-accent"
         >
           <Avatar className="size-7 rounded-md">

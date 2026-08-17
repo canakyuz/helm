@@ -86,7 +86,7 @@ export const AssetPicker = ({ projectId, value, onChange }: Props) => {
             variant="ghost"
             size="icon"
             onClick={() => onChange(null)}
-            aria-label="Temizle"
+            aria-label="Clear"
           >
             <X className="size-4" />
           </Button>

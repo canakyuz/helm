@@ -44,7 +44,7 @@ const brandSchema = z.object({
   name: z.string().min(1, "Brand name is required"),
   slug: z
     .string()
-    .min(1, "Slug gerekli")
+    .min(1, "Slug is required")
     .regex(/^[a-z0-9-]+$/, "Lowercase letters, digits and hyphens only"),
 });
 
@@ -136,7 +136,7 @@ export const BrandEdit = () => {
                 )}
               />
               <div>
-                <Button type="submit">Kaydet</Button>
+                <Button type="submit">Save</Button>
               </div>
             </form>
           </Form>
@@ -238,7 +238,7 @@ export const BrandEdit = () => {
                     onClick={deleteBrand}
                     disabled={deleting || properties.length > 0}
                   >
-                    {deleting ? "Siliniyor..." : "Sil"}
+                    {deleting ? "Deleting…" : "Delete"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

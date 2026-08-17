@@ -37,8 +37,8 @@ const KIND_LABELS: Record<FieldDef["kind"], string> = {
   textarea: "Uzun metin (textarea)",
   slug: "Slug",
   number: "Number",
-  boolean: "Anahtar (boolean)",
-  date: "Tarih",
+  boolean: "Key (boolean)",
+  date: "Date",
   select: "Choice list",
   asset: "Medya",
   image: "Image (with preview)",
@@ -52,7 +52,7 @@ const KIND_LABELS: Record<FieldDef["kind"], string> = {
 const KIND_OPTIONS = Object.entries(KIND_LABELS) as [FieldDef["kind"], string][];
 
 const makeField = (kind: FieldDef["kind"]): FieldDef => {
-  const base = { name: "yeni_alan", label: "Yeni Alan", required: false };
+  const base = { name: "yeni_alan", label: "New field", required: false };
   switch (kind) {
     case "select":
       return { ...base, kind, options: [{ value: "a", label: "A" }] };
@@ -196,7 +196,7 @@ const SortableFieldRow = ({ field, onChange, onRemove }: RowProps) => {
         </div>
 
         <div className="sm:col-span-3">
-          <Label className="text-xs text-muted-foreground">Anahtar (name)</Label>
+          <Label className="text-xs text-muted-foreground">Key (name)</Label>
           <Input
             value={field.name}
             onChange={(e) => onChange({ ...field, name: e.target.value })}
@@ -239,7 +239,7 @@ const SortableFieldRow = ({ field, onChange, onRemove }: RowProps) => {
         variant="ghost"
         size="icon"
         onClick={onRemove}
-        aria-label="Sil"
+        aria-label="Delete"
       >
         <Trash2 className="size-4" />
       </Button>

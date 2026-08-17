@@ -64,7 +64,7 @@ export const SettingsPage = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Ayarlar</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
@@ -117,7 +117,7 @@ export const SettingsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Sistem Bilgisi</CardTitle>
+          <CardTitle>System info</CardTitle>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-[160px_1fr] gap-y-3 text-sm">

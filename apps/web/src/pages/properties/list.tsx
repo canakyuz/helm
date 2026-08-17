@@ -66,7 +66,7 @@ export const PropertiesListPage = () => {
       {groups.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
-            Henüz property yok. <strong>Yeni Property</strong> ile başla.
+            Henüz property yok. <strong>New property</strong> ile başla.
           </CardContent>
         </Card>
       ) : (

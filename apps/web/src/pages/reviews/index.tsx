@@ -180,7 +180,7 @@ export const ReviewsPage = () => {
           loading={query.isLoading}
         />
         <StatCard
-          title="Toplam Yorum"
+          title="Total reviews"
           value={platformFiltered.length}
           loading={query.isLoading}
         />
@@ -282,7 +282,7 @@ export const ReviewsPage = () => {
               title={
                 reviews.length === 0
                   ? "Yorum yok"
-                  : "Filtreye uyan yorum yok"
+                  : "No reviews match the filter"
               }
               description={
                 reviews.length === 0

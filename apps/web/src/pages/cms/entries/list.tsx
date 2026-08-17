@@ -132,11 +132,11 @@ export const EntriesListPage = () => {
           </Select>
           <Select value={status} onValueChange={(v) => setStatus(v as EntryStatus | "all")}>
             <SelectTrigger>
-              <SelectValue placeholder="Durum" />
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="draft">Taslak</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
               <SelectItem value="published">Live</SelectItem>
             </SelectContent>
           </Select>
@@ -162,9 +162,9 @@ export const EntriesListPage = () => {
               <TableHead>Collection</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>Dil</TableHead>
-              <TableHead>Durum</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Update</TableHead>
-              <TableHead className="w-24">Aksiyon</TableHead>
+              <TableHead className="w-24">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -200,7 +200,7 @@ export const EntriesListPage = () => {
                 <TableCell>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="Sil">
+                      <Button variant="ghost" size="icon" aria-label="Delete">
                         <Trash2 className="size-4" />
                       </Button>
                     </AlertDialogTrigger>
@@ -218,9 +218,9 @@ export const EntriesListPage = () => {
                             remove(
                               { resource: "cms_entries", id: entry.id },
                               {
-                                onSuccess: () => toast.success("Silindi"),
+                                onSuccess: () => toast.success("Deleted"),
                                 onError: (e) =>
-                                  toast.error("Silinemedi", {
+                                  toast.error("Could not delete", {
                                     description:
                                       e instanceof Error ? e.message : String(e),
                                   }),

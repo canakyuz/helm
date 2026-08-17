@@ -221,7 +221,7 @@ export const FunnelPage = () => {
             <RefreshCw
               className={`size-4 ${loading ? "animate-spin" : ""}`}
             />
-            <span className="ml-2">Yenile</span>
+            <span className="ml-2">Refresh</span>
           </Button>
         </div>
       </div>
@@ -277,7 +277,7 @@ export const FunnelPage = () => {
                   <RefreshCw
                     className={`size-4 ${eventsLoading ? "animate-spin" : ""}`}
                   />
-                  <span className="ml-2">Yenile</span>
+                  <span className="ml-2">Refresh</span>
                 </Button>
               </div>
             </CardAction>
@@ -531,7 +531,7 @@ export const FunnelPage = () => {
           <CardContent>
             <EmptyState
               icon={<TrendingDown className="size-6" />}
-              title="Veri yok"
+              title="No data"
               description="PostHog returned an empty funnel. Check that the event names in the steps are correct (they are case-sensitive) — use Edit steps."
             />
           </CardContent>

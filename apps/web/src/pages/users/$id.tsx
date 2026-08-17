@@ -135,7 +135,7 @@ export const UserDetailPage = () => {
       );
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
-      toast.success(opts.successMsg ?? "Tamam", {
+      toast.success(opts.successMsg ?? "OK", {
         description: data?.detail,
       });
       invalidate({ resource: "audit_log", invalidates: ["list"] });
@@ -353,7 +353,7 @@ export const UserDetailPage = () => {
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="size-4" />
-                    <span className="ml-2">Sil</span>
+                    <span className="ml-2">Delete</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -395,10 +395,10 @@ export const UserDetailPage = () => {
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
-              <dt className="text-muted-foreground">E-posta</dt>
+              <dt className="text-muted-foreground">Email</dt>
               <dd className="font-mono">{user.email ?? "—"}</dd>
 
-              <dt className="text-muted-foreground">Telefon</dt>
+              <dt className="text-muted-foreground">Phone</dt>
               <dd className="font-mono">{user.phone ?? "—"}</dd>
 
               <dt className="text-muted-foreground">Signup</dt>
@@ -450,8 +450,8 @@ export const UserDetailPage = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Zaman</TableHead>
-                    <TableHead>Aksiyon</TableHead>
-                    <TableHead>Detay</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Detail</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

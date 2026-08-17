@@ -24,11 +24,11 @@ const healthOf = (ok: number, total: number): Health => {
 const COLORS: Record<Health, { dot: string; ring: string; label: string }> = {
   ok: { dot: "#10b981", ring: "rgba(16,185,129,0.5)", label: "Healthy" },
   warn: { dot: "#f59e0b", ring: "rgba(245,158,11,0.5)", label: "Dikkat" },
-  err: { dot: "#ef4444", ring: "rgba(239,68,68,0.5)", label: "Hata" },
+  err: { dot: "#ef4444", ring: "rgba(239,68,68,0.5)", label: "Errors" },
   idle: {
     dot: "var(--muted-foreground)",
     ring: "rgba(120,120,130,0.3)",
-    label: "Bekleme",
+    label: "Waiting",
   },
 };
 

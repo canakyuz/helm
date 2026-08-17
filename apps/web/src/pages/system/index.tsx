@@ -77,7 +77,7 @@ const HEARTBEAT_BASE = `${
 
 const INTERVALS = [
   { value: "15", label: "15 dakika" },
-  { value: "60", label: "Saatlik" },
+  { value: "60", label: "Hourly" },
   { value: "360", label: "6 saat" },
   { value: "1440", label: "Daily" },
 ];
@@ -348,7 +348,7 @@ export const SystemPage = () => {
           }
         />
         <SysKpi
-          label="Kaynak OK"
+          label="Sources OK"
           value={`${sysStats.ok} / ${sysStats.totalInteg}`}
           icon={<Activity className="size-3.5" />}
           tone={sysStats.err > 0 ? "amber" : "emerald"}
@@ -433,7 +433,7 @@ export const SystemPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Proje</TableHead>
+                    <TableHead>Project</TableHead>
                     <TableHead className="text-right">Son 7g hata</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -473,7 +473,7 @@ export const SystemPage = () => {
                 <RefreshCw
                   className={`size-4 ${issuesLoading ? "animate-spin" : ""}`}
                 />
-                <span className="ml-2">Yenile</span>
+                <span className="ml-2">Refresh</span>
               </Button>
             </CardAction>
           </CardHeader>
@@ -508,11 +508,11 @@ export const SystemPage = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Lvl</TableHead>
-                    <TableHead>Hata</TableHead>
+                    <TableHead>Errors</TableHead>
                     {projectsResult.data.length > 1 && (
-                      <TableHead>Proje</TableHead>
+                      <TableHead>Project</TableHead>
                     )}
-                    <TableHead className="text-right">Olay</TableHead>
+                    <TableHead className="text-right">Events</TableHead>
                     <TableHead className="text-right">User</TableHead>
                     <TableHead>Last seen</TableHead>
                     <TableHead className="w-12" />
@@ -610,7 +610,7 @@ export const SystemPage = () => {
                 )}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <div>
-                    <div className="text-xs text-muted-foreground">Olay</div>
+                    <div className="text-xs text-muted-foreground">Events</div>
                     <div className="mt-0.5 font-mono">
                       {compact(selectedIssue.count)}
                     </div>
@@ -632,7 +632,7 @@ export const SystemPage = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Durum</div>
+                    <div className="text-xs text-muted-foreground">Status</div>
                     <div className="mt-0.5 text-xs">
                       {selectedIssue.status}
                     </div>
@@ -658,7 +658,7 @@ export const SystemPage = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Proje</div>
+                    <div className="text-xs text-muted-foreground">Project</div>
                     <div className="mt-0.5 text-xs">
                       {projectName(selectedIssue.project_id)}
                     </div>
@@ -714,11 +714,11 @@ export const SystemPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Proje</TableHead>
-                  <TableHead>Kaynak</TableHead>
-                  <TableHead>Durum</TableHead>
+                  <TableHead>Project</TableHead>
+                  <TableHead>Source</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Son senkron</TableHead>
-                  <TableHead>Hata</TableHead>
+                  <TableHead>Errors</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -810,7 +810,7 @@ export const SystemPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Monitor</TableHead>
-                  <TableHead>Durum</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Son ping</TableHead>
                   <TableHead>Ping URL</TableHead>
                   <TableHead className="w-12" />
@@ -855,7 +855,7 @@ export const SystemPage = () => {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              aria-label="Sil"
+                              aria-label="Delete"
                             >
                               <Trash2 className="size-4 text-destructive" />
                             </Button>
@@ -911,7 +911,7 @@ export const SystemPage = () => {
                 <TableRow>
                   <TableHead>Zaman</TableHead>
                   <TableHead>Tetikleyici</TableHead>
-                  <TableHead>Metrik</TableHead>
+                  <TableHead>Metric</TableHead>
                   <TableHead>Result</TableHead>
                 </TableRow>
               </TableHeader>

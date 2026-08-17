@@ -113,7 +113,7 @@ export const LogsPage = () => {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard title="Run" value={runs.length} />
         <StatCard
-          title="Toplam metrik"
+          title="Total metrics"
           value={totalIngested.toLocaleString("en-US")}
         />
         <StatCard
@@ -183,8 +183,8 @@ export const LogsPage = () => {
                     <TableHead>Zaman</TableHead>
                     <TableHead>Tetikleyici</TableHead>
                     <TableHead className="text-right">Duration</TableHead>
-                    <TableHead className="text-right">Metrik</TableHead>
-                    <TableHead className="text-right">OK / Hata</TableHead>
+                    <TableHead className="text-right">Metric</TableHead>
+                    <TableHead className="text-right">OK / errors</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -273,14 +273,14 @@ export const LogsPage = () => {
           </DialogHeader>
           <div className="space-y-2 py-2">
             {details.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Detay yok.</p>
+              <p className="text-sm text-muted-foreground">No detail.</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Provider</TableHead>
-                    <TableHead>Proje</TableHead>
-                    <TableHead className="text-right">Metrik</TableHead>
+                    <TableHead>Project</TableHead>
+                    <TableHead className="text-right">Metric</TableHead>
                     <TableHead className="text-right">Country</TableHead>
                     <TableHead>Result</TableHead>
                   </TableRow>

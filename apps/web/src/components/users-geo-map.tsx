@@ -158,7 +158,7 @@ export const UsersGeoMap = ({
           <button
             type="button"
             onClick={() => setSelected(null)}
-            aria-label="Kapat"
+            aria-label="Close"
             className="absolute right-2 top-2 grid size-6 place-items-center rounded-md text-muted-foreground hover:bg-accent"
           >
             <X className="size-3.5" />

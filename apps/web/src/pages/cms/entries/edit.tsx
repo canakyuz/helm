@@ -112,7 +112,7 @@ export const EntryEditPage = () => {
 
   const handleSave = () => {
     if (!collection || !slug) {
-      toast.error("Eksik alan", { description: "Slug gerekli." });
+      toast.error("Eksik alan", { description: "Slug is required." });
       return;
     }
     const values = {
@@ -128,7 +128,7 @@ export const EntryEditPage = () => {
         { resource: "cms_entries", values },
         {
           onSuccess: (res) => {
-            toast.success("Taslak kaydedildi");
+            toast.success("Draft saved");
             navigate(`/cms/entries/edit/${res.data.id}`);
           },
           onError: (e) =>
@@ -194,7 +194,7 @@ export const EntryEditPage = () => {
               disabled={saving}
             >
               <Save className="size-4" />
-              {saving ? "Kaydediliyor…" : "Taslak Kaydet"}
+              {saving ? "Kaydediliyor…" : "Save draft"}
             </Button>
             {!isCreate && entry && (
               <PublishButton

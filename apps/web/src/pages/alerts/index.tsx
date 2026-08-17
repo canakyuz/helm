@@ -209,8 +209,8 @@ export const AlertsPage = () => {
       if (error) throw error;
       const rule = rules.find((r) => r.id === ruleId);
       if (data?.triggered > 0) {
-        toast.warning(`Kural tetiklendi: ${rule?.name}`, {
-          description: "Olaylar tablosunda detay var.",
+        toast.warning(`Rule triggered: ${rule?.name}`, {
+          description: "Details are in the events table.",
         });
       } else {
         toast.success(`Rule evaluated: ${rule?.name}`, {
@@ -288,7 +288,7 @@ export const AlertsPage = () => {
       {/* Summary */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
-          title="Aktif Kural"
+          title="Active rules"
           value={`${stats.enabled} / ${stats.total}`}
           icon={<Activity />}
         />
@@ -298,7 +298,7 @@ export const AlertsPage = () => {
           icon={<Bell />}
         />
         <StatCard
-          title="Toplam Olay"
+          title="Total events"
           value={events.length}
           icon={<Bell />}
         />
@@ -337,7 +337,7 @@ export const AlertsPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Proje</Label>
+                    <Label>Project</Label>
                     <Select value={projectId} onValueChange={setProjectId}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
@@ -354,7 +354,7 @@ export const AlertsPage = () => {
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-2">
-                      <Label>Metrik</Label>
+                      <Label>Metric</Label>
                       <Select value={metric} onValueChange={setMetric}>
                         <SelectTrigger className="w-full">
                           <SelectValue />
@@ -410,7 +410,7 @@ export const AlertsPage = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="telegram">Telegram</SelectItem>
-                        <SelectItem value="email">E-posta</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -448,7 +448,7 @@ export const AlertsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Kural</TableHead>
+                  <TableHead>Rule</TableHead>
                   <TableHead>Kapsam</TableHead>
                   <TableHead>Condition</TableHead>
                   <TableHead>Kanal</TableHead>
@@ -477,7 +477,7 @@ export const AlertsPage = () => {
                       {r.condition.endsWith("_pct") ? "%" : ""}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {r.channel === "telegram" ? "Telegram" : "E-posta"}
+                      {r.channel === "telegram" ? "Telegram" : "Email"}
                     </TableCell>
                     <TableCell className="text-right">
                       {lastWeek.length > 0 ? (
@@ -525,7 +525,7 @@ export const AlertsPage = () => {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              aria-label="Sil"
+                              aria-label="Delete"
                             >
                               <Trash2 className="size-4 text-destructive" />
                             </Button>
@@ -611,7 +611,7 @@ export const AlertsPage = () => {
               title={
                 events.length === 0
                   ? "No alerts triggered yet"
-                  : "Filtreye uyan olay yok"
+                  : "No events match the filter"
               }
               description={
                 events.length === 0
@@ -626,10 +626,10 @@ export const AlertsPage = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Zaman</TableHead>
-                    <TableHead>Kural</TableHead>
-                    <TableHead>Metrik</TableHead>
+                    <TableHead>Rule</TableHead>
+                    <TableHead>Metric</TableHead>
                     <TableHead>Mesaj</TableHead>
-                    <TableHead>Durum</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -728,11 +728,11 @@ export const AlertsPage = () => {
                     )}
                   />
                   <KV
-                    label="Metrik"
+                    label="Metric"
                     value={METRICS[selected.metric] ?? selected.metric}
                   />
                   <KV
-                    label="Durum"
+                    label="Status"
                     value={selected.delivered ? "sent" : "in-panel"}
                   />
                   <KV label="ID" value={String(selected.id)} mono />

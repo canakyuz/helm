@@ -17,7 +17,7 @@ import type { Metric } from "@/types";
 // StatCard delta'sı yükselişi yeşil gösterdiği için bu metriklerde delta gizlenir
 // (yanıltıcı renk olmasın); trend yerine aşağıdaki grafikten okunur.
 const CARDS = [
-  { metric: "players_total", title: "Toplam Oyuncu", kind: "count", icon: Users, higherIsBetter: true },
+  { metric: "players_total", title: "Total players", kind: "count", icon: Users, higherIsBetter: true },
   { metric: "paying_users", title: "Paying user", kind: "count", icon: CreditCard, higherIsBetter: true },
   { metric: "pct_ever_prestiged", title: "Prestij Yapan", kind: "pct", icon: Crown, higherIsBetter: true },
   { metric: "pct_le1_business", title: "≤1 operation", kind: "pct", icon: Building2, higherIsBetter: false },

@@ -150,7 +150,7 @@ export const ErrorsPanel = ({
               onClick={load}
               disabled={loading}
               className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-50"
-              aria-label="Yenile"
+              aria-label="Refresh"
             >
               <RefreshCw
                 className={cn("size-3.5", loading && "animate-spin")}
@@ -173,9 +173,9 @@ export const ErrorsPanel = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="h-7 px-2 text-xs">Hata</TableHead>
+                  <TableHead className="h-7 px-2 text-xs">Errors</TableHead>
                   {isAll && (
-                    <TableHead className="h-7 px-2 text-xs">Proje</TableHead>
+                    <TableHead className="h-7 px-2 text-xs">Project</TableHead>
                   )}
                   <TableHead className="h-7 px-2 text-right text-xs">
                     Olay
@@ -260,18 +260,18 @@ export const ErrorsPanel = ({
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <KV label="Olay" value={compact(selected.count)} />
+                  <KV label="Events" value={compact(selected.count)} />
                   <KV
                     label="Etkilenen"
                     value={`${compact(selected.user_count)} people`}
                     icon={<UsersIcon className="size-3" />}
                   />
                   <KV label="Short ID" value={selected.short_id} mono />
-                  <KV label="Durum" value={selected.status} />
+                  <KV label="Status" value={selected.status} />
                   <KV label="First seen" value={fmt(selected.first_seen)} />
                   <KV label="Last seen" value={fmt(selected.last_seen)} />
                   <KV
-                    label="Proje"
+                    label="Project"
                     value={projectName(selected.project_id)}
                   />
                   {selected.type && <KV label="Tip" value={selected.type} mono />}

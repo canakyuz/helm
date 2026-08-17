@@ -541,7 +541,7 @@ interface AcqRow {
 
 const TYPE_LABELS: Record<string, string> = {
   direct: "Direct",
-  search: "Arama",
+  search: "Search",
   social: "Sosyal",
   store: "Store",
   referral: "Referans",
@@ -682,7 +682,7 @@ const AcquisitionCard = ({
             {/* Top 20 referrer */}
             <div className="space-y-1">
               <div className="grid grid-cols-[1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                <span>Kaynak</span>
+                <span>Source</span>
                 <span className="text-right">User</span>
                 <span className="text-right">Pay</span>
               </div>

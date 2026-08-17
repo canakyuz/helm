@@ -82,7 +82,7 @@ export const CollectionsListPage = () => {
   const handleCreate = () => {
     const targetProject = projectId || (isAll ? "" : scope);
     if (!label || !slug || !targetProject) {
-      toast.error("Eksik alan", { description: "Proje, etiket ve slug gerekli." });
+      toast.error("Eksik alan", { description: "Project, label and slug are required." });
       return;
     }
     create(
@@ -133,7 +133,7 @@ export const CollectionsListPage = () => {
               </DialogHeader>
               <div className="grid gap-3">
                 <div className="grid gap-1.5">
-                  <Label>Proje</Label>
+                  <Label>Project</Label>
                   <Select value={projectId} onValueChange={setProjectId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select…" />
@@ -206,9 +206,9 @@ export const CollectionsListPage = () => {
               <TableHead>Etiket</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Proje</TableHead>
+              <TableHead>Project</TableHead>
               <TableHead>Field count</TableHead>
-              <TableHead className="w-24">Aksiyon</TableHead>
+              <TableHead className="w-24">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -234,7 +234,7 @@ export const CollectionsListPage = () => {
                 <TableCell>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="Sil">
+                      <Button variant="ghost" size="icon" aria-label="Delete">
                         <Trash2 className="size-4" />
                       </Button>
                     </AlertDialogTrigger>
@@ -252,9 +252,9 @@ export const CollectionsListPage = () => {
                             remove(
                               { resource: "cms_collections", id: c.id },
                               {
-                                onSuccess: () => toast.success("Silindi"),
+                                onSuccess: () => toast.success("Deleted"),
                                 onError: (e) =>
-                                  toast.error("Silinemedi", {
+                                  toast.error("Could not delete", {
                                     description:
                                       e instanceof Error ? e.message : String(e),
                                   }),

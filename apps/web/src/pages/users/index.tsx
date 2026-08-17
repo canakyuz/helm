@@ -283,12 +283,12 @@ export const UsersPage = () => {
       {/* KPI cluster */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <KpiPill
-          label="Toplam"
+          label="Total"
           value={stats.total}
           icon={<UsersIcon className="size-3.5" />}
         />
         <KpiPill
-          label={`Yeni (${NEW_DAYS}g)`}
+          label={`New (${NEW_DAYS}g)`}
           value={stats.new}
           icon={<CalendarPlus className="size-3.5" />}
           tone="emerald"
@@ -334,7 +334,7 @@ export const UsersPage = () => {
                       {t === "all"
                         ? "All"
                         : t === "new"
-                          ? "Yeni"
+                          ? "New"
                           : t === "active"
                             ? "Aktif"
                             : t === "inactive"
@@ -353,7 +353,7 @@ export const UsersPage = () => {
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                 <Input
-                  placeholder="E-posta veya UUID ara…"
+                  placeholder="Search by email or UUID…"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   className="pl-8"
@@ -369,7 +369,7 @@ export const UsersPage = () => {
                 <SelectContent>
                   <SelectItem value="created_at">Signup date</SelectItem>
                   <SelectItem value="last_sign_in_at">Last sign-in</SelectItem>
-                  <SelectItem value="email">E-posta</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -513,7 +513,7 @@ export const UsersPage = () => {
                                 asChild
                                 variant="ghost"
                                 size="icon-sm"
-                                aria-label="Detay"
+                                aria-label="Detail"
                               >
                                 <Link to={`/users/${u.id}`}>
                                   <ExternalLink className="size-4" />
@@ -755,7 +755,7 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
         <Button asChild className="w-full" size="sm">
           <Link to={`/users/${user.id}`}>
             <Shield className="size-4" />
-            <span className="ml-2">Detay & Aksiyonlar</span>
+            <span className="ml-2">Detail & actions</span>
           </Link>
         </Button>
       </CardContent>

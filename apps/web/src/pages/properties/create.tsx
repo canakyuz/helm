@@ -144,7 +144,7 @@ export const PropertyCreate = () => {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Yeni Property</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">New property</h1>
         <p className="text-sm text-muted-foreground">
           Bir property = bir platform (site, mobil uygulama, masaüstü uygulaması). Önce bir brand seç, sonra
           property tipini ve modülleri belirle.
@@ -201,7 +201,7 @@ export const PropertyCreate = () => {
                 name="new_brand_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Yeni brand</FormLabel>
+                    <FormLabel>New brand</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Dante"

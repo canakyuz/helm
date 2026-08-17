@@ -202,7 +202,7 @@ export const SegmentsPage = () => {
 
       {/* KPI cluster */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <SegKpi label="Toplam Segment" value={stats.total} icon={<Layers />} />
+        <SegKpi label="Total segments" value={stats.total} icon={<Layers />} />
         <SegKpi
           label="Calculated"
           value={`${stats.computed} / ${stats.total}`}
@@ -287,13 +287,13 @@ export const SegmentsPage = () => {
                   <div className="space-y-2">
                     <Label>Segment name</Label>
                     <Input
-                      placeholder="Yeni oyuncular"
+                      placeholder="New players"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Proje</Label>
+                    <Label>Project</Label>
                     <Select value={projectId} onValueChange={setProjectId}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
@@ -310,7 +310,7 @@ export const SegmentsPage = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label>Kural</Label>
+                      <Label>Rule</Label>
                       <Select
                         value={ruleType}
                         onValueChange={(v) =>
@@ -321,7 +321,7 @@ export const SegmentsPage = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="new">Yeni</SelectItem>
+                          <SelectItem value="new">New</SelectItem>
                           <SelectItem value="active">Aktif</SelectItem>
                           <SelectItem value="inactive">Pasif</SelectItem>
                         </SelectContent>
@@ -365,8 +365,8 @@ export const SegmentsPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Segment</TableHead>
-                  <TableHead>Proje</TableHead>
-                  <TableHead>Kural</TableHead>
+                  <TableHead>Project</TableHead>
+                  <TableHead>Rule</TableHead>
                   <TableHead className="text-right">Matched</TableHead>
                   <TableHead className="w-32 text-right">Action</TableHead>
                 </TableRow>
@@ -423,7 +423,7 @@ export const SegmentsPage = () => {
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
-                                aria-label="Sil"
+                                aria-label="Delete"
                               >
                                 <Trash2 className="size-4 text-destructive" />
                               </Button>
@@ -482,8 +482,8 @@ export const SegmentsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>E-posta</TableHead>
-                  <TableHead>Proje</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Project</TableHead>
                   <TableHead>Last sign-in</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>

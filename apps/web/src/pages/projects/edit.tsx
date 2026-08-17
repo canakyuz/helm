@@ -126,7 +126,7 @@ export const ProjectEdit = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Kaydet</Button>
+              <Button type="submit">Save</Button>
             </form>
           </Form>
         </CardContent>
@@ -164,7 +164,7 @@ export const ProjectEdit = () => {
 
           {targets.fields.length === 0 ? (
             <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-              Henüz hedef yok. "Hedef Ekle" ile başla.
+              Henüz hedef yok. "Add target" ile başla.
             </p>
           ) : (
             <Form {...form}>
