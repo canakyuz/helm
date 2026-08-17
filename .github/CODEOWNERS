@@ -1,8 +1,8 @@
-# Her PR varsayılan olarak Can'a düşer. Helm tek bakımcılı bir proje —
-# bu dosya bir ekip dağılımı değil, "kimse review'suz merge etmesin" kilidi.
+# Every PR lands on Can by default. Helm has a single maintainer — this file isn't
+# a team split, it's a lock against merging without review.
 * @canakyuz
 
-# Sır bariyeri ve CI kapıları: bunları gevşeten bir değişiklik gözden kaçmamalı.
+# Secret barrier and CI gates: a change that loosens these must not slip through.
 /scripts/check-secrets.sh     @canakyuz
 /scripts/check-commit-msg.sh  @canakyuz
 /lefthook.yml                 @canakyuz

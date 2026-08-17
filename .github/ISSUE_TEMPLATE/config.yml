@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Güvenlik açığı
+  - name: Security vulnerability
     url: https://github.com/canakyuz/helm/security/advisories/new
-    about: Açıkları public issue olarak AÇMA — buradan özel olarak bildir.
-  - name: Soru / fikir
+    about: Don't open a public issue for security problems — report them privately here.
+  - name: Question or idea
     url: https://github.com/canakyuz/helm/discussions
-    about: Hata değil de soru veya öneriyse tartışmalarda konuş.
+    about: Not a bug? Take it to Discussions.
