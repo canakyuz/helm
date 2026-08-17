@@ -84,7 +84,7 @@ export default function Health() {
     label: AD_FORMAT_LABEL[a.format] ?? a.format,
     value: `${formatInteger(a.shown)} / ${formatInteger(a.shown + a.failed)}`,
     ratio: a.failureRate != null ? 1 - a.failureRate : 1,
-    note: a.failed > 0 ? `${formatInteger(a.failed)} hata · ${pct(a.failureRate)}` : "hatasız",
+    note: a.failed > 0 ? `${formatInteger(a.failed)} hata · ${pct(a.failureRate)}` : t("hatasız"),
     tone: a.failureRate != null && a.failureRate >= 0.3 ? "loss" : "normal",
   }));
 
@@ -147,7 +147,7 @@ export default function Health() {
           <Rise index={4} replayKey={replayKey}>
             <FunnelTile
               title={t("Reklam arızası")}
-              count="GÖSTERİM / TOPLAM"
+              count={t("GÖSTERİM / TOPLAM")}
               rows={adRows}
               empty={funnels.isLoading ? "YÜKLENİYOR…" : "REKLAM OLAYI YOK"}
               replayKey={replayKey}

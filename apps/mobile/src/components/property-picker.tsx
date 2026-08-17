@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { useMemo, useState } from "react";
 import {
   Modal,
@@ -28,6 +29,7 @@ const TYPE_ICON: Record<PropertyType, IconName> = {
 };
 
 export function PropertyPicker() {
+  const t = useT();
   const { selectedPropertyId } = usePreferences();
   const { data } = usePropertyList();
   const [open, setOpen] = useState(false);
@@ -86,7 +88,7 @@ export function PropertyPicker() {
             letterSpacing: -0.2,
           }}
         >
-          {selected ? selected.name : "Tüm Projeler"}
+          {selected ? selected.name : t("Tüm Projeler")}
         </Text>
         <View style={{ transform: [{ rotate: "90deg" }] }}>
           <Icon name="chevronRight" size={12} color={colors.fgMuted} />

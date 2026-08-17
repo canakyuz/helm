@@ -241,7 +241,7 @@ export default function Overview() {
                 {/* .60 alfa 10px'te 4.70:1 ile sinirdaydi; .78 → 8.64:1. */}
                 <Text className="font-mono-medium text-eyebrow tracking-wider"
                   style={{ color: withAlpha(theme.accentInk, 0.78) }}>
-                  {picked != null ? longDayLabel(picked.date) : "BUGÜN · GELİR"}
+                  {picked != null ? longDayLabel(picked.date) : t("BUGÜN · GELİR")}
                 </Text>
                 {picked == null ? (
                   // Rozet accent zeminin UZERINDE duruyor. Onceki hal ink'i .14
@@ -327,7 +327,7 @@ export default function Overview() {
               value={mrrText}
               delta={picked != null ? mrrDay?.delta : data.mrrDelta}
               fontSize={statSize}
-              note={mrrText === "—" ? "ölçüm yok" : undefined}
+              note={mrrText === "—" ? t("ölçüm yok") : undefined}
             />
             <StatTile
               index={2}
@@ -336,14 +336,14 @@ export default function Overview() {
               value={dauText}
               delta={picked != null ? dauDay?.delta : data.dauDelta}
               fontSize={statSize}
-              note={dauText === "—" ? "ölçüm yok" : undefined}
+              note={dauText === "—" ? t("ölçüm yok") : undefined}
             />
             <StatTile
               index={3}
               replayKey={replayKey}
               label="CRASH"
               value={crashText}
-              note={crashText === "—" ? "ölçüm yok" : undefined}
+              note={crashText === "—" ? t("ölçüm yok") : undefined}
               fontSize={statSize}
               // Crash-free'de delta YUZDE DEGISIM degil PUAN farki: %99.5'ten
               // %99.0'a dusus "%0.5 dustu" degil "0.5 puan dustu".

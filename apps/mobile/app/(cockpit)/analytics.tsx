@@ -247,7 +247,7 @@ export default function Analytics() {
               <FunnelTile
                 title={t("Oyun akışı")}
                 rows={gameRows}
-                empty={funnels.isLoading ? "YÜKLENİYOR…" : "OYUN OLAYI YOK"}
+                empty={funnels.isLoading ? t("YÜKLENİYOR…") : t("OYUN OLAYI YOK")}
                 replayKey={replayKey}
               />
             </Rise>
@@ -257,7 +257,7 @@ export default function Analytics() {
             <FunnelTile
               title={t("Satın alma")}
               rows={purchaseRows}
-              empty={funnels.isLoading ? "YÜKLENİYOR…" : "SATIN ALMA OLAYI YOK"}
+              empty={funnels.isLoading ? t("YÜKLENİYOR…") : t("SATIN ALMA OLAYI YOK")}
               replayKey={replayKey}
             />
           </Rise>
