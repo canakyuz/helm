@@ -266,6 +266,11 @@ const EN: Record<string, string> = {
   "KAYNAKLAR": "SOURCES",
   "OYUN OLAYI YOK": "NO GAME EVENTS",
   "SATIN ALMA OLAYI YOK": "NO PURCHASE EVENTS",
+  "OTURUM OLAYI YOK": "NO SESSION EVENTS",
+  "REKLAM OLAYI YOK": "NO AD EVENTS",
+  "ENTEGRASYON YOK": "NO INTEGRATIONS",
+  "Entegrasyonlar": "Integrations",
+
   "SON": "LAST",
 
   // Sekme cubugu
@@ -419,6 +424,17 @@ export function useT() {
  * Bu surum dili cagri aninda MMKV'den okur; abonelik yok, cunki bir toast zaten
  * tek seferlik cizilir — dil degisiminde yeniden cevrilecek bir sey kalmaz.
  */
+/**
+ * Aktif dilin BCP-47 etiketi — buyuk/kucuk harf ve tarih donusumleri icin.
+ *
+ * NEDEN CEVIRI TABLOSUNDAN DEGIL: tablo Turkce moddaki her anahtari oldugu gibi
+ * geri veriyor, yani "__locale__" gibi bir anahtar TR'de dizginin kendisi olarak
+ * donerdi ve `toLocaleUpperCase("__locale__")` patlardi.
+ */
+export function currentLocale(): string {
+  return preferences.get().language === "tr" ? "tr-TR" : "en-US";
+}
+
 export function tr(key: string, vars?: TranslateVars): string {
   return translate(preferences.get().language, key, vars);
 }

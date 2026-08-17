@@ -130,7 +130,7 @@ export default function Analytics() {
             note:
               shopOpened > 0
                 ? `dönüşüm ${formatRatio(purchaseTotal / shopOpened)}`
-                : "mağaza açılışı ölçülmüyor",
+                : t("mağaza açılışı ölçülmüyor"),
             tone: shopOpened === 0 ? "warn" : "normal",
           },
         ];

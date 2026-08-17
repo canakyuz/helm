@@ -78,7 +78,7 @@ export function AdEconomicsTile({
         error != null
           ? `OKUNAMADI · ${error.message}`
           : loading
-            ? "YÜKLENİYOR…"
+            ? t("YÜKLENİYOR…")
             : "FORMAT KIRILIMI YOK"
       }
       replayKey={replayKey}

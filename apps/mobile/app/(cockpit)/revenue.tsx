@@ -22,7 +22,7 @@ import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
 import { AdEconomicsTile, PaymentsTile, ReconciliationTile } from "~/components/revenue";
-import { useT } from "~/lib/i18n";
+import { tr, useT } from "~/lib/i18n";
 import {
   BentoBackground,
   HERO_NUMBER,
@@ -73,9 +73,9 @@ function weekLabel(bucket: RevenueBucket): string {
   const { from, to } = weekRange(bucket);
   const [, fm, fd] = from.split("-").map(Number);
   const [, tm, td] = to.split("-").map(Number);
-  const toMonth = MONTHS_SHORT[(tm ?? 1) - 1];
+  const toMonth = tr(MONTHS_SHORT[(tm ?? 1) - 1] ?? "");
   if (fm !== tm) {
-    return `${fd} ${MONTHS_SHORT[(fm ?? 1) - 1]}–${td} ${toMonth}`;
+    return `${fd} ${tr(MONTHS_SHORT[(fm ?? 1) - 1] ?? "")}–${td} ${toMonth}`;
   }
   return `${fd}–${td} ${toMonth}`;
 }
