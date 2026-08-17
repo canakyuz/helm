@@ -1,30 +1,30 @@
 <!--
-Başlık commit formatını izlesin: type(scope): WES-XXX ne değişti
-Örnek: fix(ingest): WES-000 stop dropping revenue rows when the provider omits currency
+Title follows the commit format: type(scope): WES-XXX what changed
+Example: fix(ingest): WES-000 stop dropping revenue rows when the provider omits currency
 -->
 
-## Ne değişti
+## What changed
 
-<!-- Bir paragraf. Diff'i tekrar etme — NEDEN değiştiğini yaz. -->
+<!-- One paragraph. Don't restate the diff — say why it changed. -->
 
-## Neden
+## Why
 
-<!-- Hangi problem? Hangi davranış yanlıştı? Varsa issue linki. -->
+<!-- Which problem? What behaviour was wrong? Link the issue if there is one. -->
 
-## Nasıl doğruladın
+## How you verified it
 
 <!--
-Gerçek veriyle. "Çalışıyor" yeterli değil — ne koştun, ne gördün?
-UI değişikliğiyse önce/sonra ekran görüntüsü ekle.
+Against real data. "It works" isn't enough — what did you run, what did you see?
+For UI changes, attach before/after screenshots.
 -->
 
-## Kapsam dışı bıraktıklarım
+## Left out of scope
 
-<!-- Fark ettiğin ama bu PR'da düzeltmediğin şeyler. Yoksa "yok" yaz. -->
+<!-- Things you noticed but deliberately didn't fix here. Write "none" if there are none. -->
 
 ---
 
-- [ ] `make typecheck` yeşil
-- [ ] `make scan-secrets` yeşil — gerçek credential eklemedim
-- [ ] Davranış değiştiyse gerçek veriyle doğruladım
-- [ ] Tek konu — karışık değişiklik yok
+- [ ] `make typecheck` is green
+- [ ] `make scan-secrets` is green — no real credentials added
+- [ ] Behavioural changes verified against real data
+- [ ] One topic — nothing unrelated mixed in

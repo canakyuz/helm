@@ -1,38 +1,38 @@
-name: Özellik önerisi
-description: Yeni bir yetenek öner
+name: Feature request
+description: Propose a new capability
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
-        Helm önce tek kişilik bir ihtiyaç için yazıldı ve kapsam konusunda seçici.
-        Büyük bir şeye başlamadan önce burada konuşalım — reddedilen bir PR
-        ikimizin de zamanını yakar.
+        Helm was written for one person's needs first and is selective about scope.
+        Talk it through here before starting anything large — a rejected PR wastes
+        both our time.
 
   - type: textarea
     id: problem
     attributes:
-      label: Hangi problemi çözüyor
-      description: Özelliği değil, problemi anlat. Şu an ne yapamıyorsun?
+      label: What problem does this solve
+      description: Describe the problem, not the feature. What can't you do today?
     validations:
       required: true
 
   - type: textarea
     id: proposal
     attributes:
-      label: Önerin
+      label: Your proposal
     validations:
       required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Denediğin alternatifler
-      description: Mevcut araçlarla neden çözülmüyor?
+      label: Alternatives you tried
+      description: Why don't the existing tools cover it?
 
   - type: checkboxes
     id: contribute
     attributes:
-      label: Katkı
+      label: Contribution
       options:
-        - label: Bunu ben yazmak isterim
+        - label: I'd like to build this myself

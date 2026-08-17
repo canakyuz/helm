@@ -1,45 +1,46 @@
-name: Hata bildirimi
-description: Bozuk bir davranış bildir
+name: Bug report
+description: Report something that behaves incorrectly
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        Güvenlik açığı bulduysan burayı KULLANMA —
-        [Security Advisory](https://github.com/canakyuz/helm/security/advisories/new) aç.
+        Found a security issue? **Don't use this form** — open a
+        [Security Advisory](https://github.com/canakyuz/helm/security/advisories/new)
+        instead.
 
   - type: dropdown
     id: area
     attributes:
-      label: Hangi katman
+      label: Which layer
       options:
-        - Mobil (Expo)
+        - Mobile (Expo)
         - Web (Refine)
         - Edge function / migration
-        - Paylaşılan paket (@helm/*)
-        - Emin değilim
+        - Shared package (@helm/*)
+        - Not sure
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: Ne olmasını bekliyordun
+      label: What you expected
     validations:
       required: true
 
   - type: textarea
     id: actual
     attributes:
-      label: Ne oldu
-      description: Hata mesajı veya log varsa ham haliyle yapıştır — anahtarları maskele.
+      label: What happened
+      description: Paste error messages or logs verbatim — mask any credentials.
     validations:
       required: true
 
   - type: textarea
     id: steps
     attributes:
-      label: Tekrar üretme adımları
+      label: Steps to reproduce
       placeholder: |
         1. …
         2. …
@@ -50,14 +51,14 @@ body:
   - type: input
     id: version
     attributes:
-      label: Sürüm / commit
-      description: Hangi commit'te görüyorsun? (`git rev-parse --short HEAD`)
+      label: Version / commit
+      description: Which commit are you on? (`git rev-parse --short HEAD`)
 
   - type: checkboxes
     id: checks
     attributes:
-      label: Kontroller
+      label: Checks
       options:
-        - label: Kendi Supabase kurulumumun yanlış yapılandırması olmadığından eminim
-        - label: Bildirimimde gerçek credential yok
+        - label: I'm confident this isn't a misconfiguration of my own Supabase setup
+        - label: My report contains no real credentials
           required: true
