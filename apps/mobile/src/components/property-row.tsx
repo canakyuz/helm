@@ -1,3 +1,4 @@
+import { tr } from "~/lib/i18n";
 import { View, Text } from "react-native";
 
 import type { Property, PropertyStatus, PropertyType } from "~/hooks/use-properties";
@@ -154,7 +155,7 @@ export function PropertyRow({ property }: { property: Property }) {
             color: colors.fgSubtle,
           }}
         >
-          {property.lastPingAt ? formatRelativeTime(property.lastPingAt) : "ping yok"}
+          {property.lastPingAt ? formatRelativeTime(property.lastPingAt) : tr("ping yok")}
         </Text>
       </View>
     </View>

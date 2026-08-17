@@ -331,6 +331,25 @@ const EN: Record<string, string> = {
   "İptal": "Cancellation",
   "Süresi doldu": "Expired",
   "Ödeme sorunu": "Billing issue",
+
+  // Goreli zaman — birim basina anahtar (bkz. src/lib/format.ts)
+  "şimdi": "just now",
+  "az sonra": "in a moment",
+  "{n} sn önce": "{n}s ago",
+  "{n} dk önce": "{n}m ago",
+  "{n} sa önce": "{n}h ago",
+  "{n} g önce": "{n}d ago",
+  "{n} h önce": "{n}w ago",
+  "{n} ay önce": "{n}mo ago",
+  "{n} y önce": "{n}y ago",
+  "{n} sn sonra": "in {n}s",
+  "{n} dk sonra": "in {n}m",
+  "{n} sa sonra": "in {n}h",
+  "{n} g sonra": "in {n}d",
+  "{n} h sonra": "in {n}w",
+  "{n} ay sonra": "in {n}mo",
+  "{n} y sonra": "in {n}y",
+  "ping yok": "no ping",
 };
 
 export type TranslateVars = Record<string, string | number>;

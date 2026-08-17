@@ -209,7 +209,7 @@ export default function Analytics() {
               )}
               <Text className="mt-[6px] text-meta text-fg2">
                 MAU {mau != null ? formatInteger(mau) : "—"}
-                {stickiness != null ? t("· yapışkanlık {value}", { value: formatRatio(stickiness, 1) }) : ""}
+                {stickiness != null ? ` ${t("· yapışkanlık {value}", { value: formatRatio(stickiness, 1) })}` : ""}
                 {session != null ? ` · oturum ${fmtSession(session)}` : ""}
               </Text>
 
