@@ -38,7 +38,7 @@ export function PropertyPicker() {
 
   const list = properties.data ?? [];
   const selected = list.find((p) => p.id === selectedPropertyId);
-  const label = selectedPropertyId === "all" ? ALL : (selected?.name ?? ALL);
+  const label = selectedPropertyId === "all" ? t(ALL) : (selected?.name ?? t(ALL));
 
   const pick = (id: string) => {
     haptic.tap();
@@ -102,7 +102,7 @@ export function PropertyPicker() {
               }}
             >
               <Option
-                label={ALL}
+                label={t(ALL)}
                 sub={`${list.length} proje`}
                 active={selectedPropertyId === "all"}
                 onPress={() => pick("all")}

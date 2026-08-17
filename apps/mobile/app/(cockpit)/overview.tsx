@@ -356,7 +356,7 @@ export default function Overview() {
             <BentoTile>
               <View className="flex-row items-center justify-between">
                 <Text className="font-semibold text-emph tracking-tight text-fg">
-                  {MONTHS_TR[new Date().getMonth()]} hedefi
+                  {t("{month} hedefi", { month: t(MONTHS_TR[new Date().getMonth()] ?? "") })}
                 </Text>
                 {goalTarget != null ? (
                   <Text className="font-mono-semibold text-body text-fg2">
@@ -387,7 +387,7 @@ export default function Overview() {
             <BentoTile>
               <View className="mb-xs flex-row items-center justify-between">
                 <Text className="font-semibold text-emph tracking-tight text-fg">
-                  Projeler
+                  {t("Projeler")}
                 </Text>
                 <Text className="font-mono-medium text-[11px] text-fg3">
                   {allProjects.length}
@@ -425,7 +425,7 @@ export default function Overview() {
                             marka adi proje adiyla ayni, satir "Block Forge ·
                             Block Forge" diye tekrar ediyordu. */}
                         <Text className="mt-[1px] text-meta text-fg3" numberOfLines={1}>
-                          {TYPE_LABEL[p.type] ?? p.type} · {STATUS_LABEL[p.status]}
+                          {t(TYPE_LABEL[p.type] ?? p.type)} · {t(STATUS_LABEL[p.status])}
                         </Text>
                       </View>
                       {/* Proje bazli delta kaynagi yok — uydurmak yerine
