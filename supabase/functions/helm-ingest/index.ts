@@ -92,13 +92,17 @@ Deno.serve(async (req) => {
     return json({ error: error.message }, 500);
   }
 
-  let ingested = 0;
-  let okCount = 0;
-  let errorCount = 0;
-  const results: Array<Record<string, unknown>> = [];
   const syncedAt = new Date().toISOString();
+  type Integration = NonNullable<typeof integrations>[number];
 
-  for (const it of integrations ?? []) {
+  /**
+   * Tek bir entegrasyonu senkronlar ve SONUCU DÖNER.
+   *
+   * NEDEN SAYAÇ MUTASYONU YOK: eskiden gövde `ingested++` / `okCount++` diye
+   * dışarıdaki değişkenleri güncelliyordu. Eş zamanlı koşarken bu yarış demek.
+   * Sonuçlar dönülüp sonunda toplanıyor — saf fonksiyon, güvenli paralellik.
+   */
+  async function syncIntegration(it: Integration): Promise<Record<string, unknown>> {
     try {
       const connector = CONNECTORS[it.provider];
       if (!connector) throw new Error(`Bilinmeyen sağlayıcı: ${it.provider}`);
@@ -170,8 +174,6 @@ Deno.serve(async (req) => {
         if (fmtErr) throw new Error(fmtErr.message);
       }
 
-      ingested += rows.length + byCountry.length + byFormat.length;
-      okCount++;
       await hub
         .from("project_integrations")
         .update({
@@ -181,15 +183,16 @@ Deno.serve(async (req) => {
         })
         .eq("id", it.id);
 
-      results.push({
+      return {
+        ok: true,
         provider: it.provider,
         project_id: it.project_id,
         points: rows.length,
         country_points: byCountry.length,
-      });
+        ingested: rows.length + byCountry.length + byFormat.length,
+      };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
-      errorCount++;
       await hub
         .from("project_integrations")
         .update({
@@ -199,13 +202,49 @@ Deno.serve(async (req) => {
         })
         .eq("id", it.id);
 
-      results.push({
+      return {
+        ok: false,
         provider: it.provider,
         project_id: it.project_id,
         error: message,
-      });
+      };
     }
   }
+
+  // Sağlayıcı bazında grupla: FARKLI sağlayıcılar eş zamanlı, AYNI sağlayıcının
+  // entegrasyonları sırayla.
+  //
+  // NEDEN BÖYLE: önceki hali tek bir `for` döngüsüydü — AdMob bitmeden
+  // RevenueCat başlamıyordu ve tek bir çalışma 90 saniyeyi aşıyordu (ölçüldü:
+  // damga 13:19'da "SÜRÜYOR", 13:20'de bitti). Hepsini birden paralele almak ise
+  // aynı sağlayıcıya eş zamanlı vurmak demek; AdMob'un raporlama kotası bunu
+  // sevmez. Bu düzende duvar saati en yavaş TEK sağlayıcıya düşer ve hiçbir dış
+  // API aynı anda birden fazla istek almaz — kota riski yok.
+  //
+  // Time:  O(en yavaş sağlayıcı) — önce O(tüm sağlayıcıların toplamı)
+  // Space: O(n) entegrasyon sayısı kadar sonuç
+  const byProvider = new Map<string, Integration[]>();
+  for (const it of integrations ?? []) {
+    const group = byProvider.get(it.provider);
+    if (group) group.push(it);
+    else byProvider.set(it.provider, [it]);
+  }
+
+  const grouped = await Promise.all(
+    Array.from(byProvider.values(), async (group) => {
+      const out: Array<Record<string, unknown>> = [];
+      for (const it of group) out.push(await syncIntegration(it));
+      return out;
+    }),
+  );
+
+  const results = grouped.flat();
+  const okCount = results.filter((r) => r.ok === true).length;
+  const errorCount = results.length - okCount;
+  const ingested = results.reduce(
+    (sum, r) => sum + (typeof r.ingested === "number" ? r.ingested : 0),
+    0,
+  );
 
   // Çalışmayı kapat.
   if (runId) {
@@ -221,22 +260,31 @@ Deno.serve(async (req) => {
       .eq("id", runId);
   }
 
-  // Senkron sonrası uyarı kurallarını değerlendir (fire-and-forget).
-  try {
-    await fetch(
-      `${Deno.env.get("SUPABASE_URL")}/functions/v1/helm-alert`,
-      {
+  // Senkron sonrası uyarı kurallarını değerlendir.
+  //
+  // Yorum "fire-and-forget" diyordu ama çağrı `await` ediliyordu — yani yanıtı
+  // bekletiyordu. Gerçekten arka plana almak için EdgeRuntime.waitUntil gerekir:
+  // await'i düpedüz kaldırmak isteği runtime yanıtı dönünce öldürür ve uyarı
+  // değerlendirmesi sessizce kaybolurdu.
+  const evaluateAlerts = (async () => {
+    try {
+      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/helm-alert`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
           "Content-Type": "application/json",
         },
         body: "{}",
-      },
-    );
-  } catch {
-    // uyarı değerlendirmesi senkronu bloklamasın
-  }
+      });
+    } catch {
+      // uyarı değerlendirmesi senkronu bloklamasın
+    }
+  })();
+
+  const runtime = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } })
+    .EdgeRuntime;
+  if (runtime) runtime.waitUntil(evaluateAlerts);
+  else await evaluateAlerts;
 
   return json({ ingested, ok: okCount, errors: errorCount, results });
 });

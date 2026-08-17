@@ -6,7 +6,7 @@ export
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help install hooks scan-secrets audit-secrets dev-web dev-mobile typecheck build-web gen-types db-push fn-deploy ios-release clean
+.PHONY: help install hooks scan-secrets audit-secrets dev-web dev-mobile typecheck build-web gen-types db-push fn-deploy ios-release ota clean
 
 help: ## komutları listele
 	@awk 'BEGIN{FS=":.*## "} /^[a-zA-Z_-]+:.*## /{printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -50,3 +50,7 @@ ios-release: ## yerel IPA + TestFlight (apps/mobile/Makefile'a delege)
 
 clean: ## node_modules + build çıktıları temizle
 	rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/web/dist
+
+ota: ## Over-the-air update (apps/mobile/Makefile'a delege)
+	cd apps/mobile && eas update --channel production --environment production --message "$$(git log -1 --pretty=%s)"
+
