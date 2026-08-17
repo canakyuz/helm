@@ -230,7 +230,7 @@ export const RevenuePage = () => {
   const topChannel = useMemo(() => {
     const channels: Array<{ name: string; value: number }> = [
       { name: "Reklam", value: adTotals.thisMonth },
-      { name: "Mağaza", value: appTotals.thisMonth },
+      { name: "Store", value: appTotals.thisMonth },
       { name: "Abonelik", value: withMrrCents(latest(metrics, "mrr"), mrrCents) * rateOf(rcCurrency) },
     ];
     const max = channels.reduce((a, b) => (b.value > a.value ? b : a));
@@ -249,12 +249,12 @@ export const RevenuePage = () => {
       {/* Üst KPI cluster — 3 kanal birleşik gelir özeti */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <RevKpi
-          label="Bugün (birleşik)"
+          label="Today (combined)"
           value={formatMoney(combinedTotals.today, displayCcy)}
           tone="emerald"
         />
         <RevKpi
-          label="Dün"
+          label="Yesterday"
           value={formatMoney(combinedTotals.yesterday, displayCcy)}
         />
         <RevKpi
@@ -263,7 +263,7 @@ export const RevenuePage = () => {
           tone="primary"
         />
         <RevKpi
-          label={`Geçen ay · en büyük: ${topChannel}`}
+          label={`Last month · largest: ${topChannel}`}
           value={formatMoney(combinedTotals.prevMonth, displayCcy)}
         />
       </div>
@@ -285,7 +285,7 @@ export const RevenuePage = () => {
 
         <TabsContent value="subscription" className="space-y-4">
           {!hasRevenueCat && (
-            <ErrorBanner variant="warning" title="RevenueCat bağlanmadı">
+            <ErrorBanner variant="warning" title="RevenueCat is not connected">
               Abonelik geliri akmıyor — Entegrasyonlar → <strong>+</strong> →
               RevenueCat (v2 secret key + project_id).
             </ErrorBanner>
@@ -304,7 +304,7 @@ export const RevenuePage = () => {
               loading={loading}
             />
             <StatCard
-              title="Gelir (28 gün)"
+              title="Revenue (28 days)"
               value={formatMoney(revenue28d, displayCcy)}
               icon={<Wallet />}
               loading={loading}
@@ -312,7 +312,7 @@ export const RevenuePage = () => {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>{`MRR — son ${range} gün`}</CardTitle>
+              <CardTitle>{`MRR — last ${range} days`}</CardTitle>
             </CardHeader>
             <CardContent>
               <TrendChart
@@ -330,30 +330,30 @@ export const RevenuePage = () => {
         <TabsContent value="ads" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Toplam Tahmini Kazanç (AdMob)</CardTitle>
+              <CardTitle>Total estimated earnings (AdMob)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div>
-                  <div className="text-xs text-muted-foreground">Bugün şimdiye kadar</div>
+                  <div className="text-xs text-muted-foreground">Today so far</div>
                   <div className="mt-1 font-mono text-2xl">
                     {formatMoney(adTotals.today, displayCcy)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Dün</div>
+                  <div className="text-xs text-muted-foreground">Yesterday</div>
                   <div className="mt-1 font-mono text-2xl">
                     {formatMoney(adTotals.yesterday, displayCcy)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Bu ay şimdiye kadar</div>
+                  <div className="text-xs text-muted-foreground">Month to date</div>
                   <div className="mt-1 font-mono text-2xl">
                     {formatMoney(adTotals.thisMonth, displayCcy)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Geçen ay</div>
+                  <div className="text-xs text-muted-foreground">Last month</div>
                   <div className="mt-1 font-mono text-2xl">
                     {formatMoney(adTotals.prevMonth, displayCcy)}
                   </div>
@@ -363,14 +363,14 @@ export const RevenuePage = () => {
           </Card>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
-              title="Reklam Geliri (son gün)"
+              title="Ad revenue (last day)"
               value={formatMoney(adRevenueDisplay, displayCcy)}
               icon={<Wallet />}
               delta={deltaPct(adSeries)}
               loading={loading}
             />
             <StatCard
-              title="Gösterim (son gün)"
+              title="Impressions (last day)"
               value={compact(latest(metrics, "ad_impressions"))}
               icon={<Eye />}
               delta={deltaPct(impSeries)}
@@ -389,7 +389,7 @@ export const RevenuePage = () => {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{`Reklam Geliri — son ${range} gün`}</CardTitle>
+                <CardTitle>{`Ad revenue — last ${range} days`}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TrendChart
@@ -401,7 +401,7 @@ export const RevenuePage = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>{`Gösterim — son ${range} gün`}</CardTitle>
+                <CardTitle>{`Impressions — last ${range} days`}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TrendChart
@@ -418,30 +418,30 @@ export const RevenuePage = () => {
           <TabsContent value="store" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Toplam Mağaza Kazancı</CardTitle>
+                <CardTitle>Total store proceeds</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                   <div>
-                    <div className="text-xs text-muted-foreground">Bugün şimdiye kadar</div>
+                    <div className="text-xs text-muted-foreground">Today so far</div>
                     <div className="mt-1 font-mono text-2xl">
                       {formatMoney(appTotals.today, displayCcy)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Dün</div>
+                    <div className="text-xs text-muted-foreground">Yesterday</div>
                     <div className="mt-1 font-mono text-2xl">
                       {formatMoney(appTotals.yesterday, displayCcy)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Bu ay şimdiye kadar</div>
+                    <div className="text-xs text-muted-foreground">Month to date</div>
                     <div className="mt-1 font-mono text-2xl">
                       {formatMoney(appTotals.thisMonth, displayCcy)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Geçen ay</div>
+                    <div className="text-xs text-muted-foreground">Last month</div>
                     <div className="mt-1 font-mono text-2xl">
                       {formatMoney(appTotals.prevMonth, displayCcy)}
                     </div>
@@ -451,21 +451,21 @@ export const RevenuePage = () => {
             </Card>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <StatCard
-                title="Mağaza Geliri (son gün)"
+                title="Store revenue (last day)"
                 value={formatMoney(appRevDisplay, displayCcy)}
                 icon={<DollarSign />}
                 delta={deltaPct(appRevSeries)}
                 loading={loading}
               />
               <StatCard
-                title="İndirme (son gün)"
+                title="Downloads (last day)"
                 value={compact(downloadsLatest)}
                 icon={<Download />}
                 delta={deltaPct(downloadsSeries)}
                 loading={loading}
               />
               <StatCard
-                title="Gelir/İndirme"
+                title="Revenue / download"
                 value={
                   downloadsLatest > 0
                     ? formatMoney2(appRevDisplay / downloadsLatest, displayCcy)
@@ -478,7 +478,7 @@ export const RevenuePage = () => {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>{`Mağaza Geliri — son ${range} gün`}</CardTitle>
+                  <CardTitle>{`Store revenue — last ${range} days`}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <TrendChart
@@ -490,7 +490,7 @@ export const RevenuePage = () => {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>{`İndirme — son ${range} gün`}</CardTitle>
+                  <CardTitle>{`Downloads — last ${range} days`}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <TrendChart

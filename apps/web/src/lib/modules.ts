@@ -65,19 +65,19 @@ export interface ModuleMeta {
 
 export const MODULE_META: Record<ModuleKey, ModuleMeta> = {
   content: {
-    label: "İçerik (CMS)",
+    label: "Content (CMS)",
     icon: "FileText",
-    description: "Şemalar, içerikler, medya, çoklu dil.",
+    description: "Schemas, content, media and multi-language.",
   },
   users: {
-    label: "Müşteriler",
+    label: "Customers",
     icon: "Users",
-    description: "Kullanıcı listesi, segmentler, kohortlar.",
+    description: "User list, segments and cohorts.",
   },
   analytics: {
     label: "Analitik",
     icon: "LineChart",
-    description: "Trafik / DAU / retention / dönüşüm.",
+    description: "Traffic / DAU / retention / conversion.",
   },
   subscriptions: {
     label: "Abonelik",
@@ -92,27 +92,27 @@ export const MODULE_META: Record<ModuleKey, ModuleMeta> = {
   reviews: {
     label: "Yorumlar",
     icon: "Star",
-    description: "App Store / Play Store puanları ve yorumları.",
+    description: "App Store / Play Store ratings and reviews.",
   },
   funnel: {
     label: "Huni",
     icon: "Workflow",
-    description: "Adım adım dönüşüm, drop analizi (PostHog).",
+    description: "Step-by-step conversion and drop-off analysis (PostHog).",
   },
   push: {
     label: "Push",
     icon: "Send",
-    description: "Bildirim segmentleri, kampanya gönderimi.",
+    description: "Notification segments and campaign delivery.",
   },
   mail: {
     label: "Mail",
     icon: "Mail",
-    description: "Email kampanyaları, transactional (Resend).",
+    description: "Email campaigns and transactional mail (Resend).",
   },
   social: {
     label: "Sosyal",
     icon: "Share2",
-    description: "Post planlama, scheduler (yakında).",
+    description: "Post scheduling (coming soon).",
     comingSoon: true,
   },
 };
@@ -135,16 +135,16 @@ export const SOURCE_TO_MODULE: Record<ProviderName, ModuleKey> = {
 
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
   website: "Web sitesi",
-  web_app: "Web uygulaması",
+  web_app: "Web app",
   mobile_app: "Mobil uygulama",
-  desktop_app: "Masaüstü uygulaması",
+  desktop_app: "Desktop app",
   game: "Oyun",
 };
 
 export const PROPERTY_TYPE_DESCRIPTIONS: Record<PropertyType, string> = {
-  website: "Marketing veya içerik sitesi (CMS + traffic).",
-  web_app: "SaaS, dashboard, web tabanlı uygulama.",
+  website: "Marketing or content site (CMS + traffic).",
+  web_app: "SaaS, dashboard or web-based app.",
   mobile_app: "iOS / Android native uygulama.",
   desktop_app: "macOS / Windows / Linux native uygulama.",
-  game: "Mobil oyun (mobile_app'ten ayrı KPI seti).",
+  game: "Mobile game (a KPI set separate from mobile_app).",
 };

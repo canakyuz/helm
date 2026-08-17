@@ -84,7 +84,7 @@ export const UsersGeoMap = ({
         lat: geo.lat,
         lng: geo.lng,
         label: `${geo.name} — ${compact(value)}`,
-        description: `${geo.name}: ${value.toLocaleString("tr-TR")} kullanıcı/indirme`,
+        description: `${geo.name}: ${value.toLocaleString("en-US")} users/downloads`,
         tooltip: "hover",
         icon: {
           type: "dot",
@@ -174,7 +174,7 @@ export const UsersGeoMap = ({
               Toplam (son {days}g)
             </div>
             <div className="font-mono text-2xl font-semibold tabular-nums">
-              {selectedValue.toLocaleString("tr-TR")}
+              {selectedValue.toLocaleString("en-US")}
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export const UsersGeoMap = ({
         <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
           <div className="text-center">
             <Globe2 className="mx-auto size-8 opacity-30" />
-            <div className="mt-2">Henüz ülke verisi yok</div>
+            <div className="mt-2">No country data yet</div>
             <div className="text-xs opacity-70">
               ASC veya PostHog senkronlandıktan sonra görünür
             </div>
@@ -224,7 +224,7 @@ export const UsersGeoMap = ({
         ) : markers.length === 0 ? (
           <div className="flex h-[320px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground">
             <Globe2 className="size-6 opacity-40" />
-            <div>Henüz ülke verisi yok.</div>
+            <div>No country data yet.</div>
             <div className="text-xs">
               App Store Connect veya PostHog (
               <code className="text-[10px]">$geoip_country_code</code>)

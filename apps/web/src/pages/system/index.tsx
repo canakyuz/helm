@@ -79,11 +79,11 @@ const INTERVALS = [
   { value: "15", label: "15 dakika" },
   { value: "60", label: "Saatlik" },
   { value: "360", label: "6 saat" },
-  { value: "1440", label: "Günlük" },
+  { value: "1440", label: "Daily" },
 ];
 
 const fmt = (value: string | null) =>
-  value ? new Date(value).toLocaleString("tr-TR") : "—";
+  value ? new Date(value).toLocaleString("en-US") : "—";
 
 export const SystemPage = () => {
   const since90 = useMemo(
@@ -267,7 +267,7 @@ export const SystemPage = () => {
 
   const copyUrl = (id: string) => {
     navigator.clipboard.writeText(`${HEARTBEAT_BASE}${id}`);
-    toast.success("Ping URL kopyalandı");
+    toast.success("Ping URL copied");
   };
 
   // KPI hesapları — operasyon merkezi özeti
@@ -287,12 +287,12 @@ export const SystemPage = () => {
     const lastRunRel = lastRun?.started_at
       ? (() => {
           const m = (Date.now() - new Date(lastRun.started_at).getTime()) / 60_000;
-          if (m < 1) return "az önce";
+          if (m < 1) return "just now";
           if (m < 60) return `${Math.round(m)} dk`;
           if (m < 1440) return `${Math.round(m / 60)} sa`;
           return `${Math.round(m / 1440)} g`;
         })()
-      : "hiç";
+      : "never";
 
     const last24h = Date.now() - 24 * 3_600_000;
     const recent = runs.filter(
@@ -330,7 +330,7 @@ export const SystemPage = () => {
       {/* KPI cluster — 6'lı operasyon özeti */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <SysKpi
-          label="Sistem Sağlığı"
+          label="System health"
           value={`%${sysStats.healthPct}`}
           icon={
             sysStats.healthPct >= 80 ? (
@@ -360,7 +360,7 @@ export const SystemPage = () => {
           tone={sysStats.cronStale ? "destructive" : "emerald"}
         />
         <SysKpi
-          label="Senkron başarı (24s)"
+          label="Sync success (24h)"
           value={
             sysStats.recentCount > 0
               ? `%${sysStats.recentRate}`
@@ -388,7 +388,7 @@ export const SystemPage = () => {
           }
         />
         <SysKpi
-          label="Hata (son gün)"
+          label="Errors (last day)"
           value={compact(sysStats.sentryCount)}
           icon={<AlertOctagon className="size-3.5" />}
           tone={sysStats.sentryCount > 0 ? "destructive" : "emerald"}
@@ -416,7 +416,7 @@ export const SystemPage = () => {
                   }
                 >
                   {errorDelta === null
-                    ? "son gün"
+                    ? "last day"
                     : `${errorDelta > 0 ? "+" : ""}${errorDelta.toFixed(1)}% / 7g`}
                 </div>
               </div>
@@ -513,8 +513,8 @@ export const SystemPage = () => {
                       <TableHead>Proje</TableHead>
                     )}
                     <TableHead className="text-right">Olay</TableHead>
-                    <TableHead className="text-right">Kullanıcı</TableHead>
-                    <TableHead>Son görüldü</TableHead>
+                    <TableHead className="text-right">User</TableHead>
+                    <TableHead>Last seen</TableHead>
                     <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
@@ -556,14 +556,14 @@ export const SystemPage = () => {
                         </span>
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-xs">
-                        {new Date(i.last_seen).toLocaleString("tr-TR")}
+                        {new Date(i.last_seen).toLocaleString("en-US")}
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <Button
                           asChild
                           variant="ghost"
                           size="icon-sm"
-                          aria-label="Sentry'de aç"
+                          aria-label="Open in Sentry"
                         >
                           <a
                             href={i.permalink}
@@ -643,7 +643,7 @@ export const SystemPage = () => {
                     </div>
                     <div className="mt-0.5 text-xs">
                       {new Date(selectedIssue.first_seen).toLocaleString(
-                        "tr-TR",
+                        "en-US",
                       )}
                     </div>
                   </div>
@@ -653,7 +653,7 @@ export const SystemPage = () => {
                     </div>
                     <div className="mt-0.5 text-xs">
                       {new Date(selectedIssue.last_seen).toLocaleString(
-                        "tr-TR",
+                        "en-US",
                       )}
                     </div>
                   </div>
@@ -691,7 +691,7 @@ export const SystemPage = () => {
                     rel="noreferrer"
                   >
                     <ExternalLink className="size-4" />
-                    <span className="ml-2">Sentry'de aç</span>
+                    <span className="ml-2">Open in Sentry</span>
                   </a>
                 </Button>
               </DialogFooter>
@@ -703,7 +703,7 @@ export const SystemPage = () => {
       {/* Veri Kaynağı Sağlığı */}
       <Card>
         <CardHeader>
-          <CardTitle>Veri Kaynağı Sağlığı</CardTitle>
+          <CardTitle>Data source health</CardTitle>
         </CardHeader>
         <CardContent>
           {integrations.length === 0 ? (
@@ -746,7 +746,7 @@ export const SystemPage = () => {
       {/* Heartbeat İzleyiciler */}
       <Card>
         <CardHeader>
-          <CardTitle>Heartbeat İzleyiciler</CardTitle>
+          <CardTitle>Heartbeat monitors</CardTitle>
           <CardAction>
             <Dialog open={open} onOpenChange={setOpen}>
               <Button size="sm" onClick={() => setOpen(true)}>
@@ -766,7 +766,7 @@ export const SystemPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Beklenen aralık</Label>
+                    <Label>Expected range</Label>
                     <Select
                       value={hbInterval}
                       onValueChange={setHbInterval}
@@ -809,7 +809,7 @@ export const SystemPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>İzleyici</TableHead>
+                  <TableHead>Monitor</TableHead>
                   <TableHead>Durum</TableHead>
                   <TableHead>Son ping</TableHead>
                   <TableHead>Ping URL</TableHead>
@@ -867,7 +867,7 @@ export const SystemPage = () => {
                               </AlertDialogTitle>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   remove({
@@ -898,7 +898,7 @@ export const SystemPage = () => {
       {/* Senkron Geçmişi */}
       <Card>
         <CardHeader>
-          <CardTitle>Senkron Geçmişi</CardTitle>
+          <CardTitle>Sync history</CardTitle>
         </CardHeader>
         <CardContent>
           {runs.length === 0 ? (
@@ -912,14 +912,14 @@ export const SystemPage = () => {
                   <TableHead>Zaman</TableHead>
                   <TableHead>Tetikleyici</TableHead>
                   <TableHead>Metrik</TableHead>
-                  <TableHead>Sonuç</TableHead>
+                  <TableHead>Result</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {runs.slice(0, 20).map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>
-                      {new Date(r.started_at).toLocaleString("tr-TR")}
+                      {new Date(r.started_at).toLocaleString("en-US")}
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary">

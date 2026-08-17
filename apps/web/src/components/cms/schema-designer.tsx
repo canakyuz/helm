@@ -36,13 +36,13 @@ const KIND_LABELS: Record<FieldDef["kind"], string> = {
   text: "Metin (text)",
   textarea: "Uzun metin (textarea)",
   slug: "Slug",
-  number: "Sayı",
+  number: "Number",
   boolean: "Anahtar (boolean)",
   date: "Tarih",
-  select: "Seçim listesi",
+  select: "Choice list",
   asset: "Medya",
-  image: "Görsel (önizlemeli)",
-  list: "Liste (tekrarlı)",
+  image: "Image (with preview)",
+  list: "List (repeatable)",
   object: "Grup (nested)",
   ref: "Referans",
   richtext: "Zengin metin (Plate)",
@@ -57,7 +57,7 @@ const makeField = (kind: FieldDef["kind"]): FieldDef => {
     case "select":
       return { ...base, kind, options: [{ value: "a", label: "A" }] };
     case "list":
-      return { ...base, kind, of: { kind: "text", name: "item", label: "Öğe" } };
+      return { ...base, kind, of: { kind: "text", name: "item", label: "Item" } };
     case "object":
       return { ...base, kind, fields: [] };
     case "ref":
@@ -170,7 +170,7 @@ const SortableFieldRow = ({ field, onChange, onRemove }: RowProps) => {
         className="mt-2 cursor-grab text-muted-foreground hover:text-foreground"
         {...attributes}
         {...listeners}
-        aria-label="Sürükle"
+        aria-label="Drag"
       >
         <GripVertical className="size-4" />
       </button>
@@ -228,7 +228,7 @@ const SortableFieldRow = ({ field, onChange, onRemove }: RowProps) => {
             <Input
               value={field.collection}
               onChange={(e) => onChange({ ...field, collection: e.target.value })}
-              placeholder="ör. authors"
+              placeholder="e.g. authors"
             />
           </div>
         )}

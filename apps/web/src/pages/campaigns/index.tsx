@@ -34,7 +34,7 @@ interface Campaign {
   sent_at: string;
 }
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("tr-TR");
+const fmt = (iso: string) => new Date(iso).toLocaleString("en-US");
 
 const ChannelBadge = ({ channel }: { channel: "mail" | "push" }) => {
   if (channel === "mail") {
@@ -144,20 +144,20 @@ export const CampaignsPage = () => {
       {campaigns.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <SummaryCard label="Kampanya" value={campaigns.length} />
-          <SummaryCard label="Toplam alıcı" value={totals.recipients} />
+          <SummaryCard label="Total recipients" value={totals.recipients} />
           <SummaryCard
-            label="Gönderildi"
+            label="Sent"
             value={totals.sent}
             tone="emerald"
           />
           <SummaryCard
-            label="Açılma"
+            label="Open rate"
             value={`${totals.opened} · %${openRate.toFixed(1)}`}
             tone="primary"
             icon={<Eye className="size-3" />}
           />
           <SummaryCard
-            label="Tıklama"
+            label="Clicks"
             value={`${totals.clicked} · %${clickRate.toFixed(1)}`}
             tone="primary"
             icon={<MousePointerClick className="size-3" />}
@@ -172,7 +172,7 @@ export const CampaignsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Gönderimler</CardTitle>
+          <CardTitle>Sends</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Select
@@ -183,7 +183,7 @@ export const CampaignsPage = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm kanallar</SelectItem>
+              <SelectItem value="all">All channels</SelectItem>
               <SelectItem value="mail">Mail</SelectItem>
               <SelectItem value="push">Push</SelectItem>
             </SelectContent>
@@ -202,9 +202,9 @@ export const CampaignsPage = () => {
                   <TableHead>Kanal</TableHead>
                   {isAll && <TableHead>Proje</TableHead>}
                   <TableHead>Konu</TableHead>
-                  <TableHead className="text-right">Gönderildi</TableHead>
-                  <TableHead className="text-right">Açılma</TableHead>
-                  <TableHead className="text-right">Tıklama</TableHead>
+                  <TableHead className="text-right">Sent</TableHead>
+                  <TableHead className="text-right">Open rate</TableHead>
+                  <TableHead className="text-right">Clicks</TableHead>
                   <TableHead className="text-right">Hata</TableHead>
                 </TableRow>
               </TableHeader>

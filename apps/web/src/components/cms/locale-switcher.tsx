@@ -7,7 +7,7 @@ export type LocaleCode = (typeof DEFAULT_LOCALES)[number] | string;
 
 const LABELS: Record<string, string> = {
   en: "English",
-  tr: "Türkçe",
+  tr: "Turkish",
 };
 
 interface Props {

@@ -98,13 +98,13 @@ export const CollectionsListPage = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Şema oluşturuldu");
+          toast.success("Schema created");
           setOpen(false);
           setLabel("");
           setSlug("");
         },
         onError: (e) =>
-          toast.error("Oluşturulamadı", {
+          toast.error("Could not create", {
             description: e instanceof Error ? e.message : String(e),
           }),
       },
@@ -129,14 +129,14 @@ export const CollectionsListPage = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Yeni Şema</DialogTitle>
+                <DialogTitle>New schema</DialogTitle>
               </DialogHeader>
               <div className="grid gap-3">
                 <div className="grid gap-1.5">
                   <Label>Proje</Label>
                   <Select value={projectId} onValueChange={setProjectId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seç…" />
+                      <SelectValue placeholder="Select…" />
                     </SelectTrigger>
                     <SelectContent>
                       {projects.map((p) => (
@@ -155,7 +155,7 @@ export const CollectionsListPage = () => {
                       setLabel(e.target.value);
                       if (!slug) setSlug(slugify(e.target.value));
                     }}
-                    placeholder="ör. Blog Yazıları"
+                    placeholder="e.g. Blog posts"
                   />
                 </div>
                 <div className="grid gap-1.5">
@@ -167,7 +167,7 @@ export const CollectionsListPage = () => {
                   />
                 </div>
                 <div className="grid gap-1.5">
-                  <Label>Tür</Label>
+                  <Label>Type</Label>
                   <Select value={kind} onValueChange={(v) => setKind(v as CollectionKind)}>
                     <SelectTrigger>
                       <SelectValue />
@@ -192,7 +192,7 @@ export const CollectionsListPage = () => {
                   İptal
                 </Button>
                 <Button onClick={handleCreate} disabled={mutation.isPending}>
-                  {mutation.isPending ? "Oluşturuluyor…" : "Oluştur"}
+                  {mutation.isPending ? "Creating…" : "Create"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -205,9 +205,9 @@ export const CollectionsListPage = () => {
             <TableRow>
               <TableHead>Etiket</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead>Tür</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Proje</TableHead>
-              <TableHead>Alan sayısı</TableHead>
+              <TableHead>Field count</TableHead>
               <TableHead className="w-24">Aksiyon</TableHead>
             </TableRow>
           </TableHeader>
@@ -240,13 +240,13 @@ export const CollectionsListPage = () => {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Şemayı sil?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete this schema?</AlertDialogTitle>
                         <AlertDialogDescription>
                           {c.label} ve bağlı tüm içerikler silinecek (cascade).
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>İptal</AlertDialogCancel>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
                             remove(

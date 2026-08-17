@@ -27,10 +27,10 @@ import type { AuditLog, Project } from "@/types";
 
 const ACTION_LABELS: Record<string, string> = {
   ban: "Banla",
-  unban: "Banı kaldır",
-  set_metadata: "Metadata değiştir",
-  send_password_reset: "Şifre sıfırla",
-  delete_user: "Kullanıcı sil",
+  unban: "Unban",
+  set_metadata: "Change metadata",
+  send_password_reset: "Reset password",
+  delete_user: "Delete user",
 };
 
 const actionBadge = (action: string) => {
@@ -140,7 +140,7 @@ export const AuditPage = () => {
           tone="primary"
         />
         <AuditKpi
-          label={`En Çok: ${stats.topActionLabel}`}
+          label={`Most frequent: ${stats.topActionLabel}`}
           value={stats.topActionCount}
         />
         <AuditKpi
@@ -151,14 +151,14 @@ export const AuditPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Kullanıcı Müdahaleleri</CardTitle>
+          <CardTitle>User interventions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Kullanıcı UUID veya detay ara…"
+                placeholder="Search by user UUID or detail…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="pl-8"
@@ -169,7 +169,7 @@ export const AuditPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tüm aksiyonlar</SelectItem>
+                <SelectItem value="all">All actions</SelectItem>
                 {Object.entries(ACTION_LABELS).map(([k, v]) => (
                   <SelectItem key={k} value={k}>
                     {v}
@@ -184,13 +184,13 @@ export const AuditPage = () => {
               icon={<ClipboardList className="size-6" />}
               title={
                 logs.length === 0
-                  ? "Henüz müdahale kaydı yok"
-                  : "Filtreye uyan kayıt yok"
+                  ? "No interventions recorded yet"
+                  : "No records match the filter"
               }
               description={
                 logs.length === 0
-                  ? "Kullanıcılar → herhangi bir kullanıcının detayında ban / premium / şifre sıfırla / sil → her aksiyon burada toplanır (kim, ne zaman, kime, ne yaptı)."
-                  : "Filtre/aramayı gevşet veya aksiyon türünü 'Tüm aksiyonlar' yap."
+                  ? "Users → open any user's detail → ban / premium / reset password / delete. Every action is collected here (who, when, on whom, what)."
+                  : "Loosen the filter or search, or set the action type to All actions."
               }
               compact
             />
@@ -202,7 +202,7 @@ export const AuditPage = () => {
                   {isAll && <TableHead>Proje</TableHead>}
                   <TableHead>Yapan</TableHead>
                   <TableHead>Aksiyon</TableHead>
-                  <TableHead>Kullanıcı</TableHead>
+                  <TableHead>User</TableHead>
                   <TableHead>Detay</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
@@ -211,7 +211,7 @@ export const AuditPage = () => {
                 {filtered.map((l) => (
                   <TableRow key={l.id}>
                     <TableCell className="whitespace-nowrap text-xs">
-                      {new Date(l.created_at).toLocaleString("tr-TR")}
+                      {new Date(l.created_at).toLocaleString("en-US")}
                     </TableCell>
                     {isAll && (
                       <TableCell className="text-xs">
@@ -236,7 +236,7 @@ export const AuditPage = () => {
                           asChild
                           variant="ghost"
                           size="icon-sm"
-                          aria-label="Kullanıcıya git"
+                          aria-label="Go to user"
                         >
                           <Link to={`/users/${l.target_user}`}>
                             <ExternalLink className="size-4" />

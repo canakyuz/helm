@@ -69,7 +69,7 @@ interface CrmTable {
 }
 
 const fmt = (value: string | null) =>
-  value ? new Date(value).toLocaleString("tr-TR") : "—";
+  value ? new Date(value).toLocaleString("en-US") : "—";
 
 const isBanned = (u: UserDetail) => {
   if (!u.banned_until) return false;
@@ -145,7 +145,7 @@ export const UserDetailPage = () => {
         setReloadKey((k) => k + 1);
       }
     } catch (e) {
-      toast.error("Aksiyon başarısız", {
+      toast.error("Action failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -269,12 +269,12 @@ export const UserDetailPage = () => {
                   disabled={busy}
                   onClick={() =>
                     runAction("unban", undefined, {
-                      successMsg: "Banı kaldırıldı",
+                      successMsg: "Unbanned",
                     })
                   }
                 >
                   <ShieldOff className="size-4" />
-                  <span className="ml-2">Banı kaldır</span>
+                  <span className="ml-2">Unban</span>
                 </Button>
               ) : (
                 <AlertDialog>
@@ -295,11 +295,11 @@ export const UserDetailPage = () => {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() =>
                           runAction("ban", undefined, {
-                            successMsg: "Banlandı",
+                            successMsg: "Banned",
                           })
                         }
                       >
@@ -319,15 +319,15 @@ export const UserDetailPage = () => {
                     { scope: "app", patch: { premium: !isPremium } },
                     {
                       successMsg: isPremium
-                        ? "Premium kapatıldı"
-                        : "Premium açıldı",
+                        ? "Premium disabled"
+                        : "Premium enabled",
                     },
                   )
                 }
               >
                 <Sparkles className="size-4" />
                 <span className="ml-2">
-                  {isPremium ? "Premium kapat" : "Premium aç"}
+                  {isPremium ? "Premium kapat" : "Enable premium"}
                 </span>
               </Button>
               <Button
@@ -336,13 +336,13 @@ export const UserDetailPage = () => {
                 disabled={busy || !user.email}
                 onClick={() =>
                   runAction("send_password_reset", undefined, {
-                    successMsg: "Şifre sıfırlama linki gönderildi",
+                    successMsg: "Password reset link sent",
                   })
                 }
-                title={!user.email ? "Kullanıcının e-postası yok" : undefined}
+                title={!user.email ? "This user has no email" : undefined}
               >
                 <KeyRound className="size-4" />
-                <span className="ml-2">Şifre sıfırla</span>
+                <span className="ml-2">Reset password</span>
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -368,11 +368,11 @@ export const UserDetailPage = () => {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() =>
                         runAction("delete_user", undefined, {
-                          successMsg: "Kullanıcı silindi",
+                          successMsg: "User deleted",
                           afterDelete: true,
                         })
                       }
@@ -401,25 +401,25 @@ export const UserDetailPage = () => {
               <dt className="text-muted-foreground">Telefon</dt>
               <dd className="font-mono">{user.phone ?? "—"}</dd>
 
-              <dt className="text-muted-foreground">Kayıt</dt>
+              <dt className="text-muted-foreground">Signup</dt>
               <dd>{fmt(user.created_at)}</dd>
 
-              <dt className="text-muted-foreground">Son güncelleme</dt>
+              <dt className="text-muted-foreground">Last updated</dt>
               <dd>{fmt(user.updated_at)}</dd>
 
-              <dt className="text-muted-foreground">Son giriş</dt>
+              <dt className="text-muted-foreground">Last sign-in</dt>
               <dd>{fmt(user.last_sign_in_at)}</dd>
 
-              <dt className="text-muted-foreground">E-posta onayı</dt>
+              <dt className="text-muted-foreground">Email confirmed</dt>
               <dd>{fmt(user.email_confirmed_at)}</dd>
 
-              <dt className="text-muted-foreground">Telefon onayı</dt>
+              <dt className="text-muted-foreground">Phone confirmed</dt>
               <dd>{fmt(user.phone_confirmed_at)}</dd>
 
-              <dt className="text-muted-foreground">Ban bitiş</dt>
+              <dt className="text-muted-foreground">Ban ends</dt>
               <dd>{fmt(user.banned_until)}</dd>
 
-              <dt className="text-muted-foreground">Sağlayıcılar</dt>
+              <dt className="text-muted-foreground">Providers</dt>
               <dd className="space-x-1">
                 {user.identities.length === 0 ? (
                   <span className="text-muted-foreground">—</span>
@@ -438,7 +438,7 @@ export const UserDetailPage = () => {
         {/* Müdahale geçmişi */}
         <Card>
           <CardHeader>
-            <CardTitle>Müdahale geçmişi</CardTitle>
+            <CardTitle>Intervention history</CardTitle>
           </CardHeader>
           <CardContent>
             {auditLogs.length === 0 ? (
@@ -458,7 +458,7 @@ export const UserDetailPage = () => {
                   {auditLogs.map((l) => (
                     <TableRow key={l.id}>
                       <TableCell className="text-xs">
-                        {new Date(l.created_at).toLocaleString("tr-TR")}
+                        {new Date(l.created_at).toLocaleString("en-US")}
                       </TableCell>
                       <TableCell>{l.action}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">

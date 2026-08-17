@@ -20,7 +20,7 @@ export interface HelmTheme {
 export const HELM_THEMES: HelmTheme[] = [
   {
     key: "glass-dark",
-    label: "Karanlık",
+    label: "Dark",
     mode: "dark",
     chart: {
       grid: "rgba(255,255,255,0.07)",
@@ -31,7 +31,7 @@ export const HELM_THEMES: HelmTheme[] = [
   },
   {
     key: "glass-light",
-    label: "Aydınlık",
+    label: "Light",
     mode: "light",
     chart: {
       grid: "rgba(0,0,0,0.06)",

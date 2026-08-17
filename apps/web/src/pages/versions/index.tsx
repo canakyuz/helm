@@ -58,17 +58,17 @@ export const VersionsPage = () => {
         { body: {} },
       );
       if (error) throw error;
-      toast.success("Sürümler güncellendi", {
+      toast.success("Versions updated", {
         description: `${data?.ios ?? 0} iOS, ${data?.android ?? 0} Android — toplam ${data?.versions ?? 0}`,
       });
       if (data?.errors?.length) {
-        toast.warning("Bazı sürümler çekilemedi", {
+        toast.warning("Some versions could not be fetched", {
           description: data.errors.slice(0, 2).join("\n"),
         });
       }
       invalidate({ resource: "app_versions", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Güncelleme başarısız", {
+      toast.error("Update failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -109,8 +109,8 @@ export const VersionsPage = () => {
   const lastUpdateRel = lastUpdate
     ? (() => {
         const days = Math.floor((Date.now() - lastUpdate) / 86_400_000);
-        if (days === 0) return "bugün";
-        if (days === 1) return "dün";
+        if (days === 0) return "today";
+        if (days === 1) return "yesterday";
         if (days < 30) return `${days} g`;
         return `${Math.floor(days / 30)} ay`;
       })()
@@ -119,7 +119,7 @@ export const VersionsPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Sürümler</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Versions</h1>
         <Button onClick={handleRefresh} disabled={refreshing}>
           <RefreshCw
             className={refreshing ? "size-4 animate-spin" : "size-4"}
@@ -147,7 +147,7 @@ export const VersionsPage = () => {
           icon={<Package className="size-3.5" />}
         />
         <VerKpi
-          label={`Son Güncelleme (${lastUpdateRel})`}
+          label={`Last updated (${lastUpdateRel})`}
           value={latestAndroid?.version ? `v${latestAndroid.version}` : "—"}
           icon={<Package className="size-3.5" />}
           tone="primary"
@@ -190,10 +190,10 @@ export const VersionsPage = () => {
             <CardHeader>
               <CardTitle className="text-base">
                 {tab === "ios"
-                  ? "App Store Sürümleri"
+                  ? "App Store versions"
                   : tab === "android"
-                    ? "Play Store Sürümleri"
-                    : "Tüm Sürümler"}
+                    ? "Play Store versions"
+                    : "All versions"}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -202,22 +202,22 @@ export const VersionsPage = () => {
                   icon={<Package className="size-6" />}
                   title={
                     versions.length === 0
-                      ? "Sürüm yok"
-                      : `${tab === "ios" ? "iOS" : "Android"} sürüm yok`
+                      ? "No versions"
+                      : `${tab === "ios" ? "iOS" : "Android"} has no versions`
                   }
                   description={
                     versions.length === 0 ? (
                       <>
                         <strong>Settings → Integrations</strong> → App Store
                         Connect veya Google Play Developer bağla, ya da Property
-                        → <strong>Düzenle</strong> ile{" "}
+                        → <strong>Edit</strong> ile{" "}
                         <code>app_store_id</code> /{" "}
                         <code>google_play_id</code> gir. Sonra{" "}
                         <strong>Yenile</strong> — iOS iTunes lookup, Android
                         Play Store scrape.
                       </>
                     ) : (
-                      "Diğer tab'da olabilir veya bu mağazada bağlantı yok."
+                      "It may be on the other tab, or there is no connection for this store."
                     )
                   }
                   compact
@@ -248,7 +248,7 @@ export const VersionsPage = () => {
                           <span className="text-xs text-muted-foreground">
                             {v.release_date
                               ? new Date(v.release_date).toLocaleDateString(
-                                  "tr-TR",
+                                  "en-US",
                                 )
                               : ""}
                           </span>
@@ -280,11 +280,11 @@ const StatusBadge = ({ status }: { status: AppVersion["status"] }) => {
   if (!status) return null;
   const config: Record<string, { label: string; cls: string }> = {
     live: { label: "CANLI", cls: "border-emerald-500/30 bg-emerald-500/15 text-emerald-500" },
-    in_review: { label: "İNCELEMEDE", cls: "border-amber-500/30 bg-amber-500/15 text-amber-500" },
+    in_review: { label: "IN REVIEW", cls: "border-amber-500/30 bg-amber-500/15 text-amber-500" },
     ready: { label: "HAZIR", cls: "border-blue-500/30 bg-blue-500/15 text-blue-500" },
     testflight: { label: "TESTFLIGHT", cls: "border-violet-500/30 bg-violet-500/15 text-violet-500" },
     rejected: { label: "RED", cls: "border-destructive/30 bg-destructive/15 text-destructive" },
-    expired: { label: "SÜRE DOLDU", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
+    expired: { label: "EXPIRED", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
     removed: { label: "KALDIRILDI", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
     unknown: { label: "—", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
   };

@@ -92,7 +92,7 @@ export async function fetchAscReviews(
     return {
       ok: false,
       shouldFallback: true,
-      message: `JWT üretilemedi: ${e instanceof Error ? e.message : String(e)}`,
+      message: `Could not generate a JWT: ${e instanceof Error ? e.message : String(e)}`,
     };
   }
 

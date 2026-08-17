@@ -120,11 +120,11 @@ Deno.serve(async (req) => {
     .eq("id", integrationId)
     .maybeSingle();
   if (integErr) return json({ error: integErr.message }, 500);
-  if (!integ) return json({ error: "Entegrasyon bulunamadı" }, 404);
+  if (!integ) return json({ error: "Integration not found" }, 404);
 
   const connector = CONNECTORS[integ.provider as string];
   if (!connector) {
-    return json({ error: `Bilinmeyen sağlayıcı: ${integ.provider}` }, 400);
+    return json({ error: `Unknown provider: ${integ.provider}` }, 400);
   }
 
   const t0 = Date.now();
@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
       ok: false,
       provider: integ.provider,
       duration_ms: Date.now() - t0,
-      error: `Connector hatası: ${e instanceof Error ? e.message : String(e)}`,
+      error: `Connector error: ${e instanceof Error ? e.message : String(e)}`,
     });
   }
 

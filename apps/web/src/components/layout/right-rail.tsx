@@ -12,19 +12,19 @@ interface CityClock {
 }
 
 const CITIES: CityClock[] = [
-  { name: "İstanbul", tz: "Europe/Istanbul" },
+  { name: "Istanbul", tz: "Europe/Istanbul" },
   { name: "New York", tz: "America/New_York" },
   { name: "Londra", tz: "Europe/London" },
   { name: "Tokyo", tz: "Asia/Tokyo" },
 ];
 
 const timeAgo = (iso: string | null) => {
-  if (!iso) return "hiç";
+  if (!iso) return "never";
   const min = (Date.now() - new Date(iso).getTime()) / 60_000;
-  if (min < 1) return "az önce";
-  if (min < 60) return `${Math.round(min)} dk önce`;
-  if (min < 1440) return `${Math.round(min / 60)} sa önce`;
-  return `${Math.round(min / 1440)} gün önce`;
+  if (min < 1) return "just now";
+  if (min < 60) return `${Math.round(min)}m ago`;
+  if (min < 1440) return `${Math.round(min / 60)}h ago`;
+  return `${Math.round(min / 1440)}d ago`;
 };
 
 /** Dünya saatleri — 4 şehir, dakikada bir refresh. Airlinesim referansı. */
@@ -36,7 +36,7 @@ const WorldClock = () => {
   }, []);
 
   const fmt = (tz: string) =>
-    new Intl.DateTimeFormat("tr-TR", {
+    new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       timeZone: tz,
@@ -99,7 +99,7 @@ const OpenAlerts = () => {
       </CardHeader>
       <CardContent className="space-y-2 text-xs">
         {alerts.length === 0 ? (
-          <div className="text-muted-foreground">Son 48 saatte uyarı yok.</div>
+          <div className="text-muted-foreground">No alerts in the last 48 hours.</div>
         ) : (
           <>
             {top3.map((a) => (
@@ -153,7 +153,7 @@ const SyncStatus = () => {
       </CardHeader>
       <CardContent className="space-y-1.5 text-xs">
         <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">Son çalışma</span>
+          <span className="text-muted-foreground">Last run</span>
           <span className="font-mono tabular-nums">
             {timeAgo(last?.started_at ?? null)}
           </span>
@@ -161,7 +161,7 @@ const SyncStatus = () => {
         {last && (
           <>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Çekilen</span>
+              <span className="text-muted-foreground">Fetched</span>
               <span className="font-mono tabular-nums">{last.ingested}</span>
             </div>
             <div className="flex items-center justify-between">

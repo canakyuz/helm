@@ -66,8 +66,8 @@ export const IntegrationsPage = () => {
           <CardContent>
             <EmptyState
               icon={<Plug className="size-6" />}
-              title="Proje seç"
-              description="Entegrasyonlar property-bazlıdır. Sidebar'dan üstteki switcher'a tıkla, hangisini yönetmek istiyorsan seç — 'Tüm Property'ler' modunda eklenemez."
+              title="Pick a project"
+              description="Integrations are per-property. Use the switcher at the top of the sidebar to pick one — nothing can be added while All properties is selected."
             />
           </CardContent>
         </Card>
@@ -91,7 +91,7 @@ export const IntegrationsPage = () => {
       {/* KPI cluster — 6'lı */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <KpiPill
-          label="Bağlı"
+          label="Connected"
           value={`${stats.connected} / ${stats.totalProviders}`}
           icon={<Plug className="size-3.5" />}
         />
@@ -102,13 +102,13 @@ export const IntegrationsPage = () => {
           tone="emerald"
         />
         <KpiPill
-          label="Sağlıklı"
+          label="Healthy"
           value={stats.ok}
           icon={<Sparkles className="size-3.5" />}
           tone="emerald"
         />
         <KpiPill
-          label="Hatalı"
+          label="Failing"
           value={stats.errored}
           icon={<XCircle className="size-3.5" />}
           tone={stats.errored > 0 ? "destructive" : undefined}

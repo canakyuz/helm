@@ -27,7 +27,7 @@ interface BrandGroup {
 // Sidebar üstündeki 2-seviye kapsam seçici:
 // • Brand'ler altında property'ler grup grup listelenir.
 // • Property tıklayınca scope = property.id (eski projects davranışı ile uyumlu).
-// • "Tüm Property'ler" → scope = "all".
+// • "All properties" → scope = "all".
 // • Brand satırının kalem ikonu /brands/edit/:id'ye gider.
 //
 // Faz 8: brand-level aggregate scope.kind eklenirse burası genişler.
@@ -75,7 +75,7 @@ export const ProjectSwitcher = () => {
     ? brands.find((b) => b.id === active.brand_id)
     : null;
 
-  const label = active?.name ?? "Tüm Property'ler";
+  const label = active?.name ?? "All properties";
   const sub = active
     ? `${activeBrand?.name ?? "Brand'siz"} · ${PROPERTY_TYPE_LABELS[active.type] ?? active.type}`
     : `${properties.length} property · ${brands.length} brand`;
@@ -117,7 +117,7 @@ export const ProjectSwitcher = () => {
                   {g.brand.id !== "__orphan__" && (
                     <button
                       type="button"
-                      aria-label={`${g.brand.name} brand'ini düzenle`}
+                      aria-label={`${g.brand.name} — edit brand`}
                       onClick={(e) => {
                         e.stopPropagation();
                         edit("brands", g.brand.id);
@@ -143,7 +143,7 @@ export const ProjectSwitcher = () => {
                     </span>
                     <button
                       type="button"
-                      aria-label={`${p.name} property'sini düzenle`}
+                      aria-label={`${p.name} — edit property`}
                       onClick={(e) => {
                         e.stopPropagation();
                         edit("properties", p.id);

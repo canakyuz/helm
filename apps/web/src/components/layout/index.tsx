@@ -89,20 +89,20 @@ const NAV_GROUPS: NavGroup[] = [
     items: [{ title: "Cockpit", icon: LayoutDashboard, url: "/" }],
   },
   {
-    label: "İçerik (CMS)",
+    label: "Content (CMS)",
     items: [
-      { title: "Şemalar", icon: Layers, url: "/cms/collections", requires: "content" },
-      { title: "İçerikler", icon: FileText, url: "/cms/entries", requires: "content" },
+      { title: "Schemas", icon: Layers, url: "/cms/collections", requires: "content" },
+      { title: "Content", icon: FileText, url: "/cms/entries", requires: "content" },
       { title: "Medya", icon: ImageIcon, url: "/cms/assets", requires: "content" },
     ],
   },
   {
     label: "CRM",
     items: [
-      { title: "Kullanıcılar", icon: Users, url: "/users", requires: "users" },
+      { title: "Users", icon: Users, url: "/users", requires: "users" },
       { title: "Segmentler", icon: Filter, url: "/segments", requires: "users" },
       { title: "Yorumlar", icon: Star, url: "/reviews", requires: "reviews" },
-      { title: "Müdahale Geçmişi", icon: History, url: "/audit" },
+      { title: "Intervention history", icon: History, url: "/audit" },
     ],
   },
   {
@@ -114,18 +114,18 @@ const NAV_GROUPS: NavGroup[] = [
         url: "/revenue",
         requires: ["subscriptions", "ads"],
       },
-      { title: "Büyüme", icon: LineChart, url: "/growth", requires: "analytics" },
+      { title: "Growth", icon: LineChart, url: "/growth", requires: "analytics" },
       { title: "Huni", icon: Workflow, url: "/funnel", requires: "funnel" },
-      { title: "Uyarılar", icon: Bell, url: "/alerts" },
+      { title: "Alerts", icon: Bell, url: "/alerts" },
     ],
   },
   {
-    label: "İletişim",
+    label: "Contact",
     items: [
       { title: "Mail", icon: Mail, url: "/mail", requires: "mail" },
       { title: "Push", icon: Send, url: "/push", requires: "push" },
       {
-        title: "Kampanya Geçmişi",
+        title: "Campaign history",
         icon: Megaphone,
         url: "/campaigns",
         requires: ["mail", "push"],
@@ -137,9 +137,9 @@ const NAV_GROUPS: NavGroup[] = [
     alwaysVisible: true,
     items: [
       { title: "Entegrasyonlar", icon: Plug, url: "/integrations" },
-      { title: "Senkron & Sağlık", icon: Activity, url: "/system" },
+      { title: "Sync & health", icon: Activity, url: "/system" },
       { title: "Loglar", icon: ScrollText, url: "/logs" },
-      { title: "Sürümler", icon: Tag, url: "/versions" },
+      { title: "Versions", icon: Tag, url: "/versions" },
     ],
   },
   {
@@ -164,10 +164,10 @@ const ModeToggle = () => {
       <SidebarMenuItem>
         <SidebarMenuButton
           onClick={toggleMode}
-          tooltip={isDark ? "Aydınlık moda geç" : "Karanlık moda geç"}
+          tooltip={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
           {isDark ? <Sun /> : <Moon />}
-          <span>{isDark ? "Aydınlık" : "Karanlık"}</span>
+          <span>{isDark ? "Light" : "Dark"}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
@@ -248,7 +248,7 @@ const AppSidebar = () => {
                           <Icon />
                           <span>{item.title}</span>
                         </SidebarMenuButton>
-                        <SidebarMenuBadge>yakında</SidebarMenuBadge>
+                        <SidebarMenuBadge>coming soon</SidebarMenuBadge>
                       </SidebarMenuItem>
                     );
                   }
@@ -328,7 +328,7 @@ const HeaderBar = ({ scrolled }: { scrolled: boolean }) => {
         className="ml-2 hidden md:flex flex-1 max-w-md items-center gap-2 rounded-md border bg-muted/40 px-3 py-1.5 text-sm text-muted-foreground ring-1 ring-foreground/5 transition-colors hover:bg-muted/60"
       >
         <Search className="size-4" />
-        <span>Hızlı arama…</span>
+        <span>Quick search…</span>
         <kbd className="ml-auto rounded bg-background/60 px-1.5 py-0.5 font-mono text-[10px] ring-1 ring-foreground/10">
           ⌘K
         </kbd>
@@ -337,7 +337,7 @@ const HeaderBar = ({ scrolled }: { scrolled: boolean }) => {
       <div className="ml-auto flex items-center gap-1">
         <Link
           to="/alerts"
-          aria-label="Uyarılar"
+          aria-label="Alerts"
           className="grid size-9 place-items-center rounded-md text-muted-foreground ring-1 ring-foreground/5 transition-colors hover:bg-accent hover:text-foreground"
         >
           <Bell className="size-4" />

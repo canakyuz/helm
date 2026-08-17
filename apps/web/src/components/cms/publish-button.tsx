@@ -43,20 +43,20 @@ export const PublishButton = ({ entry, disabled, onPublished }: Props) => {
         { body: { entry_id: entry.id, action: "publish" } },
       );
       if (error) throw error;
-      if (!data) throw new Error("Boş yanıt");
+      if (!data) throw new Error("Empty response");
 
       const okCount = data.results.filter((r) => r.ok).length;
       const failed = data.results.filter((r) => !r.ok);
 
       if (failed.length === 0) {
-        toast.success("Yayınlandı", {
+        toast.success("Published", {
           description:
             data.targets_total === 0
               ? `${entry.slug} (${entry.locale}) — hedef yok, sadece DB`
-              : `${entry.slug} (${entry.locale}) — ${okCount}/${data.targets_matched} hedefe gönderildi`,
+              : `${entry.slug} (${entry.locale}) — ${okCount}/${data.targets_matched} targets published`,
         });
       } else {
-        toast.warning("Yayınlandı, bazı hedefler patladı", {
+        toast.warning("Published, but some targets failed", {
           description: failed
             .map((r) => `${r.target}: ${r.status} ${r.error ?? ""}`)
             .join("; "),
@@ -64,7 +64,7 @@ export const PublishButton = ({ entry, disabled, onPublished }: Props) => {
       }
       onPublished?.();
     } catch (e) {
-      toast.error("Yayınlama başarısız", {
+      toast.error("Publish failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -77,20 +77,20 @@ export const PublishButton = ({ entry, disabled, onPublished }: Props) => {
       <AlertDialogTrigger asChild>
         <Button size="sm" disabled={disabled || busy}>
           <Send className="size-4" />
-          {entry.status === "published" ? "Yeniden yayınla" : "Yayınla"}
+          {entry.status === "published" ? "Republish" : "Publish"}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>İçeriği yayınla?</AlertDialogTitle>
+          <AlertDialogTitle>Publish this content?</AlertDialogTitle>
           <AlertDialogDescription>
             Mevcut taslak yayına geçecek ve geri alınabilir bir snapshot oluşturulacak.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>İptal</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handle} disabled={busy}>
-            {busy ? "Yayınlanıyor…" : "Yayınla"}
+            {busy ? "Publishing…" : "Publish"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

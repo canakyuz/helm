@@ -141,7 +141,7 @@ export const GrowthPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Büyüme</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Growth</h1>
         <RangeSelect value={range} onChange={setRange} />
       </div>
 
@@ -166,7 +166,7 @@ export const GrowthPage = () => {
           loading={loading}
         />
         <StatCard
-          title="Yapışkanlık (DAU/MAU)"
+          title="Stickiness (DAU/MAU)"
           value={`%${stickiness.toFixed(0)}`}
           icon={<Sparkles />}
           loading={loading}
@@ -176,7 +176,7 @@ export const GrowthPage = () => {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{`Günlük Aktif Kullanıcı — son ${range} gün`}</CardTitle>
+            <CardTitle>{`Daily active users — last ${range} days`}</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart
@@ -188,7 +188,7 @@ export const GrowthPage = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{`Yeni Kullanıcı — son ${range} gün`}</CardTitle>
+            <CardTitle>{`New users — last ${range} days`}</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart
@@ -202,7 +202,7 @@ export const GrowthPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>{`Toplam Kullanıcı Büyümesi — son ${range} gün`}</CardTitle>
+          <CardTitle>{`Total user growth — last ${range} days`}</CardTitle>
         </CardHeader>
         <CardContent>
           <TrendChart
@@ -233,8 +233,8 @@ export const GrowthPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="app_downloads">İndirmeler</SelectItem>
-                <SelectItem value="app_revenue">Mağaza Geliri</SelectItem>
+                <SelectItem value="app_downloads">Downloads</SelectItem>
+                <SelectItem value="app_revenue">Store revenue</SelectItem>
               </SelectContent>
             </Select>
           </CardAction>
@@ -260,8 +260,8 @@ export const GrowthPage = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Ülke</TableHead>
-                      <TableHead className="text-right">Değer</TableHead>
+                      <TableHead>Country</TableHead>
+                      <TableHead className="text-right">Value</TableHead>
                       <TableHead className="text-right">Pay</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -437,8 +437,8 @@ const PostHogGeoCard = ({
           <div className="space-y-1">
             <div className="grid grid-cols-[24px_1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
               <span />
-              <span>Ülke</span>
-              <span className="text-right">Kullanıcı</span>
+              <span>Country</span>
+              <span className="text-right">User</span>
               <span className="text-right">Pay</span>
             </div>
             {countries.slice(0, 30).map((c) => {
@@ -488,8 +488,8 @@ const PostHogGeoCard = ({
                         <div className="space-y-0.5">
                           <div className="grid grid-cols-[1fr_1fr_70px] gap-2 px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                             <span>Eyalet</span>
-                            <span>Şehir</span>
-                            <span className="text-right">Kullanıcı</span>
+                            <span>City</span>
+                            <span className="text-right">User</span>
                           </div>
                           {sub.slice(0, 20).map((r, i) => (
                             <div
@@ -540,10 +540,10 @@ interface AcqRow {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  direct: "Doğrudan",
+  direct: "Direct",
   search: "Arama",
   social: "Sosyal",
-  store: "Mağaza",
+  store: "Store",
   referral: "Referans",
 };
 
@@ -683,7 +683,7 @@ const AcquisitionCard = ({
             <div className="space-y-1">
               <div className="grid grid-cols-[1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                 <span>Kaynak</span>
-                <span className="text-right">Kullanıcı</span>
+                <span className="text-right">User</span>
                 <span className="text-right">Pay</span>
               </div>
               {rows.slice(0, 20).map((r) => {

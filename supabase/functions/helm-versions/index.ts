@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
           else errors.push(`ios ${p.id}: ${e.message}`);
           propResult.ios = { method: "itunes", upserted: e ? 0 : 1 };
         } else {
-          propResult.ios = { method: "itunes", error: "iTunes lookup boş" };
+          propResult.ios = { method: "itunes", error: "iTunes lookup returned nothing" };
         }
       } else {
         propResult.ios = "skip-no-app-id";
@@ -304,7 +304,7 @@ Deno.serve(async (req) => {
           else errors.push(`android ${p.id}: ${e.message}`);
           propResult.android = { method: "scrape", upserted: e ? 0 : 1 };
         } else {
-          propResult.android = { method: "scrape", error: "Play scrape boş" };
+          propResult.android = { method: "scrape", error: "Play scrape returned nothing" };
         }
       } else {
         propResult.android = "skip-no-package-id";

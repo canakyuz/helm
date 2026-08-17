@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   try {
     body = await req.json();
   } catch {
-    return json({ error: "geçersiz JSON" }, 400);
+    return json({ error: "invalid JSON" }, 400);
   }
 
   const projectId = body?.project_id;
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     return json({ error: "project_id + token gerekli" }, 400);
   }
   const events = Array.isArray(body?.events) ? body.events : [];
-  if (events.length === 0) return json({ error: "events boş" }, 400);
+  if (events.length === 0) return json({ error: "events is empty" }, 400);
   if (events.length > MAX_EVENTS) return json({ error: `en fazla ${MAX_EVENTS} event` }, 413);
 
   const hub = createClient(
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
       occurred_at: occurred,
     });
   }
-  if (rows.length === 0) return json({ error: "geçerli event yok" }, 400);
+  if (rows.length === 0) return json({ error: "no valid events" }, 400);
 
   const { error: ierr } = await hub.from("game_events").insert(rows);
   if (ierr) return json({ error: ierr.message }, 500);

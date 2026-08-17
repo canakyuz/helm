@@ -149,7 +149,7 @@ export async function fetchAscVersions(
     const res = await fetchWithTimeout(url, { headers });
     diag.appStoreVersionsStatus = res.status;
     if (res.status === 401) {
-      return { ok: false, status: 401, message: "ASC 401 — App Manager/Admin scope gerekli (appStoreVersions için)" };
+      return { ok: false, status: 401, message: "ASC 401 — App Manager/Admin scope required (for appStoreVersions)" };
     }
     if (!res.ok) {
       diag.appStoreVersionsError = `${res.status}: ${(await res.text()).slice(0, 200)}`;

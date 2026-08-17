@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
 
   const { data, error: getErr } = await admin.auth.admin.getUserById(userId);
   if (getErr) return json({ error: getErr.message }, 500);
-  if (!data?.user) return json({ error: "Kullanıcı bulunamadı" }, 404);
+  if (!data?.user) return json({ error: "User not found" }, 404);
 
   const u = data.user;
 
@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
   // GÜVENLİK:
   //   - Tablo adı yalnızca [a-z0-9_] içerebilir (SQL injection guard)
   //   - Kolon adı yalnızca [a-z0-9_] (SQL injection guard)
-  //   - Sistem tabloları yasak: auth.*, storage.*, vault.*, pg_*, information_schema.*
+  //   - System tables are not allowed: auth.*, storage.*, vault.*, pg_*, information_schema.*
   //   - Sadece public schema (kullanıcı schema-prefix yazmamalı; yazarsa reddet)
   const SAFE_NAME = /^[a-z_][a-z0-9_]{0,62}$/i;
   const BLOCKED_TABLE_PREFIXES = ["pg_", "auth_", "storage_", "vault_"];

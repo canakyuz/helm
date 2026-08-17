@@ -111,28 +111,28 @@ export const LogsPage = () => {
       <h1 className="text-2xl font-semibold tracking-tight">Loglar</h1>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard title="Çalışma" value={runs.length} />
+        <StatCard title="Run" value={runs.length} />
         <StatCard
           title="Toplam metrik"
-          value={totalIngested.toLocaleString("tr-TR")}
+          value={totalIngested.toLocaleString("en-US")}
         />
         <StatCard
-          title="Ortalama süre"
+          title="Average duration"
           value={`${(avgDuration / 1000).toFixed(1)} sn`}
         />
-        <StatCard title="Hata oranı" value={`%${errorRate.toFixed(1)}`} />
+        <StatCard title="Error rate" value={`%${errorRate.toFixed(1)}`} />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Senkron Çalışmaları</CardTitle>
+          <CardTitle>Sync runs</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Sağlayıcı/hata mesajı ara…"
+                placeholder="Search provider or error message…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="pl-8"
@@ -143,7 +143,7 @@ export const LogsPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tüm tetikleyici</SelectItem>
+                <SelectItem value="all">All triggers</SelectItem>
                 <SelectItem value="cron">Otomatik (cron)</SelectItem>
                 <SelectItem value="manual">Manuel</SelectItem>
               </SelectContent>
@@ -153,9 +153,9 @@ export const LogsPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tüm durumlar</SelectItem>
-                <SelectItem value="ok">Sadece başarılı</SelectItem>
-                <SelectItem value="error">Sadece hatalı</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="ok">Successful only</SelectItem>
+                <SelectItem value="error">Failing only</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -165,13 +165,13 @@ export const LogsPage = () => {
               icon={<History className="size-6" />}
               title={
                 runs.length === 0
-                  ? "Henüz senkron çalışmadı"
-                  : "Filtreye uyan kayıt yok"
+                  ? "No sync has run yet"
+                  : "No records match the filter"
               }
               description={
                 runs.length === 0
-                  ? "Cockpit'ten 'Senkronize et' ile manuel tetikle veya saatlik cron'u bekle. Her çalışma burada toplanır."
-                  : "Filtreyi gevşet veya 'Tüm durumlar' seç."
+                  ? "Trigger it manually with Sync from the cockpit, or wait for the hourly cron. Every run is collected here."
+                  : "Loosen the filter or pick All statuses."
               }
               compact
             />
@@ -182,7 +182,7 @@ export const LogsPage = () => {
                   <TableRow>
                     <TableHead>Zaman</TableHead>
                     <TableHead>Tetikleyici</TableHead>
-                    <TableHead className="text-right">Süre</TableHead>
+                    <TableHead className="text-right">Duration</TableHead>
                     <TableHead className="text-right">Metrik</TableHead>
                     <TableHead className="text-right">OK / Hata</TableHead>
                   </TableRow>
@@ -195,7 +195,7 @@ export const LogsPage = () => {
                       onClick={() => setSelected(r)}
                     >
                       <TableCell className="whitespace-nowrap text-xs">
-                        {new Date(r.started_at).toLocaleString("tr-TR")}
+                        {new Date(r.started_at).toLocaleString("en-US")}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
@@ -268,7 +268,7 @@ export const LogsPage = () => {
             <DialogTitle>
               Senkron detayı —{" "}
               {selected &&
-                new Date(selected.started_at).toLocaleString("tr-TR")}
+                new Date(selected.started_at).toLocaleString("en-US")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
@@ -278,11 +278,11 @@ export const LogsPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Sağlayıcı</TableHead>
+                    <TableHead>Provider</TableHead>
                     <TableHead>Proje</TableHead>
                     <TableHead className="text-right">Metrik</TableHead>
-                    <TableHead className="text-right">Ülke</TableHead>
-                    <TableHead>Sonuç</TableHead>
+                    <TableHead className="text-right">Country</TableHead>
+                    <TableHead>Result</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

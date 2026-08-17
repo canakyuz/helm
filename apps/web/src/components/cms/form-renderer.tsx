@@ -210,7 +210,7 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
           onValueChange={(v) => onChange(v)}
         >
           <SelectTrigger id={id}>
-            <SelectValue placeholder="Seç…" />
+            <SelectValue placeholder="Select…" />
           </SelectTrigger>
           <SelectContent>
             {field.options.map((opt) => (
@@ -304,7 +304,7 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
             />
           ))}
           {field.fields.length === 0 && (
-            <p className="text-xs italic text-muted-foreground">boş grup</p>
+            <p className="text-xs italic text-muted-foreground">empty group</p>
           )}
         </div>
       );

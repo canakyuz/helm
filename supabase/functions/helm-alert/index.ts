@@ -160,20 +160,20 @@ Deno.serve(async (req) => {
       const pct = ((prev - last) / prev) * 100;
       if (pct >= rule.threshold) {
         fire = true;
-        message = `${rule.metric} %${pct.toFixed(0)} düştü (${prev} → ${last})`;
+        message = `${rule.metric} %${pct.toFixed(0)} down (${prev} → ${last})`;
       }
     } else if (rule.condition === "rise_pct" && prev > 0) {
       const pct = ((last - prev) / prev) * 100;
       if (pct >= rule.threshold) {
         fire = true;
-        message = `${rule.metric} %${pct.toFixed(0)} arttı (${prev} → ${last})`;
+        message = `${rule.metric} %${pct.toFixed(0)} up (${prev} → ${last})`;
       }
     } else if (rule.condition === "below" && last < rule.threshold) {
       fire = true;
-      message = `${rule.metric} eşiğin altında: ${last} < ${rule.threshold}`;
+      message = `${rule.metric} below threshold: ${last} < ${rule.threshold}`;
     } else if (rule.condition === "above" && last > rule.threshold) {
       fire = true;
-      message = `${rule.metric} eşiğin üstünde: ${last} > ${rule.threshold}`;
+      message = `${rule.metric} above threshold: ${last} > ${rule.threshold}`;
     }
 
     if (!fire) continue;

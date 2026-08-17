@@ -105,7 +105,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "mrr_cents",
-      label: "Fiyat ondalığı (hep .99 ise — MRR kuruşunu RC yuvarlamasına rağmen ekler)",
+      label: "Price decimal (if prices always end in .99 — restores the cents RevenueCat rounds off)",
       placeholder: "0.99",
       optional: true,
     },
@@ -132,7 +132,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "host", label: "Host", placeholder: "https://eu.posthog.com" },
     {
       key: "funnel_steps",
-      label: "Huni adımları (virgülle ayır, event adları)",
+      label: "Funnel steps (comma-separated event names)",
       placeholder: "app_opened, signup, onboarding_complete, purchase",
       optional: true,
     },
@@ -146,7 +146,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "service_role_key", label: "Service Role Key", secret: true },
     {
       key: "crm_tables",
-      label: "CRM tabloları (virgülle ayır, opsiyonel `tablo:kolon`)",
+      label: "CRM tables (comma-separated, optional `table:column`)",
       placeholder: "profiles:id, gems, subscriptions",
       optional: true,
     },
@@ -171,7 +171,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   ],
   stripe: [{ key: "secret_key", label: "Stripe Secret Key", secret: true }],
   plausible: [
-    { key: "site_id", label: "Site ID (alan adı)", placeholder: "ornek.com" },
+    { key: "site_id", label: "Site ID (domain)", placeholder: "ornek.com" },
     { key: "api_key", label: "API Key", secret: true },
     { key: "host", label: "Host", placeholder: "https://plausible.io" },
   ],
@@ -194,7 +194,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "auth_token", label: "Auth Token", secret: true },
     {
       key: "host",
-      label: "Host (self-hosted için)",
+      label: "Host (for self-hosted)",
       placeholder: "https://sentry.io",
       optional: true,
     },
@@ -208,12 +208,12 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "from_email",
-      label: "Gönderen e-posta (Resend'de doğrulanmış domain)",
+      label: "Sender email (must be a domain verified in Resend)",
       placeholder: "no-reply@helm.app",
     },
     {
       key: "from_name",
-      label: "Gönderen adı",
+      label: "Sender name",
       placeholder: "Helm",
       optional: true,
     },
@@ -221,19 +221,19 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   app_store_connect: [
     {
       key: "app_store_id",
-      label: "App Store ID (App Store URL'inde id sonrası rakam — yorumlar için)",
+      label: "App Store ID (the number after `id` in the App Store URL — used for reviews)",
       placeholder: "6451234567",
       optional: true,
     },
     {
       key: "app_store_country",
-      label: "App Store ülke kodları (virgülle ayır — yorumlar için)",
+      label: "App Store country codes (comma-separated — used for reviews)",
       placeholder: "tr,us,gb,de",
       optional: true,
     },
     {
       key: "issuer_id",
-      label: "Issuer ID (Team Key için — Individual API Key'de BOŞ bırak)",
+      label: "Issuer ID (for a Team Key — leave EMPTY for an Individual API Key)",
       placeholder: "57246542-96fe-1a63-e053-0824d011072a",
       optional: true,
     },
@@ -244,7 +244,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "private_key",
-      label: "Private Key (.p8 içeriği — BEGIN/END dahil)",
+      label: "Private key (.p8 contents — including BEGIN/END)",
       secret: true,
       multiline: true,
       placeholder: "-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY-----",
@@ -264,20 +264,20 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   google_play_developer: [
     {
       key: "service_account_json",
-      label: "Service Account JSON (Google Cloud → IAM → Service Accounts → Keys → CREATE → JSON; içeriğin TAMAMINI yapıştır)",
+      label: "Service account JSON (Google Cloud → IAM → Service Accounts → Keys → CREATE → JSON; paste the WHOLE file)",
       placeholder: '{\n  "type": "service_account",\n  "project_id": "...",\n  "private_key_id": "...",\n  "private_key": "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n",\n  "client_email": "helm@your-project.iam.gserviceaccount.com",\n  ...\n}',
       secret: true,
       multiline: true,
     },
     {
       key: "package_name",
-      label: "Package Name (opsiyonel — boşsa properties.google_play_id'den okunur)",
+      label: "Package name (optional — falls back to properties.google_play_id)",
       placeholder: "com.example.app",
       optional: true,
     },
     {
       key: "language_codes",
-      label: "Yorum çeviri dilleri (virgülle, opsiyonel — reviews için, versions etkilenmez)",
+      label: "Review translation languages (comma-separated, optional — affects reviews, not versions)",
       placeholder: "en,tr",
       optional: true,
     },
@@ -308,7 +308,7 @@ const SyncBadge = ({ record }: { record: ProjectIntegration }) => {
       </Tooltip>
     );
   }
-  return <Badge variant="secondary">henüz çalışmadı</Badge>;
+  return <Badge variant="secondary">has not run yet</Badge>;
 };
 
 interface TestResult {
@@ -352,8 +352,8 @@ const fmtNum = (n: number | null) =>
   n === null
     ? "—"
     : Number.isInteger(n)
-      ? n.toLocaleString("tr-TR")
-      : n.toLocaleString("tr-TR", { maximumFractionDigits: 4 });
+      ? n.toLocaleString("en-US")
+      : n.toLocaleString("en-US", { maximumFractionDigits: 4 });
 
 const StatusCell = ({ status }: { status: DiffStatus }) => {
   if (status === "match") {
@@ -416,7 +416,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
         ok: false,
         error: e instanceof Error ? e.message : String(e),
       });
-      toast.error("Test başarısız");
+      toast.error("Test failed");
     } finally {
       setTesting(null);
     }
@@ -438,7 +438,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
         ok: false,
         error: e instanceof Error ? e.message : String(e),
       });
-      toast.error("Doğrulama başarısız");
+      toast.error("Verification failed");
     } finally {
       setVerifying(null);
     }
@@ -516,7 +516,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Veri Kaynakları</CardTitle>
+        <CardTitle>Data sources</CardTitle>
         <CardAction>
           <Dialog
             open={open}
@@ -532,14 +532,14 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
               <DialogHeader>
                 <DialogTitle>
                   {editingId
-                    ? `${PROVIDER_LABELS[provider as ProviderName]} düzenle`
-                    : "Veri kaynağı bağla"}
+                    ? `${PROVIDER_LABELS[provider as ProviderName]} — edit`
+                    : "Connect a data source"}
                 </DialogTitle>
               </DialogHeader>
 
               <div className="flex-1 space-y-4 overflow-y-auto py-2 pr-1">
                 <div className="space-y-2">
-                  <Label>Sağlayıcı</Label>
+                  <Label>Provider</Label>
                   <Select
                     value={provider}
                     disabled={!!editingId}
@@ -559,7 +559,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                           disabled={usedProviders.has(p) && !editingId}
                         >
                           {PROVIDER_LABELS[p]}
-                          {usedProviders.has(p) && !editingId ? " (bağlı)" : ""}
+                          {usedProviders.has(p) && !editingId ? " (connected)" : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -600,7 +600,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                           onClick={() =>
                             setRevealed((r) => ({ ...r, [f.key]: !r[f.key] }))
                           }
-                          aria-label={revealed[f.key] ? "Gizle" : "Göster"}
+                          aria-label={revealed[f.key] ? "Gizle" : "Show"}
                           className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground hover:text-foreground"
                         >
                           {revealed[f.key] ? (
@@ -717,7 +717,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
         {integrations.length === 0 && !query.isLoading && (
           <div className="rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground">
             Henüz hiçbir veri kaynağı bağlanmadı. Yukarıdaki kartlardan
-            <strong> Bağla</strong> ile başla.
+            <strong> Connect</strong> ile başla.
           </div>
         )}
       </CardContent>
@@ -749,7 +749,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                       <TableRow>
                         <TableHead>Tarih</TableHead>
                         <TableHead>Metrik</TableHead>
-                        <TableHead className="text-right">Değer</TableHead>
+                        <TableHead className="text-right">Value</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -791,7 +791,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
       <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Doğrulama — upstream vs DB</DialogTitle>
+            <DialogTitle>Verification — upstream vs DB</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             {!verifyResult && (
@@ -936,7 +936,7 @@ const ProviderCard = ({
   const connected = !!integration;
   const status = integration?.last_sync_status;
   const lastSync = integration?.last_synced_at
-    ? new Date(integration.last_synced_at).toLocaleString("tr-TR")
+    ? new Date(integration.last_synced_at).toLocaleString("en-US")
     : null;
 
   return (
@@ -1011,7 +1011,7 @@ const ProviderCard = ({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Doğrula"
+                aria-label="Verify"
                 disabled={verifying}
                 onClick={onVerify}
               >
@@ -1020,7 +1020,7 @@ const ProviderCard = ({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Düzenle"
+                aria-label="Edit"
                 onClick={onEdit}
               >
                 <Pencil className="size-3.5" />
@@ -1037,14 +1037,14 @@ const ProviderCard = ({
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Bağlantı kaldırılsın mı?</AlertDialogTitle>
+                    <AlertDialogTitle>Remove this connection?</AlertDialogTitle>
                     <AlertDialogDescription>
                       {PROVIDER_LABELS[provider]} entegrasyonu silinir. Geri
                       alınamaz.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={onDelete}>
                       Sil
                     </AlertDialogAction>
@@ -1061,7 +1061,7 @@ const ProviderCard = ({
             onClick={onConnect}
           >
             <Plus className="size-3.5" />
-            <span className="ml-1">Bağla</span>
+            <span className="ml-1">Connect</span>
           </Button>
         )}
       </div>

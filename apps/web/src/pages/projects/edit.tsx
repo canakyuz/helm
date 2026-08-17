@@ -71,7 +71,7 @@ export const ProjectEdit = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Proje adı</FormLabel>
+                    <FormLabel>Project name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -100,7 +100,7 @@ export const ProjectEdit = () => {
                     <FormLabel>App Store ID</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="6451234567 (yorumlar için)"
+                        placeholder="6451234567 (for reviews)"
                         {...field}
                         value={field.value ?? ""}
                       />
@@ -114,7 +114,7 @@ export const ProjectEdit = () => {
                 name="app_store_country"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>App Store ülkesi</FormLabel>
+                    <FormLabel>App Store country</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="us"
@@ -230,7 +230,7 @@ export const ProjectEdit = () => {
                           </FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="en,tr (boş = hepsi)"
+                              placeholder="en,tr (empty = all)"
                               value={(field.value ?? []).join(",")}
                               onChange={(e) =>
                                 field.onChange(

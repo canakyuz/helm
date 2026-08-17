@@ -29,7 +29,7 @@ async function resolveProjectId(
     throw new Error(`Sentry project ${res.status}: ${await res.text()}`);
   }
   const id = String((await res.json())?.id ?? "");
-  if (!id) throw new Error("Sentry project id çözülemedi");
+  if (!id) throw new Error("Could not resolve the Sentry project id");
   return id;
 }
 

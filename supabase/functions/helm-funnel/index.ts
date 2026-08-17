@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     return json(
       {
         error:
-          "PostHog config'inde en az 2 funnel_steps tanımlı olmalı (virgülle ayır)",
+          "The PostHog config needs at least 2 funnel_steps (comma-separated)",
       },
       400,
     );

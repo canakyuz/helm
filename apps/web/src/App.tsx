@@ -144,7 +144,7 @@ function App() {
                 {
                   name: "users",
                   list: "/users",
-                  meta: { label: "Kullanıcılar" },
+                  meta: { label: "Users" },
                 },
                 {
                   name: "integrations",
@@ -164,7 +164,7 @@ function App() {
                 {
                   name: "alerts",
                   list: "/alerts",
-                  meta: { label: "Uyarılar" },
+                  meta: { label: "Alerts" },
                 },
                 { name: "mail", list: "/mail", meta: { label: "Mail" } },
                 {
@@ -175,7 +175,7 @@ function App() {
                 {
                   name: "growth",
                   list: "/growth",
-                  meta: { label: "Büyüme" },
+                  meta: { label: "Growth" },
                 },
                 { name: "logs", list: "/logs", meta: { label: "Loglar" } },
                 {
@@ -186,19 +186,19 @@ function App() {
                 {
                   name: "versions",
                   list: "/versions",
-                  meta: { label: "Sürümler" },
+                  meta: { label: "Versions" },
                 },
                 { name: "funnel", list: "/funnel", meta: { label: "Huni" } },
                 { name: "push", list: "/push", meta: { label: "Push" } },
                 {
                   name: "campaigns",
                   list: "/campaigns",
-                  meta: { label: "Kampanya Geçmişi" },
+                  meta: { label: "Campaign history" },
                 },
                 {
                   name: "audit",
                   list: "/audit",
-                  meta: { label: "Müdahale Geçmişi" },
+                  meta: { label: "Intervention history" },
                 },
                 {
                   name: "settings",
@@ -228,14 +228,14 @@ function App() {
                   name: "cms_collections",
                   list: "/cms/collections",
                   edit: "/cms/collections/edit/:id",
-                  meta: { label: "İçerik Şemaları" },
+                  meta: { label: "Content schemas" },
                 },
                 {
                   name: "cms_entries",
                   list: "/cms/entries",
                   create: "/cms/entries/create",
                   edit: "/cms/entries/edit/:id",
-                  meta: { label: "İçerikler" },
+                  meta: { label: "Content" },
                 },
                 {
                   name: "cms_assets",

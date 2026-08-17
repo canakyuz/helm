@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   try {
     body = (await req.json()) as Body;
   } catch {
-    return json({ error: "Geçersiz JSON" }, 400);
+    return json({ error: "Invalid JSON" }, 400);
   }
 
   const reviewId = body.review_id;
@@ -44,10 +44,10 @@ Deno.serve(async (req) => {
     return json({ error: "review_id gerekli (number)" }, 400);
   }
   if (replyBody.length === 0) {
-    return json({ error: "Yanıt boş olamaz" }, 400);
+    return json({ error: "The reply cannot be empty" }, 400);
   }
   if (replyBody.length > 350) {
-    return json({ error: "Yanıt 350 karakteri geçemez" }, 422);
+    return json({ error: "The reply cannot exceed 350 characters" }, 422);
   }
   if (/<script|<\/script/i.test(replyBody)) {
     return json({ error: "HTML/script kabul edilmiyor" }, 422);
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     .gte("created_at", sixtySecondsAgo);
   if (rlErr) return json({ error: rlErr.message }, 500);
   if ((recentCount ?? 0) >= 10) {
-    return json({ error: "Çok hızlısın, 1 dakika bekle" }, 429);
+    return json({ error: "Too fast — wait a minute" }, 429);
   }
 
   const { data: revRow, error: revErr } = await hub
@@ -91,13 +91,13 @@ Deno.serve(async (req) => {
     .eq("id", reviewId)
     .maybeSingle();
   if (revErr) return json({ error: revErr.message }, 500);
-  if (!revRow) return json({ error: "Review bulunamadı" }, 404);
+  if (!revRow) return json({ error: "Review not found" }, 404);
   const review = revRow as ReviewRow;
 
   const vendorReviewId = extractVendorReviewId(review.external_id);
   if (!vendorReviewId) {
     return json(
-      { error: "RSS kaynaklı yorumlara yanıt yazılamaz (ASC entegrasyonu gerekli)" },
+      { error: "RSS-sourced reviews cannot be replied to (an ASC integration is required)" },
       422,
     );
   }
@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       packageName = (proj as { google_play_id?: string } | null)?.google_play_id ?? "";
     }
     if (!packageName) {
-      return json({ error: "Play package name bulunamadı" }, 422);
+      return json({ error: "Play package name not found" }, 422);
     }
     result = await sendPlayReply({
       serviceAccountJson: cfg.service_account_json,

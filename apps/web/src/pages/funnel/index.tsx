@@ -136,7 +136,7 @@ export const FunnelPage = () => {
         if (res?.error) throw new Error(res.error);
         setEvents((res?.events as PHEvent[]) ?? []);
       } catch (e) {
-        toast.error("Event listesi alınamadı", {
+        toast.error("Could not load the event list", {
           description: e instanceof Error ? e.message : String(e),
         });
       } finally {
@@ -176,7 +176,7 @@ export const FunnelPage = () => {
   const saveFunnelSteps = () => {
     if (!phIntg) return;
     if (pickedEvents.length < 2) {
-      toast.error("En az 2 adım seç");
+      toast.error("Pick at least 2 steps");
       return;
     }
     const newConfig = {
@@ -191,7 +191,7 @@ export const FunnelPage = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Huni adımları kaydedildi");
+          toast.success("Funnel steps saved");
           setEditing(false);
           invalidate({
             resource: "project_integrations",
@@ -236,7 +236,7 @@ export const FunnelPage = () => {
       )}
 
       {!isAll && !phIntg && (
-        <ErrorBanner variant="warning" title="PostHog bağlı değil">
+        <ErrorBanner variant="warning" title="PostHog is not connected">
           Entegrasyonlar → <strong>+</strong> → PostHog → Project ID + Personal
           API Key.
         </ErrorBanner>
@@ -283,7 +283,7 @@ export const FunnelPage = () => {
             </CardAction>
           </CardHeader>
           <CardContent className="space-y-3">
-            <ErrorBanner variant="warning" title="İdeal: 3-5 adım">
+            <ErrorBanner variant="warning" title="Ideal: 3–5 steps">
               <div className="space-y-1">
                 <div>
                   6+ adımda her drop küçük görünür, conversion neredeyse hep %0
@@ -358,7 +358,7 @@ export const FunnelPage = () => {
                       variant="secondary"
                       className="cursor-pointer"
                       onClick={() => toggleEvent(e)}
-                      title="Tıkla → kaldır"
+                      title="Click to remove"
                     >
                       <span className="mr-1 font-mono">{i + 1}.</span>
                       <code>{e}</code>
@@ -426,13 +426,13 @@ export const FunnelPage = () => {
               loading={loading}
             />
             <StatCard
-              title="Sonuna Ulaşanlar"
+              title="Reached the end"
               value={compact(data.total_converted)}
               icon={<Users />}
               loading={loading}
             />
             <StatCard
-              title="Toplam Dönüşüm"
+              title="Total conversion"
               value={`%${data.overall_conversion.toFixed(1)}`}
               icon={
                 data.overall_conversion >= 50 ? (
@@ -470,14 +470,14 @@ export const FunnelPage = () => {
                     />
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="text-muted-foreground">Sonuna ulaşan</span>
+                    <span className="text-muted-foreground">Reached the end</span>
                     <ChangeBadge
                       current={data.total_converted}
                       prev={data.prev_total_converted ?? 0}
                     />
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="text-muted-foreground">Dönüşüm %</span>
+                    <span className="text-muted-foreground">Conversion %</span>
                     <ChangeBadge
                       current={data.overall_conversion}
                       prev={data.prev_overall_conversion ?? 0}
@@ -492,7 +492,7 @@ export const FunnelPage = () => {
             <ErrorBanner variant="warning">
               <strong>{data.steps.length} adım çok fazla</strong> — her küçük
               adım toplam conversion'u baltalar. Sağ üstteki{" "}
-              <strong>Adımları düzenle</strong> ile 3-5 ana kilometre taşına
+              <strong>Edit steps</strong> ile 3-5 ana kilometre taşına
               indir.
             </ErrorBanner>
           )}
@@ -515,7 +515,7 @@ export const FunnelPage = () => {
                   }}
                 >
                   <Pencil className="size-4" />
-                  <span className="ml-2">Adımları düzenle</span>
+                  <span className="ml-2">Edit steps</span>
                 </Button>
               </CardAction>
             </CardHeader>
@@ -532,7 +532,7 @@ export const FunnelPage = () => {
             <EmptyState
               icon={<TrendingDown className="size-6" />}
               title="Veri yok"
-              description="PostHog'tan funnel sonucu boş döndü. Adımlardaki event isimlerinin doğru olduğundan emin ol (case-sensitive) — Adımları düzenle ile kontrol et."
+              description="PostHog returned an empty funnel. Check that the event names in the steps are correct (they are case-sensitive) — use Edit steps."
             />
           </CardContent>
         </Card>
@@ -609,7 +609,7 @@ const FunnelBars = ({ steps }: { steps: FunnelStep[] }) => {
                           ? "text-emerald-500"
                           : "text-destructive",
                       )}
-                      title={`Önceki periyot: ${s.prev_count ?? 0}`}
+                      title={`Previous period: ${s.prev_count ?? 0}`}
                     >
                       {s.delta_pct >= 0 ? "▲" : "▼"}{" "}
                       {Math.abs(s.delta_pct).toFixed(0)}%

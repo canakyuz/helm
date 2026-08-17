@@ -22,7 +22,7 @@ const json = (body: unknown, status = 200) =>
 // Raw referrer → temiz kategori
 const categorize = (raw: string): { source: string; type: string } => {
   if (!raw || raw === "$direct" || raw === "(direct)") {
-    return { source: "Doğrudan", type: "direct" };
+    return { source: "Direct", type: "direct" };
   }
   const r = raw.toLowerCase();
   if (r.includes("google")) return { source: "Google", type: "search" };

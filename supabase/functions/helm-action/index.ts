@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
   try {
     body = (await req.json()) as Body;
   } catch {
-    return json({ error: "Geçersiz JSON" }, 400);
+    return json({ error: "Invalid JSON" }, 400);
   }
 
   const { project_id, user_id, action, params = {} } = body;
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
       const patch =
         (params.patch as Record<string, unknown> | undefined) ?? {};
       if (Object.keys(patch).length === 0) {
-        return json({ error: "patch boş" }, 400);
+        return json({ error: "patch is empty" }, 400);
       }
       const update =
         scope === "app"
@@ -129,17 +129,17 @@ Deno.serve(async (req) => {
       // Kullanıcının emailini al → recovery linki üret.
       const { data: u } = await admin.auth.admin.getUserById(user_id);
       const email = u?.user?.email;
-      if (!email) return json({ error: "Kullanıcının e-postası yok" }, 400);
+      if (!email) return json({ error: "This user has no email" }, 400);
       const { error } = await admin.auth.admin.generateLink({
         type: "recovery",
         email,
       });
       if (error) throw error;
-      detail = `password reset link gönderildi → ${email}`;
+      detail = `password reset link sent → ${email}`;
     } else if (action === "delete_user") {
       const { error } = await admin.auth.admin.deleteUser(user_id);
       if (error) throw error;
-      detail = "kullanıcı silindi";
+      detail = "user deleted";
     } else {
       return json({ error: `Bilinmeyen aksiyon: ${action}` }, 400);
     }

@@ -58,7 +58,7 @@ interface ErrorsPanelProps {
   isAll: boolean;
 }
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("tr-TR");
+const fmt = (iso: string) => new Date(iso).toLocaleString("en-US");
 
 const levelColor = (level: string) => {
   if (level === "fatal" || level === "error") return "text-destructive";
@@ -263,13 +263,13 @@ export const ErrorsPanel = ({
                   <KV label="Olay" value={compact(selected.count)} />
                   <KV
                     label="Etkilenen"
-                    value={`${compact(selected.user_count)} kişi`}
+                    value={`${compact(selected.user_count)} people`}
                     icon={<UsersIcon className="size-3" />}
                   />
-                  <KV label="Kısa ID" value={selected.short_id} mono />
+                  <KV label="Short ID" value={selected.short_id} mono />
                   <KV label="Durum" value={selected.status} />
-                  <KV label="İlk görüldü" value={fmt(selected.first_seen)} />
-                  <KV label="Son görüldü" value={fmt(selected.last_seen)} />
+                  <KV label="First seen" value={fmt(selected.first_seen)} />
+                  <KV label="Last seen" value={fmt(selected.last_seen)} />
                   <KV
                     label="Proje"
                     value={projectName(selected.project_id)}
@@ -294,7 +294,7 @@ export const ErrorsPanel = ({
                       rel="noreferrer"
                     >
                       <ExternalLink className="size-4" />
-                      <span className="ml-2">Sentry'de aç</span>
+                      <span className="ml-2">Open in Sentry</span>
                     </a>
                   </Button>
                 </div>
