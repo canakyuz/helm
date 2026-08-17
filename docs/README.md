@@ -6,16 +6,12 @@ Helm'i ticari birleşik ürüne (web + mobile + hosted hub) taşıma planı.
 
 | Sıra | Doküman | Ne zaman oku |
 |------|---------|--------------|
-| 1 | [HELM_PRODUCT_STRATEGY.md](./HELM_PRODUCT_STRATEGY.md) | Büyük resim — vizyon, özet, kararlar |
+| 1 | [architecture/monorepo.md](./architecture/monorepo.md) | Büyük resim — repo yapısı ve sınırlar |
 | 2 | [migration/phase-0-scaffold.md](./migration/phase-0-scaffold.md) | **İlk uygulama adımı** — monorepo iskelet |
 | 3 | [migration/hook-inventory.md](./migration/hook-inventory.md) | Mobile hook → `@helm/api` eşlemesi |
 | 4 | [integrations/architecture.md](./integrations/architecture.md) | Otomatik sync + adapter mimarisi |
 
 ## Dizin
-
-### Strateji
-
-- [HELM_PRODUCT_STRATEGY.md](./HELM_PRODUCT_STRATEGY.md) — master belge (executive summary + tüm bölümler)
 
 ### Mimari
 
@@ -36,8 +32,8 @@ Helm'i ticari birleşik ürüne (web + mobile + hosted hub) taşıma planı.
 
 ### İş / pazar
 
-- [business/market-and-revenue.md](./business/market-and-revenue.md) — TAM/SAM/SOM, rakipler, gelir senaryoları
-- [business/pricing.md](./business/pricing.md) — planlar, limitler, founding member
+Strateji, pazar analizi ve fiyatlandırma dokümanları bu repo'nun kapsamı dışında
+tutuluyor — Helm'in kodu açık, iş planı değil.
 
 ## Durum
 
@@ -48,6 +44,6 @@ Helm'i ticari birleşik ürüne (web + mobile + hosted hub) taşıma planı.
 | 2 — Web adopt | 🔲 Bekliyor | [overview](./migration/overview.md) |
 | 3 — Multi-tenant | 🔲 Bekliyor | [overview](./migration/overview.md) |
 | 4 — Integrations MVP | 🔲 Bekliyor | [providers](./integrations/providers.md) |
-| 5 — Launch | 🔲 Bekliyor | [pricing](./business/pricing.md) |
+| 5 — Launch | 🔲 Bekliyor | — |
 
 Son güncelleme: 2026-05-29
