@@ -59,7 +59,7 @@ export function CrashFreeHero({
 
         <View className="min-w-0 flex-1">
           <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
-            CRASH-FREE OTURUM
+            {t("CRASH-FREE OTURUM")}
           </Text>
           <Text
             className="mt-[6px] font-semibold text-statSm tracking-tighter"
@@ -68,7 +68,11 @@ export function CrashFreeHero({
             {t(verdict.label)}
           </Text>
           <Text className="mt-xs text-meta leading-[18px] text-fg2">
-            {issueCount} aktif sorun · {fatalCount} fatal · {formatInteger(totalEvents)} olay
+            {t("{issues} aktif sorun · {fatal} fatal · {events} olay", {
+              issues: issueCount,
+              fatal: fatalCount,
+              events: formatInteger(totalEvents),
+            })}
           </Text>
         </View>
       </View>

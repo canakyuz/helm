@@ -284,6 +284,19 @@ const EN: Record<string, string> = {
   "Bilinmiyor": "Unknown",
   "kesin": "settled",
   "{month} hedefi": "{month} goal",
+  "CRASH-FREE OTURUM": "CRASH-FREE SESSIONS",
+  "{issues} aktif sorun · {fatal} fatal · {events} olay":
+    "{issues} active issues · {fatal} fatal · {events} events",
+  "Ölçüm şüpheli": "Measurement suspect",
+  "Aşağıdakiler kullanıcı davranışı değil, eksik veya hatalı olay gönderimi.":
+    "These are not user behaviour — they are missing or malformed event reporting.",
+  "Oturum kapanma": "Session closure",
+  "{platform}: {started} oturum başladı, hiçbiri kapanmadı":
+    "{platform}: {started} sessions started, none closed",
+  "{platform}: bitiş ({ended}) başlangıçtan ({started}) fazla":
+    "{platform}: more ends ({ended}) than starts ({started})",
+  "Oyun bitişi ({overs}) başlangıçtan ({starts}) fazla — başlangıç olayı eksik":
+    "More game-overs ({overs}) than starts ({starts}) — the start event is missing",
 };
 
 export type TranslateVars = Record<string, string | number>;
