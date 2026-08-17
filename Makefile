@@ -6,13 +6,23 @@ export
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help install dev-web dev-mobile typecheck build-web gen-types db-push fn-deploy ios-release clean
+.PHONY: help install hooks scan-secrets audit-secrets dev-web dev-mobile typecheck build-web gen-types db-push fn-deploy ios-release clean
 
 help: ## komutları listele
 	@awk 'BEGIN{FS=":.*## "} /^[a-zA-Z_-]+:.*## /{printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 install: ## bağımlılıkları kur (bun workspace)
 	bun install
+
+hooks: ## git hook'larını aktifleştir (clone sonrası bir kez)
+	git config core.hooksPath .githooks
+	@echo "✓ pre-commit sır taraması aktif"
+
+scan-secrets: ## tracked dosyalarda sır ara
+	./scripts/check-secrets.sh tree
+
+audit-secrets: ## tüm git history'de sır ara (yavaş)
+	./scripts/check-secrets.sh history
 
 dev-web: ## web cockpit (Refine/Vite)
 	cd apps/web && bun run dev

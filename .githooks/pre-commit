@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Repo ile birlikte gelen hook. Aktifleştirmek için: make hooks
+exec "$(git rev-parse --show-toplevel)/scripts/check-secrets.sh" staged

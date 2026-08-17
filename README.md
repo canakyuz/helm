@@ -25,8 +25,12 @@ helm/                       bun workspaces monorepo
 
 ```bash
 bun install
+make hooks   # pre-commit sır taraması — clone sonrası bir kez
 # .env: HELM_SUPABASE_PROJECT_ID + app'lerde EXPO_PUBLIC_* / VITE_* anahtarları
 ```
+
+Anahtarlar `.env`'de durur, `.env.example` sadece placeholder içerir. Gerçek bir
+credential stage'lersen `pre-commit` commit'i durdurur; aynı tarama CI'da da koşar.
 
 ## Komutlar (`make help`)
 
