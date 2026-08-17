@@ -69,7 +69,7 @@ export function AttentionTile({
     <BentoTile>
       <View className="flex-row items-center justify-between">
         <Text className="font-semibold text-emph tracking-tight text-fg">
-          Dikkat gerekiyor
+          {t("Dikkat gerekiyor")}
         </Text>
         <Text className="font-mono-medium text-[11px] text-fg3">
           {rest > 0 ? `${shown.length}/${items.length}` : String(items.length)}

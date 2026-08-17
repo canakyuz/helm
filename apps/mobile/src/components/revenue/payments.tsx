@@ -44,7 +44,7 @@ export function PaymentsTile({
   return (
     <BentoTile>
       <View className="flex-row items-center justify-between">
-        <Text className="font-semibold text-emph tracking-tight text-fg">Ödemeler</Text>
+        <Text className="font-semibold text-emph tracking-tight text-fg">{t("Ödemeler")}</Text>
         <Text className="font-mono-medium text-[11px] text-fg3">
           {payments.length > 0 ? `${payments.length} KALEM · ${fmt(total)}` : ""}
         </Text>

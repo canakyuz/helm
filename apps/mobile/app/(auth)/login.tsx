@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,6 +22,7 @@ function FieldLabel({ children }: { children: string }) {
 }
 
 export default function Login() {
+  const t = useT();
   const [email, setEmail] = useState("canakyuz23@gmail.com");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +31,7 @@ export default function Login() {
 
   async function signIn() {
     if (!email.includes("@") || password.length < 6) {
-      setErrorMsg("E-posta ve en az 6 karakter şifre gir.");
+      setErrorMsg(t("E-posta ve en az 6 karakter şifre gir."));
       setStatus("error");
       return;
     }
@@ -38,7 +40,7 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       console.warn("[auth] sign-in error", error.message);
-      setErrorMsg("E-posta veya şifre hatalı.");
+      setErrorMsg(t("E-posta veya şifre hatalı."));
       setStatus("error");
       return;
     }
@@ -102,7 +104,7 @@ export default function Login() {
               </View>
 
               <View style={{ gap: 8 }}>
-                <FieldLabel>ŞİFRE</FieldLabel>
+                <FieldLabel>{t("ŞİFRE")}</FieldLabel>
                 <View style={{ ...FIELD, flexDirection: "row", alignItems: "center" }}>
                   <TextInput
                     value={password}

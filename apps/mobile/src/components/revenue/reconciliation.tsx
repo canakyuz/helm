@@ -56,7 +56,7 @@ export function ReconciliationTile({
         <Text className="font-semibold text-emph tracking-tight text-fg">
           Mağaza mutabakatı
         </Text>
-        <Text className="font-mono-medium text-[11px] text-fg3">ANLIK / KESİN</Text>
+        <Text className="font-mono-medium text-[11px] text-fg3">{t("ANLIK / KESİN")}</Text>
       </View>
 
       <View className="mt-tilePadSm" style={{ gap: space.rowY }}>
@@ -86,9 +86,9 @@ export function ReconciliationTile({
 
             <Text className="mt-[4px] font-mono-medium text-meta text-fg2">
               {fmt(l.provisional)}
-              <Text className="text-fg3"> anlık · </Text>
+              <Text className="text-fg3"> {t("anlık")} · </Text>
               {l.confirmed > 0 ? fmt(l.confirmed) : "—"}
-              <Text className="text-fg3"> kesin</Text>
+              <Text className="text-fg3"> {t("kesin")}</Text>
               {l.state === "mismatch" ? (
                 <Text style={{ color: theme.neg }}>
                   {"  fark "}

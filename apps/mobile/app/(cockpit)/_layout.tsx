@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { useMemo } from "react";
 import { usePathname } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
@@ -11,6 +12,7 @@ import { useTheme } from "~/theme/use-theme";
 
 export default function CockpitLayout() {
   const pathname = usePathname();
+  const t = useT();
   const { name: themeName, theme } = useTheme();
   const { prioritizeRevenueRequests } = usePreferences();
   const deferShellQueries =
@@ -46,22 +48,22 @@ export default function CockpitLayout() {
         <NativeTabs.Trigger.Icon
           sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis" }}
         />
-        <NativeTabs.Trigger.Label>Özet</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Özet")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="revenue">
         <NativeTabs.Trigger.Icon sf={{ default: "creditcard", selected: "creditcard.fill" }} />
-        <NativeTabs.Trigger.Label>Gelir</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Gelir")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="analytics">
         <NativeTabs.Trigger.Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
-        <NativeTabs.Trigger.Label>Kullanıcı</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Kullanıcı")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="health">
         <NativeTabs.Trigger.Icon sf={{ default: "heart", selected: "heart.fill" }} />
-        <NativeTabs.Trigger.Label>Sağlık</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Sağlık")}</NativeTabs.Trigger.Label>
         {openCount > 0 ? (
           <NativeTabs.Trigger.Badge>{String(openCount)}</NativeTabs.Trigger.Badge>
         ) : null}
@@ -69,7 +71,7 @@ export default function CockpitLayout() {
 
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Icon sf={{ default: "gearshape", selected: "gearshape.fill" }} />
-        <NativeTabs.Trigger.Label>Ayar</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Ayar")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

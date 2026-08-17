@@ -82,7 +82,7 @@ export function PlatformTile({ rows }: { rows: readonly PlatformRow[] }) {
 
   return (
     <BentoTile>
-      <Text className="font-semibold text-emph tracking-tight text-fg">Platformlar</Text>
+      <Text className="font-semibold text-emph tracking-tight text-fg">{t("Platformlar")}</Text>
       {rows.length === 0 ? (
         <Empty label={t("PLATFORM VERİSİ YOK")} />
       ) : (
