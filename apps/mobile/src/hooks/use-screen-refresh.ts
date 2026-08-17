@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { lastSyncKeys } from "@helm/queries";
+import type { LastSync } from "@helm/api";
 
 import { haptic } from "~/lib/haptics";
 import { supabase } from "~/lib/supabase";
@@ -7,66 +9,68 @@ import { supabase } from "~/lib/supabase";
 /**
  * Ekran genelinde "asagi cekip yenile" davranisi.
  *
- * NEDEN ORTAK BIR HOOK:
+ * NEDEN ORTAK BIR HOOK: yenileme sekiz sorgu tetikliyor. Spinner'i tek sorguya
+ * baglamak "yenilendi" yalani soyluyordu. `refetchQueries({type:"active"})` o anda
+ * ekranda olan her sorguyu kapsar, elle liste bakimi gerekmez.
  *
- * 1) Eski kurulum spinner'i TEK bir sorguya bagliyordu (`refreshing={kpis.isRefetching}`),
- *    oysa yenileme sekiz sorgu tetikliyordu. Spinner ilk sorgu biter bitmez duruyor,
- *    kullanici "yenilendi" saniyordu — digerleri hala ucuyorken. Burada `refreshing`
- *    gercekten HEPSI bitince kapaniyor.
+ * NEDEN ARTIK INGEST'I BEKLEMIYORUZ:
  *
- * 2) Eskiden yenilenecek sorgular elle listeleniyordu. Ekrana yeni bir kart eklendiginde
- *    o listeye eklemeyi unutmak sessiz bir hataydi — haritayi baglarken `geo.refetch()`
- *    elle eklenmek zorunda kalindi, tam da bu tuzagin kaniti. `refetchQueries` o anda
- *    ekranda AKTIF olan her sorguyu kapsar, liste bakimi gerekmez.
+ * Onceki kurulum `Promise.race([invoke, 15sn])` yapip hemen ardindan refetch
+ * ediyordu. Olcum: gercek bir ingest calismasi 90 saniyeyi asiyor (helm-ingest
+ * her saglayiciyi SIRAYLA geziyor). Yani yaris hep zamanlayici tarafindan
+ * kazaniliyor, refetch ingest daha hicbir sey YAZMADAN eski satirlari tekrar
+ * okuyordu. Ekranda rakamlar degismiyor, kullanici "yenile calismiyor, veri
+ * sadece cron'la geliyor" sonucuna variyordu — his degil, mekanizma.
  *
- * 3) Yenileme yalnizca Overview'da vardi; Revenue / Analytics / Health'te asagi cekmek
- *    hicbir sey yapmiyordu. Ortak hook bunu dort ekrana da bedavaya getiriyor.
- *
- * Hata durumu bilincli olarak yutulur: yenileme basarisiz olsa bile spinner kapanir ve
- * ekranda mevcut veri kalir. Sorgularin kendi hata durumlari zaten kartlarda gorunur;
- * burada ayrica uyari gostermek ayni hatayi iki kez soylemek olurdu.
+ * Yeni akis: ingest ates-et-unut tetiklenir, spinner sunucu "SURUYOR" der demez
+ * kapanir, calisma bitince `useIngestWatcher` ekrani kendiliginden tazeler.
+ * Kimse 90 saniye spinner izlemiyor, kimse eski rakama bakmiyor.
  */
-
-/**
- * Ingest'in bitmesini en fazla bu kadar bekleriz.
- *
- * NEDEN ZAMAN ASIMI VAR: helm-ingest her enabled entegrasyonu SIRAYLA gezer
- * (AdMob + RevenueCat + PostHog + Sentry...). Yavas bir saglayici tum yenilemeyi
- * kilitleyebilir. Sure dolunca istek iptal EDILMEZ — hub tarafinda calismaya
- * devam eder; biz sadece beklemeyi birakip elimizdekini tazeleriz. Bir sonraki
- * yenilemede o veri zaten yerinde olur.
- */
-const INGEST_TIMEOUT_MS = 15_000;
 
 /**
  * Ard arda cekislerde ingest'i yeniden tetiklemeyiz — sadece refetch yapariz.
  *
  * NEDEN GEREKLI: asagi cekmek bedava bir hareket, ingest degil. Her cekiste tum
  * dis saglayici API'lerine gitmek hem kotali (AdMob raporlama kotasi) hem yavas.
- * Sayac modul kapsaminda: her ekranin kendi hook ornegi var, bir ref sekme
- * degisiminde sifirlanir ve bekleme suresi hicbir zaman islemezdi.
  */
 const INGEST_COOLDOWN_MS = 60_000;
 let lastIngestAt = 0;
 
+/** Sunucunun sync_runs satirini yazmasini bu araliklarla, bu kadar yoklariz. */
+const NUDGE_INTERVAL_MS = 1_500;
+const NUDGE_ATTEMPTS = 4;
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 /**
- * Hub'a "dis kaynaklardan taze veri cek" der.
+ * Hub'a "dis kaynaklardan taze veri cek" der ve BEKLEMEZ.
  *
- * BU SATIR NEDEN VAR: bento'ya gecerken kayboldu ve yenileme sessizce anlamini
- * yitirdi. Sadece `refetchQueries` cagirmak AYNI satirlari tekrar okumak demek —
- * metrics tablosunu saatlik cron doldurdugundan (0013_cron_hourly.sql) panel
- * bir saate kadar eski rakami "yeniledim" diye tekrar gosteriyordu.
+ * Cagri reddedilirse cooldown geri acilir — yoksa basarisiz bir denemeden sonra
+ * kullanici bir dakika boyunca yeniden deneyemezdi.
  */
-async function triggerIngest(): Promise<void> {
+function triggerIngest(): void {
   if (Date.now() - lastIngestAt < INGEST_COOLDOWN_MS) return;
   lastIngestAt = Date.now();
-  try {
-    await Promise.race([
-      supabase.functions.invoke("helm-ingest", { body: { trigger: "manual" } }),
-      new Promise((resolve) => setTimeout(resolve, INGEST_TIMEOUT_MS)),
-    ]);
-  } catch {
-    // Ingest hatasi olumcul degil — hub'da ne varsa onu tazelemeye devam.
+  void supabase.functions
+    .invoke("helm-ingest", { body: { trigger: "manual" } })
+    .catch(() => {
+      lastIngestAt = 0;
+    });
+}
+
+/**
+ * Damgayi, sunucu calismayi kaydedene kadar kisa araliklarla yoklar.
+ *
+ * NEDEN GEREKLI: `useLastSync` yalnizca `running` true iken kendi kendine
+ * yokluyor. O gecisi kacirirsak yoklama hic baslamaz ve ekran bitmis bir
+ * calismayi fark edemez. Burasi o ilk gecisi yakalayan koprü.
+ */
+async function waitForRunToAppear(queryClient: QueryClient): Promise<void> {
+  for (let attempt = 0; attempt < NUDGE_ATTEMPTS; attempt += 1) {
+    await sleep(NUDGE_INTERVAL_MS);
+    await queryClient.refetchQueries({ queryKey: lastSyncKeys.all });
+    const last = queryClient.getQueryData<LastSync | null>(lastSyncKeys.all);
+    if (last?.running) return;
   }
 }
 
@@ -78,8 +82,11 @@ export function useScreenRefresh() {
     haptic.tap();
     setRefreshing(true);
     try {
-      await triggerIngest();
+      triggerIngest();
+      // Ekrandaki veriyi hemen tazele: ingest'ten bagimsiz olarak baska bir
+      // istemci ya da onceki cron yeni satir yazmis olabilir.
       await queryClient.refetchQueries({ type: "active" });
+      await waitForRunToAppear(queryClient);
     } finally {
       setRefreshing(false);
     }

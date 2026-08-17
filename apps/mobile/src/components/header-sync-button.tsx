@@ -1,18 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Pressable, Animated, Easing } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
 
-import { supabase } from "~/lib/supabase";
 import { Icon } from "~/components/ui/icon";
-import { haptic } from "~/lib/haptics";
-import { pushWidgetSnapshot } from "~/lib/push-widget-snapshot";
-import { toast } from "~/lib/toast";
+import { useLastSync } from "~/hooks/use-last-sync";
+import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { colors } from "~/theme/tokens";
 
+/**
+ * Baslik seridindeki yenile dugmesi.
+ *
+ * NEDEN KENDI MANTIGI YOK: bu dugmenin eskiden ayri bir kopyasi vardi —
+ * `invoke`'u timeout'suz await ediyor, hatayi `.catch(() => {})` ile yutuyor,
+ * sonra KOSULSUZ "Senkronize edildi" gosteriyordu. Ingest 500 donse bile yesil
+ * toast cikiyordu. Iki ayri yenileme yolu olmasi ayrica cooldown'un yalnizca
+ * birinde islemesi demekti. Artik ikisi de `useScreenRefresh` uzerinden gider.
+ *
+ * NEDEN SPINNER YEREL STATE DEGIL: donme, sunucunun gercek durumuna bagli
+ * (`lastSync.running`). Yerel bir bayrak, calisma arka planda surerken duruyor
+ * ve "bitti" izlenimi veriyordu.
+ */
 export function HeaderSyncButton() {
-  const queryClient = useQueryClient();
-  const [running, setRunning] = useState(false);
-  const spin = useRef(new Animated.Value(0)).current;
+  const { onRefresh } = useScreenRefresh();
+  const { data: lastSync } = useLastSync();
+  const running = lastSync?.running ?? false;
+  // useRef DEGIL useMemo: `Animated.Value` bir ref degil, sabit bir nesne.
+  // Ref olarak tutulunca `spin.interpolate(...)` render sirasinda ref okumus
+  // oluyor ve react-hooks/refs hakli olarak hata veriyordu.
+  const spin = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
     if (!running) {
@@ -36,44 +50,13 @@ export function HeaderSyncButton() {
     outputRange: ["0deg", "360deg"],
   });
 
-  async function onPress() {
-    if (running) return;
-    haptic.tap();
-    setRunning(true);
-
-    try {
-      // 1. Hub-side ingest tetikle (background).
-      await supabase.functions
-        .invoke("helm-ingest", { body: { trigger: "manual" } })
-        .catch(() => {
-          // ingest fail olursa devam et — yine de client-side invalidate yap.
-        });
-
-      // 2. Mobile cache invalidate — tüm görünür data yenilenir.
-      await queryClient.invalidateQueries();
-      await Promise.all([
-        queryClient.refetchQueries({ queryKey: ["cockpit-kpis"] }),
-        queryClient.refetchQueries({ queryKey: ["cockpit-spark", "total-revenue"] }),
-      ]);
-
-      const widgetOk = pushWidgetSnapshot(queryClient);
-
-      toast.success(
-        "Senkronize edildi",
-        widgetOk ? undefined : "Widget güncellenemedi — Ayarlar → Widget sync",
-      );
-    } catch (err) {
-      console.warn("[sync] error", err);
-      toast.error("Senkron başarısız");
-    } finally {
-      setRunning(false);
-    }
-  }
-
   return (
     <Pressable
       hitSlop={10}
-      onPress={onPress}
+      disabled={running}
+      onPress={() => {
+        void onRefresh();
+      }}
       style={({ pressed }) => ({
         paddingLeft: 16,
         paddingRight: 8,

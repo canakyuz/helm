@@ -28,10 +28,6 @@ pre-push:
     typecheck:
       # Kırık tip main'e gitmesin. CI de bakıyor ama push öncesi 90 saniye,
       # kırmızı bir CI'ı fark edip düzeltmekten ucuz.
+      # Kapsam: 6 paket + mobil + web (web'in typecheck script'i eklendi).
       run: bun run typecheck
-      tags: build
-
-    typecheck-web:
-      # Kök script web'i kapsamıyor — apps/web kendi tsconfig'iyle ayrı koşar.
-      run: cd apps/web && bun run typecheck
       tags: build

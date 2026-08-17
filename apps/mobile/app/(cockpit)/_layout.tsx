@@ -4,6 +4,7 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 import { useAlerts } from "~/hooks/use-alerts";
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
+import { useIngestWatcher } from "~/hooks/use-last-sync";
 import { useWidgetSync } from "~/hooks/use-widget-sync";
 import { usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
@@ -17,6 +18,9 @@ export default function CockpitLayout() {
   const kpis = useCockpitKpis({ enabled: !deferShellQueries });
   useWidgetSync(kpis.data, { enabled: !deferShellQueries });
   const alerts = useAlerts({ enabled: !deferShellQueries });
+  // Ingest bitince ekrani tazeler. Tek mount noktasi bilerek burasi — bkz.
+  // use-last-sync.ts icindeki gerekce.
+  useIngestWatcher();
   // Time:  O(n) alerts; Space: O(1) auxiliary.
   // Note:  Counts in one pass without allocating an intermediate filtered array.
   const openCount = useMemo(() => {
