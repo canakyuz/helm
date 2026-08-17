@@ -33,7 +33,7 @@ export function CrashTile({
   return (
     <BentoTile>
       <View className="flex-row items-center justify-between">
-        <Text className="font-semibold text-emph tracking-tight text-fg">Crash&apos;ler</Text>
+        <Text className="font-semibold text-emph tracking-tight text-fg">{t("Crash'ler")}</Text>
         <Text className="font-mono-medium text-[11px] text-fg3">{issues.length}</Text>
       </View>
 
@@ -135,7 +135,7 @@ export function VersionsTile({
   const t = useT();
   return (
     <BentoTile>
-      <Text className="font-semibold text-emph tracking-tight text-fg">Sürümler</Text>
+      <Text className="font-semibold text-emph tracking-tight text-fg">{t("Sürümler")}</Text>
       {versions.length === 0 ? (
         <Empty label={loading ? t("YÜKLENİYOR…") : t("SÜRÜM KAYDI YOK")} />
       ) : (

@@ -263,6 +263,26 @@ const EN: Record<string, string> = {
   "OYUN OLAYI YOK": "NO GAME EVENTS",
   "SATIN ALMA OLAYI YOK": "NO PURCHASE EVENTS",
   "SON": "LAST",
+
+  // Sekme cubugu
+  "Özet": "Overview",
+  "Gelir": "Revenue",
+  "Kullanıcı": "Users",
+  "Sağlık": "Health",
+  "Ayar": "Settings",
+
+  // Kart basliklari — tirnaksiz JSX metni oldugu icin ilk taramada kacmisti
+  "Sürümler": "Versions",
+  "Ödemeler": "Payouts",
+  "Platformlar": "Platforms",
+  "Dikkat gerekiyor": "Needs attention",
+  "Crash'ler": "Crashes",
+  "ANLIK / KESİN": "LIVE / SETTLED",
+  "ŞİFRE": "PASSWORD",
+  "Veri yok": "No data",
+  "Kritik": "Critical",
+  "Bilinmiyor": "Unknown",
+  "kesin": "settled",
 };
 
 export type TranslateVars = Record<string, string | number>;
