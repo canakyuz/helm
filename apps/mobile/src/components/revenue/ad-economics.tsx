@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import type { AdEconomics } from "@helm/api";
 
 import { formatInteger, formatRatio } from "~/lib/format";
@@ -36,14 +37,15 @@ export function AdEconomicsTile({
   fmt: (n: number) => string;
   replayKey?: number;
 }) {
+  const t = useT();
   const rows: FunnelRow[] = (data?.rows ?? []).map((r) => ({
-    label: r.label,
+    label: t(r.label),
     value: fmt(r.revenue),
     ratio: r.revenueShare ?? 0,
     note: [
       r.ecpm != null ? `eCPM ${fmt(r.ecpm)}` : null,
-      r.fillRate != null ? `doluluk ${formatRatio(r.fillRate)}${r.lowFill ? " ⚠" : ""}` : null,
-      `${formatInteger(r.impressions)} gösterim`,
+      r.fillRate != null ? t("doluluk {rate}", { rate: formatRatio(r.fillRate) }) + (r.lowFill ? " ⚠" : "") : null,
+      t("{n} gösterim", { n: formatInteger(r.impressions) }),
     ]
       .filter((s): s is string => s != null)
       .join(" · "),
@@ -61,7 +63,7 @@ export function AdEconomicsTile({
       : [
           data.blendedEcpm != null ? `eCPM ${fmt(data.blendedEcpm)}` : null,
           data.overallFillRate != null
-            ? `DOLULUK ${formatRatio(data.overallFillRate)}`
+            ? t("DOLULUK {rate}", { rate: formatRatio(data.overallFillRate) })
             : null,
         ]
           .filter((s): s is string => s != null)

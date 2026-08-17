@@ -81,7 +81,7 @@ export default function Health() {
 
   // Reklam: burada GELIR degil ARIZA olcusu — kac gosterim basarisiz oldu.
   const adRows: FunnelRow[] = (f?.ads ?? []).map((a) => ({
-    label: AD_FORMAT_LABEL[a.format] ?? a.format,
+    label: t(AD_FORMAT_LABEL[a.format] ?? a.format),
     value: `${formatInteger(a.shown)} / ${formatInteger(a.shown + a.failed)}`,
     ratio: a.failureRate != null ? 1 - a.failureRate : 1,
     note: a.failed > 0 ? `${formatInteger(a.failed)} hata · ${pct(a.failureRate)}` : t("hatasız"),
