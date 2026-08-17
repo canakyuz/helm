@@ -75,7 +75,7 @@ export default function Login() {
               </Text>
             </View>
             <Text style={{ fontFamily: "Geist-400", fontSize: type.body, color: colors.fgMuted, lineHeight: 19 }}>
-              Cockpit'in cep yoldaşı. Portföyün, kuruşuna kadar.
+              {t("Cockpit'in cep yoldaşı. Portföyün, kuruşuna kadar.")}
             </Text>
           </View>
 
@@ -83,7 +83,7 @@ export default function Login() {
           <LiquidGlass padding={20}>
             <View style={{ gap: 16 }}>
               <View style={{ gap: 8 }}>
-                <FieldLabel>E-POSTA</FieldLabel>
+                <FieldLabel>{t("E-POSTA")}</FieldLabel>
                 <TextInput
                   value={email}
                   onChangeText={setEmail}
@@ -151,7 +151,7 @@ export default function Login() {
                 ) : (
                   <>
                     <Text style={{ fontFamily: "GeistMono-600", fontSize: type.bodySm, color: colors.accentInk, letterSpacing: 1.6 }}>
-                      GİRİŞ YAP
+                      {t("GİRİŞ YAP")}
                     </Text>
                     <Icon name="chevronRight" size={14} color={colors.accentInk} />
                   </>

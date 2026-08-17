@@ -1,17 +1,35 @@
-// Format helper'ları @helm/domain'e taşındı (web/mobile tek kaynak).
-// Bu dosya geriye-uyumluluk için re-export; çağrı yerleri ~/lib/format'ı kullanmaya devam eder.
-export * from "@helm/domain";
-
 import { relativeTimeParts } from "@helm/domain";
 import { tr } from "~/lib/i18n";
 
 /**
+ * Bicimleyicilerin mobil giris noktasi.
+ *
+ * NEDEN `export *` DEGIL: bu dosya `@helm/domain`'i yeniden disari veriyor AMA
+ * `formatRelativeTime`'i kendi dile duyarli surumuyle degistiriyor. Yildiz
+ * export ile birlikte ayni adi tanimlamak, hangisinin kazandigini okuyana
+ * gorunmez kiliyor (ESLint `import/export` da bunu hata sayiyor). Acik liste
+ * uzun degil ve neyin nereden geldigini tek bakista gosteriyor.
+ */
+export {
+  FLAT_DELTA_EPSILON,
+  formatClock,
+  formatCurrency,
+  formatCurrencyCompact,
+  formatDelta,
+  formatInteger,
+  formatPercent,
+  formatRatio,
+  isFlatDelta,
+  relativeTimeParts,
+  type RelativeTimeParts,
+} from "@helm/domain";
+
+/**
  * Goreli zaman — dile duyarli surum.
  *
- * NEDEN BURADA EZILIYOR: `@helm/domain` surumu hazir Turkce dizgi donuyor ve on
- * ekranda ("8 dk önce") Ingilizce arayuzde Turkce kaliyordu. Parcalari kendimiz
- * birlestirip ceviri tablosundan geciriyoruz; on cagri yerinin hicbiri
- * degismiyor cunku isim ayni ve bu re-export'tan sonra tanimlaniyor.
+ * NEDEN DOMAIN SURUMU KULLANILMIYOR: `formatRelativeTimeTR` hazir Turkce dizgi
+ * donuyor ("8 dk önce") ve on ekranda Ingilizce arayuzde Turkce kaliyordu.
+ * Parcalari kendimiz birlestirip ceviri tablosundan geciriyoruz.
  */
 export function formatRelativeTime(iso: string | Date): string {
   const p = relativeTimeParts(iso);

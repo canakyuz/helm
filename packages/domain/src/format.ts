@@ -73,7 +73,16 @@ export function relativeTimeParts(iso: string | Date): RelativeTimeParts {
   return { kind: "unit", value, unit: "y", past };
 }
 
-export function formatRelativeTime(iso: string | Date): string {
+/**
+ * Turkce bicimlenmis goreli zaman.
+ *
+ * NEDEN ADINDA "TR" VAR: mobil `~/lib/format` bu modulu `export *` ile yeniden
+ * disari veriyor ve dile duyarli kendi `formatRelativeTime`'ini tanimliyor. Ayni
+ * adi tasisalardi hangisinin kazandigi okuyana gorunmezdi (ESLint de
+ * "multiple exports" diye haklı olarak sikayet ediyordu). Ad artik hangi surumun
+ * ne yaptigini soyluyor.
+ */
+export function formatRelativeTimeTR(iso: string | Date): string {
   const p = relativeTimeParts(iso);
   if (p.kind === "now") return p.past ? "şimdi" : "az sonra";
   return p.past ? `${p.value} ${p.unit} önce` : `${p.value} ${p.unit} sonra`;
