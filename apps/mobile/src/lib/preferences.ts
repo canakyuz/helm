@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 
 import { ACCENTS, DEFAULT_ACCENT, type AccentId } from "@helm/design";
 
-import { storage } from "~/lib/storage";
+import { storage, PREF_KEYS } from "~/lib/storage";
 
 export type Currency = "USD" | "TRY" | "EUR" | "GBP";
 export type SelectedPropertyId = string | "all";
@@ -32,15 +32,7 @@ export type Preferences = {
   language: Language;
 };
 
-const KEYS = {
-  selectedPropertyId: "pref.selectedPropertyId",
-  currency: "pref.currency",
-  revenueMultiplier: "pref.revenueMultiplier",
-  prioritizeRevenueRequests: "pref.prioritizeRevenueRequests",
-  themeMode: "pref.themeMode",
-  accent: "pref.accent",
-  language: "pref.language",
-} as const;
+const KEYS = PREF_KEYS;
 
 const DEFAULTS: Preferences = {
   selectedPropertyId: "all",

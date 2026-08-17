@@ -283,6 +283,7 @@ const EN: Record<string, string> = {
   "Kritik": "Critical",
   "Bilinmiyor": "Unknown",
   "kesin": "settled",
+  "{month} hedefi": "{month} goal",
 };
 
 export type TranslateVars = Record<string, string | number>;
