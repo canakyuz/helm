@@ -47,7 +47,7 @@ interface Campaign {
   sent_at: string;
 }
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("tr-TR");
+const fmt = (iso: string) => new Date(iso).toLocaleString("en-US");
 
 export const MailPage = () => {
   const { scope, isAll } = useScope();
@@ -133,18 +133,18 @@ export const MailPage = () => {
       if (dry) {
         setDryRun({ count: data.recipients, sample: data.sample ?? [] });
       } else {
-        toast.success(`${data.sent} mail gönderildi`, {
+        toast.success(`${data.sent} emails sent`, {
           description:
             data.failed > 0
-              ? `${data.failed} başarısız — geçmişten incele`
-              : `${data.recipients} alıcı`,
+              ? `${data.failed} failed — check the history`
+              : `${data.recipients} recipients`,
         });
         setSubject("");
         setBody("");
         setSegmentId("");
       }
     } catch (e) {
-      toast.error("Gönderim başarısız", {
+      toast.error("Send failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -164,7 +164,7 @@ export const MailPage = () => {
       )}
 
       {!isAll && !resendConnected && (
-        <ErrorBanner variant="warning" title="Resend bağlı değil">
+        <ErrorBanner variant="warning" title="Resend is not connected">
           Entegrasyonlar → <strong>+</strong> → <strong>Resend (Mail)</strong>{" "}
           → API key + from_email.
         </ErrorBanner>
@@ -172,18 +172,18 @@ export const MailPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Yeni Gönderim</CardTitle>
+          <CardTitle>New send</CardTitle>
         </CardHeader>
         <CardContent className="max-w-2xl space-y-4">
           <div className="space-y-2">
-            <Label>Alıcı segmenti</Label>
+            <Label>Recipient segment</Label>
             <Select
               value={segmentId}
               onValueChange={setSegmentId}
               disabled={!resendConnected || isAll}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Bir segment seç" />
+                <SelectValue placeholder="Pick a segment" />
               </SelectTrigger>
               <SelectContent>
                 {segments.length === 0 ? (
@@ -203,17 +203,17 @@ export const MailPage = () => {
           <div className="space-y-2">
             <Label>Konu</Label>
             <Input
-              placeholder="Yeni sezon başladı"
+              placeholder="A new season has started"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               disabled={!resendConnected}
             />
           </div>
           <div className="space-y-2">
-            <Label>Mesaj (boş satır paragraf ayırır)</Label>
+            <Label>Message (a blank line separates paragraphs)</Label>
             <textarea
               className="min-h-32 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-              placeholder="Selam!\n\nYeni içerikler eklendi…"
+              placeholder="Hi!\n\nNew content has been added…"
               value={body}
               onChange={(e) => setBody(e.target.value)}
               disabled={!resendConnected}
@@ -277,7 +277,7 @@ export const MailPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Geçmiş Gönderimler</CardTitle>
+          <CardTitle>Past sends</CardTitle>
           <CardAction>
             <Badge variant="secondary">{campaigns.length}</Badge>
           </CardAction>
@@ -286,8 +286,8 @@ export const MailPage = () => {
           {campaigns.length === 0 && !campQuery.isLoading ? (
             <EmptyState
               icon={<MailIcon className="size-6" />}
-              title="Henüz mail gönderilmedi"
-              description="Üstteki forma segment + konu + mesaj yaz, Önizle ile alıcı sayısını gör, sonra Gönder. Geçmiş burada birikir."
+              title="No email sent yet"
+              description="Fill in segment, subject and message above, use Preview to see the recipient count, then Send. History collects here."
               compact
             />
           ) : (
@@ -296,8 +296,8 @@ export const MailPage = () => {
                 <TableRow>
                   <TableHead>Zaman</TableHead>
                   <TableHead>Konu</TableHead>
-                  <TableHead className="text-right">Alıcı</TableHead>
-                  <TableHead className="text-right">Gönderildi</TableHead>
+                  <TableHead className="text-right">Recipient</TableHead>
+                  <TableHead className="text-right">Sent</TableHead>
                   <TableHead className="text-right">Hata</TableHead>
                 </TableRow>
               </TableHeader>
@@ -336,23 +336,23 @@ export const MailPage = () => {
 
 const MAIL_TEMPLATES = [
   {
-    label: "Hoş geldin",
-    subject: "Aramıza hoş geldin! 👋",
-    body: "Merhaba,\n\nEmpire Inc ailesine katıldığın için teşekkürler. İlk adımda yardıma ihtiyacın olursa bize yaz — buradayız.\n\nİyi günler,\nEmpire ekibi",
+    label: "Welcome",
+    subject: "Welcome aboard! 👋",
+    body: "Hi,\n\nThanks for joining Empire Inc. If you need a hand getting started, just write to us — we are here.\n\nAll the best,\nThe Empire team",
   },
   {
-    label: "Geri çağırma",
-    subject: "Seni özledik 💙",
-    body: "Selam,\n\nBir süredir uğramadın. Geri dönmen için sürpriz bir hediyemiz var — hesabını ziyaret et, gör.\n\nGörüşürüz!",
+    label: "Win-back",
+    subject: "We miss you 💙",
+    body: "Hi,\n\nYou have not been around for a while. We have a surprise gift waiting — visit your account and take a look.\n\nSee you soon!",
   },
   {
-    label: "Ödeme hatası",
-    subject: "Aboneliğinde bir sorun var",
-    body: "Merhaba,\n\nSon aylık aboneliğin işlenirken bir hata oldu. Premium içeriklere erişmeyi kaçırmamak için ödeme yöntemini güncellemen yeterli.\n\nDestek için her zaman buradayız.",
+    label: "Payment failed",
+    subject: "There is a problem with your subscription",
+    body: "Hi,\n\nSomething went wrong while processing your latest monthly subscription. Just update your payment method so you do not lose access to premium content.\n\nWe are here if you need support.",
   },
   {
-    label: "Yeni özellik",
-    subject: "🎉 Yeni özellik: ...",
-    body: "Selam,\n\nBugün uygulamamıza yepyeni bir özellik ekledik. Hemen güncelle, denemeye başla.\n\nİyi eğlenceler!",
+    label: "New feature",
+    subject: "🎉 New feature: …",
+    body: "Hi,\n\nWe shipped a brand new feature today. Update now and give it a try.\n\nHave fun!",
   },
 ];

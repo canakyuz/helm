@@ -94,8 +94,8 @@ export const EntriesListPage = () => {
 
   const handleCreate = () => {
     if (collectionId === "all") {
-      toast.error("Collection seç", {
-        description: "Yeni içerik için önce bir collection filtrele.",
+      toast.error("Pick a collection", {
+        description: "Filter by a collection first to create new content.",
       });
       return;
     }
@@ -122,7 +122,7 @@ export const EntriesListPage = () => {
               <SelectValue placeholder="Collection" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm collection'lar</SelectItem>
+              <SelectItem value="all">All collections</SelectItem>
               {collections.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.label}
@@ -135,9 +135,9 @@ export const EntriesListPage = () => {
               <SelectValue placeholder="Durum" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm durumlar</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="draft">Taslak</SelectItem>
-              <SelectItem value="published">Yayında</SelectItem>
+              <SelectItem value="published">Live</SelectItem>
             </SelectContent>
           </Select>
           <Select value={locale} onValueChange={setLocale}>
@@ -145,7 +145,7 @@ export const EntriesListPage = () => {
               <SelectValue placeholder="Dil" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tüm diller</SelectItem>
+              <SelectItem value="all">All languages</SelectItem>
               {DEFAULT_LOCALES.map((l) => (
                 <SelectItem key={l} value={l}>
                   {l.toUpperCase()}
@@ -158,12 +158,12 @@ export const EntriesListPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Başlık</TableHead>
+              <TableHead>Title</TableHead>
               <TableHead>Collection</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>Dil</TableHead>
               <TableHead>Durum</TableHead>
-              <TableHead>Güncelleme</TableHead>
+              <TableHead>Update</TableHead>
               <TableHead className="w-24">Aksiyon</TableHead>
             </TableRow>
           </TableHeader>
@@ -195,7 +195,7 @@ export const EntriesListPage = () => {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {new Date(entry.updated_at).toLocaleString("tr-TR")}
+                  {new Date(entry.updated_at).toLocaleString("en-US")}
                 </TableCell>
                 <TableCell>
                   <AlertDialog>
@@ -206,13 +206,13 @@ export const EntriesListPage = () => {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>İçeriği sil?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete this content?</AlertDialogTitle>
                         <AlertDialogDescription>
                           {entryTitle(entry)} ({entry.locale}) silinecek.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>İptal</AlertDialogCancel>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
                             remove(

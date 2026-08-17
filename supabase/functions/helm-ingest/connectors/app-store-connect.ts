@@ -43,9 +43,9 @@ async function fetchDailyReport(
     const [header, payload] = jwt.split(".");
     throw new Error(
       `AppStoreConnect 401 — JWT reddedildi.\n` +
-        `JWT (jwt.io'da inceleyin, signature'ı atın): ${header}.${payload}.SIGNATURE\n` +
-        `Sık görülen sebep: Issuer/Key ID yanlış, .p8 eski/yanlış key, ya da API key'in "Sales and Trends" yetkisi yok (rol: Admin / Finance / Sales gerekli).\n` +
-        `Apple yanıtı: ${body}`,
+        `JWT (inspect on jwt.io, drop the signature): ${header}.${payload}.SIGNATURE\n` +
+        `Common causes: wrong Issuer/Key ID, an old or wrong .p8 key, or the API key'in "Sales and Trends" yetkisi yok (rol: Admin / Finance / Sales gerekli).\n` +
+        `Apple responded: ${body}`,
     );
   }
   if (!res.ok) {

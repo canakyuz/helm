@@ -52,7 +52,7 @@ const assertSafeUrl = (raw: string): URL => {
   try {
     url = new URL(raw);
   } catch {
-    throw new Error("Geçersiz URL");
+    throw new Error("Invalid URL");
   }
   if (url.protocol !== "https:") {
     throw new Error("Sadece https:// URL kabul edilir (SSRF guard)");
@@ -62,10 +62,10 @@ const assertSafeUrl = (raw: string): URL => {
     throw new Error(`Hedef host yasak: ${host}`);
   }
   if (isPrivateIPv4(host)) {
-    throw new Error(`Özel IPv4 yasak: ${host}`);
+    throw new Error(`Private IPv4 is not allowed: ${host}`);
   }
   if (host.includes(":") && isPrivateIPv6(host)) {
-    throw new Error(`Özel IPv6 yasak: ${host}`);
+    throw new Error(`Private IPv6 is not allowed: ${host}`);
   }
   return url;
 };
@@ -95,7 +95,7 @@ export const fetchRest: Connector = async (config) => {
   // 3xx → manuel redirect; takip yapmayız
   if (res.status >= 300 && res.status < 400) {
     throw new Error(
-      `REST yönlendirme yapmamalı (${res.status} → ${res.headers.get("location") ?? "?"}). Endpoint son URL'i vermeli.`,
+      `REST must not redirect (${res.status} → ${res.headers.get("location") ?? "?"}). Endpoint son URL'i vermeli.`,
     );
   }
   if (!res.ok) {
@@ -106,7 +106,7 @@ export const fetchRest: Connector = async (config) => {
   const arr: unknown = Array.isArray(json) ? json : json?.metrics;
   if (!Array.isArray(arr)) {
     throw new Error(
-      "Beklenen biçim: [{date,metric,value}] ya da {metrics:[...]}",
+      "Expected shape: [{date,metric,value}] or {metrics:[...]}",
     );
   }
 

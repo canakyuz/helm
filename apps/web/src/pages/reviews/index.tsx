@@ -136,12 +136,12 @@ export const ReviewsPage = () => {
         { body: {} },
       );
       if (error) throw error;
-      toast.success("Yorumlar güncellendi", {
-        description: `${data?.reviews ?? 0} yorum çekildi.`,
+      toast.success("Reviews updated", {
+        description: `${data?.reviews ?? 0} reviews fetched.`,
       });
       invalidate({ resource: "reviews", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Güncelleme başarısız", {
+      toast.error("Update failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -200,7 +200,7 @@ export const ReviewsPage = () => {
             size="sm"
             onClick={() => setPlatform(p)}
           >
-            {p === "all" ? "Tümü" : p === "appstore" ? "iOS" : "Android"}
+            {p === "all" ? "All" : p === "appstore" ? "iOS" : "Android"}
             <span className="ml-2 text-xs opacity-70">
               {p === "all" ? reviews.length : reviews.filter((r) => r.source === p).length}
             </span>
@@ -210,7 +210,7 @@ export const ReviewsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Puan Dağılımı</CardTitle>
+          <CardTitle>Rating distribution</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {[5, 4, 3, 2, 1].map((r) => {
@@ -255,7 +255,7 @@ export const ReviewsPage = () => {
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Başlık, içerik, yazar ara…"
+                placeholder="Search title, content, author…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="pl-8"
@@ -266,7 +266,7 @@ export const ReviewsPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tüm puanlar</SelectItem>
+                <SelectItem value="all">All ratings</SelectItem>
                 <SelectItem value="5">5 ★</SelectItem>
                 <SelectItem value="4">4 ★</SelectItem>
                 <SelectItem value="3">3 ★</SelectItem>
@@ -286,8 +286,8 @@ export const ReviewsPage = () => {
               }
               description={
                 reviews.length === 0
-                  ? "Property → Düzenle → App Store ID / Package ID gir, Settings → Integrations → App Store Connect veya Google Play Developer bağla. Cron 30dk'da bir çeker; hemen istersen 'Yenile'."
-                  : "Filtre/aramayı gevşet."
+                  ? "Property → Edit → enter the App Store ID / Package ID, then Settings → Integrations → connect App Store Connect or Google Play Developer. The cron pulls every 30 min; use Refresh if you want it now."
+                  : "Loosen the filter or search."
               }
               compact
             />
@@ -330,7 +330,7 @@ export const ReviewsPage = () => {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {r.author ?? "anonim"} ·{" "}
                       {r.review_date
-                        ? new Date(r.review_date).toLocaleDateString("tr-TR")
+                        ? new Date(r.review_date).toLocaleDateString("en-US")
                         : ""}
                     </p>
                     {r.developer_response ? (
@@ -351,7 +351,7 @@ export const ReviewsPage = () => {
                         <p className="mt-1">{r.developer_response}</p>
                         {r.responded_at && (
                           <p className="mt-1 text-xs text-muted-foreground">
-                            {new Date(r.responded_at).toLocaleString("tr-TR")}
+                            {new Date(r.responded_at).toLocaleString("en-US")}
                           </p>
                         )}
                       </div>
@@ -362,7 +362,7 @@ export const ReviewsPage = () => {
                           size="sm"
                           onClick={() => setReplyTarget(r)}
                           disabled={r.source_method === "rss"}
-                          title={r.source_method === "rss" ? "RSS yorumlarına yanıt yazılamaz" : undefined}
+                          title={r.source_method === "rss" ? "RSS reviews cannot be replied to" : undefined}
                         >
                           Yanıtla
                         </Button>

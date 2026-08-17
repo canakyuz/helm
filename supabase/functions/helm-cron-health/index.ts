@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       {
         error: error.message,
         hint:
-          "Migration 0023 push edilmiş olmalı (helm_cron_status fonksiyonu).",
+          "Migration 0023 must be pushed (the helm_cron_status function).",
       },
       500,
     );

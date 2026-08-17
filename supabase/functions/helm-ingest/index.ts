@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
   async function syncIntegration(it: Integration): Promise<Record<string, unknown>> {
     try {
       const connector = CONNECTORS[it.provider];
-      if (!connector) throw new Error(`Bilinmeyen sağlayıcı: ${it.provider}`);
+      if (!connector) throw new Error(`Unknown provider: ${it.provider}`);
 
       const result = await connector(it.config ?? {});
       // Geriye uyumluluk: connector ya düz dizi ya da {points, byCountry,

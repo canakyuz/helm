@@ -29,11 +29,11 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
     if (!review) return;
     const trimmed = body.trim();
     if (trimmed.length === 0) {
-      toast.error("Yanıt boş olamaz");
+      toast.error("The reply cannot be empty");
       return;
     }
     if (trimmed.length > MAX) {
-      toast.error(`Yanıt en fazla ${MAX} karakter olmalı`);
+      toast.error(`The reply must be at most ${MAX} characters`);
       return;
     }
     setSending(true);
@@ -46,13 +46,13 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
       if ((data as { ok?: boolean })?.ok !== true) {
         throw new Error((data as { error?: string })?.error ?? "Bilinmeyen hata");
       }
-      toast.success("Yanıt gönderildi");
+      toast.success("Reply sent");
       onReplied();
       onOpenChange(false);
       setBody("");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      toast.error("Yanıt gönderilemedi", { description: msg });
+      toast.error("Could not send the reply", { description: msg });
     } finally {
       setSending(false);
     }
@@ -63,7 +63,7 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {review?.developer_response ? "Yanıtı Düzenle" : "Yanıt Yaz"}
+            {review?.developer_response ? "Edit reply" : "Write a reply"}
           </DialogTitle>
         </DialogHeader>
         {review && (
@@ -75,7 +75,7 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Yanıtınız…"
+              placeholder="Your reply…"
               rows={4}
               maxLength={MAX}
             />
@@ -89,7 +89,7 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
             İptal
           </Button>
           <Button onClick={handleSubmit} disabled={sending}>
-            {sending ? "Gönderiliyor…" : "Gönder"}
+            {sending ? "Sending…" : "Send"}
           </Button>
         </DialogFooter>
       </DialogContent>

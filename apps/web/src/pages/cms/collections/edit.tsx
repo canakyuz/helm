@@ -54,7 +54,7 @@ export const CollectionEditPage = () => {
         values: { label, slug, kind, schema },
       },
       {
-        onSuccess: () => toast.success("Şema güncellendi"),
+        onSuccess: () => toast.success("Schema updated"),
         onError: (e) =>
           toast.error("Kaydedilemedi", {
             description: e instanceof Error ? e.message : String(e),
@@ -63,8 +63,8 @@ export const CollectionEditPage = () => {
     );
   };
 
-  if (query.isLoading) return <p className="text-muted-foreground">Yükleniyor…</p>;
-  if (!collection) return <p className="text-muted-foreground">Şema bulunamadı.</p>;
+  if (query.isLoading) return <p className="text-muted-foreground">Loading…</p>;
+  if (!collection) return <p className="text-muted-foreground">Schema not found.</p>;
 
   return (
     <div className="flex flex-col gap-4">
@@ -93,7 +93,7 @@ export const CollectionEditPage = () => {
               <Input value={slug} onChange={(e) => setSlug(slugify(e.target.value))} />
             </div>
             <div className="grid gap-1.5">
-              <Label>Tür</Label>
+              <Label>Type</Label>
               <Select value={kind} onValueChange={(v) => setKind(v as CollectionKind)}>
                 <SelectTrigger>
                   <SelectValue />

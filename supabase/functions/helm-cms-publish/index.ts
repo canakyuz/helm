@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
     .eq("id", entryId)
     .maybeSingle();
   if (entryErr) return json({ error: entryErr.message }, 500);
-  if (!row) return json({ error: "Entry bulunamadı" }, 404);
+  if (!row) return json({ error: "Entry not found" }, 404);
   const entry = row as unknown as EntryRow;
 
   // 1) Publish (revision snapshot + status update)

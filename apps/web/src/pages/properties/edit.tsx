@@ -29,11 +29,11 @@ import {
 import type { Property } from "@/types";
 
 const propertyEditSchema = z.object({
-  name: z.string().min(1, "Property adı gerekli"),
+  name: z.string().min(1, "Property name is required"),
   slug: z
     .string()
     .min(1, "Slug gerekli")
-    .regex(/^[a-z0-9-]+$/, "Sadece küçük harf, rakam ve tire"),
+    .regex(/^[a-z0-9-]+$/, "Lowercase letters, digits and hyphens only"),
   type: z.enum(PROPERTY_TYPES),
   enabled_modules: z.array(z.string()),
   app_store_id: z.string().optional(),
@@ -117,7 +117,7 @@ export const PropertyEdit = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Property Ayarları</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Property settings</h1>
 
       <Form {...form}>
         <form onSubmit={submit} className="space-y-4">
@@ -131,7 +131,7 @@ export const PropertyEdit = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Property adı</FormLabel>
+                    <FormLabel>Property name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -189,7 +189,7 @@ export const PropertyEdit = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Modüller</CardTitle>
+              <CardTitle className="text-base">Modules</CardTitle>
               <p className="text-xs text-muted-foreground">
                 Bu property için aktif modüller. Kapatılan modülün sayfaları sidebar'da gizlenir.
               </p>
@@ -262,7 +262,7 @@ export const PropertyEdit = () => {
                     name="app_store_country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>App Store ülkesi</FormLabel>
+                        <FormLabel>App Store country</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="us"
@@ -287,7 +287,7 @@ export const PropertyEdit = () => {
                     name="google_play_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Package adı</FormLabel>
+                        <FormLabel>Package name</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="com.empireinc.app"
@@ -304,7 +304,7 @@ export const PropertyEdit = () => {
                     name="google_play_country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Play Store ülkesi</FormLabel>
+                        <FormLabel>Play Store country</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="us"

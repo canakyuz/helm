@@ -51,9 +51,9 @@ import {
 import type { Project, UserSegment } from "@/types";
 
 const RULE_LABELS: Record<UserSegment["rule_type"], string> = {
-  new: "Yeni — kayıt son N gün içinde",
-  active: "Aktif — son giriş son N gün içinde",
-  inactive: "Pasif — son giriş N günden eski",
+  new: "New — signed up within the last N days",
+  active: "Active — last sign-in within the last N days",
+  inactive: "Dormant — last sign-in older than N days",
 };
 
 interface CountResult {
@@ -97,11 +97,11 @@ export const SegmentsPage = () => {
           warning: data.warning,
         },
       }));
-      toast.success(`${data.count} kullanıcı eşleşti`, {
-        description: data.warning ?? `${data.projects} proje tarandı`,
+      toast.success(`${data.count} users matched`, {
+        description: data.warning ?? `${data.projects} projects scanned`,
       });
     } catch (e) {
-      toast.error("Hesaplama başarısız", {
+      toast.error("Calculation failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -125,7 +125,7 @@ export const SegmentsPage = () => {
   const { mutate: remove } = useDelete();
 
   const projectName = (id: string | null) =>
-    id ? (projects.find((p) => p.id === id)?.name ?? "—") : "Tüm Projeler";
+    id ? (projects.find((p) => p.id === id)?.name ?? "—") : "All projects";
 
   const reset = () => {
     setName("");
@@ -204,19 +204,19 @@ export const SegmentsPage = () => {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <SegKpi label="Toplam Segment" value={stats.total} icon={<Layers />} />
         <SegKpi
-          label="Hesaplanmış"
+          label="Calculated"
           value={`${stats.computed} / ${stats.total}`}
           icon={<UserCheck />}
           tone={stats.computed === stats.total ? "emerald" : undefined}
         />
         <SegKpi
-          label="Toplam Eşleşen"
+          label="Total matched"
           value={stats.matchedSum}
           icon={<Users />}
           tone="primary"
         />
         <SegKpi
-          label="En Büyük / En Küçük"
+          label="Max / Min"
           value={
             stats.computed > 0
               ? `${stats.largest} / ${stats.smallest}`
@@ -230,7 +230,7 @@ export const SegmentsPage = () => {
       {segments.length < 4 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Hızlı Başlangıç</CardTitle>
+            <CardTitle className="text-base">Quick start</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -267,7 +267,7 @@ export const SegmentsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Kullanıcı Segmentleri</CardTitle>
+          <CardTitle>User segments</CardTitle>
           <CardAction>
             <Dialog
               open={open}
@@ -281,11 +281,11 @@ export const SegmentsPage = () => {
               </Button>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Kullanıcı segmenti</DialogTitle>
+                  <DialogTitle>User segment</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                   <div className="space-y-2">
-                    <Label>Segment adı</Label>
+                    <Label>Segment name</Label>
                     <Input
                       placeholder="Yeni oyuncular"
                       value={name}
@@ -299,7 +299,7 @@ export const SegmentsPage = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tüm Projeler</SelectItem>
+                        <SelectItem value="all">All projects</SelectItem>
                         {projects.map((p) => (
                           <SelectItem key={p.id} value={p.id as string}>
                             {p.name}
@@ -328,7 +328,7 @@ export const SegmentsPage = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Gün</Label>
+                      <Label>Day</Label>
                       <Input
                         type="number"
                         value={ruleDays}
@@ -356,8 +356,8 @@ export const SegmentsPage = () => {
           {segments.length === 0 && !query.isLoading ? (
             <EmptyState
               icon={<Layers className="size-6" />}
-              title="Henüz segment yok"
-              description="Segment = kural ile tanımlanmış kullanıcı grubu. Mail ve Push'a hedef olur. Üstteki + ile başla — örn. 'Aktif kullanıcılar (son 7g giriş)'."
+              title="No segments yet"
+              description="A segment is a rule-defined group of users. It becomes a target for Mail and Push. Start with + above — e.g. Active users (signed in within 7d)."
               compact
             />
           ) : (
@@ -367,8 +367,8 @@ export const SegmentsPage = () => {
                   <TableHead>Segment</TableHead>
                   <TableHead>Proje</TableHead>
                   <TableHead>Kural</TableHead>
-                  <TableHead className="text-right">Eşleşen</TableHead>
-                  <TableHead className="w-32 text-right">İşlem</TableHead>
+                  <TableHead className="text-right">Matched</TableHead>
+                  <TableHead className="w-32 text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -412,7 +412,7 @@ export const SegmentsPage = () => {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              aria-label="Örnek kullanıcılar"
+                              aria-label="Sample users"
                               onClick={() => setSampleOpen(s.id)}
                             >
                               <Users className="size-4" />
@@ -435,7 +435,7 @@ export const SegmentsPage = () => {
                                 </AlertDialogTitle>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() =>
                                     remove({
@@ -474,7 +474,7 @@ export const SegmentsPage = () => {
           <DialogHeader>
             <DialogTitle>
               {sampleOpen
-                ? `${segments.find((s) => s.id === sampleOpen)?.name} — örnek kullanıcılar (ilk 10)`
+                ? `${segments.find((s) => s.id === sampleOpen)?.name} — sample users (ilk 10)`
                 : ""}
             </DialogTitle>
           </DialogHeader>
@@ -484,7 +484,7 @@ export const SegmentsPage = () => {
                 <TableRow>
                   <TableHead>E-posta</TableHead>
                   <TableHead>Proje</TableHead>
-                  <TableHead>Son giriş</TableHead>
+                  <TableHead>Last sign-in</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>
@@ -501,7 +501,7 @@ export const SegmentsPage = () => {
                         <TableCell className="text-xs text-muted-foreground">
                           {u.last_sign_in_at
                             ? new Date(u.last_sign_in_at).toLocaleString(
-                                "tr-TR",
+                                "en-US",
                               )
                             : "—"}
                         </TableCell>
@@ -510,7 +510,7 @@ export const SegmentsPage = () => {
                             asChild
                             variant="ghost"
                             size="icon-sm"
-                            aria-label="Kullanıcıya git"
+                            aria-label="Go to user"
                           >
                             <Link to={`/users/${u.id}`}>
                               <ExternalLink className="size-4" />
@@ -536,26 +536,26 @@ const SEGMENT_TEMPLATES: Array<{
   rule_days: number;
 }> = [
   {
-    name: "Yeni kullanıcılar (7g)",
-    description: "Son 7 günde kaydolmuş — onboarding'i optimize et",
+    name: "New users (7d)",
+    description: "Signed up within 7 days — optimise onboarding",
     rule_type: "new",
     rule_days: 7,
   },
   {
-    name: "Aktif kullanıcılar (30g)",
-    description: "Son 30 günde giriş yapmış — kampanya hedefi",
+    name: "Active users (30d)",
+    description: "Signed in within 30 days — campaign target",
     rule_type: "active",
     rule_days: 30,
   },
   {
-    name: "Risk altındakiler (14g)",
-    description: "14 gündür uğramamış — geri çağırma maili",
+    name: "At risk (14d)",
+    description: "Inactive for 14 days — win-back email",
     rule_type: "inactive",
     rule_days: 14,
   },
   {
-    name: "Kayıp kullanıcılar (60g)",
-    description: "60 gündür yok — son şans kampanyası",
+    name: "Lost users (60d)",
+    description: "Gone for 60 days — last-chance campaign",
     rule_type: "inactive",
     rule_days: 60,
   },

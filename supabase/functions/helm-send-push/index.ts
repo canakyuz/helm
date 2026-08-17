@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
   try {
     body = await req.json();
   } catch {
-    return json({ error: "Geçersiz JSON" }, 400);
+    return json({ error: "Invalid JSON" }, 400);
   }
   const {
     project_id,
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
     .select("rule_type, rule_days, project_id")
     .eq("id", segment_id)
     .maybeSingle();
-  if (!seg) return json({ error: "Segment bulunamadı" }, 404);
+  if (!seg) return json({ error: "Segment not found" }, 404);
 
   const targetProjectId = seg.project_id ?? project_id;
   const { data: supaIntg } = await hub
@@ -143,13 +143,13 @@ Deno.serve(async (req) => {
   const rawTokenCol = cfg.push_token_column || "expo_push_token";
   const rawUserCol = cfg.push_user_column || "id";
   if (!SAFE.test(rawTokenTable) || rawTokenTable.includes(".")) {
-    return json({ error: `push_token_table güvenli değil: ${rawTokenTable}` }, 400);
+    return json({ error: `push_token_table is unsafe: ${rawTokenTable}` }, 400);
   }
   if (!SAFE.test(rawTokenCol)) {
-    return json({ error: `push_token_column güvenli değil: ${rawTokenCol}` }, 400);
+    return json({ error: `push_token_column is unsafe: ${rawTokenCol}` }, 400);
   }
   if (!SAFE.test(rawUserCol)) {
-    return json({ error: `push_user_column güvenli değil: ${rawUserCol}` }, 400);
+    return json({ error: `push_user_column is unsafe: ${rawUserCol}` }, 400);
   }
   // Sistem tabloları yasak
   if (
@@ -158,7 +158,7 @@ Deno.serve(async (req) => {
     rawTokenTable.toLowerCase().startsWith("vault_") ||
     rawTokenTable.toLowerCase().startsWith("storage_")
   ) {
-    return json({ error: `Sistem tabloları yasak: ${rawTokenTable}` }, 400);
+    return json({ error: `System tables are not allowed: ${rawTokenTable}` }, 400);
   }
   const tokenTable = rawTokenTable;
   const tokenCol = rawTokenCol;
@@ -198,7 +198,7 @@ Deno.serve(async (req) => {
     if (tokErr) {
       return json(
         {
-          error: `Push token tablosundan okunamadı (${tokenTable}.${tokenCol}): ${tokErr.message}`,
+          error: `Could not read from the push token table (${tokenTable}.${tokenCol}): ${tokErr.message}`,
         },
         500,
       );

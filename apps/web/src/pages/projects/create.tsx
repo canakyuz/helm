@@ -40,7 +40,7 @@ export const ProjectCreate = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Proje adı</FormLabel>
+                    <FormLabel>Project name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Empire Inc"

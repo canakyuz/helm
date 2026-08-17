@@ -89,7 +89,7 @@ const INACTIVE_DAYS = 30;
 
 const fmt = (value: string | null) => {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("tr-TR");
+  return new Date(value).toLocaleDateString("en-US");
 };
 
 const fmtRelative = (value: string | null) => {
@@ -100,7 +100,7 @@ const fmtRelative = (value: string | null) => {
   const days = Math.round(min / 1440);
   if (days < 30) return `${days} g`;
   if (days < 365) return `${Math.round(days / 30)} ay`;
-  return `${Math.round(days / 365)} yıl`;
+  return `${Math.round(days / 365)}y`;
 };
 
 const initial = (u: ProjectUser) => {
@@ -252,13 +252,13 @@ export const UsersPage = () => {
   if (isAll) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Kullanıcılar</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
         <Card>
           <CardContent>
             <EmptyState
               icon={<UsersIcon className="size-6" />}
-              title="Proje seç"
-              description="Kullanıcılar property-bazlıdır. Sidebar'dan üstteki switcher'a tıkla, hangisi için listeyi yüklemek istiyorsan seç."
+              title="Pick a project"
+              description="Users are per-property. Use the switcher at the top of the sidebar to pick which one to load the list for."
             />
           </CardContent>
         </Card>
@@ -269,7 +269,7 @@ export const UsersPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Kullanıcılar</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
         <div className="text-xs text-muted-foreground">
           {stats.total > 0 && (
             <>
@@ -306,7 +306,7 @@ export const UsersPage = () => {
           tone="amber"
         />
         <KpiPill
-          label="Banlı"
+          label="Banned"
           value={stats.banned}
           icon={<Ban className="size-3.5" />}
           tone={stats.banned > 0 ? "destructive" : undefined}
@@ -332,7 +332,7 @@ export const UsersPage = () => {
                     {tabIcon(t)}
                     <span className="ml-1.5">
                       {t === "all"
-                        ? "Tümü"
+                        ? "All"
                         : t === "new"
                           ? "Yeni"
                           : t === "active"
@@ -340,7 +340,7 @@ export const UsersPage = () => {
                             : t === "inactive"
                               ? "Pasif"
                               : t === "banned"
-                                ? "Banlı"
+                                ? "Banned"
                                 : "Premium"}
                     </span>
                   </TabsTrigger>
@@ -367,8 +367,8 @@ export const UsersPage = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="created_at">Kayıt tarihi</SelectItem>
-                  <SelectItem value="last_sign_in_at">Son giriş</SelectItem>
+                  <SelectItem value="created_at">Signup date</SelectItem>
+                  <SelectItem value="last_sign_in_at">Last sign-in</SelectItem>
                   <SelectItem value="email">E-posta</SelectItem>
                 </SelectContent>
               </Select>
@@ -398,13 +398,13 @@ export const UsersPage = () => {
                 icon={<UsersIcon className="size-6" />}
                 title={
                   users.length === 0
-                    ? "Kullanıcı yok"
-                    : "Bu filtreyle eşleşen yok"
+                    ? "No users"
+                    : "Nothing matches this filter"
                 }
                 description={
                   users.length === 0
-                    ? "Property → Supabase entegrasyonu yok ya da Auth boş."
-                    : "Tab veya aramayı değiştir."
+                    ? "Property → no Supabase integration, or Auth is empty."
+                    : "Change the tab or the search."
                 }
                 compact
               />
@@ -415,11 +415,11 @@ export const UsersPage = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-10" />
-                        <TableHead>Kullanıcı</TableHead>
+                        <TableHead>User</TableHead>
                         <TableHead>Konum</TableHead>
                         <TableHead>Etiketler</TableHead>
-                        <TableHead className="text-right">Kayıt</TableHead>
-                        <TableHead className="text-right">Son giriş</TableHead>
+                        <TableHead className="text-right">Signup</TableHead>
+                        <TableHead className="text-right">Last sign-in</TableHead>
                         <TableHead className="w-16" />
                       </TableRow>
                     </TableHeader>
@@ -666,8 +666,8 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
         <CardContent>
           <EmptyState
             icon={<UserCog className="size-6" />}
-            title="Bir kullanıcı seç"
-            description="Sol listede satıra tıkla — özet, etiketler, hızlı aksiyon burada açılır. Detay sayfası için ➜ ikon."
+            title="Pick a user"
+            description="Click a row in the left list — summary, labels and quick actions open here. Use the ➜ icon for the detail page."
             compact
           />
         </CardContent>
@@ -695,32 +695,32 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
         <UserBadges user={user} />
 
         <dl className="grid grid-cols-[110px_1fr] gap-y-2 text-xs">
-          <dt className="text-muted-foreground">Kayıt</dt>
+          <dt className="text-muted-foreground">Signup</dt>
           <dd>
-            {new Date(user.created_at).toLocaleString("tr-TR")}{" "}
+            {new Date(user.created_at).toLocaleString("en-US")}{" "}
             <span className="text-muted-foreground">
               ({fmtRelative(user.created_at)})
             </span>
           </dd>
 
-          <dt className="text-muted-foreground">Son giriş</dt>
+          <dt className="text-muted-foreground">Last sign-in</dt>
           <dd>
             {user.last_sign_in_at ? (
               <>
-                {new Date(user.last_sign_in_at).toLocaleString("tr-TR")}{" "}
+                {new Date(user.last_sign_in_at).toLocaleString("en-US")}{" "}
                 <span className="text-muted-foreground">
                   ({fmtRelative(user.last_sign_in_at)})
                 </span>
               </>
             ) : (
-              <span className="text-muted-foreground">hiç</span>
+              <span className="text-muted-foreground">never</span>
             )}
           </dd>
 
-          <dt className="text-muted-foreground">E-posta onayı</dt>
+          <dt className="text-muted-foreground">Email confirmed</dt>
           <dd>
             {user.email_confirmed_at
-              ? new Date(user.email_confirmed_at).toLocaleDateString("tr-TR")
+              ? new Date(user.email_confirmed_at).toLocaleDateString("en-US")
               : "—"}
           </dd>
 
@@ -740,13 +740,13 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
               <dd>
                 {user.premium_tier ? `Tier ${user.premium_tier}` : "aktif"}
                 {user.premium_expires_at
-                  ? ` · ${new Date(user.premium_expires_at).toLocaleDateString("tr-TR")} bitiş`
-                  : " · süresiz"}
+                  ? ` · ${new Date(user.premium_expires_at).toLocaleDateString("en-US")} end`
+                  : " · permanent"}
               </dd>
             </>
           )}
 
-          <dt className="text-muted-foreground">Sağlayıcı</dt>
+          <dt className="text-muted-foreground">Provider</dt>
           <dd>
             {user.providers.length > 0 ? user.providers.join(", ") : "—"}
           </dd>

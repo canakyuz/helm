@@ -23,11 +23,11 @@ const byName = (fields: FieldDef[], name: string) => fields.find((f) => f.name =
 describe("inferSchema", () => {
   const fields = inferSchema([sample]);
 
-  it("_meta'yı top-level'da dışlar", () => {
+  it("excludes _meta at the top level", () => {
     expect(fields.find((f) => f.name === "_meta")).toBeUndefined();
   });
 
-  it("primitive kind'ları doğru seçer", () => {
+  it("picks primitive kinds correctly", () => {
     expect(byName(fields, "title").kind).toBe("text");
     expect(byName(fields, "body").kind).toBe("textarea"); // uzun string
     expect(byName(fields, "count").kind).toBe("number");
@@ -53,13 +53,13 @@ describe("inferSchema", () => {
     if (items.kind === "list") expect(items.of.kind).toBe("object");
   });
 
-  it("required = key tüm örneklerde varsa", () => {
+  it("required = the key exists in every sample", () => {
     const f2 = inferSchema([{ a: 1 }, { a: 1, b: 2 }]);
     expect(byName(f2, "a").required).toBe(true);
     expect(byName(f2, "b").required).toBe(false);
   });
 
-  it("görsel tespiti: uzantı veya key+url → image, yanlış pozitif yok", () => {
+  it("image detection: extension or key+url → image, no false positives", () => {
     const f = inferSchema([
       {
         file: "wesan-wordmark.svg", // uzantı
@@ -67,7 +67,7 @@ describe("inferSchema", () => {
         cover: "/img/hero.png",
         mediaSide: "right", // key "media" eşleşir AMA değer path değil → text
         icon: "mail", // image değil
-        title: "Bir başlık", // text
+        title: "A title", // text
       },
     ]);
     expect(byName(f, "file").kind).toBe("image");
@@ -89,14 +89,14 @@ describe("mergeSchema — governance", () => {
     expect(report.added).toContain("hero.cta.label"); // nested path
   });
 
-  it("aynı kaynak tekrar → added yok, alanlar korunur", () => {
+  it("same source again → nothing added, fields preserved", () => {
     const first = mergeSchema(null, inferred).fields;
     const { report } = mergeSchema({ fields: first }, inferred);
     expect(report.added).toEqual([]);
     expect(report.conflicts).toEqual([]);
   });
 
-  it("yeni kaynak alanı → added", () => {
+  it("new upstream field → added", () => {
     const existing: CollectionSchema = { fields: inferSchema([{ title: "x" }]) };
     const next = inferSchema([{ title: "x", subtitle: "y" }]);
     const { fields, report } = mergeSchema(existing, next);
@@ -104,7 +104,7 @@ describe("mergeSchema — governance", () => {
     expect(fields.map((f) => f.name).sort()).toEqual(["subtitle", "title"]);
   });
 
-  it("kaynakta silinen alan → korunur + raporlanır", () => {
+  it("field removed upstream → preserved and reported", () => {
     const existing: CollectionSchema = { fields: inferSchema([{ title: "x", legacy: "z" }]) };
     const next = inferSchema([{ title: "x" }]);
     const { fields, report } = mergeSchema(existing, next);

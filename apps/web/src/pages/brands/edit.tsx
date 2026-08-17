@@ -41,11 +41,11 @@ import { supabaseClient } from "@/providers/supabase-client";
 import type { Brand, Property } from "@/types";
 
 const brandSchema = z.object({
-  name: z.string().min(1, "Brand adı gerekli"),
+  name: z.string().min(1, "Brand name is required"),
   slug: z
     .string()
     .min(1, "Slug gerekli")
-    .regex(/^[a-z0-9-]+$/, "Sadece küçük harf, rakam ve tire"),
+    .regex(/^[a-z0-9-]+$/, "Lowercase letters, digits and hyphens only"),
 });
 
 type BrandFormValues = z.infer<typeof brandSchema>;
@@ -90,7 +90,7 @@ export const BrandEdit = () => {
       // FK kısıtı (ON DELETE RESTRICT) yakalanıyorsa kullanıcıya net mesaj.
       setDeleteError(
         error.message.includes("violates foreign key")
-          ? "Bu brand'e bağlı property var. Önce property'leri başka brand'e taşı veya sil."
+          ? "Properties are still linked to this brand. Move or delete them first."
           : error.message,
       );
       return;
@@ -100,7 +100,7 @@ export const BrandEdit = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Brand Ayarları</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Brand settings</h1>
 
       <Card>
         <CardHeader>
@@ -114,7 +114,7 @@ export const BrandEdit = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand adı</FormLabel>
+                    <FormLabel>Brand name</FormLabel>
                     <FormControl>
                       <Input placeholder="Dante" {...field} />
                     </FormControl>
@@ -173,8 +173,8 @@ export const BrandEdit = () => {
                   <TableHead>Ad</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead>Tip</TableHead>
-                  <TableHead className="text-right">Modül</TableHead>
-                  <TableHead className="text-right">İşlem</TableHead>
+                  <TableHead className="text-right">Module</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -192,7 +192,7 @@ export const BrandEdit = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button asChild size="sm" variant="ghost">
-                        <Link to={`/properties/edit/${p.id}`}>Düzenle</Link>
+                        <Link to={`/properties/edit/${p.id}`}>Edit</Link>
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -205,7 +205,7 @@ export const BrandEdit = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base text-destructive">Tehlikeli bölge</CardTitle>
+          <CardTitle className="text-base text-destructive">Danger zone</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between gap-3">
@@ -223,8 +223,8 @@ export const BrandEdit = () => {
                   <AlertDialogTitle>Brand silinsin mi?</AlertDialogTitle>
                   <AlertDialogDescription>
                     {properties.length > 0
-                      ? "Bu brand altında property'ler var. Önce hepsini başka brand'e taşı veya sil."
-                      : "Bu işlem geri alınamaz."}
+                      ? "This brand still has properties. Move them to another brand or delete them first."
+                      : "This cannot be undone."}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 {deleteError && (
@@ -233,7 +233,7 @@ export const BrandEdit = () => {
                   </div>
                 )}
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={deleteBrand}
                     disabled={deleting || properties.length > 0}

@@ -38,10 +38,10 @@ const fmt = (iso: string | null) => {
   if (!iso) return "—";
   const d = new Date(iso);
   const diffMin = (Date.now() - d.getTime()) / 60_000;
-  if (diffMin < 1) return "az önce";
-  if (diffMin < 60) return `${Math.round(diffMin)} dk önce`;
-  if (diffMin < 1440) return `${Math.round(diffMin / 60)} sa önce`;
-  return d.toLocaleString("tr-TR");
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${Math.round(diffMin)}m ago`;
+  if (diffMin < 1440) return `${Math.round(diffMin / 60)}h ago`;
+  return d.toLocaleString("en-US");
 };
 
 export const CronHealthCard = () => {
@@ -190,9 +190,9 @@ export const CronHealthCard = () => {
                       ) : (
                         <div className="space-y-1">
                           <div className="grid grid-cols-[100px_1fr_70px_60px] gap-2 px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                            <span>Başlangıç</span>
-                            <span>Sonuç</span>
-                            <span className="text-right">Süre</span>
+                            <span>Start</span>
+                            <span>Result</span>
+                            <span className="text-right">Duration</span>
                             <span className="text-right">Durum</span>
                           </div>
                           {j.last_runs.map((r) => {
@@ -209,7 +209,7 @@ export const CronHealthCard = () => {
                               >
                                 <span className="font-mono text-[10px] text-muted-foreground">
                                   {new Date(r.start_time).toLocaleString(
-                                    "tr-TR",
+                                    "en-US",
                                   )}
                                 </span>
                                 <span className="truncate text-xs text-muted-foreground">

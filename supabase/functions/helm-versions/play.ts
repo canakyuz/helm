@@ -142,7 +142,7 @@ export async function fetchPlayVersions(
     }
     const edit = (await res.json()) as EditResource;
     if (!edit.id) {
-      return { ok: false, message: "Play edits: id boş" };
+      return { ok: false, message: "Play edits: id is empty" };
     }
     editId = edit.id;
   } catch (e) {

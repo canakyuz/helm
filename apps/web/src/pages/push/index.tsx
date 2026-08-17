@@ -47,7 +47,7 @@ interface Campaign {
   sent_at: string;
 }
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("tr-TR");
+const fmt = (iso: string) => new Date(iso).toLocaleString("en-US");
 
 export const PushPage = () => {
   const { scope, isAll } = useScope();
@@ -138,18 +138,18 @@ export const PushPage = () => {
           sample: data.sample ?? [],
         });
       } else {
-        toast.success(`${data.sent} bildirim gönderildi`, {
+        toast.success(`${data.sent} notifications sent`, {
           description:
             data.failed > 0
-              ? `${data.failed} başarısız (token geçersiz olabilir)`
-              : `${data.recipients} cihaza ulaştı`,
+              ? `${data.failed} failed (the token may be invalid)`
+              : `${data.recipients} devices reached`,
         });
         setTitle("");
         setBody("");
         setSegmentId("");
       }
     } catch (e) {
-      toast.error("Gönderim başarısız", {
+      toast.error("Send failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -178,11 +178,11 @@ export const PushPage = () => {
       )}
 
       {!isAll && supaIntg && !supaCfg.push_token_table && (
-        <ErrorBanner variant="info" title="Varsayılan token config">
+        <ErrorBanner variant="info" title="Default token config">
           Push token tablosu config'i tanımlı değil. Varsayılanlar
           kullanılacak: <code>profiles.expo_push_token</code> (user_col:{" "}
           <code>id</code>). Farklıysa Supabase entegrasyonunu{" "}
-          <strong>Düzenle</strong>.
+          <strong>Edit</strong>.
         </ErrorBanner>
       )}
 
@@ -200,7 +200,7 @@ export const PushPage = () => {
               disabled={!pushReady || isAll}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Bir segment seç" />
+                <SelectValue placeholder="Pick a segment" />
               </SelectTrigger>
               <SelectContent>
                 {segments.length === 0 ? (
@@ -218,7 +218,7 @@ export const PushPage = () => {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Başlık</Label>
+            <Label>Title</Label>
             <Input
               placeholder="Yeni sezon!"
               value={title}
@@ -305,7 +305,7 @@ export const PushPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Geçmiş Bildirimler</CardTitle>
+          <CardTitle>Past notifications</CardTitle>
           <CardAction>
             <Badge variant="secondary">
               <Bell className="size-3" />
@@ -317,8 +317,8 @@ export const PushPage = () => {
           {campaigns.length === 0 && !campQuery.isLoading ? (
             <EmptyState
               icon={<Bell className="size-6" />}
-              title="Henüz bildirim gönderilmedi"
-              description="Üstteki form ile bir segmente push gönder. Geçmiş ve teslim oranı burada birikir."
+              title="No notifications sent yet"
+              description="Use the form above to push to a segment. History and delivery rate collect here."
               compact
             />
           ) : (
@@ -326,9 +326,9 @@ export const PushPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Zaman</TableHead>
-                  <TableHead>Başlık</TableHead>
+                  <TableHead>Title</TableHead>
                   <TableHead className="text-right">Cihaz</TableHead>
-                  <TableHead className="text-right">Gönderildi</TableHead>
+                  <TableHead className="text-right">Sent</TableHead>
                   <TableHead className="text-right">Hata</TableHead>
                 </TableRow>
               </TableHeader>
@@ -367,30 +367,30 @@ export const PushPage = () => {
 
 const PUSH_TEMPLATES = [
   {
-    label: "Yeni içerik",
-    title: "Yeni sezon başladı! 🎮",
-    body: "En sevdiğin karakterler için yeni içerikler ekledik. Şimdi gel keşfet!",
+    label: "New content",
+    title: "A new season has started! 🎮",
+    body: "We added new content for your favourite characters. Come explore!",
   },
   {
-    label: "Geri çağırma",
-    title: "Seni özledik 👋",
-    body: "Bir süredir uğramadın. Sürpriz bir hediyemiz var — gel al!",
+    label: "Win-back",
+    title: "We miss you 👋",
+    body: "You have not been around for a while. We have a surprise gift for you — come get it!",
   },
   {
-    label: "Günlük ödül",
-    title: "Günlük ödülün hazır 🎁",
-    body: "Bugünün hediyesini almayı unutma. Streak'i kaybetme!",
+    label: "Daily reward",
+    title: "Your daily reward is ready 🎁",
+    body: "Do not forget today's gift. Keep your streak alive!",
   },
   {
-    label: "İndirim",
-    title: "Sadece bugün — %50 indirim",
-    body: "Premium aboneliğe bugün başlayan herkes için %50 indirim.",
+    label: "Discount",
+    title: "Today only — 50% off",
+    body: "50% off for everyone who starts a premium subscription today.",
   },
 ];
 
 const PhonePreview = ({ title, body }: { title: string; body: string }) => {
   const now = new Date();
-  const time = now.toLocaleTimeString("tr-TR", {
+  const time = now.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -418,11 +418,11 @@ const PhonePreview = ({ title, body }: { title: string; body: string }) => {
                   <span className="text-[10px] font-semibold uppercase text-white/90">
                     Uygulamanız
                   </span>
-                  <span className="text-[9px] text-white/60">şimdi</span>
+                  <span className="text-[9px] text-white/60">now</span>
                 </div>
                 <div className="mt-0.5 text-[11px] font-semibold leading-tight text-white">
                   {title || (
-                    <span className="text-white/40">Başlık önizleme</span>
+                    <span className="text-white/40">Title preview</span>
                   )}
                 </div>
                 <div className="mt-0.5 text-[11px] leading-tight text-white/80 line-clamp-3">

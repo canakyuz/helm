@@ -31,12 +31,12 @@ import type { SyncRun } from "@/types";
 const HUB_URL = import.meta.env.VITE_HELM_SUPABASE_URL as string | undefined;
 
 const timeAgo = (iso: string | null) => {
-  if (!iso) return "hiç";
+  if (!iso) return "never";
   const min = (Date.now() - new Date(iso).getTime()) / 60_000;
-  if (min < 1) return "az önce";
-  if (min < 60) return `${Math.round(min)} dk önce`;
-  if (min < 1440) return `${Math.round(min / 60)} sa önce`;
-  return `${Math.round(min / 1440)} gün önce`;
+  if (min < 1) return "just now";
+  if (min < 60) return `${Math.round(min)}m ago`;
+  if (min < 1440) return `${Math.round(min / 60)}h ago`;
+  return `${Math.round(min / 1440)}d ago`;
 };
 
 interface Identity {
@@ -69,7 +69,7 @@ export const SettingsPage = () => {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Görünüm</CardTitle>
+            <CardTitle>Appearance</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Label className="flex items-center justify-between gap-3">
@@ -84,7 +84,7 @@ export const SettingsPage = () => {
               <Switch checked={!isDark} onCheckedChange={toggleMode} />
             </Label>
             <p className="text-xs text-muted-foreground">
-              Liquid Glass — {isDark ? "karanlık" : "aydınlık"} mod.
+              Liquid Glass — {isDark ? "dark" : "light"} mod.
             </p>
           </CardContent>
         </Card>
@@ -146,11 +146,11 @@ export const SettingsPage = () => {
                 <>
                   <span>{timeAgo(lastRun.started_at)}</span>
                   <span className="font-mono text-xs text-muted-foreground">
-                    ({new Date(lastRun.started_at).toLocaleString("tr-TR")})
+                    ({new Date(lastRun.started_at).toLocaleString("en-US")})
                   </span>
                 </>
               ) : (
-                <span className="text-muted-foreground">hiç</span>
+                <span className="text-muted-foreground">never</span>
               )}
             </dd>
 

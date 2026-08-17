@@ -174,7 +174,7 @@ export const PropertyCreate = () => {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Brand seç (veya yeni oluştur)" />
+                          <SelectValue placeholder="Pick a brand (or create one)" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -231,7 +231,7 @@ export const PropertyCreate = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Property adı</FormLabel>
+                    <FormLabel>Property name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Dante Mobile"
@@ -303,7 +303,7 @@ export const PropertyCreate = () => {
           {/* 3) Modüller */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">3. Modüller</CardTitle>
+              <CardTitle className="text-base">3. Modules</CardTitle>
               <p className="text-xs text-muted-foreground">
                 Tipe göre önerilen modüller otomatik seçildi. Sonra ayarlardan değiştirebilirsin.
               </p>
@@ -375,7 +375,7 @@ export const PropertyCreate = () => {
                   name="app_store_country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>App Store ülkesi</FormLabel>
+                      <FormLabel>App Store country</FormLabel>
                       <FormControl>
                         <Input placeholder="us" {...field} value={field.value ?? ""} />
                       </FormControl>
@@ -398,7 +398,7 @@ export const PropertyCreate = () => {
               İptal
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Kaydediliyor..." : "Property oluştur"}
+              {submitting ? "Kaydediliyor..." : "Create property"}
             </Button>
           </div>
 

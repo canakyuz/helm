@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
   try {
     body = await req.json();
   } catch {
-    return json({ error: "Geçersiz JSON" }, 400);
+    return json({ error: "Invalid JSON" }, 400);
   }
   const { project_id, segment_id, subject, body_html, body_text, dry_run } =
     body;
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     .eq("id", segment_id)
     .maybeSingle();
   if (segErr || !seg) {
-    return json({ error: "Segment bulunamadı" }, 404);
+    return json({ error: "Segment not found" }, 404);
   }
 
   // Resend entegrasyonu — proje üzerinde

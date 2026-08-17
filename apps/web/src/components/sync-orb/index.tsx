@@ -22,7 +22,7 @@ const healthOf = (ok: number, total: number): Health => {
 };
 
 const COLORS: Record<Health, { dot: string; ring: string; label: string }> = {
-  ok: { dot: "#10b981", ring: "rgba(16,185,129,0.5)", label: "Sağlıklı" },
+  ok: { dot: "#10b981", ring: "rgba(16,185,129,0.5)", label: "Healthy" },
   warn: { dot: "#f59e0b", ring: "rgba(245,158,11,0.5)", label: "Dikkat" },
   err: { dot: "#ef4444", ring: "rgba(239,68,68,0.5)", label: "Hata" },
   idle: {
@@ -49,7 +49,7 @@ export const SyncOrb = ({
     <div
       className={cn("flex flex-col items-center justify-center", className)}
       role="status"
-      aria-label={`Sync sağlığı: ${colors.label} — ${okCount} / ${total}`}
+      aria-label={`Sync health: ${colors.label} — ${okCount} / ${total}`}
     >
       <div
         className="relative grid place-items-center"

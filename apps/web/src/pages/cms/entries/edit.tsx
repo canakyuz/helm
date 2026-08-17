@@ -99,7 +99,7 @@ export const EntryEditPage = () => {
       .eq("locale", next)
       .maybeSingle();
     if (error) {
-      toast.error("Locale değiştirilemedi", { description: error.message });
+      toast.error("Could not change the locale", { description: error.message });
       return;
     }
     if (rows?.id) {
@@ -145,7 +145,7 @@ export const EntryEditPage = () => {
           values: { slug, locale, data, status: entry?.status ?? "draft" },
         },
         {
-          onSuccess: () => toast.success("Güncellendi"),
+          onSuccess: () => toast.success("Updated"),
           onError: (e) =>
             toast.error("Kaydedilemedi", {
               description: e instanceof Error ? e.message : String(e),
@@ -159,10 +159,10 @@ export const EntryEditPage = () => {
     if (!id) return;
     try {
       await revertToRevision(supabaseClient, id, rev);
-      toast.success("Geri alındı");
+      toast.success("Undone");
       invalidate({ resource: "cms_entries", invalidates: ["detail"] });
     } catch (e) {
-      toast.error("Geri alınamadı", {
+      toast.error("Could not undo", {
         description: e instanceof Error ? e.message : String(e),
       });
     }
@@ -170,11 +170,11 @@ export const EntryEditPage = () => {
 
   const headerSlug = useMemo(() => {
     const title = (data?.title as unknown) ?? slug;
-    return typeof title === "string" && title ? title : slug || "Yeni içerik";
+    return typeof title === "string" && title ? title : slug || "New content";
   }, [data, slug]);
 
   if (!collection) {
-    return <p className="text-muted-foreground">Collection seçilmedi.</p>;
+    return <p className="text-muted-foreground">No collection selected.</p>;
   }
 
   return (
@@ -258,7 +258,7 @@ export const EntryEditPage = () => {
           </CardHeader>
           <CardContent>
             {revisions.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Henüz revizyon yok.</p>
+              <p className="text-xs text-muted-foreground">No revisions yet.</p>
             ) : (
               <ScrollArea className="max-h-[420px] pr-2">
                 <ul className="flex flex-col gap-2">
@@ -266,7 +266,7 @@ export const EntryEditPage = () => {
                     <li key={rev.id} className="rounded-md border p-2 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">
-                          {new Date(rev.created_at).toLocaleString("tr-TR")}
+                          {new Date(rev.created_at).toLocaleString("en-US")}
                         </span>
                         <Badge variant="outline" className="text-[10px]">
                           {rev.status_at_snapshot ?? "?"}

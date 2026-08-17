@@ -113,10 +113,10 @@ Deno.serve(async (req) => {
         rawBody,
         svixSig,
       );
-      if (!ok) return json({ error: "İmza geçersiz" }, 401);
+      if (!ok) return json({ error: "Invalid signature" }, 401);
     } catch (e) {
       return json(
-        { error: `İmza doğrulanamadı: ${e instanceof Error ? e.message : e}` },
+        { error: `Could not verify the signature: ${e instanceof Error ? e.message : e}` },
         401,
       );
     }
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
   try {
     payload = JSON.parse(rawBody) as ResendPayload;
   } catch {
-    return json({ error: "Geçersiz JSON" }, 400);
+    return json({ error: "Invalid JSON" }, 400);
   }
 
   const type = payload.type ?? "";

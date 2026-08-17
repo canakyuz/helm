@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
     .eq("id", segmentId)
     .maybeSingle();
   if (segErr) return json({ error: segErr.message }, 500);
-  if (!seg) return json({ error: "Segment bulunamadı" }, 404);
+  if (!seg) return json({ error: "Segment not found" }, 404);
 
   const segment = seg as SegmentRow;
 
@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
       count: 0,
       sample: [],
       projects: 0,
-      warning: "Bu segmente bağlı aktif Supabase entegrasyonu yok",
+      warning: "No active Supabase integration is linked to this segment",
     });
   }
 

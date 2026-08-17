@@ -21,7 +21,7 @@ export const StatCard = ({
   value,
   icon,
   delta,
-  deltaLabel = "son 7 gün",
+  deltaLabel = "last 7 days",
   loading,
 }: StatCardProps) => {
   if (loading) {

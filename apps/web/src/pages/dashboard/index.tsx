@@ -79,12 +79,12 @@ const latestByProject = (metrics: Metric[], metricName: string) => {
 };
 
 const timeAgo = (iso: string | null) => {
-  if (!iso) return "hiç";
+  if (!iso) return "never";
   const min = (Date.now() - new Date(iso).getTime()) / 60_000;
-  if (min < 1) return "az önce";
-  if (min < 60) return `${Math.round(min)} dk önce`;
-  if (min < 1440) return `${Math.round(min / 60)} sa önce`;
-  return `${Math.round(min / 1440)} gün önce`;
+  if (min < 1) return "just now";
+  if (min < 60) return `${Math.round(min)}m ago`;
+  if (min < 1440) return `${Math.round(min / 60)}h ago`;
+  return `${Math.round(min / 1440)}d ago`;
 };
 
 /** Bir projenin connector sağlığı: ok / error / pending. */
@@ -308,13 +308,13 @@ export const DashboardPage = () => {
       );
       if (error) throw error;
       toast.success("Senkronizasyon tamam", {
-        description: `${data?.ingested ?? 0} metrik güncellendi.`,
+        description: `${data?.ingested ?? 0} metrics updated.`,
       });
       invalidate({ resource: "metrics", invalidates: ["list"] });
       invalidate({ resource: "sync_runs", invalidates: ["list"] });
       invalidate({ resource: "project_integrations", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Senkronizasyon başarısız", {
+      toast.error("Sync failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -342,7 +342,7 @@ export const DashboardPage = () => {
         <div className="flex flex-1 items-center gap-3">
           <div>
             <span className="text-muted-foreground">
-              {new Date().toLocaleDateString("tr-TR", {
+              {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
@@ -377,7 +377,7 @@ export const DashboardPage = () => {
           )}
           title={
             syncStale
-              ? "Gece cron'u çalışmıyor olabilir — Vault secret'larını kontrol et"
+              ? "The nightly cron may not be running — check the Vault secrets"
               : undefined
           }
         >
@@ -464,7 +464,7 @@ export const DashboardPage = () => {
               </div>
               <div className="grid grid-cols-3 gap-3 pt-0 mt-0 flex-wrap align-top">
                 <SubStat
-                    label="Dün"
+                    label="Yesterday"
                     value={formatMoney(adTotals.yesterday, displayCcy)}
                 />
                 <SubStat
@@ -472,7 +472,7 @@ export const DashboardPage = () => {
                     value={formatMoney(adTotals.thisMonth, displayCcy)}
                 />
                 <SubStat
-                    label="Geçen ay"
+                    label="Last month"
                     value={formatMoney(adTotals.prevMonth, displayCcy)}
                 />
               </div>
@@ -485,7 +485,7 @@ export const DashboardPage = () => {
           <KpiCell
             label={isAll ? "Toplam MRR" : "MRR"}
             value={formatMoney(mrrDisplay, displayCcy)}
-            hint="Aylık tekrarlı gelir"
+            hint="Monthly recurring revenue"
             loading={loading}
           />
         ) : (
@@ -498,7 +498,7 @@ export const DashboardPage = () => {
             label={isAll ? "Toplam DAU" : "DAU"}
             value={compact(latest(metrics, "dau"))}
             delta={deltaPct(dauSeries)}
-            hint="Günlük aktif"
+            hint="Daily active"
             loading={loading}
           />
         ) : (
@@ -535,7 +535,7 @@ export const DashboardPage = () => {
         {usersEnabled ? (
           isAll ? (
             <KpiCell
-              label="Toplam Kullanıcı"
+              label="Total users"
               value={compact(latest(metrics, "total_users"))}
               delta={deltaPct(series(metrics, "total_users"))}
               hint="Supabase"
@@ -545,14 +545,14 @@ export const DashboardPage = () => {
             <KpiCell
               label="WAU"
               value={compact(latest(metrics, "wau"))}
-              hint="Haftalık aktif"
+              hint="Weekly active"
               loading={loading}
             />
           )
         ) : (
           <KpiPlaceholder
-            label={isAll ? "Toplam Kullanıcı" : "WAU"}
-            module="Müşteriler"
+            label={isAll ? "Total users" : "WAU"}
+            module="Customers"
           />
         )}
 

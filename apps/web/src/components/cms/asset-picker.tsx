@@ -52,12 +52,12 @@ export const AssetPicker = ({ projectId, value, onChange }: Props) => {
     setUploading(true);
     try {
       const asset = await uploadAsset(supabaseClient, projectId, file);
-      toast.success("Yüklendi", { description: file.name });
+      toast.success("Uploaded", { description: file.name });
       invalidate({ resource: "cms_assets", invalidates: ["list"] });
       onChange(asset.id);
       setOpen(false);
     } catch (e) {
-      toast.error("Yükleme başarısız", {
+      toast.error("Upload failed", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -100,12 +100,12 @@ export const AssetPicker = ({ projectId, value, onChange }: Props) => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" size="sm">
-            {current ? "Değiştir" : "Seç"}
+            {current ? "Change" : "Select"}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Medya seç</DialogTitle>
+            <DialogTitle>Pick media</DialogTitle>
           </DialogHeader>
 
           <ScrollArea className="h-[420px] pr-2">

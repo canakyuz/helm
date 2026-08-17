@@ -85,7 +85,7 @@ export const PropertiesListPage = () => {
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="Brand düzenle"
+                    aria-label="Edit brand"
                     onClick={() => edit("brands", g.brand.id)}
                   >
                     <Pencil className="size-4" />
@@ -131,7 +131,7 @@ const PropertyCard = ({ property, onEdit }: PropertyCardProps) => {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Düzenle"
+          aria-label="Edit"
           onClick={() => onEdit("properties", property.id)}
         >
           <Pencil className="size-4" />

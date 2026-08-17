@@ -22,7 +22,7 @@ export const PROVIDER_META: Record<ProviderName, ProviderMeta> = {
   posthog: {
     category: "analytics",
     icon: "BarChart3",
-    description: "Olay analitiği · funnel · kohort · geo",
+    description: "Event analytics · funnels · cohorts · geo",
     docs: "https://posthog.com/docs",
   },
   plausible: {
@@ -40,25 +40,25 @@ export const PROVIDER_META: Record<ProviderName, ProviderMeta> = {
   stripe: {
     category: "revenue",
     icon: "DollarSign",
-    description: "Web ödeme · abonelik · payouts",
+    description: "Web payments · subscriptions · payouts",
     docs: "https://stripe.com/docs/api",
   },
   admob: {
     category: "revenue",
     icon: "Megaphone",
-    description: "Mobil reklam geliri · eCPM · gösterim",
+    description: "Mobile ad revenue · eCPM · impressions",
     docs: "https://developers.google.com/admob",
   },
   app_store_connect: {
     category: "revenue",
     icon: "Apple",
-    description: "App Store satış · indirme · yorum",
+    description: "App Store sales · downloads · reviews",
     docs: "https://developer.apple.com/app-store-connect/api/",
   },
   supabase: {
     category: "users",
     icon: "Database",
-    description: "Auth kullanıcıları · CRM tablo · push token",
+    description: "Auth users · CRM tables · push tokens",
     docs: "https://supabase.com/docs",
   },
   sentry: {
@@ -76,12 +76,12 @@ export const PROVIDER_META: Record<ProviderName, ProviderMeta> = {
   rest: {
     category: "custom",
     icon: "Webhook",
-    description: "Özel REST endpoint · jsonb config",
+    description: "Custom REST endpoint · jsonb config",
   },
   google_play_developer: {
     category: "revenue",
     icon: "PlayCircle",
-    description: "Android yorum · puan · yanıt · service account",
+    description: "Android reviews · ratings · replies · service account",
     docs: "https://developers.google.com/android-publisher",
   },
 };
@@ -89,10 +89,10 @@ export const PROVIDER_META: Record<ProviderName, ProviderMeta> = {
 export const CATEGORY_LABELS: Record<ProviderCategory, string> = {
   analytics: "Analitik",
   revenue: "Gelir",
-  users: "Kullanıcı / Auth",
-  monitoring: "Sağlık & İzleme",
-  communication: "İletişim",
-  custom: "Özel",
+  users: "Users / auth",
+  monitoring: "Health & monitoring",
+  communication: "Contact",
+  custom: "Custom",
 };
 
 export const CATEGORY_ORDER: ProviderCategory[] = [

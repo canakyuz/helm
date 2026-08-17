@@ -20,7 +20,7 @@ export interface CmsPlateEditorProps {
 export function CmsPlateEditor({
   value,
   onChange,
-  placeholder = "Yazmaya başla…",
+  placeholder = "Start writing…",
   readOnly,
 }: CmsPlateEditorProps) {
   const editor = usePlateEditor({
