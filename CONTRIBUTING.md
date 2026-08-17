@@ -8,9 +8,17 @@ issue aç ve konuşalım. Reddedilen bir PR ikimizin de zamanını yakar.
 
 ```bash
 bun install
-make hooks    # pre-commit sır taraması — bunu atlama
+make hooks    # git hook'ları — bunu atlama
 cp apps/mobile/.env.example apps/mobile/.env
 ```
+
+`make hooks` üç kapı kurar ([lefthook.yml](./lefthook.yml)):
+
+| Kanca | Ne yapar |
+|-------|----------|
+| `pre-commit` | Stage'lenmiş içerikte sır arar |
+| `commit-msg` | Commit formatını doğrular (aşağıya bak) |
+| `pre-push` | Tüm workspace'leri `tsc` eder |
 
 Helm bir Supabase projesine bağlanır. Kendi projeni kurmak için
 `supabase/migrations/` altındaki migration'ları uygula (`make db-push`), sonra
@@ -59,6 +67,11 @@ fix(ingest): WES-000 stop writing fake zero errors when the sdk is silent
 
 Mesajı ne yapıldığıyla değil **neden** yapıldığıyla yaz — diff zaten ne olduğunu
 gösteriyor.
+
+Bu format `commit-msg` kancasıyla **zorunlu tutuluyor**
+([scripts/check-commit-msg.sh](./scripts/check-commit-msg.sh)): tek satır, geçerli
+`type`, scope zorunlu, `WES-XXX` zorunlu, `Co-Authored-By` yasak. Kanca yanlış
+davranıyorsa `--no-verify` ile geçme — script'i düzelt.
 
 ## PR
 

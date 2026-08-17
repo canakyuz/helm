@@ -74,6 +74,7 @@
   "scripts": {
     "dev": "refine dev",
     "build": "tsc && refine build",
+    "typecheck": "tsc --noEmit",
     "start": "refine start",
     "refine": "refine",
     "seed:friday": "bun run scripts/seed-friday-cms.ts",

@@ -1,16 +1,69 @@
+# Her push ve PR'da koşan kapı. Üç iş paralel: sır → tip → lint.
+#
+# NEDEN AYRI JOB'LAR: tek job olsaydı sır taraması typecheck'in 90 saniyesini
+# beklerdi. Sır bulgusu en acil sinyal — kendi başına, saniyeler içinde kırmızı
+# olmalı. Ayrıca hangi katmanın düştüğü Actions listesinde tek bakışta görünür.
 name: CI
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Aynı branch'e arka arkaya push edilirse eskisini iptal et — sıra beklemesin.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   secrets:
+    name: Sır taraması
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: ./scripts/check-secrets.sh tree
+
+      # Yalnızca tracked dosyalar. History taraması (`audit-secrets`) bilerek
+      # burada değil: eski commit'lerdeki rotate edilmiş değerler her koşuda
+      # kırmızı verir ve gerçek bulguyu gürültüye boğardı.
+      - name: Tracked dosyalarda sır ara
+        run: ./scripts/check-secrets.sh tree
 
   typecheck:
+    name: Tip kontrolü
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: oven-sh/setup-bun@v2
-      - run: bun install
-      - run: bun run typecheck
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # Kök script paketleri + mobili gezer; web kendi tsconfig'iyle ayrı koşar.
+      - name: Paketler + mobil
+        run: bun run typecheck
+
+      - name: Web
+        run: cd apps/web && bun run typecheck
+
+  lint:
+    name: Lint (mobil)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # Yalnızca mobilde eslint yapılandırması var. Web'e eklenirse buraya ikinci
+      # bir adım gelir — sessizce kapsam dışı kalmasın diye not düşülüyor.
+      - name: Mobil
+        run: cd apps/mobile && bun run lint

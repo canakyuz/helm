@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Actions sürümleri en sessiz teknik borç: `@v4` bir gün deprecate olur ve
+  # tüm CI aynı gün kırmızıya döner. Aylık toplu PR yeterli.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'chore(ci): WES-000'
+    groups:
+      actions:
+        patterns: ['*']
+
+  # NOT: JS bağımlılıkları bilerek dışarıda. Depo bun.lock kullanıyor; Dependabot
+  # bunu güvenilir çözemediğinde lockfile'ı npm'e göre yeniden yazan PR'lar açar
+  # ve kurulum bozulur. Sürüm yükseltmeleri `bun update` ile elle yapılır.
+  # Dependabot'un Bun desteğini doğruladıktan sonra buraya npm ekosistemi eklenebilir.

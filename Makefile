@@ -15,8 +15,8 @@ install: ## bağımlılıkları kur (bun workspace)
 	bun install
 
 hooks: ## git hook'larını aktifleştir (clone sonrası bir kez)
-	git config core.hooksPath .githooks
-	@echo "✓ pre-commit sır taraması aktif"
+	bunx lefthook install
+	@echo "✓ pre-commit sır + commit-msg format + pre-push typecheck aktif"
 
 scan-secrets: ## tracked dosyalarda sır ara
 	./scripts/check-secrets.sh tree
