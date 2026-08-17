@@ -11,7 +11,7 @@
 | **2** | Web adopt | 2–3 hf | Web duplicate sil | — |
 | **3** | Multi-tenant | 4–6 hf | RLS, signup, org | — |
 | **4** | Integrations MVP | 4–6 hf | RC + App Store + Sentry wizard | [../integrations/providers.md](../integrations/providers.md) |
-| **5** | Launch | 2–4 hf | Billing, App Store, landing | [../business/pricing.md](../business/pricing.md) |
+| **5** | Launch | 2–4 hf | Billing, App Store, landing | — |
 
 ## Bağımlılık grafiği
 
@@ -85,5 +85,4 @@ Her faz bitmeden sonrakine geçme kriteri:
 
 ## İlgili
 
-- [HELM_PRODUCT_STRATEGY.md](../HELM_PRODUCT_STRATEGY.md)
 - [hook-inventory.md](./hook-inventory.md)

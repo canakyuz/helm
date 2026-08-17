@@ -59,10 +59,22 @@ credential stage'lersen `pre-commit` commit'i durdurur; aynı tarama CI'da da ko
 
 ## Dokümanlar
 
-- [docs/HELM_PRODUCT_STRATEGY.md](./docs/HELM_PRODUCT_STRATEGY.md) — vizyon, pazar, ticarileştirme
+- [docs/README.md](./docs/README.md) — doküman indeksi
 - [docs/architecture/monorepo.md](./docs/architecture/monorepo.md) — paket kuralları, import yönü
+- [docs/integrations/architecture.md](./docs/integrations/architecture.md) — sync orchestration, adapter interface
 - [docs/migration/](./docs/migration/) — geçiş fazları
 - [MONOREPO-EXECUTION.md](./MONOREPO-EXECUTION.md) — Faz 0 kurulum spec'i (uygulandı)
+
+## Katkı ve güvenlik
+
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — geliştirme akışı, commit formatı, PR beklentileri
+- [SECURITY.md](./SECURITY.md) — açık bildirimi
+
+## Lisans
+
+[GNU AGPL-3.0](./LICENSE). Helm'i değiştirip ağ üzerinden bir servis olarak
+sunuyorsan, değiştirdiğin kaynağı kullanıcılarına açmak zorundasın. Bu şartın
+uymadığı bir kullanım için ayrı lisans konusunda yazabilirsin.
 
 ## Durum
 

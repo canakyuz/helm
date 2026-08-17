@@ -6,3 +6,9 @@ dist/
 .env.*
 !.env.example
 .DS_Store
+
+# Yayınlanmayan içerik: strateji, pazar analizi, fiyatlandırma
+/private/
+
+# Ajan/editör yerel ayarları
+.claude/settings.local.json

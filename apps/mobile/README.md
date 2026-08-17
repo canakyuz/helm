@@ -3,7 +3,7 @@
 `helm` cockpit'inin **kişisel** mobil yoldaşı. Aynı Supabase'e bağlanır; sahada hızlı KPI + alert kontrolü için. TestFlight only.
 
 > Proje kuralları: [`CLAUDE.md`](./CLAUDE.md)  
-> Ürün stratejisi: [`docs/README.md`](./docs/README.md) — geçiş planı, entegrasyonlar, pazar analizi
+> Doküman indeksi: [`docs/README.md`](../../docs/README.md) — geçiş planı, mimari, entegrasyonlar
 
 ## Kurulum
 

@@ -281,4 +281,4 @@ Wizard: entegrasyon bağlandığında ilgili modül otomatik enable önerisi.
 ## İlgili
 
 - [architecture.md](./architecture.md)
-- [../business/pricing.md](../business/pricing.md) — sync frequency limitleri
+- Sync frekans limitleri plan bazlıdır; varsayılan saatlik cron için `helm-ingest`'e bak.
