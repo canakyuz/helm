@@ -297,6 +297,22 @@ const EN: Record<string, string> = {
     "{platform}: more ends ({ended}) than starts ({started})",
   "Oyun bitişi ({overs}) başlangıçtan ({starts}) fazla — başlangıç olayı eksik":
     "More game-overs ({overs}) than starts ({starts}) — the start event is missing",
+  "TOPLAM GELİR": "TOTAL REVENUE",
+  "Ay": "Month",
+  "Hafta": "Week",
+  "{label} · {n} gün": "{label} · {n} days",
+  "ABONE": "SUBS",
+  "Reklam": "Ads",
+  "Abonelik": "Subscription",
+  "doluluk {rate}": "fill {rate}",
+  "DOLULUK {rate}": "FILL {rate}",
+  "Reklam ekonomisi": "Ad economics",
+  "Banner": "Banner",
+  "Geçiş": "Interstitial",
+  "Ödüllü": "Rewarded",
+  "Ödüllü · devam": "Rewarded · continue",
+  "Ödüllü · günlük ×2": "Rewarded · daily ×2",
+  "Açılış": "App open",
 };
 
 export type TranslateVars = Record<string, string | number>;

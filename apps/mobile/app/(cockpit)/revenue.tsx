@@ -164,12 +164,13 @@ export default function Revenue() {
             <BentoTile padding={space.tilePadLg}>
               <View className="flex-row items-center justify-between">
                 <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
-                  TOPLAM GELİR
+                  {t("TOPLAM GELİR")}
                 </Text>
                 <BentoSegment
-                  options={GRAINS}
-                  value={grain}
-                  onChange={(g) => {
+                  options={GRAINS.map((g) => t(g))}
+                  value={t(grain)}
+                  onChange={(label) => {
+                    const g = GRAINS.find((x) => t(x) === label) ?? "Ay";
                     setGrain(g);
                     setPickedKey(null);
                   }}
@@ -185,8 +186,11 @@ export default function Revenue() {
               />
               <Text className="mt-[6px] text-meta text-fg2">
                 {picked == null
-                  ? "Veri yok"
-                  : `${grain === "Ay" ? monthLabel(picked.key) : weekLabel(picked)} · ${picked.days.length} gün`}
+                  ? t("Veri yok")
+                  : t("{label} · {n} gün", {
+                      label: grain === "Ay" ? monthLabel(picked.key) : weekLabel(picked),
+                      n: picked.days.length,
+                    })}
               </Text>
 
               {/* Kaynak kirilimi — toplamin NEREDEN geldigi, dogrudan burada */}
@@ -208,7 +212,7 @@ export default function Revenue() {
                           style={{ backgroundColor: sourceTint(s.metric, theme.accent) }}
                         />
                         <Text className="flex-1 font-medium text-row text-fg">
-                          {SOURCE_LABEL[s.metric] ?? s.metric}
+                          {t(SOURCE_LABEL[s.metric] ?? s.metric)}
                           {/* "anlık": tutar webhook'tan geliyor, magaza raporu
                               henuz dogrulamadi. Isaretlenmezse kesin rakamla
                               ayni agirlikta okunur. */}
@@ -289,7 +293,7 @@ export default function Revenue() {
             <MiniTile
               index={4}
               replayKey={replayKey}
-              label="ABONE"
+              label={t("ABONE")}
               value={formatInteger(picked?.activeSubs ?? kpis.data?.activeSubs ?? 0)}
             />
           </View>

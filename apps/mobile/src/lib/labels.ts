@@ -1,3 +1,4 @@
+import { tr } from "~/lib/i18n";
 import type { PropertyStatus, PropertyType } from "@helm/api";
 
 /**
@@ -36,7 +37,7 @@ export const STATUS_LABEL: Record<PropertyStatus, string> = {
 /** "2026-08" → "Ağustos" (bu yıl) / "Ağustos 25" (önceki yıllar). */
 export function monthLabel(key: string): string {
   const [y, m] = key.split("-").map(Number);
-  const name = MONTHS_TR[(m ?? 1) - 1] ?? key;
+  const name = tr(MONTHS_TR[(m ?? 1) - 1] ?? key);
   return y === new Date().getFullYear() ? name : `${name} ${String(y).slice(2)}`;
 }
 
