@@ -1,4 +1,5 @@
-import { useT } from "~/lib/i18n";
+import { MONTHS_SHORT } from "~/lib/labels";
+import { tr, useT } from "~/lib/i18n";
 import { Text, View } from "react-native";
 import { RC_EVENT_LABEL } from "@helm/api";
 import type { PaymentRow } from "@helm/api";
@@ -13,12 +14,10 @@ const STORE_SHORT: Record<string, string> = {
   STRIPE: "Stripe",
 };
 
-const MONTHS_SHORT = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
-
 /** "2026-07-28" → "28 Tem" */
 function shortDate(iso: string): string {
   const [, m, d] = iso.split("-").map(Number);
-  return `${d} ${MONTHS_SHORT[(m ?? 1) - 1] ?? ""}`;
+  return `${d} ${tr(MONTHS_SHORT[(m ?? 1) - 1] ?? "")}`;
 }
 
 /**

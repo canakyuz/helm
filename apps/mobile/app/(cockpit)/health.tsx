@@ -139,7 +139,7 @@ export default function Health() {
               title={t("Oturum kapanma")}
               count={f != null ? `${f.days}G` : undefined}
               rows={sessionRows}
-              empty={funnels.isLoading ? "YÜKLENİYOR…" : "OTURUM OLAYI YOK"}
+              empty={funnels.isLoading ? t("YÜKLENİYOR…") : t("OTURUM OLAYI YOK")}
               replayKey={replayKey}
             />
           </Rise>
@@ -149,7 +149,7 @@ export default function Health() {
               title={t("Reklam arızası")}
               count={t("GÖSTERİM / TOPLAM")}
               rows={adRows}
-              empty={funnels.isLoading ? "YÜKLENİYOR…" : "REKLAM OLAYI YOK"}
+              empty={funnels.isLoading ? t("YÜKLENİYOR…") : t("REKLAM OLAYI YOK")}
               replayKey={replayKey}
             />
           </Rise>

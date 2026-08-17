@@ -81,12 +81,13 @@ export function IntegrationsTile({
   total: number;
   loading: boolean;
 }) {
+  const t = useT();
   const { theme } = useTheme();
 
   return (
     <BentoTile>
       <View className="flex-row items-center justify-between">
-        <Text className="font-semibold text-emph tracking-tight text-fg">Entegrasyonlar</Text>
+        <Text className="font-semibold text-emph tracking-tight text-fg">{t("Entegrasyonlar")}</Text>
         <Text
           className="font-mono-medium text-[11px]"
           style={{ color: okCount === total ? theme.pos : theme.warn }}
@@ -96,7 +97,7 @@ export function IntegrationsTile({
       </View>
 
       {integrations.length === 0 ? (
-        <Empty label={loading ? "YÜKLENİYOR…" : "ENTEGRASYON YOK"} />
+        <Empty label={loading ? t("YÜKLENİYOR…") : t("ENTEGRASYON YOK")} />
       ) : (
         <View className="mt-headerY flex-row flex-wrap gap-sm">
           {integrations.map((i) => {

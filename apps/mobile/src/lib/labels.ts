@@ -1,4 +1,4 @@
-import { tr } from "~/lib/i18n";
+import { currentLocale, tr } from "~/lib/i18n";
 import type { PropertyStatus, PropertyType } from "@helm/api";
 
 /**
@@ -51,9 +51,11 @@ export function shortDate(iso: string): string {
 export function longDayLabel(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   if (y == null || m == null || d == null) return iso;
-  return new Date(y, m - 1, d)
-    .toLocaleDateString("tr-TR", { day: "numeric", month: "long" })
-    .toLocaleUpperCase("tr-TR");
+  // Intl'e gidilmiyordu ve "tr-TR" sabitti — Ingilizce arayuzde de "9 AGUSTOS"
+  // cikiyordu. Ay adi ceviri tablosundan gelir, buyutme de dile gore yapilir.
+  const month = tr(MONTHS_TR[m - 1] ?? "");
+  const locale = currentLocale();
+  return `${d} ${month}`.toLocaleUpperCase(locale);
 }
 
 /**

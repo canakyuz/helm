@@ -7,6 +7,7 @@ import { useTheme } from "~/theme/use-theme";
 import { BentoTile } from "~/components/bento";
 import type { InstrumentationWarning } from "@helm/api";
 import { useT } from "~/lib/i18n";
+import { usePreferences } from "~/lib/preferences";
 
 /** fps eşikleri — 60 hedef, 45 altı hissedilir, 30 altı kırık. */
 const FPS_OK = 45;
@@ -26,6 +27,7 @@ const PERF_LABEL: Record<string, string> = {
  */
 export function PerfTile({ rows }: { rows: readonly PerfRow[] }) {
   const t = useT();
+  const { language } = usePreferences();
   const { theme } = useTheme();
 
   const tone = (fps: number): string =>
@@ -47,7 +49,7 @@ export function PerfTile({ rows }: { rows: readonly PerfRow[] }) {
           {rows.map((r) => (
             <View key={r.key} className="rounded-inner bg-tile2 p-boxPad">
               <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-                {(PERF_LABEL[r.key] ?? r.key).toLocaleUpperCase("tr-TR")}
+                {t(PERF_LABEL[r.key] ?? r.key).toLocaleUpperCase(language === "tr" ? "tr-TR" : "en-US")}
               </Text>
               <View className="mt-sm flex-row items-baseline" style={{ gap: 16 }}>
                 <Stat label="ortanca" value={r.p50} color={tone(r.p50)} />
@@ -63,13 +65,14 @@ export function PerfTile({ rows }: { rows: readonly PerfRow[] }) {
 }
 
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
+  const { language } = usePreferences();
   return (
     <View>
       <Text className="font-semibold text-statSm tracking-tighter" style={{ color }}>
         {value}
       </Text>
       <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-        {label.toLocaleUpperCase("tr-TR")}
+        {label.toLocaleUpperCase(language === "tr" ? "tr-TR" : "en-US")}
       </Text>
     </View>
   );

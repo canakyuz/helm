@@ -239,7 +239,7 @@ export function PropertyPicker() {
                       }}
                       numberOfLines={1}
                     >
-                      {isAll ? "Tüm Projeler" : item.name}
+                      {isAll ? t("Tüm Projeler") : item.name}
                     </Text>
                     <Text
                       style={{
