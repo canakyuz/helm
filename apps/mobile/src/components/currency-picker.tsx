@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { View, Text, Pressable } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -15,6 +16,7 @@ const CURRENCIES: Array<{ code: Currency; symbol: string }> = [
 ];
 
 export function CurrencyPicker() {
+  const t = useT();
   const queryClient = useQueryClient();
   const { currency } = usePreferences();
   const { data: rates, isLoading } = useFxRates();
@@ -24,7 +26,7 @@ export function CurrencyPicker() {
     currency === "USD"
       ? "HUB BAZ · 1:1"
       : isLoading
-      ? "KUR YÜKLENIYOR"
+      ? t("KUR YÜKLENIYOR")
       : `1 USD ≈ ${rate.toFixed(currency === "TRY" ? 2 : 4)} ${currency}`;
 
   return (

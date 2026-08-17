@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { useEffect } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, {
@@ -137,6 +138,7 @@ export function BentoHeader({
  * HUB'in son calismasi; telefonun son istek attigi an degil (bkz. fetchLastSync).
  */
 function SyncStamp() {
+  const t = useT();
   const { theme } = useTheme();
   const { data } = useLastSync();
   if (!data) return null;
@@ -146,7 +148,7 @@ function SyncStamp() {
 
   // Suren calismada bitis saati HENUZ yok; started_at'i "bitti" gibi sunmamak
   // icin ayri bir metin.
-  const label = data.running ? "SÜRÜYOR" : `SON ${clock}`;
+  const label = data.running ? t("SÜRÜYOR") : `${t("SON")} ${clock}`;
   // Renk kosullu oldugu icin token yerine tema degeri — bento'daki diger
   // kosullu renkler de boyle (StatTile delta rengi).
   const color = data.failed ? theme.neg : stale && !data.running ? theme.warn : theme.fg3;
@@ -156,7 +158,7 @@ function SyncStamp() {
       className="font-mono-medium text-eyebrow tracking-wide"
       style={{ color }}
       accessibilityLabel={
-        data.running ? "Senkronizasyon sürüyor" : `Son güncelleme saat ${clock}`
+        data.running ? t("Senkronizasyon sürüyor") : t("Son güncelleme saat {clock}", { clock })
       }
     >
       {label}

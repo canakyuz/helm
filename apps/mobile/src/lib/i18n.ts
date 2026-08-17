@@ -257,6 +257,12 @@ const EN: Record<string, string> = {
   // Dil secici — kendi adlari
   "Türkçe": "Turkish",
   "İngilizce": "English",
+
+  // Bos durumlar ve baslik seridi kalanlari
+  "KAYNAKLAR": "SOURCES",
+  "OYUN OLAYI YOK": "NO GAME EVENTS",
+  "SATIN ALMA OLAYI YOK": "NO PURCHASE EVENTS",
+  "SON": "LAST",
 };
 
 export type TranslateVars = Record<string, string | number>;
