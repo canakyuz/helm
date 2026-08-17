@@ -46,7 +46,7 @@ export function LiveEventsTile({
         <Text className="font-semibold text-emph tracking-tight text-fg">
           Son işlemler
         </Text>
-        <Text className="font-mono-medium text-[11px] text-fg3">CANLI</Text>
+        <Text className="font-mono-medium text-[11px] text-fg3">{t("CANLI")}</Text>
       </View>
 
       {events.length === 0 ? (
@@ -72,10 +72,10 @@ export function LiveEventsTile({
                 className="font-medium text-row tracking-tight text-fg"
                 numberOfLines={1}
               >
-                {e.productId ?? RC_EVENT_LABEL[e.eventType] ?? e.eventType}
+                {e.productId ?? t(RC_EVENT_LABEL[e.eventType] ?? e.eventType)}
               </Text>
               <Text className="mt-[1px] text-meta text-fg3" numberOfLines={1}>
-                {RC_EVENT_LABEL[e.eventType] ?? e.eventType}
+                {t(RC_EVENT_LABEL[e.eventType] ?? e.eventType)}
                 {e.store != null ? ` · ${e.store}` : ""} ·{" "}
                 {formatRelativeTime(e.occurredAt)}
               </Text>

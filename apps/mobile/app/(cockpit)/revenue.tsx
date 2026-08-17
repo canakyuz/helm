@@ -221,7 +221,7 @@ export default function Revenue() {
                               className="font-mono-medium text-[11px]"
                               style={{ color: theme.warn }}
                             >
-                              {"  anlık"}
+                              {`  ${t("anlık")}`}
                             </Text>
                           ) : null}
                         </Text>

@@ -71,7 +71,7 @@ export function AdEconomicsTile({
 
   return (
     <FunnelTile
-      title="Reklam ekonomisi"
+      title={t("Reklam ekonomisi")}
       count={summary}
       rows={rows}
       empty={
