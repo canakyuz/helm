@@ -1,4 +1,4 @@
-import { usePreferences, type Language } from "~/lib/preferences";
+import { preferences, usePreferences, type Language } from "~/lib/preferences";
 
 /**
  * Arayuz cevirisi.
@@ -114,6 +114,149 @@ const EN: Record<string, string> = {
   "Eksik zorunlu alan: {list}": "Missing required field: {list}",
   "••••••••  kayıtlı — değiştirmek için yeni değer gir":
     "••••••••  saved — enter a new value to replace it",
+
+  // Giris
+  "E-posta ve en az 6 karakter şifre gir.":
+    "Enter your email and a password of at least 6 characters.",
+  "E-posta veya şifre hatalı.": "Incorrect email or password.",
+
+  // Ekran basliklari ve yukleme/bos durumlari
+  "ANALİZ": "ANALYTICS",
+  "SAĞLIK": "HEALTH",
+  "GELİR": "REVENUE",
+  "PORTFÖY": "PORTFOLIO",
+  "Yükleniyor…": "Loading…",
+  "YÜKLENİYOR…": "LOADING…",
+  "Analiz yüklenemedi": "Couldn't load analytics",
+  "Cockpit yüklenemedi": "Couldn't load the cockpit",
+  "Gelir yüklenemedi": "Couldn't load revenue",
+  "ÜLKE VERİSİ YOK": "NO COUNTRY DATA",
+  "AÇIK CRASH YOK": "NO OPEN CRASHES",
+  "SÜRÜM KAYDI YOK": "NO VERSION HISTORY",
+  "HENÜZ İŞLEM YOK": "NO TRANSACTIONS YET",
+  "BU DÖNEMDE ÖDEME YOK": "NO PAYOUTS THIS PERIOD",
+  "FPS ÖLÇÜMÜ YOK": "NO FPS SAMPLES",
+  "PLATFORM VERİSİ YOK": "NO PLATFORM DATA",
+  "KUR YÜKLENIYOR": "LOADING RATES",
+
+  // Analiz
+  "Kullanıcılar": "Users",
+  "Oyun akışı": "Game flow",
+  "Mağaza açıldı": "Store opened",
+  "Satın alma": "Purchase",
+  "Satın alındı": "Purchased",
+  "ne yapıyorlar": "what they're doing",
+  "mağaza açılışı ölçülmüyor": "store opens aren't tracked",
+  "Akış · {name}": "Flow · {name}",
+  "dönüşüm {rate}": "conversion {rate}",
+  "· yapışkanlık {value}": "· stickiness {value}",
+
+  // Saglik
+  "Kararlılık": "Stability",
+  "Reklam arızası": "Ad failures",
+  "Sağlıklı": "Healthy",
+  "Zayıflamış": "Degraded",
+  "GÖSTERİM / TOPLAM": "IMPRESSIONS / TOTAL",
+  "hatasız": "no errors",
+  "tümü kapandı": "all closed",
+  "{n} oturum kapanmadı · {rate}": "{n} sessions never closed · {rate}",
+  "bitiş sayısı başlangıçtan fazla — ölçüm hatalı":
+    "more ends than starts — the measurement is wrong",
+
+  // Ozet
+  "BUGÜN · GELİR": "TODAY · REVENUE",
+  "Tüm projeler": "All projects",
+  "Tüm Projeler": "All Projects",
+  "Proje seç": "Pick a project",
+  "Çöz": "Resolve",
+  "ölçüm yok": "not measured",
+  "· {n} modül": "· {n} modules",
+
+  // Gelir
+  "Kazanç": "Earnings",
+  "Uygulama içi": "In-app",
+  "anlık": "live",
+  "{n} gösterim": "{n} impressions",
+  "DOĞRULANDI": "RECONCILED",
+  "MAĞAZA": "STORE",
+  "UYUŞMUYOR": "MISMATCH",
+  "DÜN": "YESTERDAY",
+  "GEÇEN AY": "LAST MONTH",
+
+  // Uyarilar
+  "altında": "below",
+  "üstünde": "above",
+  "artış": "rise",
+  "düşüş": "drop",
+  "Açık alert": "Open alerts",
+  "Toplam kullanıcı": "Total users",
+  "Yeni kullanıcı": "New users",
+
+  // Telemetri
+  "En düşük fps": "Lowest fps",
+  "p95 düşük fps": "p95 low fps",
+  "en kötü": "worst",
+  "{n} ÖLÇÜM": "{n} SAMPLES",
+
+  // Baslik seridi
+  "SÜRÜYOR": "RUNNING",
+  "Senkronizasyon sürüyor": "Sync in progress",
+  "Son güncelleme saat {clock}": "Last updated at {clock}",
+
+  // Yorum yaniti
+  "Yanıt Yaz": "Write a reply",
+  "Yanıtı Düzenle": "Edit reply",
+  "Yanıtınız…": "Your reply…",
+  "Gönder": "Send",
+  "Gönderiliyor…": "Sending…",
+  "Yanıt gönderildi": "Reply sent",
+  "Yanıt gönderilemedi": "Couldn't send the reply",
+
+  // Kaynak yonetimi bildirimleri
+  "Kaynak bağlandı": "Source connected",
+  "Kaynak bağlanamadı": "Couldn't connect the source",
+  "Kaynak kaldırıldı": "Source removed",
+  "Kaldırılamadı": "Couldn't remove it",
+  "Durum değiştirilemedi": "Couldn't change the status",
+  "Hedef güncellendi": "Goal updated",
+  "· kapalı": "· off",
+
+  // labels.ts — property tipi ve durumu
+  "Uygulama": "App",
+  "Oyun": "Game",
+  "Masaüstü": "Desktop",
+  "sağlıklı": "healthy",
+  "veri bayat": "stale data",
+  "kapalı": "down",
+  "bilinmiyor": "unknown",
+
+  // labels.ts — ay adlari. Tarih bicimleyici bunlari anahtar olarak gecirir.
+  "Ocak": "January",
+  "Şubat": "February",
+  "Mart": "March",
+  "Nisan": "April",
+  "Mayıs": "May",
+  "Haziran": "June",
+  "Temmuz": "July",
+  "Ağustos": "August",
+  "Eylül": "September",
+  "Ekim": "October",
+  "Kasım": "November",
+  "Aralık": "December",
+  "Oca": "Jan",
+  "Şub": "Feb",
+  "Nis": "Apr",
+  "Haz": "Jun",
+  "Tem": "Jul",
+  "Ağu": "Aug",
+  "Eyl": "Sep",
+  "Eki": "Oct",
+  "Kas": "Nov",
+  "Ara": "Dec",
+
+  // Dil secici — kendi adlari
+  "Türkçe": "Turkish",
+  "İngilizce": "English",
 };
 
 export type TranslateVars = Record<string, string | number>;
@@ -131,4 +274,16 @@ export function translate(lang: Language, key: string, vars?: TranslateVars): st
 export function useT() {
   const { language } = usePreferences();
   return (key: string, vars?: TranslateVars) => translate(language, key, vars);
+}
+
+/**
+ * React disi kod icin ceviri — hook cagrilamayan yerler: mutation `onSuccess`
+ * toast'lari, olay isleyicileri, saf yardimci fonksiyonlar.
+ *
+ * NEDEN AYRI: `useT` bir hook, kural geregi bilesen govdesi disinda cagrilamaz.
+ * Bu surum dili cagri aninda MMKV'den okur; abonelik yok, cunki bir toast zaten
+ * tek seferlik cizilir — dil degisiminde yeniden cevrilecek bir sey kalmaz.
+ */
+export function tr(key: string, vars?: TranslateVars): string {
+  return translate(preferences.get().language, key, vars);
 }

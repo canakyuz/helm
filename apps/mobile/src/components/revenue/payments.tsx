@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { Text, View } from "react-native";
 import { RC_EVENT_LABEL } from "@helm/api";
 import type { PaymentRow } from "@helm/api";
@@ -36,6 +37,7 @@ export function PaymentsTile({
   loading: boolean;
   fmt: (n: number) => string;
 }) {
+  const t = useT();
   const { theme } = useTheme();
   const total = payments.reduce((a, p) => a + p.amount, 0);
 
@@ -51,7 +53,7 @@ export function PaymentsTile({
       {payments.length === 0 ? (
         <>
           <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
-            {loading ? "YÜKLENİYOR…" : "BU DÖNEMDE ÖDEME YOK"}
+            {loading ? t("YÜKLENİYOR…") : t("BU DÖNEMDE ÖDEME YOK")}
           </Text>
           {!loading ? (
             <Text className="text-meta leading-[18px] text-fg3">

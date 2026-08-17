@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { Text, View } from "react-native";
 import { space } from "@helm/design";
 
@@ -36,6 +37,7 @@ export function CrashFreeHero({
   totalEvents: number;
 }) {
   const { theme, glass } = useTheme();
+  const t = useT();
   const verdict = verdictOf(theme, crashFree);
 
   return (
@@ -63,7 +65,7 @@ export function CrashFreeHero({
             className="mt-[6px] font-semibold text-statSm tracking-tighter"
             style={{ color: verdict.color }}
           >
-            {verdict.label}
+            {t(verdict.label)}
           </Text>
           <Text className="mt-xs text-meta leading-[18px] text-fg2">
             {issueCount} aktif sorun · {fatalCount} fatal · {formatInteger(totalEvents)} olay

@@ -1,3 +1,4 @@
+import { tr } from "~/lib/i18n";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createIntegration,
@@ -42,10 +43,10 @@ export function useCreateIntegration() {
       config: Record<string, string>;
     }) => createIntegration(supabase, args),
     onSuccess: () => {
-      toast.success("Kaynak bağlandı");
+      toast.success(tr("Kaynak bağlandı"));
       invalidate();
     },
-    onError: (e: Error) => toast.error("Kaynak bağlanamadı", e.message),
+    onError: (e: Error) => toast.error(tr("Kaynak bağlanamadı"), e.message),
   });
 }
 
@@ -68,7 +69,7 @@ export function useSetIntegrationEnabled() {
     mutationFn: (args: { id: string; enabled: boolean }) =>
       setIntegrationEnabled(supabase, args),
     onSuccess: invalidate,
-    onError: (e: Error) => toast.error("Durum değiştirilemedi", e.message),
+    onError: (e: Error) => toast.error(tr("Durum değiştirilemedi"), e.message),
   });
 }
 
@@ -77,9 +78,9 @@ export function useDeleteIntegration() {
   return useMutation({
     mutationFn: (id: string) => deleteIntegration(supabase, id),
     onSuccess: () => {
-      toast.success("Kaynak kaldırıldı");
+      toast.success(tr("Kaynak kaldırıldı"));
       invalidate();
     },
-    onError: (e: Error) => toast.error("Kaldırılamadı", e.message),
+    onError: (e: Error) => toast.error(tr("Kaldırılamadı"), e.message),
   });
 }

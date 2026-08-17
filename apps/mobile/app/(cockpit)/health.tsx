@@ -20,6 +20,7 @@ import {
   PerfTile,
   type FunnelRow,
 } from "~/components/analytics";
+import { useT } from "~/lib/i18n";
 import {
   CrashFreeHero,
   CrashTile,
@@ -28,6 +29,7 @@ import {
 } from "~/components/health";
 
 export default function Health() {
+  const t = useT();
   const { theme } = useTheme();
   const { refreshing, onRefresh } = useScreenRefresh();
   const [replayKey, setReplayKey] = useState(0);
@@ -43,7 +45,7 @@ export default function Health() {
   };
 
   if (issuesQuery.isLoading && healthQuery.isLoading)
-    return <ScreenStatus label="Yükleniyor…" />;
+    return <ScreenStatus label={t("Yükleniyor…")} />;
 
   const issues = issuesQuery.data ?? [];
   const integrations = healthQuery.data?.integrations ?? [];
@@ -91,8 +93,8 @@ export default function Health() {
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="SAĞLIK"
-          title="Kararlılık"
+          eyebrow={t("SAĞLIK")}
+          title={t("Kararlılık")}
           onSync={handleRefresh}
           syncing={refreshing}
           picker
@@ -144,7 +146,7 @@ export default function Health() {
 
           <Rise index={4} replayKey={replayKey}>
             <FunnelTile
-              title="Reklam arızası"
+              title={t("Reklam arızası")}
               count="GÖSTERİM / TOPLAM"
               rows={adRows}
               empty={funnels.isLoading ? "YÜKLENİYOR…" : "REKLAM OLAYI YOK"}

@@ -1,3 +1,4 @@
+import { useT } from "~/lib/i18n";
 import { Text, View } from "react-native";
 import { RC_EVENT_LABEL, type RevenueEvent } from "@helm/api";
 
@@ -33,6 +34,7 @@ export function LiveEventsTile({
   loading: boolean;
   fmtAmount: (n: number) => string;
 }) {
+  const t = useT();
   const { theme } = useTheme();
 
   const tone = (t: string): string =>
@@ -50,7 +52,7 @@ export function LiveEventsTile({
       {events.length === 0 ? (
         <>
           <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
-            {loading ? "YÜKLENİYOR…" : "HENÜZ İŞLEM YOK"}
+            {loading ? t("YÜKLENİYOR…") : t("HENÜZ İŞLEM YOK")}
           </Text>
           {!loading ? (
             <Text className="text-meta leading-[18px] text-fg3">

@@ -15,7 +15,7 @@ import {
 } from "~/components/settings";
 
 const LANGUAGES: readonly Language[] = ["tr", "en"];
-const LANGUAGE_LABEL: Record<Language, string> = { tr: "Türkçe", en: "English" };
+const LANGUAGE_LABEL: Record<Language, string> = { tr: "Türkçe", en: "İngilizce" };
 
 export default function Appearance() {
   const router = useRouter();
@@ -71,10 +71,10 @@ export default function Appearance() {
                 divider
                 right={
                   <BentoSegment
-                    options={LANGUAGES.map((l) => LANGUAGE_LABEL[l])}
-                    value={LANGUAGE_LABEL[language]}
+                    options={LANGUAGES.map((l) => t(LANGUAGE_LABEL[l]))}
+                    value={t(LANGUAGE_LABEL[language])}
                     onChange={(label) => {
-                      const next = LANGUAGES.find((l) => LANGUAGE_LABEL[l] === label);
+                      const next = LANGUAGES.find((l) => t(LANGUAGE_LABEL[l]) === label);
                       if (next != null) preferences.setLanguage(next);
                     }}
                     mono={false}

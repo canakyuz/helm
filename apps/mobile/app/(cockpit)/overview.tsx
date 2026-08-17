@@ -29,6 +29,7 @@ import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
 import { AttentionTile, StatTile, statFontSize, toItems } from "~/components/overview";
+import { useT } from "~/lib/i18n";
 import {
   BentoBackground,
   HERO_NUMBER,
@@ -95,6 +96,7 @@ function dayPoint(
 }
 
 export default function Overview() {
+  const t = useT();
   const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
   // Stat kutularinda kurussuz: uzun deger tum satirin punto'sunu dusuruyordu.
@@ -135,9 +137,9 @@ export default function Overview() {
     [revenue.data, appRevDetail.data],
   );
 
-  if (kpis.isLoading) return <ScreenStatus label="Yükleniyor…" />;
+  if (kpis.isLoading) return <ScreenStatus label={t("Yükleniyor…")} />;
   if (kpis.isError || !kpis.data)
-    return <ScreenStatus label="Cockpit yüklenemedi" tone="danger" />;
+    return <ScreenStatus label={t("Cockpit yüklenemedi")} tone="danger" />;
 
   const data = kpis.data;
 
@@ -208,8 +210,8 @@ export default function Overview() {
       <BentoBackground />
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
-          eyebrow="PORTFÖY"
-          title="Tüm projeler"
+          eyebrow={t("PORTFÖY")}
+          title={t("Tüm projeler")}
           onSync={handleRefresh}
           syncing={refreshing}
           picker
