@@ -46,21 +46,37 @@ const UNITS: Array<readonly [number, string]> = [
   [12, "ay"],
 ];
 
-export function formatRelativeTime(iso: string | Date): string {
+/**
+ * Goreli zamanin PARCALARI — bicimlenmis metin degil.
+ *
+ * NEDEN AYRI: `formatRelativeTime` hazir Turkce dizgi donuyordu ("8 dk önce"),
+ * dolayisiyla Ingilizce arayuzde on ekranda Turkce kaliyordu ve cevrilecek bir
+ * tutamak yoktu. Parcalari disari verince UI katmani kendi dilinde birlestirir;
+ * paket dil bilmemeye devam eder.
+ */
+export type RelativeTimeParts =
+  | { kind: "now"; past: boolean }
+  | { kind: "unit"; value: number; unit: string; past: boolean };
+
+export function relativeTimeParts(iso: string | Date): RelativeTimeParts {
   const date = typeof iso === "string" ? new Date(iso) : iso;
   const diffMs = Date.now() - date.getTime();
   const past = diffMs >= 0;
   let value = Math.abs(Math.round(diffMs / 1000));
 
-  if (value < 5) return past ? "şimdi" : "az sonra";
+  if (value < 5) return { kind: "now", past };
 
   for (const [factor, unit] of UNITS) {
-    if (value < factor) {
-      return past ? `${value} ${unit} önce` : `${value} ${unit} sonra`;
-    }
+    if (value < factor) return { kind: "unit", value, unit, past };
     value = Math.round(value / factor);
   }
-  return past ? `${value} y önce` : `${value} y sonra`;
+  return { kind: "unit", value, unit: "y", past };
+}
+
+export function formatRelativeTime(iso: string | Date): string {
+  const p = relativeTimeParts(iso);
+  if (p.kind === "now") return p.past ? "şimdi" : "az sonra";
+  return p.past ? `${p.value} ${p.unit} önce` : `${p.value} ${p.unit} sonra`;
 }
 
 /**
