@@ -69,6 +69,12 @@ ios-release: ## yerel IPA + TestFlight (apps/mobile/Makefile'a delege)
 clean: ## node_modules + build çıktıları temizle
 	rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/web/dist
 
-ota: ## Over-the-air update (apps/mobile/Makefile'a delege)
-	cd apps/mobile && eas update --channel production --environment production --message "$$(git log -1 --pretty=%s)"
+# CHANNEL varsayilani preview: ios-local-release de preview profiliyle build
+# aliyor (apps/mobile/Makefile: EAS_PROFILE ?= preview) ve o build preview
+# kanalini dinliyor. Sabit "production" yazilirsa guncelleme TestFlight'taki
+# cihaza hic ulasmaz — sessizce bosa gider.
+CHANNEL ?= preview
+
+ota: ## OTA update (CHANNEL=production ile prod kanalina)
+	cd apps/mobile && eas update --channel $(CHANNEL) --environment $(CHANNEL) --message "$$(git log -1 --pretty=%s)"
 
