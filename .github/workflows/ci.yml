@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   secrets:
-    name: Sır taraması
+    name: Secret scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,11 +29,11 @@ jobs:
       # Yalnızca tracked dosyalar. History taraması (`audit-secrets`) bilerek
       # burada değil: eski commit'lerdeki rotate edilmiş değerler her koşuda
       # kırmızı verir ve gerçek bulguyu gürültüye boğardı.
-      - name: Tracked dosyalarda sır ara
+      - name: Scan tracked files for secrets
         run: ./scripts/check-secrets.sh tree
 
   typecheck:
-    name: Tip kontrolü
+    name: Typecheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,11 +47,11 @@ jobs:
       # Tüm workspace'ler: 6 paket + mobil + web. Web'in `typecheck` script'i
       # sonradan eklendi; öncesinde `build` içine gömülü olduğu için 226 dosya
       # CI'da hiç kontrol edilmiyordu.
-      - name: Tüm workspace'ler
+      - name: All workspaces
         run: bun run typecheck
 
   lint:
-    name: Lint (mobil)
+    name: Lint (mobile)
     runs-on: ubuntu-latest
     # RAPORLAR, BLOKLAMAZ — bilinçli. Depoda 18 mevcut eslint hatası var
     # (react-hooks/refs ve exhaustive-deps ağırlıklı). Bloklayan bir kapı ilk
@@ -69,7 +69,7 @@ jobs:
 
       # Yalnızca mobilde eslint yapılandırması var. Web'e eklenirse buraya ikinci
       # bir adım gelir — sessizce kapsam dışı kalmasın diye not düşülüyor.
-      - name: Mobil
+      - name: Mobile
         run: |
           set -uo pipefail
           cd apps/mobile

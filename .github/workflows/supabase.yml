@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   functions:
-    name: Edge function tip kontrolü
+    name: Edge function typecheck
     runs-on: ubuntu-latest
     # RAPORLAR, BLOKLAMAZ — bilinçli, lint job'ıyla aynı gerekçe. Bu kapı ilk
     # koşuşunda 9 mevcut hata buldu (40 function'ın hiç kontrol edilmediği
@@ -52,14 +52,14 @@ jobs:
       # `deno check` her function'ın importlarını çözer ve tiplerini doğrular.
       # Bir function'ı tek tek koşuyoruz ki hangisinin düştüğü özet tablosunda
       # görünsün — toplu koşuda ilk hata gerisini gizliyor.
-      - name: Her function'ı ayrı doğrula
+      - name: Check each function separately
         run: |
           set -uo pipefail
           failed=0
           {
-            echo "### Edge function kontrolü"
+            echo "### Edge function check"
             echo ""
-            echo "| Function | Durum |"
+            echo "| Function | Status |"
             echo "|---|---|"
           } >> "$GITHUB_STEP_SUMMARY"
           for dir in supabase/functions/*/; do
@@ -76,14 +76,14 @@ jobs:
           exit $failed
 
   migrations:
-    name: Migration sırası
+    name: Migration order
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       # Aynı numarayı taşıyan iki migration, hangi sırayla uygulanacağı
       # belirsiz bir şema demektir — iki dal birleşince sessizce oluşur.
-      - name: Numara çakışması ve isimlendirme
+      - name: Number collisions and naming
         run: |
           set -euo pipefail
           cd supabase/migrations
@@ -92,13 +92,13 @@ jobs:
           names=$(printf '%s\n' *.sql)
           dupes=$(printf '%s\n' "$names" | cut -d_ -f1 | sort | uniq -d)
           if [ -n "$dupes" ]; then
-            echo "::error title=Migration çakışması::Aynı numarayı paylaşan dosyalar: $dupes"
+            echo "::error title=Migration collision::Files sharing the same number: $dupes"
             exit 1
           fi
           bad=$(printf '%s\n' "$names" | grep -vE '^[0-9]{4}_[a-z0-9_]+\.sql$' || true)
           if [ -n "$bad" ]; then
-            echo "::error title=Migration adı::NNNN_snake_case.sql beklenir: $bad"
+            echo "::error title=Migration name::expected NNNN_snake_case.sql, got: $bad"
             exit 1
           fi
           count=$(printf '%s\n' "$names" | grep -c '')
-          echo "✅ $count migration, çakışma yok." >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ $count migrations, no collisions." >> "$GITHUB_STEP_SUMMARY"
