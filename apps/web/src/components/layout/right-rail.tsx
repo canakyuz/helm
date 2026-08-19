@@ -4,7 +4,8 @@ import { useList } from "@refinedev/core";
 import { Activity, AlertOctagon, Bell, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { AlertEvent, SyncRun } from "@/types";
+import type { AlertEvent } from "@/types";
+import { SYNC_HEALTH_MESSAGE, useLastSyncRun } from "@/hooks/use-last-sync-run";
 
 interface CityClock {
   name: string;
@@ -132,23 +133,15 @@ const OpenAlerts = () => {
   );
 };
 
-/** Son senkron durumu + cron sağlığı özeti. */
+/** Last sync run + cron health summary. */
 const SyncStatus = () => {
-  const { result } = useList<SyncRun>({
-    resource: "sync_runs",
-    sorters: [{ field: "started_at", order: "desc" }],
-    pagination: { mode: "off" },
-  });
-  const last = result.data[0];
-  const stale =
-    !last?.started_at ||
-    Date.now() - new Date(last.started_at).getTime() > 3 * 3_600_000;
+  const { run: last, health, needsAttention } = useLastSyncRun();
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Activity className="size-4" /> Senkron
+          <Activity className="size-4" /> Sync
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-1.5 text-xs">
@@ -172,9 +165,9 @@ const SyncStatus = () => {
             </div>
           </>
         )}
-        {stale && (
+        {needsAttention && (
           <div className="mt-2 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1.5 text-destructive">
-            Cron 3+ saattir çalışmadı.
+            {SYNC_HEALTH_MESSAGE[health]}
           </div>
         )}
       </CardContent>
@@ -182,7 +175,7 @@ const SyncStatus = () => {
   );
 };
 
-/** Dashboard'a özel sağ widget pane — World Clock, Alerts, Sync. */
+/** Dashboard-only right rail — world clock, alerts, sync. */
 export const RightRail = () => (
   <aside className="hidden xl:flex w-[320px] shrink-0 flex-col gap-4">
     <WorldClock />
