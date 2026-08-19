@@ -109,6 +109,7 @@ Web ve mobile `.env`'lerini root'a topla. Gerekli anahtarlar:
 HELM_SUPABASE_PROJECT_ID=mqiwgorivtglnjbwhkve
 # web (Vite):    VITE_HELM_SUPABASE_URL, VITE_HELM_SUPABASE_ANON_KEY
 # mobile (Expo): EXPO_PUBLIC_HELM_SUPABASE_URL, EXPO_PUBLIC_HELM_SUPABASE_ANON_KEY
+# ANON_KEY değeri yeni format olmalı (sb_publishable_...). Legacy JWT anon key 2026-08-17'de kapatıldı → "Legacy API keys are disabled" (401).
 ```
 **Not:** Vite `apps/web`'de çalışırken `.env`'i app klasöründen okur (Vite default). Mobile `EXPO_PUBLIC_*`'ı app klasöründen okur. Yani her app'in kendi `.env`'i `apps/<app>/.env` olarak kalabilir; project-id'yi root `.env`'e koy (CLI script'leri için).
 
