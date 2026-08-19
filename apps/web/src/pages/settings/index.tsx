@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { useGetIdentity, useList, useLogout } from "@refinedev/core";
+import { useGetIdentity, useLogout } from "@refinedev/core";
 import {
   CheckCircle2,
   Clock,
@@ -24,9 +23,13 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CronHealthCard } from "@/components/settings/cron-health-card";
+import {
+  SYNC_HEALTH_LABEL,
+  SYNC_HEALTH_MESSAGE,
+  useLastSyncRun,
+} from "@/hooks/use-last-sync-run";
 import { useDisplayCurrency } from "@/context/currency";
 import { useHelmTheme } from "@/theme/ThemeProvider";
-import type { SyncRun } from "@/types";
 
 const HUB_URL = import.meta.env.VITE_HELM_SUPABASE_URL as string | undefined;
 
@@ -51,16 +54,8 @@ export const SettingsPage = () => {
   const { currency, setCurrency } = useDisplayCurrency();
   const { data: identity } = useGetIdentity<Identity>();
 
-  const { result: runsResult } = useList<SyncRun>({
-    resource: "sync_runs",
-    sorters: [{ field: "started_at", order: "desc" }],
-    pagination: { mode: "off" },
-  });
-  const lastRun = runsResult.data[0];
-  const syncStale = useMemo(() => {
-    if (!lastRun?.started_at) return true;
-    return Date.now() - new Date(lastRun.started_at).getTime() > 3 * 3_600_000;
-  }, [lastRun]);
+  const { run: lastRun, health: syncHealth, needsAttention: syncStale } =
+    useLastSyncRun();
 
   return (
     <div className="space-y-4">
@@ -155,18 +150,18 @@ export const SettingsPage = () => {
             </dd>
 
             <dt className="flex items-center gap-2 text-muted-foreground">
-              <Clock className="size-3.5" /> Cron sağlığı
+              <Clock className="size-3.5" /> Cron health
             </dt>
             <dd>
               {syncStale ? (
                 <Badge variant="destructive">
                   <XCircle className="mr-1 size-3" />
-                  3 saatten fazla senkron yok
+                  {SYNC_HEALTH_LABEL[syncHealth]}
                 </Badge>
               ) : (
                 <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
                   <CheckCircle2 className="mr-1 size-3" />
-                  saatlik cron çalışıyor
+                  {SYNC_HEALTH_LABEL[syncHealth]}
                 </Badge>
               )}
             </dd>
@@ -176,24 +171,23 @@ export const SettingsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Otomasyon</CardTitle>
+          <CardTitle>Automation</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p>
-            <code className="font-mono">helm-ingest-hourly</code> cron'u her
-            saatin başında (<code className="font-mono">0 * * * *</code>) tüm
-            aktif entegrasyonları çalıştırır.
+            The <code className="font-mono">helm-ingest-hourly</code> cron runs
+            every enabled integration on the hour (
+            <code className="font-mono">0 * * * *</code>).
           </p>
           <p className="text-muted-foreground">
-            Etkinleşmesi için Supabase Vault'a <code>helm_project_url</code> +{" "}
-            <code>helm_service_role_key</code> girilmiş olmalı.{" "}
+            It needs <code>helm_project_url</code> and{" "}
+            <code>helm_service_role_key</code> in the Supabase Vault.{" "}
             <code className="font-mono">scripts/p0-cron-bootstrap.sql</code>{" "}
-            tek tıkla kurulum.
+            sets both up in one go.
           </p>
           {syncStale && (
             <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-              Cron çalışmıyor olabilir. Vault secret'larını ve{" "}
-              <code>cron.job</code> tablosunu kontrol et.
+              {SYNC_HEALTH_MESSAGE[syncHealth]}
             </div>
           )}
         </CardContent>

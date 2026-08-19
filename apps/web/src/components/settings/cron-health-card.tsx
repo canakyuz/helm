@@ -13,6 +13,7 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -83,8 +84,15 @@ export const CronHealthCard = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="size-4" />
-          Cron Çalışmaları
+          Cron dispatch
         </CardTitle>
+        <CardDescription>
+          Whether pg_cron fired the job — not whether the ingest worked.{" "}
+          <code className="font-mono">net.http_post</code> is asynchronous, so a
+          run is marked succeeded the moment the request is queued (note the
+          ~40&nbsp;ms durations). The real outcome lives in{" "}
+          <code className="font-mono">sync_runs</code>, shown above.
+        </CardDescription>
         <CardAction>
           <Button
             variant="outline"
@@ -113,16 +121,14 @@ export const CronHealthCard = () => {
           </div>
         ) : loading && jobs.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
-            Yükleniyor…
+            Loading…
           </div>
         ) : jobs.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
-            <code>helm-*</code> ön ekli cron job'u bulunamadı.
+            No cron job with a <code>helm-*</code> prefix.
             <br />
-            <code className="text-xs">
-              scripts/p0-cron-bootstrap.sql
-            </code>{" "}
-            ile <code>helm-ingest-hourly</code> kur.
+            Install <code>helm-ingest-hourly</code> with{" "}
+            <code className="text-xs">scripts/p0-cron-bootstrap.sql</code>.
           </div>
         ) : (
           <div className="space-y-2">
@@ -153,11 +159,11 @@ export const CronHealthCard = () => {
                       </Badge>
                       {j.active ? (
                         <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500 text-[10px]">
-                          aktif
+                          active
                         </Badge>
                       ) : (
                         <Badge variant="secondary" className="text-[10px]">
-                          pasif
+                          inactive
                         </Badge>
                       )}
                     </div>
