@@ -15,3 +15,10 @@ dist/
 .zed
 .idea
 .claude
+
+# Tek seferlik codemod / debug artiklari. Oturum icinde uretilip diskte kalan
+# bu dosyalar `git add -A` ile sessizce commit'e giriyordu — public repo'da
+# "test-login.js" gibi bir dosya, icerigi zararsiz olsa da yanlis okunur.
+/test-tokens.txt
+/scripts/apply-bento.js
+/scripts/test-login.js
