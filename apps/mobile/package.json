@@ -26,7 +26,8 @@
     "postinstall": "install-skia && node ./plugins/patch-extension-storage-file.js && node ./plugins/fix-cocoapods-modulemaps.js",
     "pod:fix": "node ./plugins/fix-cocoapods-modulemaps.js",
     "patch:ios-app-groups": "node ./plugins/patch-ios-app-groups-build.js",
-    "patch:widget-storage": "node ./plugins/patch-extension-storage-file.js"
+    "patch:widget-storage": "node ./plugins/patch-extension-storage-file.js",
+    "test": "bun test"
   },
   "dependencies": {
     "@bacons/apple-targets": "^4.0.7",
