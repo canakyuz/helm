@@ -46,8 +46,17 @@ build-web: ## web prod build → apps/web/dist
 require-token:
 	@test -n "$(SUPABASE_ACCESS_TOKEN)" || { \
 		echo "SUPABASE_ACCESS_TOKEN .env'de yok."; \
-		echo "Helm hesabının PAT'ini ekle:  echo 'SUPABASE_ACCESS_TOKEN=sbp_...' >> .env"; \
-		echo "Token: supabase.com/dashboard/account/tokens"; \
+		echo ""; \
+		echo "DIKKAT: bu makinedeki supabase CLI BASKA bir hesapta."; \
+		echo "  gorunen projeler : begahome, empireinc"; \
+		echo "  gereken proje    : $(HELM_SUPABASE_PROJECT_ID) (Helm Ops)"; \
+		echo "Yani 'supabase login' yetmez — token HELM hesabindan alinmali."; \
+		echo ""; \
+		echo "1) Helm hesabiyla gir: supabase.com/dashboard/account/tokens"; \
+		echo "2) .env'i EDITORLE ac ve satiri ekle."; \
+		echo "   'echo ... >> .env' KULLANMA: .env son satiri newline ile"; \
+		echo "   bitmiyorsa token onceki satirin sonuna yapisir ve iki komut"; \
+		echo "   birden bozulur (yasandi)."; \
 		exit 1; }
 
 gen-types: require-token ## Supabase schema → packages/types/src/database.ts
@@ -55,8 +64,19 @@ gen-types: require-token ## Supabase schema → packages/types/src/database.ts
 
 # --db-url ile: --project-ref tek başına DB şifresini interaktif sorar, bu da
 # make içinde kilitlenme demek. HELM_DB_URL zaten .env'de.
-db-push: require-token ## migration'ları remote'a uygula
+#
+# NEDEN require-token YOK: bu hedef Management API'ye hiç gitmiyor, doğrudan
+# Postgres'e bağlanıyor. Token'ı şart koşmak, gereği olmayan bir engelde
+# durdurup "yetki sorunu var" sanısı yaratıyordu. Kendi ön koşulu DB URL'i.
+db-push: require-db-url ## migration'ları remote'a uygula
 	supabase db push --db-url "$(HELM_DB_URL)"
+
+require-db-url:
+	@test -n "$(HELM_DB_URL)" || { \
+		echo "HELM_DB_URL .env'de yok."; \
+		echo "Supabase → Settings → Database → Connection string (pooler)."; \
+		echo "DB şifresini yakın zamanda sıfırladıysan bu satırı da güncelle."; \
+		exit 1; }
 
 # --project-ref şart: repo'da supabase/.temp/project-ref link dosyası yok, CLI
 # aksi halde "Cannot find project ref" der.
