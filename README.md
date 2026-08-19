@@ -111,7 +111,10 @@ touch if you need terms that don't fit that requirement.
 
 - **Phase 0 (monorepo skeleton)** ✅ — workspaces, `@helm/*` scaffold, types as a
   single source, green build.
-- **Phase 1 (API extract)** 🔲 — moving `supabase.from` calls out of hooks and
-  into `@helm/api`. Order of work:
-  [phase-1-api-extract.md](./docs/migration/phase-1-api-extract.md). The apps
-  declare `@helm/*` as dependencies but don't import from them yet.
+- **Phase 1 (API extract)** ✅ — reads go through `@helm/api` (32 modules) and
+  `@helm/queries`; both apps import from `@helm/*`. Three write paths still call
+  `supabase.from` directly (CMS asset delete, CMS revision insert, push-device
+  upsert). Background:
+  [phase-1-api-extract.md](./docs/migration/phase-1-api-extract.md).
+- **Next** — move those three writes into `@helm/api`, then tighten the RLS
+  policies for multi-user use (see *Deployment*).
