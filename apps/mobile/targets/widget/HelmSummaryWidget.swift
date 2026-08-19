@@ -26,6 +26,24 @@ private struct HelmWidgetPayload: Decodable {
     totalRevenueText ?? legacyMoney(totalRevenue ?? ((adRevenue ?? 0) + (incomingPayments ?? 0)))
   }
 
+  /// "21:00" — verinin YAZILDIGI an, widget'in cizildigi an degil.
+  ///
+  /// NEDEN GEREKLI: widget agdan veri cekmiyor; yalnizca uygulamanin en son
+  /// yazdigi dosyayi okuyor. Uygulama acilmadigi surece rakam gunlerce ayni
+  /// kalabilir ve damgasiz haliyle guncelmis gibi gorunur. Damga, bayat veriyi
+  /// tazelemez ama sakladigi yalani ortadan kaldirir.
+  var updatedAtDisplay: String? {
+    guard !updatedAtIso.isEmpty else { return nil }
+    let iso = ISO8601DateFormatter()
+    iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    let date = iso.date(from: updatedAtIso)
+      ?? ISO8601DateFormatter().date(from: updatedAtIso)
+    guard let date else { return nil }
+    let out = DateFormatter()
+    out.dateFormat = "HH:mm"
+    return out.string(from: date)
+  }
+
   var adDisplay: String { adRevenueText ?? legacyMoney(adRevenue ?? 0) }
   var payDisplay: String { incomingPaymentsText ?? legacyMoney(incomingPayments ?? 0) }
   var liveDisplay: String { liveUsersText ?? String(Int(liveUsers)) }
@@ -473,7 +491,11 @@ private struct HelmGlassCard: View {
       )
       .padding(.top, 8)
 
-      Text("\(payload.adDisplay) ad · \(payload.payDisplay) pay")
+      Text(
+        payload.updatedAtDisplay.map {
+          "\(payload.adDisplay) ad · \(payload.payDisplay) pay · \($0)"
+        } ?? "\(payload.adDisplay) ad · \(payload.payDisplay) pay"
+      )
         .font(.system(size: compact ? 10 : 11, weight: .regular))
         .helmText(.secondary)
         .lineLimit(1)
@@ -525,7 +547,11 @@ private struct HelmLargeBody: View {
       HelmTotalAmount(full: p.totalDisplay, mainPt: 32, centsPt: 17)
         .padding(.top, 10)
 
-      Text("\(p.adDisplay) ad · \(p.payDisplay) pay")
+      Text(
+        p.updatedAtDisplay.map {
+          "\(p.adDisplay) ad · \(p.payDisplay) pay · \($0)"
+        } ?? "\(p.adDisplay) ad · \(p.payDisplay) pay"
+      )
         .font(.system(size: 11))
         .helmText(.secondary)
         .padding(.top, 6)

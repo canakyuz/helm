@@ -50,6 +50,11 @@ jobs:
       - name: All workspaces
         run: bun run typecheck
 
+      # Regresyon testleri. Bir bug duzeltildiginde testi de yaziliyor ama
+      # CI kosmuyorsa test dekordan ibaret kalir — bu adim onu engelliyor.
+      - name: Tests
+        run: cd apps/mobile && bun test
+
   lint:
     name: Lint (mobile)
     runs-on: ubuntu-latest

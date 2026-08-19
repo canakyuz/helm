@@ -1,0 +1,57 @@
+  --color-canvas: rgb(var(--bento-bg));
+  --color-tile: rgb(var(--bento-tile));
+  --color-tile2: rgb(var(--bento-tile2));
+  --color-line: rgb(var(--bento-line));
+  --color-fg: rgb(var(--bento-fg));
+  --color-fg2: rgb(var(--bento-fg2));
+  --color-fg3: rgb(var(--bento-fg3));
+  --color-pos: rgb(var(--bento-pos));
+  --color-neg: rgb(var(--bento-neg));
+  --color-warn: rgb(var(--bento-warn));
+  --color-chrome: rgb(var(--bento-chrome));
+  --color-violet: rgb(var(--bento-violet));
+  --color-blue: rgb(var(--bento-blue));
+  --color-amber: rgb(var(--bento-amber));
+  --color-bento-accent: #06B9EF;
+  --color-bento-accent-ink: #11130A;
+  --color-bento-accent-soft: #037FAB;
+
+  --spacing-xs: 6px;
+  --spacing-sm: 8px;
+  --spacing-screenX: 16px;
+  --spacing-tileGap: 10px;
+  --spacing-tilePad: 18px;
+  --spacing-tilePadLg: 20px;
+  --spacing-tilePadSm: 16px;
+  --spacing-boxPad: 14px;
+  --spacing-rowY: 12px;
+  --spacing-headerY: 14px;
+  --spacing-tabBarTop: 12px;
+  --spacing-tabBarBottom: 26px;
+
+  --radius-tile: 22px;
+  --radius-inner: 16px;
+  --radius-field: 14px;
+  --radius-icon: 13px;
+  --radius-btn: 12px;
+  --radius-logo: 18px;
+  --radius-rail: 4px;
+  --radius-bar: 3px;
+  --radius-pill: 999px;
+
+  --text-eyebrow: 10px;
+  --text-meta: 12px;
+  --text-body: 13px;
+  --text-row: 14px;
+  --text-emph: 15px;
+  --text-title: 19px;
+  --text-statSm: 22px;
+  --text-stat: 28px;
+  --text-hero: 48px;
+
+  --tracking-hero: -0.045em;
+  --tracking-tightest: -0.04em;
+  --tracking-tighter: -0.03em;
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.16em;
+  --tracking-wider: 0.18em;
