@@ -13,7 +13,7 @@ import { usePropertyMetrics } from "~/hooks/use-property-metrics";
 import { useFormatCurrency, useFormatCurrencyCompact } from "~/hooks/use-format-currency";
 import { useFxRates } from "~/hooks/use-fx-rates";
 import { useRevenueGoal } from "~/hooks/use-revenue-goal";
-import { useRevenueMix } from "~/hooks/use-revenue-mix";
+import { useRevenueHistory } from "~/hooks/use-revenue-history";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatDelta, formatInteger, formatPercent, formatRelativeTime, isFlatDelta } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
@@ -25,6 +25,7 @@ import {
   STATUS_LABEL,
   TYPE_LABEL,
 } from "~/lib/labels";
+import { amountOn, currentMonthTotal, heroDays, isoDay } from "~/lib/revenue-hero";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
@@ -47,27 +48,6 @@ const SPARK_BARS = 10;
 const TOP_N = 5;
 
 /** Hero rakaminin stili — CountUp ve duz Text ayni gorunmeli. */
-/**
- * Iki gunluk seriyi tarihe gore toplar.
- *
- * NEDEN GEREKLI: hero'daki rakam reklam + magaza gelirinin toplami, ama sparkline
- * sadece ad_revenue serisinden geliyordu. Bir cubuga basinca basliktakinden BASKA
- * bir metrik gorunurdu. Ayni sayiyi gostermeleri sart.
- *
- * Time: O(n+m), Space: O(n+m).
- */
-function mergeSeries(
-  a: readonly { date: string; value: number }[],
-  b: readonly { date: string; value: number }[],
-): { date: string; value: number }[] {
-  const byDate = new Map<string, number>();
-  for (const p of a) byDate.set(p.date, p.value);
-  for (const p of b) byDate.set(p.date, (byDate.get(p.date) ?? 0) + p.value);
-  return [...byDate.entries()]
-    .sort(([x], [y]) => (x < y ? -1 : x > y ? 1 : 0))
-    .map(([date, value]) => ({ date, value }));
-}
-
 /**
  * Bir gunun serideki degeri ve bir onceki OLCUME gore yuzde degisimi.
  *
@@ -108,8 +88,7 @@ export default function Overview() {
   const ack = useAckAlert();
   const properties = useProperties();
   const propMetrics = usePropertyMetrics();
-  const revenue = useMetricDetail("ad_revenue");
-  const appRevDetail = useMetricDetail("app_revenue");
+  const history = useRevenueHistory();
   const crashFree = useMetricDetail("crash_free_sessions");
   // Gun secilince alttaki kartlar da O GUNU gostermeli. kpis yalnizca bugunun
   // anlik goruntusu; onceki hal gecmis bir gun secilince hero'yu degistirip
@@ -118,7 +97,6 @@ export default function Overview() {
   const mrrDetail = useMetricDetail("mrr");
   const dauDetail = useMetricDetail("dau");
   const goal = useRevenueGoal();
-  const mix = useRevenueMix();
   const { refreshing, onRefresh } = useScreenRefresh();
 
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
@@ -129,12 +107,12 @@ export default function Overview() {
   /** Hero'da hangi gun gosteriliyor. null = bugun. */
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
+  // Hero serisi widget ile AYNI kaynaktan: revenue-history bucket'lari.
+  // Gerekcesi ~/lib/revenue-hero.ts basinda — ozeti: ad_revenue + app_revenue
+  // metrikleri magaza gelirini bu ay %100 eksik gosteriyordu.
   const sparkPoints = useMemo(
-    () =>
-      mergeSeries(revenue.data?.series ?? [], appRevDetail.data?.series ?? []).slice(
-        -SPARK_BARS,
-      ),
-    [revenue.data, appRevDetail.data],
+    () => heroDays(history.data?.months ?? [], SPARK_BARS),
+    [history.data],
   );
 
   if (kpis.isLoading) return <ScreenStatus label={t("Yükleniyor…")} />;
@@ -145,8 +123,8 @@ export default function Overview() {
 
   // Hero = GUNLUK gelir (bugun reklam + magaza). Hepsi USD canonical; fmt secili
   // para birimine cevirir.
-  const todayRevenue = (revenue.data?.today ?? 0) + (appRevDetail.data?.today ?? 0);
-  const yestRevenue = (revenue.data?.yesterday ?? 0) + (appRevDetail.data?.yesterday ?? 0);
+  const todayRevenue = amountOn(sparkPoints, isoDay());
+  const yestRevenue = amountOn(sparkPoints, isoDay(-1));
   const revDelta = yestRevenue > 0 ? ((todayRevenue - yestRevenue) / yestRevenue) * 100 : 0;
 
   const cfSeries = (crashFree.data?.series ?? []).map((p) => p.value);
@@ -156,12 +134,12 @@ export default function Overview() {
       ? Number((cfNow! - cfSeries[cfSeries.length - 2]!).toFixed(1))
       : null;
 
-  // Ilerleme = bu ayin GERCEK geliri (revenue-mix toplami), MRR projeksiyonu degil.
+  // Ilerleme = bu ayin GERCEK geliri (webhook + magaza mutabakatli), MRR projeksiyonu degil.
   const goalTarget =
     goal.data?.target_amount != null
       ? toUsd(goal.data.target_amount, goal.data.currency, rates ?? FX_FALLBACK)
       : null;
-  const goalCurrent = mix.data?.total ?? 0;
+  const goalCurrent = currentMonthTotal(history.data?.months ?? []);
   const goalRatio = goalTarget != null && goalTarget > 0 ? goalCurrent / goalTarget : 0;
 
   // Secili gun. Yenileme seriyi kisaltabilecegi icin indeks dogrulanir —
