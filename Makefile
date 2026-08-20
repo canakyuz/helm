@@ -6,7 +6,7 @@ export
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help install hooks require-token scan-secrets audit-secrets dev-web dev-mobile typecheck build-web gen-types db-push fn-deploy ios-release ota clean
+.PHONY: help install hooks require-token check-ota-env scan-secrets audit-secrets dev-web dev-mobile typecheck build-web gen-types db-push fn-deploy ios-release ota clean
 
 help: ## komutları listele
 	@awk 'BEGIN{FS=":.*## "} /^[a-zA-Z_-]+:.*## /{printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -101,6 +101,31 @@ clean: ## node_modules + build çıktıları temizle
 # Kanal sorusunun tek dogru kaynagi `eas build:list`.
 CHANNEL ?= production
 
-ota: ## OTA update (CHANNEL=production ile prod kanalina)
+# Yayindan ONCE hedef ortamin anahtarini dogrula.
+#
+# NEDEN: `eas update` EXPO_PUBLIC_* degerlerini bundle'a GOMER. Hedef ortamda
+# olu bir anahtar duruyorsa yayin, calisan bir uygulamayi bozar — yasandi:
+# production ortami legacy JWT (eyJ...) tasiyordu, Supabase'de legacy anahtarlar
+# kapatilmisti, yayindan sonra telefonda TUM ekranlar bosaldi. Anahtar formati
+# tek satirlik bir kontrol; yayindan sonra fark etmek cok pahali.
+ota: check-ota-env ## OTA update (CHANNEL=production ile prod kanalina)
 	cd apps/mobile && eas update --channel $(CHANNEL) --environment $(CHANNEL) --message "$$(git log -1 --pretty=%s)"
+
+check-ota-env:
+	@cd apps/mobile && key=$$(eas env:list --environment $(CHANNEL) 2>/dev/null \
+		| grep -oE 'EXPO_PUBLIC_HELM_SUPABASE_ANON_KEY=[A-Za-z0-9_.-]+' | cut -d= -f2); \
+	if [ -z "$$key" ]; then \
+		echo "HATA: $(CHANNEL) ortaminda EXPO_PUBLIC_HELM_SUPABASE_ANON_KEY yok."; \
+		echo "Bos ortamla yayin yaparsan uygulama Supabase'e hic baglanamaz."; \
+		exit 1; \
+	fi; \
+	case "$$key" in \
+		eyJ*) echo "HATA: $(CHANNEL) ortami LEGACY JWT anahtari tasiyor (eyJ...)."; \
+		      echo "Supabase'de legacy anahtarlar kapali; bu anahtarla yayin"; \
+		      echo "uygulamayi bozar. Once sb_publishable_... ile guncelle:"; \
+		      echo "  eas env:update --environment $(CHANNEL) \\"; \
+		      echo "    --name EXPO_PUBLIC_HELM_SUPABASE_ANON_KEY --value sb_publishable_..."; \
+		      exit 1;; \
+	esac; \
+	echo "✓ $(CHANNEL) ortami anahtar formati uygun ($${key%%_*}_...)"
 
