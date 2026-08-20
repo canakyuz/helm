@@ -91,28 +91,28 @@ type NavGroup = {
 // Detay: .docs/MODULES.md §6
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Main Navigation",
+    label: "Ana Menü",
     alwaysVisible: true,
     items: [
       { title: "Cockpit", icon: LayoutDashboard, url: "/" },
       {
-        title: "Content",
+        title: "CMS",
         icon: Layers,
         requires: "content",
         children: [
-          { title: "Schemas", icon: Layers, url: "/cms/collections", requires: "content" },
-          { title: "Content", icon: FileText, url: "/cms/entries", requires: "content" },
+          { title: "Şemalar", icon: Layers, url: "/cms/collections", requires: "content" },
+          { title: "İçerikler", icon: FileText, url: "/cms/entries", requires: "content" },
           { title: "Medya", icon: ImageIcon, url: "/cms/assets", requires: "content" },
         ],
       },
-      { title: "Users", icon: Users, url: "/users", requires: "users" },
+      { title: "Kullanıcılar", icon: Users, url: "/users", requires: "users" },
       { title: "Segmentler", icon: Filter, url: "/segments", requires: "users" },
       { title: "Yorumlar", icon: Star, url: "/reviews", requires: "reviews" },
-      { title: "Intervention history", icon: History, url: "/audit" },
+      { title: "Müdahale geçmişi", icon: History, url: "/audit" },
     ],
   },
   {
-    label: "Analytics & Insights",
+    label: "Analitik & İçgörü",
     items: [
       {
         title: "Gelir & Reklam",
@@ -120,18 +120,18 @@ const NAV_GROUPS: NavGroup[] = [
         url: "/revenue",
         requires: ["subscriptions", "ads"],
       },
-      { title: "Growth", icon: LineChart, url: "/growth", requires: "analytics" },
+      { title: "Büyüme", icon: LineChart, url: "/growth", requires: "analytics" },
       { title: "Huni", icon: Workflow, url: "/funnel", requires: "funnel" },
-      { title: "Alerts", icon: Bell, url: "/alerts" },
+      { title: "Uyarılar", icon: Bell, url: "/alerts" },
     ],
   },
   {
-    label: "Messaging",
+    label: "Mesajlaşma",
     items: [
       { title: "Mail", icon: Mail, url: "/mail", requires: "mail" },
       { title: "Push", icon: Send, url: "/push", requires: "push" },
       {
-        title: "Campaign history",
+        title: "Kampanya geçmişi",
         icon: Megaphone,
         url: "/campaigns",
         requires: ["mail", "push"],
@@ -143,15 +143,15 @@ const NAV_GROUPS: NavGroup[] = [
     alwaysVisible: true,
     items: [
       { title: "Entegrasyonlar", icon: Plug, url: "/integrations" },
-      { title: "Sync & health", icon: Activity, url: "/system" },
+      { title: "Sync & Sağlık", icon: Activity, url: "/system" },
       { title: "Loglar", icon: ScrollText, url: "/logs" },
-      { title: "Versions", icon: Tag, url: "/versions" },
+      { title: "Sürümler", icon: Tag, url: "/versions" },
     ],
   },
   {
-    label: "Support",
+    label: "Destek",
     alwaysVisible: true,
-    items: [{ title: "Settings", icon: Settings, url: "/settings" }],
+    items: [{ title: "Ayarlar", icon: Settings, url: "/settings" }],
   },
 ];
 
@@ -181,11 +181,11 @@ const SidebarSearch = () => {
     <button
       type="button"
       onClick={() => query.toggle()}
-      className="mx-2 flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-2.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground group-data-[collapsible=icon]:hidden"
+      className="mx-2 flex h-8 items-center gap-2 rounded-lg border border-border bg-card px-2.5 text-[13px] text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground group-data-[collapsible=icon]:hidden"
     >
-      <Search className="size-4 shrink-0" />
-      <span className="flex-1 truncate text-left">Search anything</span>
-      <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+      <Search className="size-3.5 shrink-0" />
+      <span className="flex-1 truncate text-left">Hızlı arama</span>
+      <kbd className="rounded border border-border bg-muted px-1.5 py-px font-mono text-[10px] text-muted-foreground">
         ⌘K
       </kbd>
     </button>
@@ -194,7 +194,7 @@ const SidebarSearch = () => {
 
 /** Logo satırı + collapse butonu (Kravio üst bloğu). */
 const SidebarLogo = () => (
-  <div className="flex items-center gap-2 px-2 pt-1">
+  <div className="flex items-center gap-2.5 px-2 pt-1">
     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
       <span className="text-sm font-bold">H</span>
     </div>
@@ -246,7 +246,7 @@ const NavUser = () => {
           <DropdownMenuContent side="top" align="start" className="w-56">
             <DropdownMenuItem onClick={toggleMode}>
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-              {isDark ? "Light mode" : "Dark mode"}
+              {isDark ? "Açık mod" : "Koyu mod"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()}>
@@ -334,10 +334,10 @@ const AppSidebar = () => {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="gap-3 pb-1">
+      <SidebarHeader className="gap-2.5 pb-1">
         <SidebarLogo />
-        <SidebarSearch />
         <ProjectSwitcher />
+        <SidebarSearch />
       </SidebarHeader>
 
       <SidebarContent>
@@ -367,7 +367,7 @@ const AppSidebar = () => {
                           <Icon />
                           <span>{item.title}</span>
                         </SidebarMenuButton>
-                        <SidebarMenuBadge>coming soon</SidebarMenuBadge>
+                        <SidebarMenuBadge>yakında</SidebarMenuBadge>
                       </SidebarMenuItem>
                     );
                   }
@@ -405,7 +405,7 @@ const AppSidebar = () => {
 const useBreadcrumb = (): { group: string; page: string } => {
   const { pathname } = useLocation();
   return useMemo(() => {
-    if (pathname === "/") return { group: "Main Navigation", page: "Cockpit" };
+    if (pathname === "/") return { group: "Ana Menü", page: "Cockpit" };
     for (const g of NAV_GROUPS) {
       for (const it of g.items) {
         if (it.url && it.url !== "/" && pathname.startsWith(it.url)) {

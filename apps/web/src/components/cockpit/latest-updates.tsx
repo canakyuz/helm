@@ -112,7 +112,7 @@ export const LatestUpdates = ({ alerts, runs, className }: LatestUpdatesProps) =
     <Card className={cn("py-0", className)}>
       <CardHeader className="px-5 pt-5 pb-0">
         <CardTitle className="text-sm font-medium text-muted-foreground">
-          Latest Updates
+          Son Aktiviteler
         </CardTitle>
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col gap-3 px-5 pb-5 pt-3">
@@ -141,7 +141,7 @@ export const LatestUpdates = ({ alerts, runs, className }: LatestUpdatesProps) =
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search activities"
+            placeholder="Aktivite ara"
             className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
           />
         </label>

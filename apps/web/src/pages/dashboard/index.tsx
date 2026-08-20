@@ -87,9 +87,9 @@ const latestByProject = (metrics: Metric[], metricName: string) => {
 };
 
 const timeAgo = (iso: string | null) => {
-  if (!iso) return "never";
+  if (!iso) return "hiç";
   const min = (Date.now() - new Date(iso).getTime()) / 60_000;
-  if (min < 1) return "just now";
+  if (min < 1) return "az önce";
   if (min < 60) return `${Math.round(min)}m ago`;
   if (min < 1440) return `${Math.round(min / 60)}h ago`;
   return `${Math.round(min / 1440)}d ago`;
@@ -443,7 +443,7 @@ export const DashboardPage = () => {
       <div className="flex flex-wrap items-end justify-between gap-3 pt-1">
         <div>
           <h1 className="text-[26px] font-semibold tracking-tight">
-            Hello, {firstName} 👋
+            Merhaba, {firstName} 👋
           </h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {isAll
@@ -763,7 +763,7 @@ const StatusStrip = ({
       )}
       title={
         syncStale
-          ? "The nightly cron may not be running - check the Vault secrets"
+          ? "Gece cron'u çalışmıyor olabilir - Vault secret'larını kontrol et"
           : undefined
       }
     >

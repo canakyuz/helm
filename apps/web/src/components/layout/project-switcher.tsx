@@ -63,7 +63,7 @@ export const ProjectSwitcher = () => {
       .sort((a, b) => a.brand.name.localeCompare(b.brand.name));
     if (orphans.length > 0) {
       ordered.push({
-        brand: { id: "__orphan__", name: "Brand'siz", slug: "", created_at: "" },
+        brand: { id: "__orphan__", name: "Marka'sız", slug: "", created_at: "" },
         properties: orphans,
       });
     }
@@ -75,10 +75,10 @@ export const ProjectSwitcher = () => {
     ? brands.find((b) => b.id === active.brand_id)
     : null;
 
-  const label = active?.name ?? "All properties";
+  const label = active?.name ?? "Tüm property'ler";
   const sub = active
-    ? `${activeBrand?.name ?? "Brand'siz"} · ${PROPERTY_TYPE_LABELS[active.type] ?? active.type}`
-    : `${properties.length} property · ${brands.length} brand`;
+    ? `${activeBrand?.name ?? "Marka'sız"} · ${PROPERTY_TYPE_LABELS[active.type] ?? active.type}`
+    : `${properties.length} property · ${brands.length} marka`;
 
   return (
     <SidebarMenu>
@@ -104,7 +104,7 @@ export const ProjectSwitcher = () => {
               Kapsam
             </DropdownMenuLabel>
             <DropdownMenuItem onClick={() => setScope("all")}>
-              <Boxes className="size-4" /> Tüm Property'ler
+              <Boxes className="size-4" /> Tüm property'ler
             </DropdownMenuItem>
 
             {groups.map((g) => (

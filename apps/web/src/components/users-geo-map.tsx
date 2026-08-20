@@ -163,7 +163,7 @@ export const UsersGeoMap = ({
           <button
             type="button"
             onClick={() => setSelected(null)}
-            aria-label="Close"
+            aria-label="Kapat"
             className="absolute right-2 top-2 grid size-6 place-items-center rounded-md text-muted-foreground hover:bg-accent"
           >
             <X className="size-3.5" />
@@ -197,7 +197,7 @@ export const UsersGeoMap = ({
         <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
           <div className="text-center">
             <Globe2 className="mx-auto size-8 opacity-30" />
-            <div className="mt-2">No country data yet</div>
+            <div className="mt-2">Henüz ülke verisi yok</div>
             <div className="text-xs opacity-70">
               ASC veya PostHog senkronlandıktan sonra görünür
             </div>
@@ -227,7 +227,7 @@ export const UsersGeoMap = ({
         ) : markers.length === 0 ? (
           <div className="flex h-[300px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed text-sm text-muted-foreground">
             <Globe2 className="size-6 opacity-40" />
-            <div>No country data yet.</div>
+            <div>Henüz ülke verisi yok.</div>
             <div className="text-xs">
               App Store Connect veya PostHog (
               <code className="text-[10px]">$geoip_country_code</code>)
