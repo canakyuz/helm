@@ -8,6 +8,7 @@ import type { GeoMapMarker } from "@/components/tool-ui/geo-map";
 import { getCountryGeo } from "@/lib/country-geo";
 import { compact } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
+import { useHelmTheme } from "@/theme/ThemeProvider";
 import type { MetricCountry } from "@/types";
 
 interface UsersGeoMapProps {
@@ -24,12 +25,12 @@ interface UsersGeoMapProps {
 
 const DEFAULT_METRICS = ["app_downloads", "dau"];
 
-/** Marker boyutu için lineer-log ölçek: 1 → 10px, max → ~24px.
- *  Daha büyük marker'lar - map'te kaybolma riskini azaltır. */
+/** Marker boyutu için lineer-log ölçek: 1 → 5px, max → ~16px.
+ *  Küçük yarıçap + beyaz ring - düşük zoom'da blob birleşmesini önler. */
 const radiusFor = (value: number, max: number) => {
-  if (max <= 0) return 10;
+  if (max <= 0) return 5;
   const ratio = Math.log10(Math.max(1, value)) / Math.log10(Math.max(10, max));
-  return 10 + ratio * 14;
+  return 5 + ratio * 11;
 };
 
 export const UsersGeoMap = ({
@@ -40,6 +41,9 @@ export const UsersGeoMap = ({
   mapHeight,
   fullCanvas = false,
 }: UsersGeoMapProps) => {
+  // Tile temasını app temasından al - OS temasına düşerse light app'te
+  // koyu harita çıkıyordu (okunmaz kontrast).
+  const { theme } = useHelmTheme();
   const since = useMemo(
     () => new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10),
     [days],
@@ -133,6 +137,7 @@ export const UsersGeoMap = ({
         clustering={{ enabled: false }}
         viewport={{ mode: "fit", padding: 24, maxZoom: 5 }}
         showZoomControl
+        theme={theme.mode}
         onMarkerClick={(m) => setSelected(m.id ?? null)}
       />
 

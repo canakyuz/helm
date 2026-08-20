@@ -44,32 +44,15 @@
   }
 }
 
-/* Map marker nefes alma - Leaflet CircleMarker SVG path için.
-   Transform kullanmıyoruz (Leaflet pozisyonu bozulur); stroke-width
-   + stroke-opacity animate ederek "halka genişler" hissi. */
-@keyframes helm-marker-pulse {
-  0%,
-  100% {
-    stroke-width: 2;
-    stroke-opacity: 0.9;
-  }
-  50% {
-    stroke-width: 10;
-    stroke-opacity: 0.3;
-  }
-}
+/* Map marker - flat: lacivert dolgu + kart renginde ince ring.
+   Eski pulse animasyonu kaldırıldı - düşük zoom'da halolar birleşip
+   okunmaz blob üretiyordu (Kravio dili: sakin, net nokta). */
 [data-helm-theme^="glass"] .helm-pulse-markers path.leaflet-interactive {
-  animation: helm-marker-pulse 2.4s ease-in-out infinite;
-  stroke: var(--primary);
+  stroke: rgb(var(--bento-tile));
+  stroke-width: 2;
+  stroke-opacity: 1;
   fill: var(--primary);
-  fill-opacity: 0.95;
-}
-
-/* Reduced motion respect - animasyonları kapat. */
-@media (prefers-reduced-motion: reduce) {
-  .helm-pulse-markers path.leaflet-interactive {
-    animation: none !important;
-  }
+  fill-opacity: 0.8;
 }
 
 /* Header: düz zemin, scroll'da opak + alt border (blur yok). */

@@ -162,7 +162,8 @@ export const BarTrendCard = ({
                     fill={
                       i === activeIndex
                         ? "var(--primary)"
-                        : "rgb(var(--bento-line))"
+                        : // Kart zemininden türetilmiş gri - iki temada da okunur.
+                          "color-mix(in srgb, rgb(var(--bento-fg3)) 24%, rgb(var(--bento-tile)))"
                     }
                   />
                 ))}
