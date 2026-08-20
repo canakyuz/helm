@@ -1,4 +1,4 @@
--- sync_runs retention — tablo sinirsiz buyuyordu.
+-- sync_runs retention - tablo sinirsiz buyuyordu.
 --
 -- NEDEN GEREKLI: helm-ingest saat basi, helm-reviews yarim saatte bir calisiyor
 -- ve her calisma bir satir yaziyor. Hicbir yerde temizlik yoktu: gunde ~24+
@@ -28,7 +28,7 @@ $$;
 comment on function public.helm_prune_sync_runs(int) is
   'sync_runs kayitlarini keep_days gunden eskiyse siler; silinen satir sayisini doner.';
 
--- Gece 03:15 UTC — saat basi ingest ve yarim saatlik reviews cakismasin.
+-- Gece 03:15 UTC - saat basi ingest ve yarim saatlik reviews cakismasin.
 select cron.schedule(
   'helm-prune-sync-runs',
   '15 3 * * *',

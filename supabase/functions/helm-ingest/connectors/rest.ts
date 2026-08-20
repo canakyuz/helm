@@ -1,13 +1,13 @@
 import { type Connector, type MetricPoint, today } from "./types.ts";
 
-// REST — kullanıcının kendi endpoint'inden metrik çeker. Endpoint helm
+// REST - kullanıcının kendi endpoint'inden metrik çeker. Endpoint helm
 // sözleşmesine uymalı: JSON gövdesi ya doğrudan bir dizi
 //   [{ "date": "2026-05-19", "metric": "signups", "value": 42 }]
 // ya da { "metrics": [ ... ] } biçiminde olmalı. date verilmezse bugün alınır.
 // config: { url, auth_header? }
 //
 // SSRF guard:
-//   - sadece https:// (http:// yasak — clear-text + private hedef riski)
+//   - sadece https:// (http:// yasak - clear-text + private hedef riski)
 //   - localhost / 127.x / 0.0.0.0 / 169.254.x (AWS metadata) / RFC1918 yasak
 //   - IPv6 ::1 / fe80::/10 yasak
 //   - Hostname IP literal değilse DNS rebinding riski mevcut; ek defans için
@@ -78,7 +78,7 @@ export const fetchRest: Connector = async (config) => {
     headers.Authorization = config.auth_header;
   }
 
-  // 10 sn timeout — sınırsız bekleme yok
+  // 10 sn timeout - sınırsız bekleme yok
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 10_000);
   let res: Response;

@@ -1,16 +1,16 @@
--- helm — gece cron'unu aktifleştir (P0.1)
+-- helm - gece cron'unu aktifleştir (P0.1)
 --
 -- KULLANIM:
 --   1) Supabase Dashboard → SQL Editor'ü aç.
 --   2) Aşağıdaki <SERVICE_ROLE_KEY> alanını gerçek key ile değiştir
 --      (Project Settings → API → service_role / secret).
 --   3) Tüm dosyayı kopyala-yapıştır, Run.
---   4) Çıktıdaki son SELECT'i kontrol et — 'helm-ingest-nightly' satırı olmalı.
+--   4) Çıktıdaki son SELECT'i kontrol et - 'helm-ingest-nightly' satırı olmalı.
 --
 -- Bu dosya idempotent: tekrar çalıştırırsan secret'ları günceller,
 -- cron job'unu (varsa) silip yeniden kurar.
 
--- Hub URL (helm'in kendisi — bu dosya hub repo'sundaki helm projesi için):
+-- Hub URL (helm'in kendisi - bu dosya hub repo'sundaki helm projesi için):
 --   https://mqiwgorivtglnjbwhkve.supabase.co
 do $$
 declare
@@ -77,7 +77,7 @@ from vault.secrets
 where name in ('helm_project_url', 'helm_service_role_key')
 order by name;
 
--- (Opsiyonel) hemen bir kez tetikle — gece beklemeden test:
+-- (Opsiyonel) hemen bir kez tetikle - gece beklemeden test:
 -- select net.http_post(
 --   url := 'https://mqiwgorivtglnjbwhkve.supabase.co/functions/v1/helm-ingest',
 --   headers := jsonb_build_object(

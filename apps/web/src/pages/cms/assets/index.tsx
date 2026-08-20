@@ -1,4 +1,4 @@
-// helm — CMS medya kütüphanesi. Upload + grid + alt edit + sil.
+// helm - CMS medya kütüphanesi. Upload + grid + alt edit + sil.
 
 import { useRef, useState } from "react";
 import { useInvalidate, useList, useUpdate } from "@refinedev/core";

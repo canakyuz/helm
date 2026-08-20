@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-action — proje Auth kullanıcısı üzerinde admin aksiyonu.
+// helm-action - proje Auth kullanıcısı üzerinde admin aksiyonu.
 // Tüm aksiyonlar audit_log'a kaydedilir.
 //
 // Body: { project_id, user_id, action, params? }
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  // Actor — JWT'den email çıkar (audit log için)
+  // Actor - JWT'den email çıkar (audit log için)
   let actorEmail: string | null = null;
   const authHeader = req.headers.get("Authorization");
   if (authHeader?.startsWith("Bearer ")) {
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
       const { data } = await hub.auth.getUser(jwt);
       actorEmail = data?.user?.email ?? null;
     } catch {
-      // anonim/anon-key — actor null kalır
+      // anonim/anon-key - actor null kalır
     }
   }
   const { data: integ, error: integErr } = await hub

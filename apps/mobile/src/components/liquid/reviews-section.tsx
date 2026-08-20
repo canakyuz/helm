@@ -54,14 +54,14 @@ function ReviewRows({ items, reply }: { items: ReviewItem[]; reply: ReturnType<t
                   </Text>
                 </View>
                 <Text style={{ fontFamily: "Geist-400", fontSize: type.bodySm, color: colors.fgSecondary }} numberOfLines={1}>
-                  {r.body ?? "—"}
+                  {r.body ?? "-"}
                 </Text>
               </View>
             }
             detail={
               <>
                 <Text style={{ fontFamily: "Geist-400", fontSize: type.body, color: colors.fgSecondary, lineHeight: 18 }}>
-                  {r.body ?? "—"}
+                  {r.body ?? "-"}
                 </Text>
                 {hasReply ? (
                   <View
@@ -75,7 +75,7 @@ function ReviewRows({ items, reply }: { items: ReviewItem[]; reply: ReturnType<t
                   >
                     <Text style={{ fontFamily: MONO_500, fontSize: 9, color: colors.green, letterSpacing: 0.6 }}>YOUR REPLY</Text>
                     <Text style={{ fontFamily: "Geist-400", fontSize: type.bodySm, color: colors.fgSecondary, marginTop: 4 }}>
-                      {r.developer_response ?? draft[r.id] ?? "Thanks for the feedback — we're on it!"}
+                      {r.developer_response ?? draft[r.id] ?? "Thanks for the feedback - we're on it!"}
                     </Text>
                   </View>
                 ) : (

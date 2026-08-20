@@ -1,4 +1,4 @@
--- helm — yeni connector sağlayıcıları: Stripe (web aboneliği), Plausible
+-- helm - yeni connector sağlayıcıları: Stripe (web aboneliği), Plausible
 -- (web analitiği). project_integrations.provider kısıtı genişletilir.
 
 alter table public.project_integrations

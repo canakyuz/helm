@@ -1,13 +1,13 @@
-# helm-mobile — Liquid Glass Design System
+# helm-mobile - Liquid Glass Design System
 
 helm cockpit'inin **mobil** analitik yoldaşı. Sadece gelir değil; oyun/uygulama/web projeleri için
 **ödemeler + analitik + crash sağlığı** tek panelde. iOS, koyu tema, gerçek iOS 26 liquid glass dili.
 
-> Bu **mobil uygulamanın** (Expo / React Native / TypeScript) tasarım sistemidir — web prototipinin
+> Bu **mobil uygulamanın** (Expo / React Native / TypeScript) tasarım sistemidir - web prototipinin
 > (`liquid.css` / `var(--*)` / `.jsx` / `window.HELM` / Tweaks paneli) DEĞİL. Token'lar
 > `src/theme/tokens.ts`'te TS objeleri; cam `expo-glass-effect` ile; native kontroller `@expo/ui` +
 > `expo-maps` ile. Bir token/bileşen adını yazmadan önce buradan veya `src/components/liquid/index.ts`
-> barrel'ından doğrula — uydurma.
+> barrel'ından doğrula - uydurma.
 
 ---
 
@@ -22,7 +22,7 @@ helm cockpit'inin **mobil** analitik yoldaşı. Sadece gelir değil; oyun/uygula
 
 ---
 
-## 2. Renk — `colors` (`src/theme/tokens.ts`)
+## 2. Renk - `colors` (`src/theme/tokens.ts`)
 
 Inline kullanım: `import { colors } from "~/theme/tokens"` → `colors.accent`. NativeWind className de aynı paleti yansıtır.
 
@@ -46,7 +46,7 @@ Inline kullanım: `import { colors } from "~/theme/tokens"` → `colors.accent`.
 ### Accent & semantik
 | Token | Hex | Anlam |
 |---|---|---|
-| `accent` | `#06B9EF` | **Marka camgöbeği** — CTA, pozitif, canlı |
+| `accent` | `#06B9EF` | **Marka camgöbeği** - CTA, pozitif, canlı |
 | `accentInk` | `#11130A` | Accent dolgu üstü metin |
 | `accentSoft` | `#037FAB` | Accent'in sakin tonu |
 | `accentViolet` | `#DDAEFF` | Abonelik / MRR |
@@ -59,23 +59,23 @@ Inline kullanım: `import { colors } from "~/theme/tokens"` → `colors.accent`.
 > (`packages/design/src/accents.ts`): camgöbeği · teal · indigo · pembe · yeşil.
 > Renkler uygulama ikonundan piksel bazında örneklendi. Yukarıdaki `accent`
 > değeri varsayılan ailenin (camgöbeği) koyu tema değeri; runtime'da `theme.accent`
-> oku. **Tek kaynak `packages/design/src/`** — buradaki `tokens.ts` legacy kopya.
+> oku. **Tek kaynak `packages/design/src/`** - buradaki `tokens.ts` legacy kopya.
 
 **Kural:** Yeni hex uydurma. Harmonik ton gerekirse alpha-suffix (`` `${colors.accent}40` ``) ya da `rgba(...)`. Her projeye tint olarak bu accent'lerden biri.
 
 **Accent ailesine yeni renk eklerken:** Lab ΔE ölçmeden ekleme. Durum renklerinden
 (`pos`/`neg`/`warn`) ΔE ≥ 30, seri renklerinden ve diğer accent'lerden ΔE ≥ 25
-olmak zorunda — yoksa renk körlüğünde grafikte iki seri ayırt edilemez hale gelir.
+olmak zorunda - yoksa renk körlüğünde grafikte iki seri ayırt edilemez hale gelir.
 
 ---
 
 ## 3. Tipografi
 
 İki aile (`@expo-google-fonts/geist` + `geist-mono`, `useAppFonts()` ile yüklü):
-- **Geist** — UI/başlık. Font ailesi adları string: `"Geist-400/500/600/700"`.
-- **Geist Mono** — TÜM rakamlar/eyebrow/etiket/kod: `"GeistMono-400/500/600"`.
+- **Geist** - UI/başlık. Font ailesi adları string: `"Geist-400/500/600/700"`.
+- **Geist Mono** - TÜM rakamlar/eyebrow/etiket/kod: `"GeistMono-400/500/600"`.
 
-### Tip skalası — `type` (6 kademe, yarım punto YASAK)
+### Tip skalası - `type` (6 kademe, yarım punto YASAK)
 | Token | px | Rol |
 |---|---|---|
 | `type.label` | 10 | Eyebrow (UPPERCASE, letterSpacing ~1.6), meta |
@@ -89,7 +89,7 @@ Sayılar daima mono + tabular (RN'de Geist Mono zaten tabular akar). Eyebrow `<E
 
 ---
 
-## 4. Cam Sistemi — `<LiquidGlass>` (`src/components/liquid/glass.tsx`)
+## 4. Cam Sistemi - `<LiquidGlass>` (`src/components/liquid/glass.tsx`)
 
 `var(--glass-*)` YOK. Reçete `glass` objesinde + GlassView/BlurView ile uygulanır.
 
@@ -110,14 +110,14 @@ Sayılar daima mono + tabular (RN'de Geist Mono zaten tabular akar). Eyebrow `<E
 - Props: `tone` (default/accent/danger/warn/info/violet), `radius`, `padding`, `glow` (accent ışık lekesi), `deco` (CornerTicks slot), `onPress`, `style`.
 - `LiquidGlass padding={0} style={{marginHorizontal:16}}` → tek büyük kart deseni.
 
-### Arka plan — `<LiquidBackground>` (`background.tsx`, Skia)
+### Arka plan - `<LiquidBackground>` (`background.tsx`, Skia)
 4 drift aurora blob (accent/violet/blue/warn, opacity ~0.28–0.45) + blueprint grid + alta güçlü fade. `glow` prop yoğunluk.
 
 ---
 
 ## 5. Şekil & Boşluk
 
-### `space` — 4pt skala (TEK izinli boşluk; keyfi/yarım px YASAK)
+### `space` - 4pt skala (TEK izinli boşluk; keyfi/yarım px YASAK)
 `xs2:2 · xs:4 · sm:8 · md:12 · lg:16 · xl:24`
 
 - Ekran kenar padding: `16` (`space.lg`).
@@ -134,17 +134,17 @@ Sayılar daima mono + tabular (RN'de Geist Mono zaten tabular akar). Eyebrow `<E
 └─ <LiquidGlass padding={0} style={{marginHorizontal:16}}>
      <CardSection index="01" …/> <FullDivider/>
      <CardSection index="02" …/> …
-[ native bottom tab bar — app/(cockpit)/_layout.tsx ]
+[ native bottom tab bar - app/(cockpit)/_layout.tsx ]
 ```
 
 - **`<OpenHero>`** (`hero.tsx`): `eyebrow`, `live`, `right` (segment/pill), `value`+`format` (`CountUp`), `delta`, `caption`, `chartData`/`chartEl`, `stats` (`HeroStat[]`, `MiniStat`+`Sep`), `ring`.
 - **`<CardSection>`** (`card.tsx`): `index` + `title` + `count` + sağa solan hairline + `action`. `<FullDivider/>` ile ayrılır.
 - **Header** tek satır; `LiquidHeader showPicker={false}` Settings'te picker'ı gizler.
-- **Tab bar NATIVE** (`NativeTabs`, floating-pill değil) — 5 sekme, `tintColor: accent`.
+- **Tab bar NATIVE** (`NativeTabs`, floating-pill değil) - 5 sekme, `tintColor: accent`.
 
 ---
 
-## 7. Bileşenler (`src/components/liquid/` — barrel: `index.ts`)
+## 7. Bileşenler (`src/components/liquid/` - barrel: `index.ts`)
 
 ### Grafikler (`charts.tsx`, Skia)
 `AreaChart` (cubic + gradyan + uç nokta) · `Bars` (son bar vurgulu) · `Ring` (gauge) · `HBar` (animasyonlu yatay oran) · `StackBar` · `Spark`.
@@ -156,9 +156,9 @@ Sayılar daima mono + tabular (RN'de Geist Mono zaten tabular akar). Eyebrow `<E
 `Row` (genişleyen satır + Chevron) · `KV` (2-sütun detay) · `OpenHero`/`MiniStat`/`Sep` · `CardSection`/`FullDivider` · `LiquidHeader`.
 
 ### Native (rebuild gerektirir)
-- **`NativeSegmented`** (`native-segmented.tsx`) — `@expo/ui` SwiftUI Picker `.segmented`. Custom `Seg` yerine tercih. ⚠️ `tag` modifier'dır (`<Text modifiers={[tag(o)]}>`), prop değil.
-- **`AudienceMap`** (`audience-map.tsx`) — `expo-maps` `AppleMaps.View`. Rank-tint marker, akıllı kamera, flat/temiz stil. ⚠️ `colorScheme` enum (`AppleMaps.MapColorScheme.DARK`), marker callout iOS<18'de yok. `fill` prop full-bleed.
-- **`ReviewsSection`** (`reviews-section.tsx`) — rating + histogram + reply; Analytics + Health ikisinde de kullanılır (tek kaynak).
+- **`NativeSegmented`** (`native-segmented.tsx`) - `@expo/ui` SwiftUI Picker `.segmented`. Custom `Seg` yerine tercih. ⚠️ `tag` modifier'dır (`<Text modifiers={[tag(o)]}>`), prop değil.
+- **`AudienceMap`** (`audience-map.tsx`) - `expo-maps` `AppleMaps.View`. Rank-tint marker, akıllı kamera, flat/temiz stil. ⚠️ `colorScheme` enum (`AppleMaps.MapColorScheme.DARK`), marker callout iOS<18'de yok. `fill` prop full-bleed.
+- **`ReviewsSection`** (`reviews-section.tsx`) - rating + histogram + reply; Analytics + Health ikisinde de kullanılır (tek kaynak).
 
 ### Compat
 `src/components/ui/liquid-glass.tsx` → `LiquidGlassPanel` eski API'yi `LiquidGlass`'a yönlendiren shim.
@@ -176,23 +176,23 @@ Sayılar daima mono + tabular (RN'de Geist Mono zaten tabular akar). Eyebrow `<E
 | spin | ~900ms linear | Sync ikonu (withRepeat) |
 | press | ~120ms | Pressable `opacity 0.85` |
 
-⚠️ **Reanimated kuralı:** shared-value'yu **render sırasında yazma** — `useEffect` içinde yaz (yoksa uyarı/jitter). `Pressable`'ın `style`'ını fonksiyon yapma; `flexDirection:"row"` fonksiyon-style'da uygulanmaz → statik style kullan (bkz memory: pressable-function-style-flexdirection).
+⚠️ **Reanimated kuralı:** shared-value'yu **render sırasında yazma** - `useEffect` içinde yaz (yoksa uyarı/jitter). `Pressable`'ın `style`'ını fonksiyon yapma; `flexDirection:"row"` fonksiyon-style'da uygulanmaz → statik style kullan (bkz memory: pressable-function-style-flexdirection).
 
 ---
 
-## 9. Bilgi Mimarisi — 5 sekme
+## 9. Bilgi Mimarisi - 5 sekme
 
 `app/(cockpit)/`: **Overview · Revenue · Analytics · Health · Settings** (native tab bar).
 
-- **Overview** — gelir hero + canlı aktif + aylık hedef + tip-filtreli Projects (`NativeSegmented`) + Alerts (resolve/ack).
-- **Revenue** *(ana odak)* — dönem `NativeSegmented` hero; kart-içi `NativeSegmented` Mix/Subs/Payouts. (By platform / recent payments kaldırıldı — kaynak yok.)
-- **Analytics** — DAU hero (DAU/WAU/MAU `NativeSegmented`); Top countries, funnel, acquisition, retention, **ReviewsSection**, OS. Harita: `AudienceMap`.
-- **Health** — crash-free hero; crashes (resolve/ignore/Sentry), integrations, app versions, heartbeat, **ReviewsSection**.
-- **Settings** — workspace, data sources (gerçek system-health), alerts, appearance (currency persist), sync, about.
+- **Overview** - gelir hero + canlı aktif + aylık hedef + tip-filtreli Projects (`NativeSegmented`) + Alerts (resolve/ack).
+- **Revenue** *(ana odak)* - dönem `NativeSegmented` hero; kart-içi `NativeSegmented` Mix/Subs/Payouts. (By platform / recent payments kaldırıldı - kaynak yok.)
+- **Analytics** - DAU hero (DAU/WAU/MAU `NativeSegmented`); Top countries, funnel, acquisition, retention, **ReviewsSection**, OS. Harita: `AudienceMap`.
+- **Health** - crash-free hero; crashes (resolve/ignore/Sentry), integrations, app versions, heartbeat, **ReviewsSection**.
+- **Settings** - workspace, data sources (gerçek system-health), alerts, appearance (currency persist), sync, about.
 
 ---
 
-## 10. Veri (hibrit — gerçek + tagged demo)
+## 10. Veri (hibrit - gerçek + tagged demo)
 
 Gerçek: Supabase hook'ları (`useCockpitKpis`, `useMetricDetail`, `useAlerts`, `useProperties`,
 `useSentryIssues`, `useSystemHealth`, `useReviews`, `useAcquisition`/`useFunnel`/`useGeoBreakdown`/`useRetention`/`useOsBreakdown`,
@@ -220,6 +220,6 @@ deploy edilince ilgili demo→gerçek geçişi mobilde sadece hook değişimiyle
 
 ## 12. Yapma / Yap
 
-**Yapma:** `var(--*)` (web token'ı — yok) · `.jsx`/`window.HELM` · yeni hex uydurma · yarım punto / keyfi px (sadece `space` skalası) · GlassView'i fill'siz bırakma (kart kaybolur) · `Pressable` fonksiyon-style'da `flexDirection` · render'da shared-value yazma · kaynaksız değeri DemoChip'siz gösterme · emoji ikon · gradyan buton spam.
+**Yapma:** `var(--*)` (web token'ı - yok) · `.jsx`/`window.HELM` · yeni hex uydurma · yarım punto / keyfi px (sadece `space` skalası) · GlassView'i fill'siz bırakma (kart kaybolur) · `Pressable` fonksiyon-style'da `flexDirection` · render'da shared-value yazma · kaynaksız değeri DemoChip'siz gösterme · emoji ikon · gradyan buton spam.
 
 **Yap:** `colors`/`type`/`space`/`glass`/`radius` token'ları · `space` skalası boşluk · mono+tabular rakam · native bileşen (NativeSegmented/AudienceMap) tercih · her satırı `Row` ile işlevsel · cam üstünde içeriği kahraman tut · editöryel `index`+hairline ritmi · değişiklikten sonra `bun run typecheck` + sim'de gözle doğrula (`curl localhost:8081/reload` + `xcrun simctl io booted screenshot`).

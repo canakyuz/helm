@@ -1,4 +1,4 @@
-# Faz 0 — Monorepo Scaffold
+# Faz 0 - Monorepo Scaffold
 
 **Süre:** ~1 hafta  
 **Durum:** 🔲 Bekliyor  
@@ -14,7 +14,7 @@ Kod taşımadan önce monorepo iskeletini kur. Faz 1'de extract edilecek paketle
 - [ ] `HELM_SUPABASE_PROJECT_ID` `.env`'de tanımlı
 - [ ] `supabase login` yapılmış (types generate için)
 
-## Adım 1 — Monorepo root kararı
+## Adım 1 - Monorepo root kararı
 
 **Seçenek A (önerilen):** Yeni `helm/` root; `helm-mobile` → `apps/mobile`, web → `apps/web`.
 
@@ -22,7 +22,7 @@ Kod taşımadan önce monorepo iskeletini kur. Faz 1'de extract edilecek paketle
 
 Bu doküman **Seçenek A** varsayar. Seçenek B için sadece `apps/mobile` yerine repo root kullan.
 
-## Adım 2 — Dizin oluştur
+## Adım 2 - Dizin oluştur
 
 ```bash
 # Yeni root (Seçenek A)
@@ -31,7 +31,7 @@ mkdir -p helm/{apps/mobile,packages/{types,api,queries,domain,config}/src}
 
 Mevcut `helm-mobile` içeriği `apps/mobile/` altına taşınır (git history için `git subtree` veya yeni repo).
 
-## Adım 3 — Root package.json
+## Adım 3 - Root package.json
 
 ```json
 {
@@ -45,7 +45,7 @@ Mevcut `helm-mobile` içeriği `apps/mobile/` altına taşınır (git history i�
 }
 ```
 
-## Adım 4 — Paket iskeletleri
+## Adım 4 - Paket iskeletleri
 
 Her paket minimum:
 
@@ -89,7 +89,7 @@ packages/config/
 }
 ```
 
-## Adım 5 — Types generate
+## Adım 5 - Types generate
 
 ```bash
 cd helm
@@ -101,7 +101,7 @@ Placeholder `database.ts` yerine gerçek schema gelmeli.
 
 Ek domain types (`SelectedPropertyId`, `ModuleId`) `packages/types/src/domain.ts`'e taşınacak (Faz 1).
 
-## Adım 6 — Mobile workspace bağlantısı
+## Adım 6 - Mobile workspace bağlantısı
 
 `apps/mobile/package.json`:
 
@@ -117,9 +117,9 @@ Ek domain types (`SelectedPropertyId`, `ModuleId`) `packages/types/src/domain.ts
 }
 ```
 
-Faz 0'da mobile **henüz import etmez** — sadece dependency tanımlı, build kırılmaz.
+Faz 0'da mobile **henüz import etmez** - sadece dependency tanımlı, build kırılmaz.
 
-## Adım 7 — CI
+## Adım 7 - CI
 
 `.github/workflows/ci.yml`:
 
@@ -138,7 +138,7 @@ jobs:
 
 Mobile için mevcut `bun typecheck` (`tsc --noEmit`) korunur.
 
-## Adım 8 — Web repo audit (paralel)
+## Adım 8 - Web repo audit (paralel)
 
 Web repo henüz taşınmamış olsa bile:
 
@@ -150,15 +150,15 @@ Audit şablonu:
 
 | Domain | Mobile hook | Web dosya (path) | Overlap |
 |--------|-------------|------------------|---------|
-| KPI | `use-cockpit-kpis` | TBD | — |
-| Alerts | `use-alerts` | TBD | — |
+| KPI | `use-cockpit-kpis` | TBD | - |
+| Alerts | `use-alerts` | TBD | - |
 | ... | ... | ... | ... |
 
-## Adım 9 — Kurallar (feature freeze)
+## Adım 9 - Kurallar (feature freeze)
 
 Faz 0 bitince:
 
-1. **Yeni fetch logic** doğrudan `packages/api`'ye yazılır — mobile hook'a gömülmez.
+1. **Yeni fetch logic** doğrudan `packages/api`'ye yazılır - mobile hook'a gömülmez.
 2. **Schema değişikliği** → `gen:types` → PR'da types diff review.
 3. **Commit scope:** `mobile`, `web`, `api`, `docs` (conventional + WES-XXX).
 

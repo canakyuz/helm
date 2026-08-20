@@ -1,4 +1,4 @@
-# Every PR lands on Can by default. Helm has a single maintainer — this file isn't
+# Every PR lands on Can by default. Helm has a single maintainer - this file isn't
 # a team split, it's a lock against merging without review.
 * @canakyuz
 

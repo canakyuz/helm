@@ -16,7 +16,7 @@ const ease = Easing.bezier(...EASE_OUT);
 
 export type RailRow = {
   label: string;
-  /** Sagda gosterilen deger — bicimlenmis metin. */
+  /** Sagda gosterilen deger - bicimlenmis metin. */
   value: string;
   /** Dolum orani, 0–1. 1'i asmasi VERI HATASIDIR; asagida ozel isleniyor. */
   ratio: number;
@@ -26,14 +26,14 @@ export type RailRow = {
 /**
  * Oran 1'i asarsa bu bir olcum hatasi (orn. "63 bitis / 60 baslangic").
  * Onceki hal `Math.min(1, ratio)` ile sessizce kirpiyordu; sonuc gercek bir
- * 5/5 ile ayni dolu cubuk oluyordu — yani hata BASARI gibi goruunuyordu.
+ * 5/5 ile ayni dolu cubuk oluyordu - yani hata BASARI gibi goruunuyordu.
  * Ustelik Saglik ekraninin ust karti ayni veriyi "olcum supheli" diye
  * raporluyor: tek ekranda iki celisen ifade.
  */
 const OVERFLOW_MARK = " ⚠";
 
 /**
- * Etiketli oran rail'i — "Yeni +$1,840" gibi satirlar.
+ * Etiketli oran rail'i - "Yeni +$1,840" gibi satirlar.
  *
  * Tasarim bunu CSS'te `width: 0 → %X` ile animasyonluyordu; burada scaleX
  * kullaniliyor. Gerekce: width animasyonu her karede layout hesabi tetikler,
@@ -119,7 +119,7 @@ function Rail({
 }
 
 /**
- * Yigili oran cubugu — tek satirda parcalarin payi (gelir kirilimi).
+ * Yigili oran cubugu - tek satirda parcalarin payi (gelir kirilimi).
  * Parcalar arasinda 3px bosluk var: bitisik renkler ayirt edilemiyordu.
  */
 export function BentoStack({

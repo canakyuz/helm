@@ -1,9 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-funnel — PostHog'tan sıralı funnel hesaplaması.
+// helm-funnel - PostHog'tan sıralı funnel hesaplaması.
 // Body: { project_id, days?: number }
 //   days default 30
-// PostHog Funnels API ile sıralı adım conversion'u — gerçek "kullanıcı 1→2→3"
+// PostHog Funnels API ile sıralı adım conversion'u - gerçek "kullanıcı 1→2→3"
 // sıralı funnel. Her adımın unique_users count'unu ve önceki adıma göre
 // conversion oranını döner.
 
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
   const phProjectId = cfg.project_id;
 
   // PostHog Funnel API
-  // POST /api/projects/:id/query/ — HogQL/InsightVizNode kabul eder.
+  // POST /api/projects/:id/query/ - HogQL/InsightVizNode kabul eder.
   // Funnel için "FunnelsQuery" kind kullan.
   const body = {
     query: {
@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
     null;
   try {
     steps = await fetchFunnel(`-${days}d`);
-    // Önceki periyot — N gün öncesi, N gün uzunluğunda
+    // Önceki periyot - N gün öncesi, N gün uzunluğunda
     prevSteps = await fetchFunnel(`-${days * 2}d`, `-${days}d`);
   } catch (e) {
     return json(

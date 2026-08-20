@@ -4,18 +4,18 @@ import type { SelectedPropertyId } from "@helm/types";
 import { fetchFxRates, toUsd, type FxRates } from "./fx-rates";
 
 /**
- * Reklam ekonomisi — format basina gelir, eCPM ve doluluk.
+ * Reklam ekonomisi - format basina gelir, eCPM ve doluluk.
  *
  * NEDEN VAR: gelirin buyuk kismi reklamdan geliyordu ama ekranda tek satir
  * ("Reklam ₺340.71") olarak duruyordu. Olculdu (6-13 Agustos): `rewarded`
  * gosterimlerin %15'ini alip gelirin %77'sini uretiyor, `banner` ise
  * gosterimlerin %77'sini alip gelirin %11'ini. Tek sayiyla bu gorunmuyor.
  *
- * Kaynak `metrics_format` (migration 0040) — AdMob networkReport'un FORMAT
+ * Kaynak `metrics_format` (migration 0040) - AdMob networkReport'un FORMAT
  * boyutu. Tabloda YALNIZCA SAYIM var; oranlar burada turetiliyor.
  */
 
-/** Formatlarin sabit sirasi — ekran her tazelemede ayni sirayi gormeli.
+/** Formatlarin sabit sirasi - ekran her tazelemede ayni sirayi gormeli.
  *  Gelire gore siralamak, iki gun arasinda satirlarin yer degistirmesine yol
  *  acardi; goz once ogrendigi yere bakiyor. */
 const FORMAT_ORDER = ["rewarded", "interstitial", "app_open", "banner"] as const;
@@ -50,21 +50,21 @@ export type AdFormatRow = {
   fillRate: number | null;
   /** impressions / matched, 0–1. Eslesen sifirsa null.
    *  Dolan ama GOSTERILMEYEN reklam: geçis/acilis formatlarinda dogal olarak
-   *  dusuktur (onceden yuklenir, dogal molada gosterilir) — tek basina ariza
+   *  dusuktur (onceden yuklenir, dogal molada gosterilir) - tek basina ariza
    *  degildir, o yuzden uyari uretmez. */
   showRate: number | null;
-  /** Doluluk esigin altinda — masada para kalmis olabilir. */
+  /** Doluluk esigin altinda - masada para kalmis olabilir. */
   lowFill: boolean;
 };
 
 export type AdEconomics = {
-  /** Sorgulanan aralik — ekranin secili donemi. */
+  /** Sorgulanan aralik - ekranin secili donemi. */
   from: string;
   to: string;
   rows: AdFormatRow[];
   totalRevenue: number;
   totalImpressions: number;
-  /** Tum formatlar birlikte. Satir eCPM'lerinin ORTALAMASI DEGIL — oranlarin
+  /** Tum formatlar birlikte. Satir eCPM'lerinin ORTALAMASI DEGIL - oranlarin
    *  ortalamasi oran degildir; toplanmis gelir ve gosterimden hesaplanir. */
   blendedEcpm: number | null;
   overallFillRate: number | null;
@@ -88,7 +88,7 @@ const METRICS = [
 const ratio = (num: number, den: number): number | null =>
   den > 0 ? num / den : null;
 
-/** Ham satirlari format bazinda toplar. Time: O(n), Space: O(f) — f = format
+/** Ham satirlari format bazinda toplar. Time: O(n), Space: O(f) - f = format
  *  sayisi (4-6), yani pratikte sabit. */
 function aggregate(rows: readonly Row[], fx: FxRates) {
   const acc = new Map<
@@ -161,7 +161,7 @@ export async function fetchAdEconomics(
   }
 
   // Bilinen formatlar sabit sirada; AdMob yeni bir format eklerse (native,
-  // rewarded_interstitial…) listeden DUSMEZ — sona, gelire gore eklenir.
+  // rewarded_interstitial…) listeden DUSMEZ - sona, gelire gore eklenir.
   const known = new Set<string>(FORMAT_ORDER);
   const ordered = [
     ...FORMAT_ORDER.filter((f) => acc.has(f)),

@@ -38,14 +38,14 @@ import {
   type RailRow,
 } from "~/components/bento";
 
-/** Dönem pili yüksekliği — yatay ScrollView'a açıkça verilmeli (bkz PeriodStrip). */
+/** Dönem pili yüksekliği - yatay ScrollView'a açıkça verilmeli (bkz PeriodStrip). */
 const PILL_H = 40;
 
 const GRAINS = ["Ay", "Hafta"] as const;
 type Grain = (typeof GRAINS)[number];
 
 
-/** Kaynak renkleri — seri ladder'i (pos/neg/warn DURUM renkleri, seri degil). */
+/** Kaynak renkleri - seri ladder'i (pos/neg/warn DURUM renkleri, seri degil). */
 /** Kaynak renkleri. Reklam = secili accent (ana gelir kalemi), digerleri sabit seri. */
 function sourceTint(metric: string, accent: string): string {
   if (metric === "ad_revenue") return accent;
@@ -67,7 +67,7 @@ const SOURCE_LABEL: Record<string, string> = {
  *
  * NEDEN IKI AY: onceki hal her zaman SADECE bitis ayini yaziyordu, yani
  * 27 Temmuz–2 Agustos araligi "27–2 Ağu" olarak cikiyordu. Bu okunusta 27
- * Agustos'tan 2 Agustos'a gidiyor gibi duruyor — hem anlamsiz hem yanlis.
+ * Agustos'tan 2 Agustos'a gidiyor gibi duruyor - hem anlamsiz hem yanlis.
  */
 function weekLabel(bucket: RevenueBucket): string {
   const { from, to } = weekRange(bucket);
@@ -104,14 +104,14 @@ export default function Revenue() {
     [history.data, grain],
   );
 
-  // Secili kova. Granularite degisince eski anahtar gecersiz kalir — en guncel
+  // Secili kova. Granularite degisince eski anahtar gecersiz kalir - en guncel
   // doneme duser, bos ekran gostermez.
   const picked = useMemo(
     () => buckets.find((b) => b.key === pickedKey) ?? buckets[0] ?? null,
     [buckets, pickedKey],
   );
 
-  // Reklam kirilimi SECILI DONEMI izler — sabit "son 7 gun" degil. Kova
+  // Reklam kirilimi SECILI DONEMI izler - sabit "son 7 gun" degil. Kova
   // yoksa bos aralik gecer ve hook istek atmaz.
   const ads = useAdEconomics(picked?.start ?? "", picked?.end ?? "");
 
@@ -126,7 +126,7 @@ export default function Revenue() {
   const periodSubs = picked?.activeSubs ?? kpis.data?.activeSubs ?? 0;
   const arppu = periodSubs > 0 ? periodMrr / periodSubs : 0;
 
-  // Sifir kalan kaynak gizlenir — "bagli ama uretmiyor" izlenimi vermesin.
+  // Sifir kalan kaynak gizlenir - "bagli ama uretmiyor" izlenimi vermesin.
   // Ilk sifir-disi degerde kendiliginden geri gelir (activeSources API'den).
   const sources = (history.data?.activeSources ?? []).map((metric) => ({
     metric,
@@ -193,7 +193,7 @@ export default function Revenue() {
                     })}
               </Text>
 
-              {/* Kaynak kirilimi — toplamin NEREDEN geldigi, dogrudan burada */}
+              {/* Kaynak kirilimi - toplamin NEREDEN geldigi, dogrudan burada */}
               {sources.length > 0 && picked != null ? (
                 <>
                   <View className="mt-tilePad">
@@ -256,7 +256,7 @@ export default function Revenue() {
             </BentoTile>
           </Rise>
 
-          {/* Donem gezinmesi — yatay kaydirmali, en guncel solda */}
+          {/* Donem gezinmesi - yatay kaydirmali, en guncel solda */}
           <Rise index={1} replayKey={replayKey}>
             <PeriodStrip
               buckets={buckets}
@@ -298,7 +298,7 @@ export default function Revenue() {
             />
           </View>
 
-          {/* Reklam ekonomisi — gelirin buyuk kismi buradan geliyor, o yuzden
+          {/* Reklam ekonomisi - gelirin buyuk kismi buradan geliyor, o yuzden
               mutabakatin USTUNDE. Kirilimi olmayan projede kart cizilmez;
               "FORMAT KIRILIMI YOK" yazan bos bir kutu her ekranda gurultu. */}
           {(ads.data?.rows.length ?? 0) > 0 || ads.isLoading || ads.isError ? (
@@ -313,7 +313,7 @@ export default function Revenue() {
             </Rise>
           ) : null}
 
-          {/* Anlik/kesin mutabakat — hangi para dogrulandi, hangisi bekliyor. */}
+          {/* Anlik/kesin mutabakat - hangi para dogrulandi, hangisi bekliyor. */}
           {picked != null && picked.legs.length > 0 ? (
             <Rise index={6} replayKey={replayKey}>
               <ReconciliationTile legs={picked.legs} fmt={fmt} />
@@ -353,7 +353,7 @@ function PeriodStrip({
   return (
     // AÇIK YÜKSEKLİK ŞART: dikey ScrollView içindeki yatay ScrollView'ın
     // yüksekliği sıfıra düşüyor. iOS çocukları yine de çiziyor (varsayılan
-    // olarak kırpmaz) ama sınırların DIŞINDAKİ dokunuşları iletmiyor — piller
+    // olarak kırpmaz) ama sınırların DIŞINDAKİ dokunuşları iletmiyor - piller
     // görünür ama tıklanamaz oluyordu. flexGrow:0 tek başına yetmez.
     <ScrollView
       horizontal

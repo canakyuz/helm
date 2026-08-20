@@ -172,7 +172,7 @@ export const PushPage = () => {
           variant="warning"
           title="Supabase entegrasyonu yok"
         >
-          Push token'ları proje DB'sinden okunur — Entegrasyonlar →{" "}
+          Push token'ları proje DB'sinden okunur - Entegrasyonlar →{" "}
           <strong>Supabase</strong> bağla.
         </ErrorBanner>
       )}
@@ -205,7 +205,7 @@ export const PushPage = () => {
               <SelectContent>
                 {segments.length === 0 ? (
                   <SelectItem value="__none" disabled>
-                    Segment yok — Segments sayfasından oluştur
+                    Segment yok - Segments sayfasından oluştur
                   </SelectItem>
                 ) : (
                   segments.map((s) => (
@@ -337,7 +337,7 @@ export const PushPage = () => {
                   <TableRow key={c.id}>
                     <TableCell className="text-xs">{fmt(c.sent_at)}</TableCell>
                     <TableCell className="font-medium">
-                      {c.subject ?? "—"}
+                      {c.subject ?? "-"}
                     </TableCell>
                     <TableCell className="text-right font-mono">
                       {c.recipients}
@@ -374,7 +374,7 @@ const PUSH_TEMPLATES = [
   {
     label: "Win-back",
     title: "We miss you 👋",
-    body: "You have not been around for a while. We have a surprise gift for you — come get it!",
+    body: "You have not been around for a while. We have a surprise gift for you - come get it!",
   },
   {
     label: "Daily reward",
@@ -383,7 +383,7 @@ const PUSH_TEMPLATES = [
   },
   {
     label: "Discount",
-    title: "Today only — 50% off",
+    title: "Today only - 50% off",
     body: "50% off for everyone who starts a premium subscription today.",
   },
 ];

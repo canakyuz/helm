@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { fetchAscVersions, type AscVersionRow } from "./asc.ts";
 import { fetchPlayVersions, type PlayVersionRow } from "./play.ts";
 
-// helm-versions — App Store + Play Store sürümlerini çeker.
+// helm-versions - App Store + Play Store sürümlerini çeker.
 // Apple sırası:
 //   1) app_store_connect integration enabled + key varsa  → ASC API (canlı + TestFlight)
 //   2) yoksa → iTunes lookup fallback (sadece canlı)
@@ -85,9 +85,9 @@ async function fetchPlay(p: PropertyRow): Promise<VersionInsert | null> {
   const html = await res.text();
 
   // Play Store HTML'inde "softwareVersion" / current version birkaç şekilde geçer.
-  // Pattern 1: structured data — "softwareVersion": "1.2.3"
-  // Pattern 2: meta — "Current Version" + value
-  // Pattern 3: HTML attribute — version etiketi
+  // Pattern 1: structured data - "softwareVersion": "1.2.3"
+  // Pattern 2: meta - "Current Version" + value
+  // Pattern 3: HTML attribute - version etiketi
   let version: string | null = null;
   const m1 = html.match(/"softwareVersion"\s*:\s*"([^"]+)"/);
   if (m1) version = m1[1];
@@ -97,7 +97,7 @@ async function fetchPlay(p: PropertyRow): Promise<VersionInsert | null> {
   }
   if (!version) return null;
 
-  // Release notes — "Yenilikler" / "What's new" — opsiyonel
+  // Release notes - "Yenilikler" / "What's new" - opsiyonel
   let releaseNotes: string | null = null;
   const rn = html.match(/<div[^>]*itemprop="description"[^>]*>([\s\S]*?)<\/div>/);
   if (rn) {
@@ -105,7 +105,7 @@ async function fetchPlay(p: PropertyRow): Promise<VersionInsert | null> {
     if (releaseNotes.length > 500) releaseNotes = releaseNotes.slice(0, 500);
   }
 
-  // Release date — Play HTML'inde "lastUpdated" veya "datePublished" geçer
+  // Release date - Play HTML'inde "lastUpdated" veya "datePublished" geçer
   let releaseDate: string | null = null;
   const dm = html.match(/"datePublished"\s*:\s*"([^"]+)"/);
   if (dm) releaseDate = dm[1];

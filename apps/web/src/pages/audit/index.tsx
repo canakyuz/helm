@@ -74,7 +74,7 @@ export const AuditPage = () => {
     pagination: { mode: "off" },
   });
   const projectName = (id: string | null) =>
-    id ? projResult.data.find((p) => p.id === id)?.name ?? "—" : "—";
+    id ? projResult.data.find((p) => p.id === id)?.name ?? "-" : "-";
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -114,9 +114,9 @@ export const AuditPage = () => {
       lastMonth: recent.length,
       topActionLabel: topAction
         ? `${ACTION_LABELS[topAction[0]] ?? topAction[0]}`
-        : "—",
+        : "-",
       topActionCount: topAction?.[1] ?? 0,
-      topActor: topActor?.[0] ?? "—",
+      topActor: topActor?.[0] ?? "-",
       topActorCount: topActor?.[1] ?? 0,
       uniqueTargets,
     };
@@ -225,7 +225,7 @@ export const AuditPage = () => {
                     </TableCell>
                     <TableCell>{actionBadge(l.action)}</TableCell>
                     <TableCell className="font-mono text-xs">
-                      {l.target_user ?? "—"}
+                      {l.target_user ?? "-"}
                     </TableCell>
                     <TableCell className="max-w-md truncate text-xs text-muted-foreground">
                       {l.detail ?? ""}

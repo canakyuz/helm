@@ -1,6 +1,6 @@
-# Analytics — Audience Redesign (harita + reviews) — Design
+# Analytics - Audience Redesign (harita + reviews) - Design
 
-_2026-05-31 · WES-000 · "B layout" — sayı hero + DAU/WAU/MAU + harita bölümü + funnel + retention + reviews_
+_2026-05-31 · WES-000 · "B layout" - sayı hero + DAU/WAU/MAU + harita bölümü + funnel + retention + reviews_
 
 ## Amaç
 Analytics'i odaksız 5-liste yığınından, **kitle (audience) odaklı** profesyonel bir ekrana çevirmek:
@@ -8,20 +8,20 @@ Analytics'i odaksız 5-liste yığınından, **kitle (audience) odaklı** profes
 conversion/funnel, engagement/retention+reviews) hepsi tek ekranda. Gerçek veriyle.
 
 ## Kararlar (brainstorm'da netleşti)
-- **Hero = B yönü:** büyük DAU sayısı + DAU/WAU/MAU **native segmented** (Expo UI) + bar grafik. (Mevcut hero zaten bu — korunur, segment native'e geçer.)
+- **Hero = B yönü:** büyük DAU sayısı + DAU/WAU/MAU **native segmented** (Expo UI) + bar grafik. (Mevcut hero zaten bu - korunur, segment native'e geçer.)
 - **Harita:** `expo-maps` `AppleMaps.View` (iOS, key gerektirmez, dark). "Where" bölümü = canlı harita + ülke marker'ları, gerçek `metrics_country` verisinden (`useGeoBreakdown` zaten çekiyor). Tıklanınca ülke listesi/detay.
-- **Reviews & ratings:** Health'ten **paylaşılan bileşene** çıkarılır, Analytics'e eklenir. **İkisinde de kalır** (tek kaynak, iki ekran — tekrar yok).
+- **Reviews & ratings:** Health'ten **paylaşılan bileşene** çıkarılır, Analytics'e eklenir. **İkisinde de kalır** (tek kaynak, iki ekran - tekrar yok).
 - **Bölüm sırası:** Hero → 01 Where (harita+ülkeler) → 02 Conversion funnel → 03 Acquisition → 04 Retention → 05 Reviews & ratings → 06 OS versions (ikincil, en altta).
 - **Native segmented:** DAU/WAU/MAU `<Seg>` → `<NativeSegmented>`.
 
 ## Mimari (paylaşılan bileşenler)
 ```
-src/components/liquid/audience-map.tsx   CREATE — <AudienceMap rows={GeoRow[]}> AppleMaps + country markers
-src/components/liquid/reviews-section.tsx CREATE — <ReviewsSection> (rating+histogram+ReviewRows+reply)
+src/components/liquid/audience-map.tsx   CREATE - <AudienceMap rows={GeoRow[]}> AppleMaps + country markers
+src/components/liquid/reviews-section.tsx CREATE - <ReviewsSection> (rating+histogram+ReviewRows+reply)
                                           → Health + Analytics ikisi de import eder (tek kaynak)
-app/(cockpit)/analytics.tsx              MODIFY — B layout: hero native seg, Where=map, + Reviews bölümü
-app/(cockpit)/health.tsx                 MODIFY — inline Reviews kodunu <ReviewsSection> ile değiştir (davranış aynı)
-src/lib/country-geo.ts                   CREATE — ISO-2 ülke kodu → {lat,lng,name} (marker konumu için, statik tablo)
+app/(cockpit)/analytics.tsx              MODIFY - B layout: hero native seg, Where=map, + Reviews bölümü
+app/(cockpit)/health.tsx                 MODIFY - inline Reviews kodunu <ReviewsSection> ile değiştir (davranış aynı)
+src/lib/country-geo.ts                   CREATE - ISO-2 ülke kodu → {lat,lng,name} (marker konumu için, statik tablo)
 ```
 
 ### `<AudienceMap>`
@@ -35,7 +35,7 @@ src/lib/country-geo.ts                   CREATE — ISO-2 ülke kodu → {lat,ln
 - Kendi `useReviews()` + `useReviewReply()` çağırır (self-contained). Analytics ve Health sadece `<ReviewsSection />` koyar.
 
 ### country-geo tablosu
-- Statik `Record<string,{lat:number;lng:number;name:string}>` — yaygın ülkeler (US, TR, DE, GB, BR, JP, FR, IN, CA, AU…). Bilinmeyen kod → marker atlanır (liste yine gösterir). Web'de `country-geo.ts` var; aynı veriyi mobile'a küçük bir alt küme olarak alırız.
+- Statik `Record<string,{lat:number;lng:number;name:string}>` - yaygın ülkeler (US, TR, DE, GB, BR, JP, FR, IN, CA, AU…). Bilinmeyen kod → marker atlanır (liste yine gösterir). Web'de `country-geo.ts` var; aynı veriyi mobile'a küçük bir alt küme olarak alırız.
 
 ## Veri (hepsi gerçek, mevcut)
 DAU/WAU/MAU/new users/stickiness/avg session → `useCockpitKpis`+`useMetricDetail`. Geo → `useGeoBreakdown`.

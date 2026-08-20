@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// helm — Friday marketing site CMS seed (idempotent).
+// helm - Friday marketing site CMS seed (idempotent).
 // Imports priv/friday/web/content/en.json as draft site-bundle; publish from Helm UI.
 //
 // Run from helm/apps/web:
@@ -26,7 +26,7 @@ function fail(msg: string): never {
 
 if (!URL || URL.includes("...") || !URL.startsWith("http")) {
   fail(
-    "Missing or invalid Supabase URL. Set VITE_HELM_SUPABASE_URL in helm/.env.local — do not use placeholder ... on the command line.",
+    "Missing or invalid Supabase URL. Set VITE_HELM_SUPABASE_URL in helm/.env.local - do not use placeholder ... on the command line.",
   );
 }
 if (!KEY) {

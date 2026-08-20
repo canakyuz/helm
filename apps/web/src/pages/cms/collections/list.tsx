@@ -1,4 +1,4 @@
-// helm — CMS şemalar listesi. Proje filtresi (useScope) + yeni şema dialog.
+// helm - CMS şemalar listesi. Proje filtresi (useScope) + yeni şema dialog.
 
 import { useState } from "react";
 import { Link } from "react-router";
@@ -177,7 +177,7 @@ export const CollectionsListPage = () => {
                         Collection (çoklu kayıt)
                       </SelectItem>
                       <SelectItem value="singleton">
-                        Singleton (tek kayıt — sayfa içeriği gibi)
+                        Singleton (tek kayıt - sayfa içeriği gibi)
                       </SelectItem>
                     </SelectContent>
                   </Select>

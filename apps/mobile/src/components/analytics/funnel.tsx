@@ -21,18 +21,18 @@ export type FunnelRow = {
   value: string;
   /** Cubuk dolulugu, 0–1. */
   ratio: number;
-  /** İkincil satır — kayıp oranı, uyarı vb. */
+  /** İkincil satır - kayıp oranı, uyarı vb. */
   note?: string | undefined;
   /** "loss" kirmizi cubuk: bu adim kayip anlamina geliyor. */
   tone?: "normal" | "loss" | "warn" | undefined;
 };
 
 /**
- * Huni karti — adimlar ve dolgu oranlari.
+ * Huni karti - adimlar ve dolgu oranlari.
  *
  * NEDEN YUZDE DEGIL ORAN CUBUGU: "%47" okunur ama karsilastirilmaz; yan yana
  * cubuklar hangi adimda ne kadar kaybettigini tek bakista gosterir. Ham sayi
- * yine sagda duruyor — cubuk hikaye, sayi kanit.
+ * yine sagda duruyor - cubuk hikaye, sayi kanit.
  */
 export function FunnelTile({
   title,
@@ -111,7 +111,7 @@ function Step({
 
   // Oran 1'i asarsa bu bir OLCUM HATASI, basari degil ("63 bitis / 60 baslangic").
   // Kirpma sessizce yapiliyordu ve sonuc gercek bir 5/5 ile ayni dolu accent
-  // cubuk oluyordu — ustelik ayni ekranin ust karti bunu "olcum supheli" diye
+  // cubuk oluyordu - ustelik ayni ekranin ust karti bunu "olcum supheli" diye
   // hata sayiyor. Tek ekranda iki celisen ifade kalmasin diye warn'a doner.
   const overflow = row.ratio > 1;
 
@@ -162,7 +162,7 @@ function Step({
       </View>
 
       {/* Kart icinde en az bir notlu satir varsa TUM satirlar not satirini
-          ayirir (bos olsa bile) — yoksa yukseklikler ayrisir. Hicbir satirda
+          ayirir (bos olsa bile) - yoksa yukseklikler ayrisir. Hicbir satirda
           not yoksa satir hic basilmaz. */}
       {reserveNote ? (
         <Text
@@ -178,7 +178,7 @@ function Step({
   );
 }
 
-/** İki değerli satır — sol etiket, sağ değer. Huni olmayan listeler için. */
+/** İki değerli satır - sol etiket, sağ değer. Huni olmayan listeler için. */
 export function KeyRow({
   label,
   value,

@@ -12,7 +12,7 @@ import { duration, EASE_OUT, press, radius as R, stagger } from "@helm/design";
 
 const ease = Easing.bezier(...EASE_OUT);
 
-/** Sifirdan buyumez — hicbir sey yoktan var olmaz. Cubuk taban cizgisinde baslar. */
+/** Sifirdan buyumez - hicbir sey yoktan var olmaz. Cubuk taban cizgisinde baslar. */
 const FROM = 0.04;
 /** Dokunma hedefi cubuktan genis: 30px'lik cubuga isabet ettirmek zor. */
 const HIT = { top: 12, bottom: 12, left: 2, right: 2 };
@@ -36,7 +36,7 @@ type Props = {
 };
 
 /**
- * Bento bar grafigi — flex tabanli, Skia degil.
+ * Bento bar grafigi - flex tabanli, Skia degil.
  *
  * NEDEN SKIA DEGIL: bu grafik sadece dikdortgen; Skia canvas'i acmanin kazandirdigi
  * hicbir sey yok. Skia egri/gradyan/ring gerektiren yerlerde kalir (charts.tsx).
@@ -52,7 +52,7 @@ export function BentoBars({
   onSelect,
   replayKey = 0,
 }: Props) {
-  // Time: O(n), Space: O(n) — n sabit (10–15 cubuk).
+  // Time: O(n), Space: O(n) - n sabit (10–15 cubuk).
   const max = Math.max(...points.map((p) => p.value), 0);
   const active = selectedIndex ?? points.length - 1;
 
@@ -121,7 +121,7 @@ function Bar({
     <Pressable
       onPress={onPress}
       hitSlop={HIT}
-      // Statik style — Pressable'in style'i fonksiyon olursa flexDirection gibi
+      // Statik style - Pressable'in style'i fonksiyon olursa flexDirection gibi
       // layout ozellikleri uygulanmiyor (bkz design.md §8 gotcha).
       style={{ flex: 1, justifyContent: "flex-end" }}
       accessibilityRole="button"

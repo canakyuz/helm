@@ -3,7 +3,7 @@ import { corsHeaders } from "./_shared/cors.ts";
 // SAAT DILIMI NOTU: baglayicilar rapor penceresini UTC'ye gore kurar ama
 // saglayicilar HESABIN saat diliminde raporlar (AdMob'da Europe/Istanbul, UTC+3).
 // Pencere UTC bugune sabitlenirse, yerel gun donumu ile UTC gun donumu arasindaki
-// ~3 saatte saglayicinin GUNCEL gunu hic istenmez — panel "bugun" diye dunun
+// ~3 saatte saglayicinin GUNCEL gunu hic istenmez - panel "bugun" diye dunun
 // rakamini gosterir. admob.ts bitisi UTC yarina uzatir; yeni baglayici yazarken
 // ayni tuzaga dikkat.
 
@@ -18,7 +18,7 @@ import { fetchRest } from "./connectors/rest.ts";
 import { fetchSentry } from "./connectors/sentry.ts";
 import { fetchAppStoreConnect } from "./connectors/app-store-connect.ts";
 
-// helm-ingest — her enabled entegrasyonu gezer, sağlayıcı API'sini çağırır,
+// helm-ingest - her enabled entegrasyonu gezer, sağlayıcı API'sini çağırır,
 // metrics tablosuna idempotent upsert eder. Her çalışma sync_runs'a kaydedilir.
 
 const CONNECTORS: Record<string, Connector> = {
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     if (body?.trigger === "manual") trigger = "manual";
     if (typeof body?.project_id === "string") projectId = body.project_id;
   } catch {
-    // gövde yok — cron
+    // gövde yok - cron
   }
 
   // Çalışmayı kaydet.
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
    *
    * NEDEN SAYAÇ MUTASYONU YOK: eskiden gövde `ingested++` / `okCount++` diye
    * dışarıdaki değişkenleri güncelliyordu. Eş zamanlı koşarken bu yarış demek.
-   * Sonuçlar dönülüp sonunda toplanıyor — saf fonksiyon, güvenli paralellik.
+   * Sonuçlar dönülüp sonunda toplanıyor - saf fonksiyon, güvenli paralellik.
    */
   async function syncIntegration(it: Integration): Promise<Record<string, unknown>> {
     try {
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       const byCountry = Array.isArray(result) ? [] : (result.byCountry ?? []);
       const byFormat = Array.isArray(result) ? [] : (result.byFormat ?? []);
 
-      // Kaynak para birimi — config'ten (AdMob TRY, App Store vendor ccy…),
+      // Kaynak para birimi - config'ten (AdMob TRY, App Store vendor ccy…),
       // yoksa USD (RevenueCat/Stripe USD raporlar). Değer HAM saklanır; gösterim
       // katmanı metrics.currency'den USD'ye normalize eder.
       const sourceCurrency =
@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
         if (upErr) throw new Error(upErr.message);
       }
 
-      // Ülke kırılımı — metrics_country tablosuna.
+      // Ülke kırılımı - metrics_country tablosuna.
       if (byCountry.length > 0) {
         const countryRows = byCountry.map((p) => ({
           project_id: it.project_id,
@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
         if (ccErr) throw new Error(ccErr.message);
       }
 
-      // Reklam formatı kırılımı — metrics_format tablosuna. currency ANA
+      // Reklam formatı kırılımı - metrics_format tablosuna. currency ANA
       // tabloyla aynı kaynaktan: ad_revenue burada da para taşıyor, birimsiz
       // yazılırsa iki tablonun toplamı karşılaştırılamaz.
       if (byFormat.length > 0) {
@@ -214,14 +214,14 @@ Deno.serve(async (req) => {
   // Sağlayıcı bazında grupla: FARKLI sağlayıcılar eş zamanlı, AYNI sağlayıcının
   // entegrasyonları sırayla.
   //
-  // NEDEN BÖYLE: önceki hali tek bir `for` döngüsüydü — AdMob bitmeden
+  // NEDEN BÖYLE: önceki hali tek bir `for` döngüsüydü - AdMob bitmeden
   // RevenueCat başlamıyordu ve tek bir çalışma 90 saniyeyi aşıyordu (ölçüldü:
   // damga 13:19'da "SÜRÜYOR", 13:20'de bitti). Hepsini birden paralele almak ise
   // aynı sağlayıcıya eş zamanlı vurmak demek; AdMob'un raporlama kotası bunu
   // sevmez. Bu düzende duvar saati en yavaş TEK sağlayıcıya düşer ve hiçbir dış
-  // API aynı anda birden fazla istek almaz — kota riski yok.
+  // API aynı anda birden fazla istek almaz - kota riski yok.
   //
-  // Time:  O(en yavaş sağlayıcı) — önce O(tüm sağlayıcıların toplamı)
+  // Time:  O(en yavaş sağlayıcı) - önce O(tüm sağlayıcıların toplamı)
   // Space: O(n) entegrasyon sayısı kadar sonuç
   const byProvider = new Map<string, Integration[]>();
   for (const it of integrations ?? []) {
@@ -262,7 +262,7 @@ Deno.serve(async (req) => {
 
   // Senkron sonrası uyarı kurallarını değerlendir.
   //
-  // Yorum "fire-and-forget" diyordu ama çağrı `await` ediliyordu — yani yanıtı
+  // Yorum "fire-and-forget" diyordu ama çağrı `await` ediliyordu - yani yanıtı
   // bekletiyordu. Gerçekten arka plana almak için EdgeRuntime.waitUntil gerekir:
   // await'i düpedüz kaldırmak isteği runtime yanıtı dönünce öldürür ve uyarı
   // değerlendirmesi sessizce kaybolurdu.

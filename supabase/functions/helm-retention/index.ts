@@ -1,9 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-retention — PostHog (HogQL) cohort retention eğrisi.
+// helm-retention - PostHog (HogQL) cohort retention eğrisi.
 // Body: { project_id }
 // Her offset (D1/D3/D7/D14/D30) için YANSIZ hesap: numerator ve denominator
-// aynı "uygun cohort" kümesi üzerinden alınır — yani o offset'e ulaşacak kadar
+// aynı "uygun cohort" kümesi üzerinden alınır - yani o offset'e ulaşacak kadar
 // eski (>= offset gün önce ilk görülen) ve son 30 cohort günü içindeki kullanıcılar.
 // Bu, genç cohort'ların uzun offset'leri aşağı çekmesini (recency bias) önler.
 

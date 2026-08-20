@@ -9,7 +9,7 @@ import { colors } from "~/theme/tokens";
 /**
  * Baslik seridindeki yenile dugmesi.
  *
- * NEDEN KENDI MANTIGI YOK: bu dugmenin eskiden ayri bir kopyasi vardi —
+ * NEDEN KENDI MANTIGI YOK: bu dugmenin eskiden ayri bir kopyasi vardi -
  * `invoke`'u timeout'suz await ediyor, hatayi `.catch(() => {})` ile yutuyor,
  * sonra KOSULSUZ "Senkronize edildi" gosteriyordu. Ingest 500 donse bile yesil
  * toast cikiyordu. Iki ayri yenileme yolu olmasi ayrica cooldown'un yalnizca

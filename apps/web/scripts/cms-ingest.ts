@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// helm — generic CMS ingest: en.json → tipli şema (inference) → cms_collections.schema.
+// helm - generic CMS ingest: en.json → tipli şema (inference) → cms_collections.schema.
 // Drift governance'ın "tek-sefer / dev-tetikli" ucu: runtime ASLA infer etmez, sadece bu.
 //
 // Kullanım (helm/apps/web içinden):
@@ -83,7 +83,7 @@ const bundlePath = resolve(__dirname, T.bundleRelPath);
 const bundle = JSON.parse(readFileSync(bundlePath, "utf8")) as Record<string, unknown>;
 
 // Re-ingest: kaynaktaki yeni key'leri ekle, mevcut (düzenlenmiş) değeri KORU. Diziler
-// kullanıcı yönetiminde — varsa dokunma. _meta dahil pass-through.
+// kullanıcı yönetiminde - varsa dokunma. _meta dahil pass-through.
 const fillMissing = (target: unknown, source: unknown): unknown => {
   if (Array.isArray(source)) return target ?? source;
   if (source && typeof source === "object") {
@@ -131,7 +131,7 @@ async function ensureCollection(propertyId: string): Promise<{ id: string; schem
     .maybeSingle();
 
   const existingSchema = (existing?.schema as CollectionSchema | undefined) ?? null;
-  // Eski "bundle" sarmal alanı (kind ne olursa olsun) sözleşme değil — gerçek top-level
+  // Eski "bundle" sarmal alanı (kind ne olursa olsun) sözleşme değil - gerçek top-level
   // key'ler common/nav/... → unwrap migrasyonunda düşür. Kaynak gerçekten "bundle"
   // içeriyorsa inference onu doğru tiple yeniden ekler.
   const cleaned = existingSchema

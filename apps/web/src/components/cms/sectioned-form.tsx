@@ -1,4 +1,4 @@
-// helm — CMS iki-pane tipli panel + sağ panede drill-down.
+// helm - CMS iki-pane tipli panel + sağ panede drill-down.
 // Sol ray: top-level bölümler (sabit). Sağ pane: seçili bölüm; object çocukları breadcrumb
 // ile derinleşir (Pages › Home › Hero), leaf+list alanları o seviyede inline düzenlenir.
 // Böylece "pages" gibi 21 sayfalık derin ağaç tek wall yerine gezinilebilir detay olur.

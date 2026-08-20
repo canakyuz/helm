@@ -1,10 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { makeAscJwt } from "../_shared/asc-jwt.ts";
 
-// helm-payouts — banka ödemeleri, çok kaynaklı:
+// helm-payouts - banka ödemeleri, çok kaynaklı:
 //   • Stripe  /v1/payouts (canlı, gerçek payout objesi)
 //   • App Store Connect /v1/financeReports (aylık proceeds → payout-benzeri)
-// Her kaynak bağımsız try/catch — biri patlarsa diğeri akar. payouts tablosuna
+// Her kaynak bağımsız try/catch - biri patlarsa diğeri akar. payouts tablosuna
 // idempotent upsert + birleşik { pending, recent } döner.
 // Body: { project_id }
 //
@@ -92,7 +92,7 @@ async function fetchStripe(projectId: string, secretKey: string) {
   return { rows, pending, recent };
 }
 
-// ── App Store Connect — financeReports ──────────────────────────
+// ── App Store Connect - financeReports ──────────────────────────
 async function fetchAscFinance(
   projectId: string,
   cfg: Record<string, string>,

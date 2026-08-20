@@ -8,7 +8,7 @@ import { BentoTile } from "~/components/bento";
 
 const TOP_N = 5;
 
-/** Gelir dusuren olaylar — digerleri (iptal, odeme sorunu) notr gosterilir. */
+/** Gelir dusuren olaylar - digerleri (iptal, odeme sorunu) notr gosterilir. */
 const POSITIVE = new Set([
   "INITIAL_PURCHASE",
   "RENEWAL",
@@ -21,7 +21,7 @@ const NEGATIVE = new Set(["CANCELLATION", "EXPIRATION", "BILLING_ISSUE"]);
 /**
  * Gercek zamanli satin alma akisi.
  *
- * NEDEN AYRI KART: bu tablo App Store Connect metrikleriyle TOPLANMAZ — ayni
+ * NEDEN AYRI KART: bu tablo App Store Connect metrikleriyle TOPLANMAZ - ayni
  * para iki kez gorunurdu. Yukaridaki donem toplami Apple'in mutabakatli rakami
  * (T-1 gecikmeli), bu kart "az once ne oldu". Ikisi farkli sorulari cevaplar.
  */
@@ -84,7 +84,7 @@ export function LiveEventsTile({
               className="font-mono-semibold text-body"
               style={{ color: tone(e.eventType) }}
             >
-              {e.amount != null ? fmtAmount(e.amount) : "—"}
+              {e.amount != null ? fmtAmount(e.amount) : "-"}
             </Text>
           </View>
         ))

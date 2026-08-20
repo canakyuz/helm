@@ -42,7 +42,7 @@
   background: var(--geo-map-canvas-bg);
 }
 
-/* Liquid Glass overlay — sol-üst lime + sağ-alt cyan radial bloom.
+/* Liquid Glass overlay - sol-üst lime + sağ-alt cyan radial bloom.
    Marker'ları pointer-event'lerden uzak tut (pointer-events: none). */
 .root[data-slot="geo-map"] :global(.leaflet-container)::after {
   content: "";
@@ -64,7 +64,7 @@
   mix-blend-mode: screen;
 }
 
-/* Tile filter — daha doygun + kontrastlı (marker'lar belirginleşsin). */
+/* Tile filter - daha doygun + kontrastlı (marker'lar belirginleşsin). */
 :global([data-helm-theme="glass-dark"])
   .root[data-slot="geo-map"]
   :global(.leaflet-tile-pane) {

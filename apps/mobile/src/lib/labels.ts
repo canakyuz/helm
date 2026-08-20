@@ -5,7 +5,7 @@ import type { PropertyStatus, PropertyType } from "@helm/api";
  * Ekranlarda gorunen sabit etiketler ve tarih bicimleyicileri.
  *
  * NEDEN TEK DOSYA: MONTHS_TR iki, TYPE_LABEL uc ekranda kopyalanmisti. Uc tekrar
- * DRY esigidir; kopyalar kacinilmaz olarak birbirinden ayrisir — nitekim
+ * DRY esigidir; kopyalar kacinilmaz olarak birbirinden ayrisir - nitekim
  * property-picker "Uygulama" derken overview "mobile_app" diyordu.
  */
 
@@ -47,11 +47,11 @@ export function shortDate(iso: string): string {
   return `${d} ${MONTHS_SHORT[(m ?? 1) - 1] ?? ""}`;
 }
 
-/** "2026-08-09" → "9 AĞUSTOS" — hero eyebrow'unda seçili gün. */
+/** "2026-08-09" → "9 AĞUSTOS" - hero eyebrow'unda seçili gün. */
 export function longDayLabel(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   if (y == null || m == null || d == null) return iso;
-  // Intl'e gidilmiyordu ve "tr-TR" sabitti — Ingilizce arayuzde de "9 AGUSTOS"
+  // Intl'e gidilmiyordu ve "tr-TR" sabitti - Ingilizce arayuzde de "9 AGUSTOS"
   // cikiyordu. Ay adi ceviri tablosundan gelir, buyutme de dile gore yapilir.
   const month = tr(MONTHS_TR[m - 1] ?? "");
   const locale = currentLocale();
@@ -59,7 +59,7 @@ export function longDayLabel(iso: string): string {
 }
 
 /**
- * Proje monogramı — adın ilk iki harfi. "Orbit Runner" → "OR".
+ * Proje monogramı - adın ilk iki harfi. "Orbit Runner" → "OR".
  * Noktalama atılır: "Wesan · Corporate site" ikinci kelime olarak "·" veriyordu.
  */
 export function monogram(name: string): string {
@@ -76,7 +76,7 @@ export function localToday(): string {
 }
 
 /**
- * Grafik serisi renkleri — ilki seçili accent.
+ * Grafik serisi renkleri - ilki seçili accent.
  *
  * pos/neg/warn burada YOK: onlar durum renkleri. Seri olarak kullanılırlarsa
  * "yeşil ülke çubuğu" ile "pozitif delta" aynı anlamı taşıyormuş gibi okunur.

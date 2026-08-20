@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-acquisition — PostHog $initial_referrer breakdown.
+// helm-acquisition - PostHog $initial_referrer breakdown.
 // Kullanıcı edinme kaynakları: direct / google / facebook / referral.
 //
 // Body: { project_id, days?: number }

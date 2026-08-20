@@ -1,17 +1,17 @@
-# CMS Tipli İçerik Paneli — Tasarım Spec'i
+# CMS Tipli İçerik Paneli - Tasarım Spec'i
 
 **Tarih:** 2026-06-05
 **Durum:** Onaylandı (brainstorming → implementasyon)
 **Kapsam:** helm web (`apps/web`) + ingest script
-**Önceki spec:** `2026-06-05-key-value-editor-design.md` — **SUPERSEDED** (schema-less yön terk edildi, KVE kaldırılıyor).
+**Önceki spec:** `2026-06-05-key-value-editor-design.md` - **SUPERSEDED** (schema-less yön terk edildi, KVE kaldırılıyor).
 
 ## Problem & yön düzeltmesi
 
-DB'den gelen en.json (2000+ satır) gerçek bir içerik paneli gibi düzenlenmeli — ham JSON
+DB'den gelen en.json (2000+ satır) gerçek bir içerik paneli gibi düzenlenmeli - ham JSON
 ya da generic key-value tree değil. Schema-less yaklaşım (KVE) "gerçek CMS paneli" hissi
 vermedi. Doğru model: **en.json'dan BİR KERE tipli şema üret, dondur, tipli panelde düzenle.**
 
-## Governance — drift'i öldüren kural (revert'ten farkı bu)
+## Governance - drift'i öldüren kural (revert'ten farkı bu)
 
 Inference + object kind + ingest daha önce revert edilmişti çünkü **sürekli/otomatik** idi →
 schema data'dan canlı türeyip drift ediyordu. Bu sefer:
@@ -36,14 +36,14 @@ schema data'dan canlı türeyip drift ediyordu. Bu sefer:
 data'da kalır (pass-through) ama şemaya **girmez** (sistem metadata'sı, düzenlenmez).
 → Tüketici (Friday) `data.bundle` değil `data` okur. **ONAYLANDI.**
 
-## Slice 1 — `object` kind + KVE temizliği
+## Slice 1 - `object` kind + KVE temizliği
 
 - `types/cms.ts`: `| (FieldBase & { kind: "object"; fields: FieldDef[] })`.
 - `lib/cms-schema.ts`: `fieldToZod` object → `z.object(shape)`; `fieldDefault` object → nested default.
 - `form-renderer.tsx`: object → nested grup (recursive `FieldRow`). **KVE import + json wiring geri alınır**, json kind → eski textarea fallback.
 - `components/key-value-editor/` **silinir**; eski KVE spec'i silinir.
 
-## Slice 2 — inference + merge + ingest
+## Slice 2 - inference + merge + ingest
 
 - `lib/cms-infer.ts`: revert'ten **restore** (zaten object/list/primitive, D≤3 guard, humanize,
   `_meta` hariç, O(N·K)). Select/asset infer edilmez (tek örnekten bilinemez) → text; dev
@@ -55,7 +55,7 @@ data'da kalır (pass-through) ama şemaya **girmez** (sistem metadata'sı, düze
   ensure brand/property/collection). en.json oku → inferSchema → mergeSchema(mevcut) → collection.schema
   güncelle → entry upsert (`data = en.json`, unwrap). `package.json`: `ingest:friday`, `ingest:wesan`.
 
-## Slice 3 — iki-pane UI (`SectionedForm`)
+## Slice 3 - iki-pane UI (`SectionedForm`)
 
 Master-detail. Kabuk (header, Taslak/Yayınla, EN/TR, Geçmiş/Diller) aynı; ana alan:
 
@@ -76,7 +76,7 @@ Master-detail. Kabuk (header, Taslak/Yayınla, EN/TR, Geçmiş/Diller) aynı; an
 - Alan stili: label üstte, sakin boşluk, lime focus (mevcut ui primitives). **Arama yok** (sade).
 - Diğer ekranlar (Şemalar/İçerikler/Medya) dokunulmaz.
 
-## Slice 4 — doğrulama
+## Slice 4 - doğrulama
 
 `bun run ingest:wesan` → şema üret → `bun run dev` → edit sayfasında iki-pane tipli panel **gözle doğrula**.
 

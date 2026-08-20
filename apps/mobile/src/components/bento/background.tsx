@@ -22,7 +22,7 @@ function rgba(hex: string, alpha: number): string {
 }
 
 /**
- * Bento arka plani — kisik aurora.
+ * Bento arka plani - kisik aurora.
  *
  * NEDEN HALA AURORA VAR: cam, arkasindaki seyi bulaniklastirarak var olur. Duz
  * zemin uzerinde GlassView'in kiracagi hicbir sey kalmaz, geriye yari saydam
@@ -42,7 +42,7 @@ export function BentoBackground() {
   //
   // Ilk denemede en parlak blob tepedeydi; ama tepede opak accent hero oturuyor
   // ve auroryi tamamen kapatiyordu. Cam tile'lar ise fade'in bittigi, aurora'nin
-  // hic kalmadigi bolgedeydi — yani camin kiracagi sey yanlis yerdeydi ve
+  // hic kalmadigi bolgedeydi - yani camin kiracagi sey yanlis yerdeydi ve
   // tile'lar duz gri okunuyordu. Isik, camin OLDUGU yerde olmali.
   const blobs = useMemo(
     () => [

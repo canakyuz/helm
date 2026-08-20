@@ -7,7 +7,7 @@ import { usePreferences } from "~/lib/preferences";
 type QueryGate = { enabled?: boolean };
 
 /**
- * Veri kapsami uyarilari — susmus kaynak, baglanmamis proje.
+ * Veri kapsami uyarilari - susmus kaynak, baglanmamis proje.
  *
  * alert_events'ten AYRI: bunlar kayitli olay degil, o anki durumdan turetilen
  * sinyaller. Kaynak duzelince kendiliginden kaybolurlar.

@@ -1,12 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { type Connector, type MetricPoint } from "./types.ts";
 
-// Supabase — hedef projenin auth.users kayıtlarından son 90 günlük
+// Supabase - hedef projenin auth.users kayıtlarından son 90 günlük
 // total_users + new_users serisini created_at'e bakarak yeniden kurar.
 //
 // track_activity="true" ise ek olarak hedef projenin public.analytics_daily
 // rollup tablosundan dau/mau/sessions çekilir (Empire gibi event yazan ürünler).
-// Tablo/RPC yoksa bu ek kısım sessizce atlanır — geriye dönük güvenli.
+// Tablo/RPC yoksa bu ek kısım sessizce atlanır - geriye dönük güvenli.
 // config: { project_url, service_role_key, track_activity?, activity_refresh_days? }
 export const fetchSupabaseUsers: Connector = async (config) => {
   const admin = createClient(config.project_url, config.service_role_key, {
@@ -46,7 +46,7 @@ export const fetchSupabaseUsers: Connector = async (config) => {
     points.push({ date: dayStr, metric: "new_users", value: newUsers });
   }
 
-  // Aktivite metrikleri (dau/mau/sessions) — yalnızca opt-in eden projeler için.
+  // Aktivite metrikleri (dau/mau/sessions) - yalnızca opt-in eden projeler için.
   // Hedef projedeki analytics_daily rollup tablosundan okunur; ham event taranmaz.
   if (config.track_activity === "true") {
     try {
@@ -78,7 +78,7 @@ export const fetchSupabaseUsers: Connector = async (config) => {
       );
     }
 
-    // Funnel-health metrikleri (anlık snapshot) — ayrı try, çünkü funnel
+    // Funnel-health metrikleri (anlık snapshot) - ayrı try, çünkü funnel
     // migration'ı olmayan projelerde kolonlar yoksa dau/mau emit'i etkilenmesin.
     try {
       await admin.rpc("snapshot_funnel_daily"); // idempotent, sadece bugünü yazar
@@ -100,7 +100,7 @@ export const fetchSupabaseUsers: Connector = async (config) => {
         "pct_ever_prestiged",
       ] as const;
 
-      // Sadece dolu (non-null) alanları emit et — funnel kolonları yalnızca
+      // Sadece dolu (non-null) alanları emit et - funnel kolonları yalnızca
       // snapshot alınan günlerde dolu olur, boş günleri yanlış 0 olarak basmayız.
       for (const row of funnel ?? []) {
         const date = String(row.date).slice(0, 10);

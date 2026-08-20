@@ -1,4 +1,4 @@
-// helm — CMS modülü tipleri
+// helm - CMS modülü tipleri
 // Schema-as-data: cms_collections.schema jsonb FieldDef[] içerir.
 
 import type { Value as PlateValue } from "platejs";

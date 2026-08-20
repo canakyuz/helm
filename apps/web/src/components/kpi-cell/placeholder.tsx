@@ -26,7 +26,7 @@ export const KpiPlaceholder = ({ label, module, className }: KpiPlaceholderProps
           <Lock className="size-3 opacity-60" />
         </div>
         <div className="helm-hero-number text-[clamp(1.5rem,3cqw,2rem)] leading-none text-muted-foreground/40">
-          —
+          -
         </div>
         <div className="flex min-h-[18px] items-center">
           {scope === "all" ? (

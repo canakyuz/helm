@@ -6,7 +6,7 @@ import { GeoMapEngine } from "./geo-map-engine";
 import styles from "./geo-map-theme.module.css";
 import type { GeoMapProps, GeoMapStyle } from "./schema";
 
-// Label'sız Carto tile'lar — daha temiz cam zemin (marker'lar öne çıkar).
+// Label'sız Carto tile'lar - daha temiz cam zemin (marker'lar öne çıkar).
 const LIGHT_TILE_URL =
   "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png";
 const DARK_TILE_URL =

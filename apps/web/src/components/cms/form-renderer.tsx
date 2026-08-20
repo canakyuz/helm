@@ -1,4 +1,4 @@
-// helm — CMS dinamik form renderer.
+// helm - CMS dinamik form renderer.
 // schema.fields[] → shadcn input map. Recursive list desteği.
 
 import { Plus, Trash2 } from "lucide-react";
@@ -285,7 +285,7 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
     }
 
     case "object": {
-      // Nested grup — alt FieldDef'leri value (alt-obje) üzerine recursive render.
+      // Nested grup - alt FieldDef'leri value (alt-obje) üzerine recursive render.
       // Üst seviye bölümleme SectionedForm'da; bu, bölüm İÇİ derin nesting içindir.
       const obj =
         value && typeof value === "object" && !Array.isArray(value)

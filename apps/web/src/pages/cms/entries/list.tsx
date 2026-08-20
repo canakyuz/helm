@@ -1,4 +1,4 @@
-// helm — CMS içerik listesi. Collection + status + locale filter.
+// helm - CMS içerik listesi. Collection + status + locale filter.
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";

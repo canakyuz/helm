@@ -1,4 +1,4 @@
--- helm — senkron çalışma kayıtları (gözlemlenebilirlik).
+-- helm - senkron çalışma kayıtları (gözlemlenebilirlik).
 -- helm-ingest her çalıştığında bir satır yazar: ne zaman, kaç metrik, hata var mı.
 
 create table if not exists public.sync_runs (

@@ -8,12 +8,12 @@ import { useScope } from "@/context/scope";
 import { compact, deltaPct, latest, series } from "@/lib/metrics";
 import type { Metric } from "@/types";
 
-// Ürün funnel sağlığı — Empire Inc'in analytics_daily snapshot'ından gelen
+// Ürün funnel sağlığı - Empire Inc'in analytics_daily snapshot'ından gelen
 // anlık durum metrikleri (source='supabase'). PostHog event funnel'ından AYRI;
 // "oyun keyifli mi / loop tutuyor mu" sorusunu cevaplar.
 //
 // "kind=pct" metrikler 0-100 yüzde, "count" metrikler ham sayı.
-// "higherIsBetter=false" olanlarda (≤1 işletme, level-1, pause) artış KÖTÜ —
+// "higherIsBetter=false" olanlarda (≤1 işletme, level-1, pause) artış KÖTÜ -
 // StatCard delta'sı yükselişi yeşil gösterdiği için bu metriklerde delta gizlenir
 // (yanıltıcı renk olmasın); trend yerine aşağıdaki grafikten okunur.
 const CARDS = [
@@ -31,7 +31,7 @@ export const FunnelHealth = () => {
   const { scope, isAll } = useScope();
 
   // Metrik filtresi vardi ama TARIH filtresi yoktu: sorgu her calistiginda tum
-  // gecmisi istiyordu. Bugun 480 satir, yani sorun gorunmuyor — ama satir sayisi
+  // gecmisi istiyordu. Bugun 480 satir, yani sorun gorunmuyor - ama satir sayisi
   // her gun buyuyor ve PostgREST 1.000'de sessizce kesiyor. O gun geldiginde
   // kartlar hata vermez, sadece yanlis sayi gosterir; bulunmasi en zor ariza tipi.
   // 90 gun bu kartlar (son deger + delta + trend) icin fazlasiyla yeterli.
@@ -57,7 +57,7 @@ export const FunnelHealth = () => {
 
   // Çoklu proje (isAll) seçiliyken aynı metrik birden çok projeden gelir; helper'lar
   // metric adına göre tarihsel seri kurduğu için "All" görünümünde toplama gerekir.
-  // Tek proje scope'unda zaten tek seri — yaygın kullanım bu, KISS.
+  // Tek proje scope'unda zaten tek seri - yaygın kullanım bu, KISS.
   const fmtValue = (kind: "count" | "pct", v: number) =>
     kind === "pct" ? `%${v.toFixed(1)}` : compact(v);
 
@@ -77,7 +77,7 @@ export const FunnelHealth = () => {
             title={c.title}
             value={fmtValue(c.kind, latest(metrics, c.metric))}
             icon={<c.icon />}
-            // Düşmesi-iyi metriklerde delta gizli — yanıltıcı renk olmasın.
+            // Düşmesi-iyi metriklerde delta gizli - yanıltıcı renk olmasın.
             delta={c.higherIsBetter ? deltaPct(series(metrics, c.metric)) : undefined}
             loading={loading}
           />

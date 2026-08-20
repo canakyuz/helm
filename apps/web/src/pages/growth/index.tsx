@@ -108,13 +108,13 @@ export const GrowthPage = () => {
   const grandTotal = byCountry.reduce((a, [, v]) => a + v, 0);
   const maxCountryValue = byCountry[0]?.[1] ?? 0;
 
-  // Harita marker'ları — koordinatlı ülkeler
+  // Harita marker'ları - koordinatlı ülkeler
   const geoMarkers = useMemo(() => {
     return byCountry
       .map(([code, value]) => {
         const info = getCountryGeo(code);
         if (!info) return null;
-        // Marker yarıçapı sıklığa göre — radius 6-22 arası
+        // Marker yarıçapı sıklığa göre - radius 6-22 arası
         const ratio =
           maxCountryValue > 0 ? Math.sqrt(value / maxCountryValue) : 0;
         const radius = Math.round(6 + ratio * 16);
@@ -187,7 +187,7 @@ export const GrowthPage = () => {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{`Daily active users — last ${range} days`}</CardTitle>
+            <CardTitle>{`Daily active users - last ${range} days`}</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart
@@ -199,7 +199,7 @@ export const GrowthPage = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{`New users — last ${range} days`}</CardTitle>
+            <CardTitle>{`New users - last ${range} days`}</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart
@@ -213,7 +213,7 @@ export const GrowthPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>{`Total user growth — last ${range} days`}</CardTitle>
+          <CardTitle>{`Total user growth - last ${range} days`}</CardTitle>
         </CardHeader>
         <CardContent>
           <TrendChart
@@ -225,18 +225,18 @@ export const GrowthPage = () => {
         </CardContent>
       </Card>
 
-      {/* PostHog geo breakdown — IP tabanlı, izinsiz */}
+      {/* PostHog geo breakdown - IP tabanlı, izinsiz */}
       <PostHogGeoCard scope={scope} isAll={isAll} days={range} />
 
       {/* Acquisition source breakdown */}
       <AcquisitionCard scope={scope} isAll={isAll} days={range} />
 
-      {/* Ülke kırılımı — metrics_country tablosundan */}
+      {/* Ülke kırılımı - metrics_country tablosundan */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="size-4" />
-            Ülke Kırılımı — son {range} gün
+            Ülke Kırılımı - son {range} gün
           </CardTitle>
           <CardAction>
             <Select value={geoMetric} onValueChange={setGeoMetric}>
@@ -293,7 +293,7 @@ export const GrowthPage = () => {
                         <TableCell className="text-right font-mono tabular-nums text-xs text-muted-foreground">
                           {grandTotal > 0
                             ? `${((value / grandTotal) * 100).toFixed(1)}%`
-                            : "—"}
+                            : "-"}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -423,7 +423,7 @@ const PostHogGeoCard = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="size-4" />
-          Coğrafi Dağılım — son {days} gün
+          Coğrafi Dağılım - son {days} gün
           <span className="text-xs font-normal text-muted-foreground">
             PostHog · IP tabanlı · izinsiz
           </span>
@@ -635,7 +635,7 @@ const AcquisitionCard = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="size-4" />
-          Edinme Kaynakları — son {days} gün
+          Edinme Kaynakları - son {days} gün
           <span className="text-xs font-normal text-muted-foreground">
             PostHog · $initial_referrer
           </span>
@@ -657,7 +657,7 @@ const AcquisitionCard = ({
           </div>
         ) : (
           <>
-            {/* Tip bazlı özet — yatay bar */}
+            {/* Tip bazlı özet - yatay bar */}
             <div className="space-y-1">
               <div className="flex h-3 overflow-hidden rounded-full">
                 {byType.map(([type, users]) => {

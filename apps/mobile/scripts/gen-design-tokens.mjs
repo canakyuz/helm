@@ -5,11 +5,11 @@
 // Tailwind karsiliklarini yazar. tailwind.config.js bir .ts dosyasini require
 // edemedigi icin olcek degerleri de duz JS olarak uretilir.
 //
-// Elle duzenleme — degisiklik icin packages/design'i duzenle, sonra:
+// Elle duzenleme - degisiklik icin packages/design'i duzenle, sonra:
 //
 //   bun run gen:design
 //
-// Renkler RGB kanal ucluleri olarak yazilir ("19 19 24"), hex degil — Tailwind'in
+// Renkler RGB kanal ucluleri olarak yazilir ("19 19 24"), hex degil - Tailwind'in
 // alfa modifier'i (bg-tile/50) ancak bu formda calisir.
 
 import { writeFileSync } from "node:fs";
@@ -23,7 +23,7 @@ import { darkTheme, themes } from "../../../packages/design/src/themes.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-const BANNER = `URETILMIS DOSYA — elle duzenleme.
+const BANNER = `URETILMIS DOSYA - elle duzenleme.
    Kaynak: packages/design/src/
    Yeniden uret: bun run gen:design`;
 
@@ -53,7 +53,7 @@ ${nativewindVars("dark")}
 // ---- tailwind.tokens.js -----------------------------------------------------
 
 // Tema-duyarli renkler CSS degiskeninden okunur; marka renkleri sabit hex.
-// Anahtar listesi ELLE TUTULMAZ — temanin kendisinden turetilir, yoksa
+// Anahtar listesi ELLE TUTULMAZ - temanin kendisinden turetilir, yoksa
 // themes.ts'e eklenen bir renk sessizce Tailwind'e gecmez.
 const themed = Object.keys(darkTheme);
 
@@ -82,7 +82,7 @@ module.exports = ${JSON.stringify(
       spacing: px(space),
       borderRadius: px(radius),
       fontSize: px(type),
-      // em olarak yazilir — NativeWind bunu fontSize'a gore cozer. Mutlak px
+      // em olarak yazilir - NativeWind bunu fontSize'a gore cozer. Mutlak px
       // yazilamaz cunku ayni tracking farkli punto'da farkli nokta degeri demek.
       letterSpacing: Object.fromEntries(
         Object.entries(tracking).map(([k, v]) => [k, `${v}em`]),
@@ -98,7 +98,7 @@ module.exports = ${JSON.stringify(
 // ---- widget/HelmDesignTokens.swift -----------------------------------------
 
 // NEDEN: iOS widget'i ayri bir derleme birimi; TypeScript import edemez. Renkleri
-// Swift'e elle kopyalamak generator'in onlemek icin var oldugu seyin ta kendisi —
+// Swift'e elle kopyalamak generator'in onlemek icin var oldugu seyin ta kendisi -
 // nitekim kaymisti (widget grafik gradyani #FF6B6B/#C56CF0/#4834D4 paletin
 // hicbir yerinde yoktu, base #0C0C10 ise bg #0A0A0C degildi). Artik tek kaynak.
 //

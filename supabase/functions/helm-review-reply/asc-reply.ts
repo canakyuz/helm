@@ -1,8 +1,8 @@
 // supabase/functions/helm-review-reply/asc-reply.ts
 // Apple App Store Connect Customer Review Responses.
-//   POST   /v1/customerReviewResponses             — yeni yanıt
-//   PATCH  /v1/customerReviewResponses/{id}        — mevcut yanıtı güncelle
-//   GET    /v1/customerReviews/{id}/response       — mevcut response_id'yi öğren
+//   POST   /v1/customerReviewResponses             - yeni yanıt
+//   PATCH  /v1/customerReviewResponses/{id}        - mevcut yanıtı güncelle
+//   GET    /v1/customerReviews/{id}/response       - mevcut response_id'yi öğren
 
 import { makeAscJwt, type ASCKeyConfig } from "../_shared/asc-jwt.ts";
 

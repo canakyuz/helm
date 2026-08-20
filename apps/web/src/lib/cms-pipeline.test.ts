@@ -1,4 +1,4 @@
-// helm — ingest çekirdeği testleri: inferSchema + mergeSchema (governance'ın doğruluğu).
+// helm - ingest çekirdeği testleri: inferSchema + mergeSchema (governance'ın doğruluğu).
 // Çalıştır: bun test apps/web/src/lib/cms-pipeline.test.ts
 
 import { describe, expect, it } from "bun:test";
@@ -79,7 +79,7 @@ describe("inferSchema", () => {
   });
 });
 
-describe("mergeSchema — governance", () => {
+describe("mergeSchema - governance", () => {
   const inferred = inferSchema([sample]);
 
   it("ilk ingest → hepsi added, fields = inferred", () => {

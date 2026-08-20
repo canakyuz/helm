@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-os-breakdown — PostHog (HogQL) OS + sürüm kırılımı (son 30 gün, tekil kullanıcı).
+// helm-os-breakdown - PostHog (HogQL) OS + sürüm kırılımı (son 30 gün, tekil kullanıcı).
 // Body: { project_id }
 // Response: { rows: [{ os, version, users, pct }], total, days }
 

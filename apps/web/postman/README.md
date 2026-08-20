@@ -1,4 +1,4 @@
-# helm — Postman Koleksiyonu
+# helm - Postman Koleksiyonu
 
 helm'in connector'larının yaptığı **tam HTTP çağrılarını** Postman'de tek tek
 çalıştırıp ham yanıtı görebilmek için. Veri yorumlamasında bir şey ters
@@ -18,59 +18,59 @@ connectors/`) ile karşılaştırırsın.
 
 Her istek öncesi pre-request script çalışır ve şunları üretir:
 `DATE_90_AGO`, `DATE_TODAY`, `EPOCH_90_AGO`, `EPOCH_NOW`, `YMD_START`,
-`YMD_END` — connector'lardaki son 90 gün penceresinin birebir aynısı.
+`YMD_END` - connector'lardaki son 90 gün penceresinin birebir aynısı.
 
 ## Sıra
 
 ### AdMob
-1. **0 — Refresh access token** — `client_id/secret/refresh_token`'dan
+1. **0 - Refresh access token** - `client_id/secret/refresh_token`'dan
    access token üretir, otomatik kaydeder.
-2. **1 — Network report** — son 90 günün günlük gelir/gösterim/RPM raporu.
+2. **1 - Network report** - son 90 günün günlük gelir/gösterim/RPM raporu.
    - helm: revenue = `microsValue / 1e6`, impressions = `integerValue`,
      ecpm = `IMPRESSION_RPM/1e6` (yoksa `revenue/impressions*1000`).
    - **Para birimi:** yanıtın `header.localizationSettings.currencyCode`'una
-     bak — helm config'inde `currency` alanı bunla eşleşmeli.
+     bak - helm config'inde `currency` alanı bunla eşleşmeli.
 
 ### RevenueCat
-- **Overview metrics** — `metrics[]` dizisi. helm `id: 'mrr'`,
+- **Overview metrics** - `metrics[]` dizisi. helm `id: 'mrr'`,
   `'active_subscriptions'`, `'revenue'` arıyor.
-  **Yanıttaki gerçek id'leri doğrula** — farklıysa connector kodunda
+  **Yanıttaki gerçek id'leri doğrula** - farklıysa connector kodunda
   güncellenmesi gerekir.
 
 ### PostHog
-- **Daily DAU** — HogQL: `SELECT toDate(timestamp), uniq(person_id) FROM events ...`
-- **Current WAU** — anlık WAU.
+- **Daily DAU** - HogQL: `SELECT toDate(timestamp), uniq(person_id) FROM events ...`
+- **Current WAU** - anlık WAU.
 - Sürekli 0 dönüyorsa → `person_id` event'lerin çoğunda boş demektir.
 
 ### Stripe
-- **Aktif abonelikler** — helm MRR'ı her aboneliğin items'ından hesaplar
+- **Aktif abonelikler** - helm MRR'ı her aboneliğin items'ından hesaplar
   (yıllık /12, vb), `unit_amount` cents'i /100.
 
 ### Plausible
-- **Timeseries** — günlük ziyaretçi 90g. helm bunu `dau` olarak yazar.
+- **Timeseries** - günlük ziyaretçi 90g. helm bunu `dau` olarak yazar.
 
 ### Sentry
-- **Project stats** — `[[unix_ts, count], …]` — helm `errors` olarak yazar.
+- **Project stats** - `[[unix_ts, count], …]` - helm `errors` olarak yazar.
 
 ### Target Supabase (proje kullanıcıları)
-- **List users (admin)** — helm-users buna eşdeğer; tüm sayfaları gezer.
+- **List users (admin)** - helm-users buna eşdeğer; tüm sayfaları gezer.
 
 ### App Store
-- **Reviews RSS** — public, auth yok.
-- **App lookup** — `results[0].version` + `currentVersionReleaseDate` +
+- **Reviews RSS** - public, auth yok.
+- **App lookup** - `results[0].version` + `currentVersionReleaseDate` +
   `releaseNotes`. helm sürüm takibi buradan.
 
 ### helm Edge Functions
 - **helm-ingest / helm-test / helm-users / helm-alert / helm-reviews /
-  helm-versions / helm-heartbeat** — helm'in kendi endpoint'leri.
-- Auth: `Authorization: Bearer {{HELM_SUPABASE_ANON_KEY}}` (heartbeat hariç —
+  helm-versions / helm-heartbeat** - helm'in kendi endpoint'leri.
+- Auth: `Authorization: Bearer {{HELM_SUPABASE_ANON_KEY}}` (heartbeat hariç -
   JWT'siz deploy edildi).
 
 ## Akış: bir bug'ı izlemek
 
 1. Cockpit'te tuhaf bir değer gör (ör. eCPM $0).
 2. Postman'de AdMob → "Network report"u çalıştır.
-3. Yanıtta o tarih için `IMPRESSION_RPM` ne dönüyor — bak.
+3. Yanıtta o tarih için `IMPRESSION_RPM` ne dönüyor - bak.
 4. helm o değeri nasıl yorumluyor: `connectors/admob.ts` aç, karşılaştır.
 5. Tutarsızlık varsa connector'ı düzelt + deploy.
 

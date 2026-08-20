@@ -25,7 +25,7 @@ export default function About() {
 
   const lastSync = health.data?.lastSyncRun?.finishedAt ?? null;
   const runs24h = health.data?.syncRunsLast24h ?? 0;
-  const version = Constants.expoConfig?.version ?? "—";
+  const version = Constants.expoConfig?.version ?? "-";
 
   return (
     <View className="flex-1 bg-canvas">
@@ -60,7 +60,7 @@ export default function About() {
               <InfoRow
                 label={t("Son senkron")}
                 divider
-                value={lastSync != null ? formatRelativeTime(lastSync) : "—"}
+                value={lastSync != null ? formatRelativeTime(lastSync) : "-"}
               />
               {/* Cron saat basi calisiyor; 24 saatte beklenen ~24 tur. Ham sayi
                   "calisiyor mu" sorusunu tek bakista cevapliyor. */}

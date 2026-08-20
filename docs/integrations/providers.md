@@ -173,7 +173,7 @@ Authorization: Bearer {auth_token}
 | Unresolved issues | `sentry_issues` veya metrics: `open_errors` |
 | Event count 24h | `metrics`: `error_count` |
 
-Mobile: `use-sentry-issues.ts` — mevcut ekran `more/errors.tsx`.
+Mobile: `use-sentry-issues.ts` - mevcut ekran `more/errors.tsx`.
 
 ### webhook
 
@@ -205,7 +205,7 @@ Mobile KPI tile zaten `ad_revenue` okur (`use-cockpit-kpis`).
 
 ### sync
 
-Daily active users → `metrics.dau` (Supabase DAU ile reconcile — property config'de primary source seç)
+Daily active users → `metrics.dau` (Supabase DAU ile reconcile - property config'de primary source seç)
 
 ---
 

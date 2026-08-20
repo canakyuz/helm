@@ -11,7 +11,7 @@ import {
   GeistMono_600SemiBold,
 } from "@expo-google-fonts/geist-mono";
 
-// Tek hook — `_layout.tsx` font yüklenmeden splash tutar.
+// Tek hook - `_layout.tsx` font yüklenmeden splash tutar.
 export function useAppFonts() {
   return useFonts({
     "Geist-400": Geist_400Regular,

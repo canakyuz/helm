@@ -102,7 +102,7 @@ const EN: Record<string, string> = {
   "Projeler": "Projects",
   "Uyarı kuralları": "Alert rules",
 
-  // Accent aile adlari — kaynak @helm/design/accents.ts, orada tek dil.
+  // Accent aile adlari - kaynak @helm/design/accents.ts, orada tek dil.
   "Camgöbeği": "Cyan",
   "İndigo": "Indigo",
   "Pembe": "Pink",
@@ -112,8 +112,8 @@ const EN: Record<string, string> = {
   "opsiyonel": "optional",
   "Kaydediliyor…": "Saving…",
   "Eksik zorunlu alan: {list}": "Missing required field: {list}",
-  "••••••••  kayıtlı — değiştirmek için yeni değer gir":
-    "••••••••  saved — enter a new value to replace it",
+  "••••••••  kayıtlı - değiştirmek için yeni değer gir":
+    "••••••••  saved - enter a new value to replace it",
 
   // Giris
   "E-posta ve en az 6 karakter şifre gir.":
@@ -164,8 +164,8 @@ const EN: Record<string, string> = {
   "hatasız": "no errors",
   "tümü kapandı": "all closed",
   "{n} oturum kapanmadı · {rate}": "{n} sessions never closed · {rate}",
-  "bitiş sayısı başlangıçtan fazla — ölçüm hatalı":
-    "more ends than starts — the measurement is wrong",
+  "bitiş sayısı başlangıçtan fazla - ölçüm hatalı":
+    "more ends than starts - the measurement is wrong",
 
   // Ozet
   "BUGÜN · GELİR": "TODAY · REVENUE",
@@ -225,7 +225,7 @@ const EN: Record<string, string> = {
   "Hedef güncellendi": "Goal updated",
   "· kapalı": "· off",
 
-  // labels.ts — property tipi ve durumu
+  // labels.ts - property tipi ve durumu
   "Uygulama": "App",
   "Oyun": "Game",
   "Masaüstü": "Desktop",
@@ -234,7 +234,7 @@ const EN: Record<string, string> = {
   "kapalı": "down",
   "bilinmiyor": "unknown",
 
-  // labels.ts — ay adlari. Tarih bicimleyici bunlari anahtar olarak gecirir.
+  // labels.ts - ay adlari. Tarih bicimleyici bunlari anahtar olarak gecirir.
   "Ocak": "January",
   "Şubat": "February",
   "Mart": "March",
@@ -258,7 +258,7 @@ const EN: Record<string, string> = {
   "Kas": "Nov",
   "Ara": "Dec",
 
-  // Dil secici — kendi adlari
+  // Dil secici - kendi adlari
   "Türkçe": "Turkish",
   "İngilizce": "English",
 
@@ -280,7 +280,7 @@ const EN: Record<string, string> = {
   "Sağlık": "Health",
   "Ayar": "Settings",
 
-  // Kart basliklari — tirnaksiz JSX metni oldugu icin ilk taramada kacmisti
+  // Kart basliklari - tirnaksiz JSX metni oldugu icin ilk taramada kacmisti
   "Sürümler": "Versions",
   "Ödemeler": "Payouts",
   "Platformlar": "Platforms",
@@ -298,14 +298,14 @@ const EN: Record<string, string> = {
     "{issues} active issues · {fatal} fatal · {events} events",
   "Ölçüm şüpheli": "Measurement suspect",
   "Aşağıdakiler kullanıcı davranışı değil, eksik veya hatalı olay gönderimi.":
-    "These are not user behaviour — they are missing or malformed event reporting.",
+    "These are not user behaviour - they are missing or malformed event reporting.",
   "Oturum kapanma": "Session closure",
   "{platform}: {started} oturum başladı, hiçbiri kapanmadı":
     "{platform}: {started} sessions started, none closed",
   "{platform}: bitiş ({ended}) başlangıçtan ({started}) fazla":
     "{platform}: more ends ({ended}) than starts ({started})",
-  "Oyun bitişi ({overs}) başlangıçtan ({starts}) fazla — başlangıç olayı eksik":
-    "More game-overs ({overs}) than starts ({starts}) — the start event is missing",
+  "Oyun bitişi ({overs}) başlangıçtan ({starts}) fazla - başlangıç olayı eksik":
+    "More game-overs ({overs}) than starts ({starts}) - the start event is missing",
   "TOPLAM GELİR": "TOTAL REVENUE",
   "Ay": "Month",
   "Hafta": "Week",
@@ -341,7 +341,7 @@ const EN: Record<string, string> = {
   "Süresi doldu": "Expired",
   "Ödeme sorunu": "Billing issue",
 
-  // Goreli zaman — birim basina anahtar (bkz. src/lib/format.ts)
+  // Goreli zaman - birim basina anahtar (bkz. src/lib/format.ts)
   "şimdi": "just now",
   "az sonra": "in a moment",
   "{n} sn önce": "{n}s ago",
@@ -360,15 +360,15 @@ const EN: Record<string, string> = {
   "{n} y sonra": "in {n}y",
   "ping yok": "no ping",
 
-  // Entegrasyon form alanlari — kaynak @helm/domain/integrations.ts
-  "App Store ID (App Store URL'inde id sonrası rakam — yorumlar için)":
-    "App Store ID (the number after `id` in the App Store URL — used for reviews)",
-  "App Store ülke kodları (virgülle ayır — yorumlar için)":
-    "App Store country codes (comma-separated — used for reviews)",
+  // Entegrasyon form alanlari - kaynak @helm/domain/integrations.ts
+  "App Store ID (App Store URL'inde id sonrası rakam - yorumlar için)":
+    "App Store ID (the number after `id` in the App Store URL - used for reviews)",
+  "App Store ülke kodları (virgülle ayır - yorumlar için)":
+    "App Store country codes (comma-separated - used for reviews)",
   "CRM tabloları (virgülle ayır, opsiyonel `tablo:kolon`)":
     "CRM tables (comma-separated, optional `table:column`)",
-  "Fiyat ondalığı (hep .99 ise — MRR kuruşunu RC yuvarlamasına rağmen ekler)":
-    "Price decimal (if prices always end in .99 — restores the cents RevenueCat rounds off)",
+  "Fiyat ondalığı (hep .99 ise - MRR kuruşunu RC yuvarlamasına rağmen ekler)":
+    "Price decimal (if prices always end in .99 - restores the cents RevenueCat rounds off)",
   "Gönderen adı":
     "Sender name",
   "Gönderen e-posta (Resend'de doğrulanmış domain)":
@@ -377,16 +377,16 @@ const EN: Record<string, string> = {
     "Host (for self-hosted)",
   "Huni adımları (virgülle ayır, event adları)":
     "Funnel steps (comma-separated event names)",
-  "Issuer ID (Team Key için — Individual API Key'de BOŞ bırak)":
-    "Issuer ID (for a Team Key — leave EMPTY for an Individual API Key)",
-  "Package Name (opsiyonel — boşsa properties.google_play_id'den okunur)":
-    "Package name (optional — falls back to properties.google_play_id)",
-  "Para birimi (ISO kodu — RC raporlama, genelde USD)":
-    "Currency (ISO code — RevenueCat reporting, usually USD)",
-  "Para birimi (ISO kodu — TRY/USD/EUR)":
-    "Currency (ISO code — TRY/USD/EUR)",
-  "Private Key (.p8 içeriği — BEGIN/END dahil)":
-    "Private key (.p8 contents — including BEGIN/END)",
+  "Issuer ID (Team Key için - Individual API Key'de BOŞ bırak)":
+    "Issuer ID (for a Team Key - leave EMPTY for an Individual API Key)",
+  "Package Name (opsiyonel - boşsa properties.google_play_id'den okunur)":
+    "Package name (optional - falls back to properties.google_play_id)",
+  "Para birimi (ISO kodu - RC raporlama, genelde USD)":
+    "Currency (ISO code - RevenueCat reporting, usually USD)",
+  "Para birimi (ISO kodu - TRY/USD/EUR)":
+    "Currency (ISO code - TRY/USD/EUR)",
+  "Private Key (.p8 içeriği - BEGIN/END dahil)":
+    "Private key (.p8 contents - including BEGIN/END)",
   "Proceeds para birimi (ISO kodu)":
     "Proceeds currency (ISO code)",
   "Proje slug":
@@ -395,8 +395,8 @@ const EN: Record<string, string> = {
     "Service account JSON (Google Cloud → IAM → Service Accounts → Keys → CREATE → JSON; paste the WHOLE file)",
   "Site ID (alan adı)":
     "Site ID (domain)",
-  "Yorum çeviri dilleri (virgülle, opsiyonel — reviews için, versions etkilenmez)":
-    "Review translation languages (comma-separated, optional — affects reviews, not versions)",
+  "Yorum çeviri dilleri (virgülle, opsiyonel - reviews için, versions etkilenmez)":
+    "Review translation languages (comma-separated, optional - affects reviews, not versions)",
 };
 
 export type TranslateVars = Record<string, string | number>;
@@ -417,15 +417,15 @@ export function useT() {
 }
 
 /**
- * React disi kod icin ceviri — hook cagrilamayan yerler: mutation `onSuccess`
+ * React disi kod icin ceviri - hook cagrilamayan yerler: mutation `onSuccess`
  * toast'lari, olay isleyicileri, saf yardimci fonksiyonlar.
  *
  * NEDEN AYRI: `useT` bir hook, kural geregi bilesen govdesi disinda cagrilamaz.
  * Bu surum dili cagri aninda MMKV'den okur; abonelik yok, cunki bir toast zaten
- * tek seferlik cizilir — dil degisiminde yeniden cevrilecek bir sey kalmaz.
+ * tek seferlik cizilir - dil degisiminde yeniden cevrilecek bir sey kalmaz.
  */
 /**
- * Aktif dilin BCP-47 etiketi — buyuk/kucuk harf ve tarih donusumleri icin.
+ * Aktif dilin BCP-47 etiketi - buyuk/kucuk harf ve tarih donusumleri icin.
  *
  * NEDEN CEVIRI TABLOSUNDAN DEGIL: tablo Turkce moddaki her anahtari oldugu gibi
  * geri veriyor, yani "__locale__" gibi bir anahtar TR'de dizginin kendisi olarak

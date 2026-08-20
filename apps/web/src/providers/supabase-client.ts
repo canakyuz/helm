@@ -1,7 +1,7 @@
 import { createClient } from "@refinedev/supabase";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// helm hub Supabase projesi — değerler .env.local'dan okunur.
+// helm hub Supabase projesi - değerler .env.local'dan okunur.
 const SUPABASE_URL = import.meta.env.VITE_HELM_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_HELM_SUPABASE_ANON_KEY as string;
 

@@ -5,13 +5,13 @@ import { isSecretKey, type ProviderName } from "@helm/domain";
  * Entegrasyon yazma katmani.
  *
  * SIR POLITIKASI: `project_integrations.config` duz metin jsonb ve RLS
- * "authenticated full access" (0001_init.sql:64) — yani istemci teknik olarak
+ * "authenticated full access" (0001_init.sql:64) - yani istemci teknik olarak
  * Service Role Key'i cekebilir. CEKMIYORUZ. Duzenleme ekrani sir alanlarinin
  * DEGERINI degil, YALNIZCA SET EDILMIS OLUP OLMADIGINI gorur; bu sayede sirlar
  * React state'ine, sorgu cache'ine ve ekran goruntusune hic girmez.
  *
  * TEK ISTISNA `updateIntegrationConfig`: birlestirme icin mevcut config bir kez
- * okunur. Dokunulmayan sirlar korunsun diye zorunlu — aksi halde formu kaydetmek
+ * okunur. Dokunulmayan sirlar korunsun diye zorunlu - aksi halde formu kaydetmek
  * girilmemis her siri silerdi. Deger yalnizca fonksiyon kapsaminda yasar, disari
  * donmez. Atomik olmadigi icin es zamanli iki duzenleme birbirini ezebilir; tek
  * kullanicili uygulamada kabul edilebilir, cok kullaniciya cikarsa jsonb merge
@@ -25,7 +25,7 @@ export type IntegrationConfigView = {
   enabled: boolean;
   /** Sir OLMAYAN alanlar, oldugu gibi. */
   config: Record<string, string>;
-  /** Kayitli sir alanlarinin ANAHTARLARI — degerleri degil. */
+  /** Kayitli sir alanlarinin ANAHTARLARI - degerleri degil. */
   secretKeysSet: string[];
   lastSyncStatus: "ok" | "error" | null;
   lastSyncError: string | null;

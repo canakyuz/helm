@@ -5,15 +5,15 @@ import { formatCurrency, formatInteger, formatDelta } from "@helm/domain";
 
 // `~/lib/preferences`'teki Currency ile ayni kume. Oradan import edilmiyor
 // cunku o dosya expo-secure-store cekiyor ve bu modulu RN'e baglardi. Iki
-// tanim ayrisirsa TS cagri yerinde hata verir — sessizce kaymaz.
+// tanim ayrisirsa TS cagri yerinde hata verir - sessizce kaymaz.
 type Currency = "USD" | "TRY" | "EUR" | "GBP";
 
 /**
- * Widget yukunun SAF hesabi — React Native'e dokunmaz.
+ * Widget yukunun SAF hesabi - React Native'e dokunmaz.
  *
  * NEDEN AYRI DOSYA: bu mantik `widget-sync.ts` icindeydi, o da `react-native`
  * import ediyor. Dolayisiyla RN disinda calistirilamiyor, yani test edilemiyordu
- * — ve tam da burada bir birim karisikligi bugi vardi (gunluk reklam geliri
+ * - ve tam da burada bir birim karisikligi bugi vardi (gunluk reklam geliri
  * aylik MRR oranina ekleniyordu). Saf kisim ayrilinca dogrulanabiliyor.
  */
 
@@ -36,7 +36,7 @@ export type HelmWidgetPayload = {
 };
 
 /**
- * Widget'in gosterdigi AY verisi — ay basindan bugune.
+ * Widget'in gosterdigi AY verisi - ay basindan bugune.
  *
  * NEDEN AY: buyuk sayi eskiden `adRevenue + mrr` idi; bu BIR GUNUN reklam
  * gelirini AYLIK tekrarli gelir ORANINA ekliyordu. Iki farkli birim toplaninca
@@ -49,7 +49,7 @@ export type WidgetMonthInput = {
   total: number;
   /** Ay basindan bugune reklam geliri (USD). */
   adRevenue: number;
-  /** Ay basindan bugune kullanicilarin odedigi — abonelik + uygulama ici (USD). */
+  /** Ay basindan bugune kullanicilarin odedigi - abonelik + uygulama ici (USD). */
   payments: number;
   /** Son 7 gunun gunluk toplamlari, eskiden yeniye (USD). */
   last7: number[];
@@ -88,8 +88,8 @@ export function normalizeBars(values: number[]): number[] {
 
 export function buildWidgetPayload(
   data: {
-    // null = olcum yok. Metin alanlari "—" gosterir; SAYISAL alan (liveUsers)
-    // widget'in duzeni icin 0'a duser — orada gosterilecek bir metin yok.
+    // null = olcum yok. Metin alanlari "-" gosterir; SAYISAL alan (liveUsers)
+    // widget'in duzeni icin 0'a duser - orada gosterilecek bir metin yok.
     dau: number | null;
     mrrDelta: number | null;
     openAlerts: number;
@@ -101,11 +101,11 @@ export function buildWidgetPayload(
 ): HelmWidgetPayload {
   // Tutarlar USD baz; fxRate = USD → secili currency.
   const money = (v: number | null) =>
-    v != null ? formatCurrency(v * fxRate, currency) : "—";
+    v != null ? formatCurrency(v * fxRate, currency) : "-";
 
   return {
     liveUsers: data.dau ?? 0,
-    liveUsersText: data.dau != null ? formatInteger(data.dau) : "—",
+    liveUsersText: data.dau != null ? formatInteger(data.dau) : "-",
     adRevenueText: money(month ? month.adRevenue : null),
     incomingPaymentsText: money(month ? month.payments : null),
     totalRevenueText: money(month ? month.total : null),

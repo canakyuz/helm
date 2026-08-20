@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans or subagent-driven-development. Steps use checkbox (`- [ ]`) syntax.
 
-**Goal:** Turn Analytics into an audience-focused screen — DAU hero + native DAU/WAU/MAU segment, a live Apple Map of users by country, then funnel/acquisition/retention/reviews/OS — with Reviews extracted to a shared component used by both Analytics and Health.
+**Goal:** Turn Analytics into an audience-focused screen - DAU hero + native DAU/WAU/MAU segment, a live Apple Map of users by country, then funnel/acquisition/retention/reviews/OS - with Reviews extracted to a shared component used by both Analytics and Health.
 
 **Architecture:** Three new shared units (`country-geo.ts` static table, `<AudienceMap>` wrapping `expo-maps` AppleMaps.View, `<ReviewsSection>` extracted verbatim from Health). Analytics composes them in the agreed B layout; Health swaps its inline reviews block for `<ReviewsSection>`. expo-maps is installed + native-rebuilt (verified, 0 errors).
 
@@ -14,12 +14,12 @@
 
 ## File Structure
 ```
-src/lib/country-geo.ts                     CREATE — ISO-2 → {lat,lng,name} static table + lookup
-src/components/liquid/audience-map.tsx     CREATE — <AudienceMap rows={GeoRow[]}> Apple Map + country markers
-src/components/liquid/reviews-section.tsx  CREATE — <ReviewsSection/> (rating + histogram + ReviewRows + reply), self-contained
-src/components/liquid/index.ts             MODIFY — export AudienceMap, ReviewsSection
-app/(cockpit)/health.tsx                   MODIFY — replace inline reviews with <ReviewsSection/>
-app/(cockpit)/analytics.tsx                MODIFY — native DAU/WAU/MAU segment; add Where(map) + Reviews sections; reorder
+src/lib/country-geo.ts                     CREATE - ISO-2 → {lat,lng,name} static table + lookup
+src/components/liquid/audience-map.tsx     CREATE - <AudienceMap rows={GeoRow[]}> Apple Map + country markers
+src/components/liquid/reviews-section.tsx  CREATE - <ReviewsSection/> (rating + histogram + ReviewRows + reply), self-contained
+src/components/liquid/index.ts             MODIFY - export AudienceMap, ReviewsSection
+app/(cockpit)/health.tsx                   MODIFY - replace inline reviews with <ReviewsSection/>
+app/(cockpit)/analytics.tsx                MODIFY - native DAU/WAU/MAU segment; add Where(map) + Reviews sections; reorder
 ```
 
 ---
@@ -91,7 +91,7 @@ git commit -m "feat(mobile-analytics): WES-000 add country geo centroid table fo
 
 > Wraps `expo-maps` AppleMaps.View. Uses the real `GeoRow[]` (country, country_name, users) the
 > Analytics geo hook already returns. Markers from `countryGeo` lookup; unknown codes skipped.
-> iOS<18 has no marker tap — fine, the screen also lists countries below.
+> iOS<18 has no marker tap - fine, the screen also lists countries below.
 
 - [ ] **Step 1: Create `audience-map.tsx`**
 
@@ -225,14 +225,14 @@ function ReviewRows({ items, reply }: { items: ReviewItem[]; reply: ReturnType<t
                   </Text>
                 </View>
                 <Text style={{ fontFamily: "Geist-400", fontSize: type.bodySm, color: colors.fgSecondary }} numberOfLines={1}>
-                  {r.body ?? "—"}
+                  {r.body ?? "-"}
                 </Text>
               </View>
             }
             detail={
               <>
                 <Text style={{ fontFamily: "Geist-400", fontSize: type.body, color: colors.fgSecondary, lineHeight: 18 }}>
-                  {r.body ?? "—"}
+                  {r.body ?? "-"}
                 </Text>
                 {hasReply ? (
                   <View
@@ -246,7 +246,7 @@ function ReviewRows({ items, reply }: { items: ReviewItem[]; reply: ReturnType<t
                   >
                     <Text style={{ fontFamily: MONO_500, fontSize: 9, color: colors.green, letterSpacing: 0.6 }}>YOUR REPLY</Text>
                     <Text style={{ fontFamily: "Geist-400", fontSize: type.bodySm, color: colors.fgSecondary, marginTop: 4 }}>
-                      {r.developer_response ?? draft[r.id] ?? "Thanks for the feedback — we're on it!"}
+                      {r.developer_response ?? draft[r.id] ?? "Thanks for the feedback - we're on it!"}
                     </Text>
                   </View>
                 ) : (
@@ -404,7 +404,7 @@ Expected: 0 errors. Fix any "declared but never read" by removing the dead local
 
 - [ ] **Step 4: Visual check**
 
-`curl -s localhost:8081/reload`; on Health tab, scroll to Reviews — identical look + reply flow still works.
+`curl -s localhost:8081/reload`; on Health tab, scroll to Reviews - identical look + reply flow still works.
 
 - [ ] **Step 5: Commit**
 
@@ -415,7 +415,7 @@ git commit -m "refactor(mobile-health): WES-000 use shared ReviewsSection (behav
 
 ---
 
-### Task 6: Analytics — native segment + map + reviews + reorder
+### Task 6: Analytics - native segment + map + reviews + reorder
 
 **Files:**
 - Modify: `app/(cockpit)/analytics.tsx`
@@ -426,7 +426,7 @@ git commit -m "refactor(mobile-health): WES-000 use shared ReviewsSection (behav
 
 - [ ] **Step 1: Imports**
 
-Add to the liquid import block in `analytics.tsx`: `NativeSegmented, AudienceMap, ReviewsSection`. Keep `Seg` only if still used elsewhere (it isn't after step 2 — remove it then).
+Add to the liquid import block in `analytics.tsx`: `NativeSegmented, AudienceMap, ReviewsSection`. Keep `Seg` only if still used elsewhere (it isn't after step 2 - remove it then).
 
 - [ ] **Step 2: Hero segment → native**
 
@@ -472,7 +472,7 @@ function WhereSection({ projectId }: { projectId?: string | undefined }) {
 
 - [ ] **Step 4: Reorder the sections block + renumber indices**
 
-Replace the `<LiquidGlass padding={0}>` children with this order (renumber the `index=` props on each existing CardSection accordingly — Where=01, Funnel=02, Acquisition=03, Retention=04, Reviews=05, OS=06):
+Replace the `<LiquidGlass padding={0}>` children with this order (renumber the `index=` props on each existing CardSection accordingly - Where=01, Funnel=02, Acquisition=03, Retention=04, Reviews=05, OS=06):
 ```tsx
           <LiquidGlass padding={0}>
             <WhereSection projectId={projectId} />
@@ -490,7 +490,7 @@ Replace the `<LiquidGlass padding={0}>` children with this order (renumber the `
             <OsSection projectId={projectId} />
           </LiquidGlass>
 ```
-Then update each section's internal `index="…"` string to match its new position: CountriesSection title stays "Top countries" but its `CardSection index` → "01b" is wrong — instead keep Where as the only "01", and set: CountriesSection index "01" is replaced — give CountriesSection NO index change is fine since Where owns 01; BUT to avoid two "01"s, set CountriesSection's CardSection index to "" (drop number, it's the list under the map) OR renumber. SIMPLEST: WhereSection index "01"; CountriesSection drop its index prop (omit `index`); Funnel "02"; Acquisition "03"; Retention "04"; ReviewsSection index "05"; OsSection "06". Edit each existing CardSection's `index=` accordingly.
+Then update each section's internal `index="…"` string to match its new position: CountriesSection title stays "Top countries" but its `CardSection index` → "01b" is wrong - instead keep Where as the only "01", and set: CountriesSection index "01" is replaced - give CountriesSection NO index change is fine since Where owns 01; BUT to avoid two "01"s, set CountriesSection's CardSection index to "" (drop number, it's the list under the map) OR renumber. SIMPLEST: WhereSection index "01"; CountriesSection drop its index prop (omit `index`); Funnel "02"; Acquisition "03"; Retention "04"; ReviewsSection index "05"; OsSection "06". Edit each existing CardSection's `index=` accordingly.
 
 - [ ] **Step 5: Typecheck**
 
@@ -505,7 +505,7 @@ Expected: 0 errors. Remove `Seg` import if now unused; remove `Bars`-unrelated l
 
 ```bash
 git add "app/(cockpit)/analytics.tsx"
-git commit -m "feat(mobile-analytics): WES-000 audience layout — native segment, Apple map Where section, shared Reviews, reorder"
+git commit -m "feat(mobile-analytics): WES-000 audience layout - native segment, Apple map Where section, shared Reviews, reorder"
 ```
 
 ---
@@ -514,8 +514,8 @@ git commit -m "feat(mobile-analytics): WES-000 audience layout — native segmen
 
 **Spec coverage:** hero native segment (T6) ✓ · Apple map Where (T1,T2,T6) ✓ · Reviews shared + both screens (T3,T4,T5,T6) ✓ · reorder (T6) ✓ · country-geo (T1) ✓ · OS secondary last (T6) ✓.
 
-**Placeholder scan:** Task 6 Step 4 contains prose reasoning about index numbering rather than one final code block — the implementer must apply the SIMPLEST rule stated (Where=01, CountriesSection omit index, Funnel=02, Acquisition=03, Retention=04, Reviews=05, OS=06). This is a guided edit, not a silent TODO. No other placeholders.
+**Placeholder scan:** Task 6 Step 4 contains prose reasoning about index numbering rather than one final code block - the implementer must apply the SIMPLEST rule stated (Where=01, CountriesSection omit index, Funnel=02, Acquisition=03, Retention=04, Reviews=05, OS=06). This is a guided edit, not a silent TODO. No other placeholders.
 
 **Type consistency:** `AudienceMapRow` (country, country_name, users) matches `GeoRow` from use-analytics. `ReviewsSection({index})` signature consistent T3/T5/T6. `NativeSegmented<T>` matches existing usage in Overview/Revenue. `countryGeo` returns `CountryGeo|null`, consumer filters null.
 
-**Known verification points (implementer must check, not guess):** expo-maps `colorScheme` string vs enum (T2 Step2 fallback); exact line ranges in health.tsx for deletion (T5 — search by content, not line number); whether `Seg` becomes unused in analytics (T6 Step5).
+**Known verification points (implementer must check, not guess):** expo-maps `colorScheme` string vs enum (T2 Step2 fallback); exact line ranges in health.tsx for deletion (T5 - search by content, not line number); whether `Seg` becomes unused in analytics (T6 Step5).

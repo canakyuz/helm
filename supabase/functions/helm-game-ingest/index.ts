@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, json } from "../_shared/cors.ts";
 
-// helm-game-ingest — istemci oyunlardan telemetri/hata push'u (Sentry'siz).
+// helm-game-ingest - istemci oyunlardan telemetri/hata push'u (Sentry'siz).
 // JWT istemez (--no-verify-jwt ile deploy); auth = body.project_id + body.token
 // (properties.ingest_token ile eşleşmeli, tahmin edilemez UUID).
 //

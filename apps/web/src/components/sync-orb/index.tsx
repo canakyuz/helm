@@ -32,7 +32,7 @@ const COLORS: Record<Health, { dot: string; ring: string; label: string }> = {
   },
 };
 
-/** Sync sağlık orb'u — nabız atan dot + halka.
+/** Sync sağlık orb'u - nabız atan dot + halka.
  *  okCount/total ratio'ya göre renk değişir.
  *  CSS-only animasyon (sync-pulse keyframe glass.css'te).
  *  Helm cockpit ZONE A son cell. */
@@ -49,13 +49,13 @@ export const SyncOrb = ({
     <div
       className={cn("flex flex-col items-center justify-center", className)}
       role="status"
-      aria-label={`Sync health: ${colors.label} — ${okCount} / ${total}`}
+      aria-label={`Sync health: ${colors.label} - ${okCount} / ${total}`}
     >
       <div
         className="relative grid place-items-center"
         style={{ width: size, height: size }}
       >
-        {/* Dış halka — pulse */}
+        {/* Dış halka - pulse */}
         <span
           aria-hidden
           className="absolute inset-0 rounded-full animate-[sync-pulse_1.5s_ease-out_infinite]"
@@ -63,7 +63,7 @@ export const SyncOrb = ({
             background: `radial-gradient(circle, ${colors.ring} 0%, transparent 70%)`,
           }}
         />
-        {/* İç dot — sabit */}
+        {/* İç dot - sabit */}
         <span
           aria-hidden
           className="relative size-3 rounded-full"

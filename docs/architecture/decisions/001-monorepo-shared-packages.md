@@ -26,7 +26,7 @@ Helm web ve mobile **tek codebase birleştirilmeyecek**. Bunun yerine:
 **Artı:**
 - Metric/alert değişikliği tek PR
 - Type-safe hub contract
-- Web kurulum, mobile sahada — doğru UX ayrımı
+- Web kurulum, mobile sahada - doğru UX ayrımı
 
 **Eksi:**
 - Monorepo tooling kurulumu (Faz 0)

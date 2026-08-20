@@ -148,7 +148,7 @@ export function SegmentTemplateCard({
                 fontVariant: ["tabular-nums"],
               }}
             >
-              {count === null ? "—" : formatInteger(count)}
+              {count === null ? "-" : formatInteger(count)}
             </Text>
           )}
           <Text

@@ -14,7 +14,7 @@ export type { LastSync } from "@helm/api";
  */
 const RUNNING_POLL_MS = 5_000;
 
-/** Hub'in son ingest calismasi — baslik seridindeki "SON hh:mm" damgasi. */
+/** Hub'in son ingest calismasi - baslik seridindeki "SON hh:mm" damgasi. */
 export function useLastSync() {
   return useQuery({
     ...lastSyncQueryOptions(supabase),
@@ -29,7 +29,7 @@ export function useLastSync() {
  * NEDEN VAR: yenileme hareketi ingest'i tetikliyor ama ingest 90+ saniye suruyor.
  * Kullaniciyi o kadar bekletmek yerine spinner erken kapaniyor; taze rakamlar
  * calisma bitince buradan geliyor. `running` true'dan false'a dondugu an tek
- * tetikleyici — ayni calisma icin iki kez tazelenmez.
+ * tetikleyici - ayni calisma icin iki kez tazelenmez.
  *
  * NEDEN LAYOUT'TA: her ekranda mount edilseydi sekme degistikce ref sifirlanir
  * ve gecis kacardi; ayrica dort ekran ayni anda refetch tetiklerdi.

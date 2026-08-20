@@ -69,8 +69,8 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
         {review && (
           <div className="space-y-3">
             <div className="rounded-md border bg-muted/30 p-3 text-sm">
-              <div className="font-medium">{review.title ?? "—"}</div>
-              <div className="mt-1 text-muted-foreground">{review.body ?? "—"}</div>
+              <div className="font-medium">{review.title ?? "-"}</div>
+              <div className="mt-1 text-muted-foreground">{review.body ?? "-"}</div>
             </div>
             <Textarea
               value={body}

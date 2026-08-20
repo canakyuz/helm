@@ -1,10 +1,10 @@
-# helm-mobile — Gerçek Veri Denetimi + Plan
+# helm-mobile - Gerçek Veri Denetimi + Plan
 
 _2026-05-30 · WES-000 · 5 ekranın gerçek/demo veri durumu + wiring planı_
 
 ## Mevcut gerçek kaynaklar (kanıt: hook'lar)
 
-**`metrics` tablosu** (zaman serili, `project_id` boyutlu) — yalnızca şu anahtarlar:
+**`metrics` tablosu** (zaman serili, `project_id` boyutlu) - yalnızca şu anahtarlar:
 `mrr · dau · total_users · ad_revenue · active_subs · new_users`
 → `useCockpitKpis`, `useMetricDetail(metric)` bunları okur.
 
@@ -87,7 +87,7 @@ OS sürüm dağılımı, WAU/MAU, **session-bazlı crash-free %**.
 
 ## Plan (öncelikli)
 
-### Tier 1 — şimdi bağlanabilir (kaynak mobilde/metrics'te var, düşük efor)
+### Tier 1 - şimdi bağlanabilir (kaynak mobilde/metrics'te var, düşük efor)
 1. **Analytics hero bar** → `useMetricDetail('dau')` gerçek seri (demoData.dauSeries kalkar).
 2. **Analytics ülkeler** → `useUsers`'ı country'ye göre aggregate eden bir hook (gerçek).
 3. **Analytics new users** → `useCockpitKpis.newUsers`.
@@ -100,17 +100,17 @@ OS sürüm dağılımı, WAU/MAU, **session-bazlı crash-free %**.
 
 → Hepsi mobil-içi; backend değişikliği yok. Çıktı: demo etiketlerinin ~yarısı kalkar.
 
-### Tier 2 — persist + hafif entegrasyon (mobil + ufak backend/pref)
+### Tier 2 - persist + hafif entegrasyon (mobil + ufak backend/pref)
 10. **Push/Critical bildirim toggle** → `preferences`'a persist + `expo-notifications` kayıt.
 11. **Aylık gelir hedefi** → kullanıcı-set hedef (preference veya küçük tablo).
 12. **Widget toggle** → mevcut `useWidgetSync`'e bağla.
 
-### Tier 3 — gerçek backend/entegrasyon ingestion gerektirir (şu an veri yok)
-13. **Session crash-free % + trend** (Overview + Health) — Sentry sessions API → yeni metric.
-14. **Revenue derinliği** — IAP/abonelik geliri ayrımı, platform kırılımı, MRR hareketi, payouts,
-    tekil işlemler — RevenueCat/Stripe/App Store Connect ingestion.
-15. **Analytics derinliği** — retention, funnel, acquisition, OS, WAU/MAU — PostHog/attribution ingestion.
-16. **Subs detayı** — trial/trial→paid/churn — RevenueCat.
+### Tier 3 - gerçek backend/entegrasyon ingestion gerektirir (şu an veri yok)
+13. **Session crash-free % + trend** (Overview + Health) - Sentry sessions API → yeni metric.
+14. **Revenue derinliği** - IAP/abonelik geliri ayrımı, platform kırılımı, MRR hareketi, payouts,
+    tekil işlemler - RevenueCat/Stripe/App Store Connect ingestion.
+15. **Analytics derinliği** - retention, funnel, acquisition, OS, WAU/MAU - PostHog/attribution ingestion.
+16. **Subs detayı** - trial/trial→paid/churn - RevenueCat.
 
 → Her biri backend'de yeni ingest + metric/edge ister. Önce backend repo'da neyin zaten
 ingest edildiği teyit edilmeli (varsayımı doğrula).

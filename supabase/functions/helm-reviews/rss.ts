@@ -1,5 +1,5 @@
 // supabase/functions/helm-reviews/rss.ts
-// iTunes RSS — public, auth gerektirmez. ASC fallback'i olarak kalır.
+// iTunes RSS - public, auth gerektirmez. ASC fallback'i olarak kalır.
 
 export interface RssReviewRow {
   project_id: string;

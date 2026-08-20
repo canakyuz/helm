@@ -1,4 +1,4 @@
--- helm-ingest gece otomasyonu — pg_cron + pg_net.
+-- helm-ingest gece otomasyonu - pg_cron + pg_net.
 -- helm-ingest Edge Function'ı her gece 03:00 UTC'de çalıştırır.
 
 create extension if not exists pg_cron;

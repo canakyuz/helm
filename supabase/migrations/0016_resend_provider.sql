@@ -1,4 +1,4 @@
--- Resend (mail) sağlayıcısı — kampanya gönderimi için.
+-- Resend (mail) sağlayıcısı - kampanya gönderimi için.
 -- helm-send-mail edge function bu entegrasyondan api_key + from_email okur.
 
 alter table public.project_integrations
@@ -14,7 +14,7 @@ alter table public.project_integrations
     )
   );
 
--- Gönderim geçmişi (basit log — Mail + Push'tan ortak kullanır).
+-- Gönderim geçmişi (basit log - Mail + Push'tan ortak kullanır).
 create table if not exists public.campaigns (
   id          bigint generated always as identity primary key,
   project_id  uuid references public.projects(id) on delete set null,

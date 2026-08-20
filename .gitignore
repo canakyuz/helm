@@ -17,12 +17,12 @@ dist/
 .claude
 
 # Tek seferlik codemod / debug artiklari. Oturum icinde uretilip diskte kalan
-# bu dosyalar `git add -A` ile sessizce commit'e giriyordu — public repo'da
+# bu dosyalar `git add -A` ile sessizce commit'e giriyordu - public repo'da
 # "test-login.js" gibi bir dosya, icerigi zararsiz olsa da yanlis okunur.
 /test-tokens.txt
 /scripts/apply-bento.js
 /scripts/test-login.js
 /scripts/apply-bento-to-ui.js
 
-# CLI her calistiginda yeniden yaziliyor — surekli "modified" gurultusu.
+# CLI her calistiginda yeniden yaziliyor - surekli "modified" gurultusu.
 supabase/.temp/cli-latest

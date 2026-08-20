@@ -21,17 +21,17 @@ import { PropertyPicker } from "./property-picker";
  * Bu suredan eski veri "bayat" sayilir ve damga uyari rengine doner.
  *
  * NEDEN 90 DAKIKA: cron saat basi calisiyor (0013_cron_hourly.sql). Bir saatlik
- * gecikme NORMAL — onu kirmiziya boyamak alarmi anlamsizlastirirdi. 90 dakika
+ * gecikme NORMAL - onu kirmiziya boyamak alarmi anlamsizlastirirdi. 90 dakika
  * "bir tur kacti" demektir; bakilmasi gereken tek durum bu.
  */
 const STALE_AFTER_MS = 90 * 60_000;
 
 type Props = {
-  /** Ust satir — BUYUK HARF, mono, genis tracking. */
+  /** Ust satir - BUYUK HARF, mono, genis tracking. */
   eyebrow: string;
   title: string;
   /**
-   * Yenile butonu. VERILMEZSE BUTON CIZILMEZ — Ayarlar alt ekranlarinda
+   * Yenile butonu. VERILMEZSE BUTON CIZILMEZ - Ayarlar alt ekranlarinda
    * (gorunum, veri, hakkinda) yenilenecek uzak veri yok; calismayan bir buton
    * koymak `rows.tsx`'te bilerek temizlenen "dekoratif buton" hatasinin aynisi.
    */
@@ -41,7 +41,7 @@ type Props = {
   alertCount?: number;
   /**
    * Baslik yerine proje secici goster. Portfoy kapsamli ekranlarda (Ozet, Gelir,
-   * Kullanici, Saglik) acik olmali — secili proje ekranin ne gosterdigini
+   * Kullanici, Saglik) acik olmali - secili proje ekranin ne gosterdigini
    * belirliyor ve degistirmenin baska yolu yok. Ayarlar'da anlamsiz.
    */
   picker?: boolean;
@@ -130,11 +130,11 @@ export function BentoHeader({
 }
 
 /**
- * "SON 10:12" — verinin hub'a en son ne zaman indigi.
+ * "SON 10:12" - verinin hub'a en son ne zaman indigi.
  *
  * NEDEN BUTONUN YANINDA: yenile butonu tek basina ne zaman basilmasi gerektigini
  * soylemiyordu. Rakam degismeyince "uygulama mi bozuk, veri mi ayni" ayrimi
- * yapilamiyordu — damga bu belirsizligi kaldiriyor. Kaynak sync_runs, yani
+ * yapilamiyordu - damga bu belirsizligi kaldiriyor. Kaynak sync_runs, yani
  * HUB'in son calismasi; telefonun son istek attigi an degil (bkz. fetchLastSync).
  */
 function SyncStamp() {
@@ -149,7 +149,7 @@ function SyncStamp() {
   // Suren calismada bitis saati HENUZ yok; started_at'i "bitti" gibi sunmamak
   // icin ayri bir metin.
   const label = data.running ? t("SÜRÜYOR") : `${t("SON")} ${clock}`;
-  // Renk kosullu oldugu icin token yerine tema degeri — bento'daki diger
+  // Renk kosullu oldugu icin token yerine tema degeri - bento'daki diger
   // kosullu renkler de boyle (StatTile delta rengi).
   const color = data.failed ? theme.neg : stale && !data.running ? theme.warn : theme.fg3;
 
@@ -170,7 +170,7 @@ function SyncGlyph({ spinning, color }: { spinning: boolean; color: string }) {
   const turn = useSharedValue(0);
 
   // Shared value render sirasinda yazilmaz. Donme bitince acida birakmak yerine
-  // sifira cekiyoruz — yarim kalmis bir ok "hala calisiyor" gibi okunur.
+  // sifira cekiyoruz - yarim kalmis bir ok "hala calisiyor" gibi okunur.
   useEffect(() => {
     if (spinning) {
       turn.value = 0;

@@ -33,7 +33,7 @@ export const useHelmTheme = () => useContext(HelmThemeContext);
 const STORAGE_KEY = "helm-mode";
 const LEGACY_STORAGE_KEY = "helm-theme";
 
-/** localStorage'dan başlangıç tema key'i — eski "helm-theme" varsa migrate. */
+/** localStorage'dan başlangıç tema key'i - eski "helm-theme" varsa migrate. */
 const readInitialKey = (): string => {
   try {
     const current = localStorage.getItem(STORAGE_KEY);
@@ -48,7 +48,7 @@ const readInitialKey = (): string => {
       return migrated;
     }
   } catch {
-    // SSR / private mode — sessizce default'a düş.
+    // SSR / private mode - sessizce default'a düş.
   }
   return DEFAULT_THEME_KEY;
 };

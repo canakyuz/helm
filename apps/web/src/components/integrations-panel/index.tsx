@@ -99,13 +99,13 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "api_key", label: "v2 Secret API Key", secret: true },
     {
       key: "currency",
-      label: "Para birimi (ISO kodu — RC raporlama, genelde USD)",
+      label: "Para birimi (ISO kodu - RC raporlama, genelde USD)",
       placeholder: "USD",
       optional: true,
     },
     {
       key: "mrr_cents",
-      label: "Price decimal (if prices always end in .99 — restores the cents RevenueCat rounds off)",
+      label: "Price decimal (if prices always end in .99 - restores the cents RevenueCat rounds off)",
       placeholder: "0.99",
       optional: true,
     },
@@ -121,7 +121,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "refresh_token", label: "Refresh Token", secret: true },
     {
       key: "currency",
-      label: "Para birimi (ISO kodu — TRY/USD/EUR)",
+      label: "Para birimi (ISO kodu - TRY/USD/EUR)",
       placeholder: "USD",
       optional: true,
     },
@@ -221,19 +221,19 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   app_store_connect: [
     {
       key: "app_store_id",
-      label: "App Store ID (the number after `id` in the App Store URL — used for reviews)",
+      label: "App Store ID (the number after `id` in the App Store URL - used for reviews)",
       placeholder: "6451234567",
       optional: true,
     },
     {
       key: "app_store_country",
-      label: "App Store country codes (comma-separated — used for reviews)",
+      label: "App Store country codes (comma-separated - used for reviews)",
       placeholder: "tr,us,gb,de",
       optional: true,
     },
     {
       key: "issuer_id",
-      label: "Issuer ID (for a Team Key — leave EMPTY for an Individual API Key)",
+      label: "Issuer ID (for a Team Key - leave EMPTY for an Individual API Key)",
       placeholder: "57246542-96fe-1a63-e053-0824d011072a",
       optional: true,
     },
@@ -244,7 +244,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "private_key",
-      label: "Private key (.p8 contents — including BEGIN/END)",
+      label: "Private key (.p8 contents - including BEGIN/END)",
       secret: true,
       multiline: true,
       placeholder: "-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY-----",
@@ -271,13 +271,13 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "package_name",
-      label: "Package name (optional — falls back to properties.google_play_id)",
+      label: "Package name (optional - falls back to properties.google_play_id)",
       placeholder: "com.example.app",
       optional: true,
     },
     {
       key: "language_codes",
-      label: "Review translation languages (comma-separated, optional — affects reviews, not versions)",
+      label: "Review translation languages (comma-separated, optional - affects reviews, not versions)",
       placeholder: "en,tr",
       optional: true,
     },
@@ -350,7 +350,7 @@ interface VerifyResult {
 
 const fmtNum = (n: number | null) =>
   n === null
-    ? "—"
+    ? "-"
     : Number.isInteger(n)
       ? n.toLocaleString("en-US")
       : n.toLocaleString("en-US", { maximumFractionDigits: 4 });
@@ -389,7 +389,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [provider, setProvider] = useState<ProviderName | "">("");
   const [config, setConfig] = useState<Record<string, string>>({});
-  // Hangi secret alanların düz metin gösterileceği — key bazlı toggle.
+  // Hangi secret alanların düz metin gösterileceği - key bazlı toggle.
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   const [testing, setTesting] = useState<string | null>(null);
@@ -532,7 +532,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
               <DialogHeader>
                 <DialogTitle>
                   {editingId
-                    ? `${PROVIDER_LABELS[provider as ProviderName]} — edit`
+                    ? `${PROVIDER_LABELS[provider as ProviderName]} - edit`
                     : "Connect a data source"}
                 </DialogTitle>
               </DialogHeader>
@@ -791,7 +791,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
       <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Verification — upstream vs DB</DialogTitle>
+            <DialogTitle>Verification - upstream vs DB</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             {!verifyResult && (
@@ -866,7 +866,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                           </TableCell>
                           <TableCell className="text-right font-mono text-xs">
                             {d.delta_pct === null
-                              ? "—"
+                              ? "-"
                               : `${d.delta_pct > 0 ? "+" : ""}${d.delta_pct.toFixed(1)}%`}
                           </TableCell>
                           <TableCell>

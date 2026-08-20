@@ -1,14 +1,14 @@
 import { type Connector, type MetricPoint } from "./types.ts";
 
-// Sentry — iki metrik:
+// Sentry - iki metrik:
 //   1) "errors": son 90 gün günlük kabul edilmiş hata olayı sayısı
 //      (org-level stats_v2, category=error & outcome=accepted).
-//      NOT: legacy /projects/{org}/{proj}/stats/?stat=received kullanılmıyor —
+//      NOT: legacy /projects/{org}/{proj}/stats/?stat=received kullanılmıyor -
 //      200 dönüp 171 gün boyunca sabit 0 ürettiği ölçüldü.
 //   2) "crash_free_sessions": son 90 gün günlük crash-free session oranı (0–100),
 //      Sessions/Release-Health endpoint'inden. Indie founder için en kritik sağlık
 //      sinyali. Projede release-health (session) verisi yoksa veya token scope yetmezse
-//      sessizce atlanır — "errors" akışını bozmaz (graceful degradation).
+//      sessizce atlanır - "errors" akışını bozmaz (graceful degradation).
 // config: { org_slug, project_slug, auth_token, host? }
 
 const SESSION_FIELD = "crash_free_rate(session)";
@@ -88,12 +88,12 @@ async function fetchCrashFree(
 export const fetchSentry: Connector = async (config) => {
   const host = (config.host || "https://sentry.io").replace(/\/+$/, "");
 
-  // errors — ana metrik (her zaman çekilir).
+  // errors - ana metrik (her zaman çekilir).
   //
-  // ESKIDEN: /api/0/projects/{org}/{proj}/stats/?stat=received — Sentry'nin LEGACY
+  // ESKIDEN: /api/0/projects/{org}/{proj}/stats/?stat=received - Sentry'nin LEGACY
   // uc noktasi. 200 donuyordu ama degeri her gun 0'di: 171 gun boyunca tek bir
   // sifirdan farkli deger uretmedi. Ayni donemde crash_free_sessions %99.53
-  // raporluyordu, yani proje canliydi ve veri akiyordu — sorun uygulamada degil,
+  // raporluyordu, yani proje canliydi ve veri akiyordu - sorun uygulamada degil,
   // sorulan uc noktadaydi. Sonuc: kullanici App Store'da bug bildirirken panel
   // "0 hata" gosteriyordu.
   //
@@ -101,7 +101,7 @@ export const fetchSentry: Connector = async (config) => {
   // gercekten kabul ettigi hata olaylari. Slug kabul etmedigi icin numerik id sart.
   // outcome FILTRESI YOK, groupBy VAR: "kabul edilen hata sayisi" ile "SDK hic
   // konusuyor mu" ayri sorular. Yalnizca accepted sorulunca ikisi ayrilamiyor ve
-  // susmus bir SDK her gun "0 hata" yazip SAGLIKLI okunuyor — Empire Inc'te tam
+  // susmus bir SDK her gun "0 hata" yazip SAGLIKLI okunuyor - Empire Inc'te tam
   // olarak bu oldu: 55 gun boyunca gunluk 0 yazildi, panel yesil gorundu, oysa
   // uygulama Sentry'ye hic ulasmiyordu (DSN baska bir organizasyonu gosteriyor).
   const projectId = await resolveProjectId(host, config);
@@ -130,7 +130,7 @@ export const fetchSentry: Connector = async (config) => {
   const intervals = data.intervals ?? [];
 
   // Gun basina: kabul edilen hata sayisi, ve TUM outcome'larin toplami.
-  // Toplam, "SDK o gun Sentry ile konustu mu" sorusunun cevabi — istemci
+  // Toplam, "SDK o gun Sentry ile konustu mu" sorusunun cevabi - istemci
   // tarafinda elenen (client_discard) veya kotaya takilan olaylar da sayilir.
   const accepted = new Array<number>(intervals.length).fill(0);
   const anyVolume = new Array<number>(intervals.length).fill(0);
@@ -157,7 +157,7 @@ export const fetchSentry: Connector = async (config) => {
     });
   }
 
-  // crash_free_sessions — opsiyonel, hata errors'i bloklamaz.
+  // crash_free_sessions - opsiyonel, hata errors'i bloklamaz.
   try {
     points.push(...(await fetchCrashFree(host, config)));
   } catch (e) {

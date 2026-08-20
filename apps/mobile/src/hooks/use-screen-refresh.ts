@@ -20,7 +20,7 @@ import { supabase } from "~/lib/supabase";
  * her saglayiciyi SIRAYLA geziyor). Yani yaris hep zamanlayici tarafindan
  * kazaniliyor, refetch ingest daha hicbir sey YAZMADAN eski satirlari tekrar
  * okuyordu. Ekranda rakamlar degismiyor, kullanici "yenile calismiyor, veri
- * sadece cron'la geliyor" sonucuna variyordu — his degil, mekanizma.
+ * sadece cron'la geliyor" sonucuna variyordu - his degil, mekanizma.
  *
  * Yeni akis: ingest ates-et-unut tetiklenir, spinner sunucu "SURUYOR" der demez
  * kapanir, calisma bitince `useIngestWatcher` ekrani kendiliginden tazeler.
@@ -28,7 +28,7 @@ import { supabase } from "~/lib/supabase";
  */
 
 /**
- * Ard arda cekislerde ingest'i yeniden tetiklemeyiz — sadece refetch yapariz.
+ * Ard arda cekislerde ingest'i yeniden tetiklemeyiz - sadece refetch yapariz.
  *
  * NEDEN GEREKLI: asagi cekmek bedava bir hareket, ingest degil. Her cekiste tum
  * dis saglayici API'lerine gitmek hem kotali (AdMob raporlama kotasi) hem yavas.
@@ -45,7 +45,7 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 /**
  * Hub'a "dis kaynaklardan taze veri cek" der ve BEKLEMEZ.
  *
- * Cagri reddedilirse cooldown geri acilir — yoksa basarisiz bir denemeden sonra
+ * Cagri reddedilirse cooldown geri acilir - yoksa basarisiz bir denemeden sonra
  * kullanici bir dakika boyunca yeniden deneyemezdi.
  */
 function triggerIngest(): void {

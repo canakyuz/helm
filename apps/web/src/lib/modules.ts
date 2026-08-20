@@ -1,4 +1,4 @@
-// helm — modül kataloğu, property type preset'leri ve provider→module mapping.
+// helm - modül kataloğu, property type preset'leri ve provider→module mapping.
 // Detay: .docs/MODULES.md
 
 import type { ProviderName } from "@/types";

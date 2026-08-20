@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-sentry-issues — bağlı Sentry projelerinden top issue listesini çeker.
+// helm-sentry-issues - bağlı Sentry projelerinden top issue listesini çeker.
 // On-demand: System sayfası açıldığında çağrılır.
 //
 // Body: { project_id?: string }  → verilmezse tüm aktif Sentry entegrasyonları.

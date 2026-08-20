@@ -1,4 +1,4 @@
-// helm — CMS dinamik şema → runtime Zod validator + boş entry üretici.
+// helm - CMS dinamik şema → runtime Zod validator + boş entry üretici.
 
 import { z, type ZodTypeAny } from "zod";
 import type { CollectionSchema, FieldDef } from "@/types/cms";

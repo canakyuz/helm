@@ -1,4 +1,4 @@
-// helm — CMS şema editor. label/slug/kind + SchemaDesigner.
+// helm - CMS şema editor. label/slug/kind + SchemaDesigner.
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";

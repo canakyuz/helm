@@ -1,5 +1,5 @@
 // supabase/functions/helm-review-reply/play-reply.ts
-// Google Play androidpublisher.reviews.reply — idempotent (üzerine yazar).
+// Google Play androidpublisher.reviews.reply - idempotent (üzerine yazar).
 
 interface ServiceAccount {
   client_email: string;

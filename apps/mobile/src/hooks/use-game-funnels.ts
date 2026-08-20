@@ -7,7 +7,7 @@ import { usePreferences } from "~/lib/preferences";
 type QueryGate = { enabled?: boolean };
 
 /**
- * Oyun telemetrisi hunileri — oturum, reklam, oyun akisi, satin alma, fps.
+ * Oyun telemetrisi hunileri - oturum, reklam, oyun akisi, satin alma, fps.
  *
  * Diger analitik hook'larindan farkli olarak PostHog'a DEGIL game_events'e bakar;
  * PostHog uclari bu projede bos donuyor, gercek davranis verisi burada.

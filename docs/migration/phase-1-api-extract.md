@@ -1,4 +1,4 @@
-# Faz 1 — API Extract
+# Faz 1 - API Extract
 
 **Süre:** 2–3 hafta  
 **Durum:** 🔲 Bekliyor  
@@ -11,7 +11,7 @@ Web/mobile drift'i önlemek için tüm `supabase.from(...)` çağrılarını hoo
 
 ## Extract sırası
 
-Risk ve bağımlılığa göre — **bu sırayı değiştirme**:
+Risk ve bağımlılığa göre - **bu sırayı değiştirme**:
 
 | # | Kaynak | Hedef paket | Not |
 |---|--------|-------------|-----|
@@ -19,7 +19,7 @@ Risk ve bağımlılığa göre — **bu sırayı değiştirme**:
 | 2 | `src/lib/modules.ts` | `@helm/domain/modules` | `CockpitKpis` type import → `@helm/api` |
 | 3 | `use-fx-rates` | `@helm/api/fx-rates` | Basit, izole |
 | 4 | `use-property-list` | `@helm/api/property-list` | Basit |
-| 5 | `use-cockpit-kpis` | `@helm/api/cockpit-kpis` | Core — dikkatli test |
+| 5 | `use-cockpit-kpis` | `@helm/api/cockpit-kpis` | Core - dikkatli test |
 | 6 | `use-alerts` + `useAckAlert` | `@helm/api/alerts` | Mutation ayrı export |
 | 7 | `use-properties` | `@helm/api/properties` | Heartbeat logic domain'e |
 | 8 | `use-system-health` | `@helm/api/system-health` | `deriveStatus` → domain |
@@ -36,9 +36,9 @@ Risk ve bağımlılığa göre — **bu sırayı değiştirme**:
 
 **Extract edilmez (platform-only):**
 
-- `use-auth` — SecureStore adapter
-- `use-widget-sync` — iOS widget bridge
-- `use-format-currency` — prefs hook; domain `formatCurrency` kullanır
+- `use-auth` - SecureStore adapter
+- `use-widget-sync` - iOS widget bridge
+- `use-format-currency` - prefs hook; domain `formatCurrency` kullanır
 
 ## PR stratejisi
 
@@ -53,9 +53,9 @@ PR başına max 2 api modülü (cockpit-kpis tek başına bir PR).
 
 ## Tek PR checklist
 
-- [ ] `packages/api/src/<module>.ts` — fetch + types export
-- [ ] `packages/queries/src/<module>.ts` — queryKeys + queryOptions (+ mutationOptions)
-- [ ] `apps/mobile/src/hooks/use-*.ts` — sadece useQuery/useMutation wrapper
+- [ ] `packages/api/src/<module>.ts` - fetch + types export
+- [ ] `packages/queries/src/<module>.ts` - queryKeys + queryOptions (+ mutationOptions)
+- [ ] `apps/mobile/src/hooks/use-*.ts` - sadece useQuery/useMutation wrapper
 - [ ] `bun typecheck` yeşil
 - [ ] Smoke: ilgili ekran açılıyor, data geliyor
 

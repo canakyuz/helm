@@ -1,4 +1,4 @@
--- helm — tetiklenen uyarı olayları. helm-alert fonksiyonu yazar; panel okur.
+-- helm - tetiklenen uyarı olayları. helm-alert fonksiyonu yazar; panel okur.
 
 create table if not exists public.alert_events (
   id               bigint generated always as identity primary key,

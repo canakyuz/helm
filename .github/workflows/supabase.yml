@@ -1,5 +1,5 @@
 # Hub katmanının kapısı: 40 edge function ve 38 migration şu ana kadar hiçbir
-# otomatik kontrolden geçmiyordu — bozuk bir function ancak deploy sonrası,
+# otomatik kontrolden geçmiyordu - bozuk bir function ancak deploy sonrası,
 # bozuk bir migration ancak `db push` sırasında ortaya çıkıyordu.
 #
 # NEDEN KENDİ ŞERİDİ: bu işler Deno'ya ihtiyaç duyar, mobil/web CI'ı ise Bun'a.
@@ -29,15 +29,15 @@ jobs:
   functions:
     name: Edge function typecheck
     runs-on: ubuntu-latest
-    # RAPORLAR, BLOKLAMAZ — bilinçli, lint job'ıyla aynı gerekçe. Bu kapı ilk
+    # RAPORLAR, BLOKLAMAZ - bilinçli, lint job'ıyla aynı gerekçe. Bu kapı ilk
     # koşuşunda 9 mevcut hata buldu (40 function'ın hiç kontrol edilmediği
     # düşünülürse beklenen sonuç). Bloklamak her push'u kırmızıya boyardı.
     #
     # Bulgular iki gruba ayrılıyor:
-    #   · Ortam gürültüsü — crypto.subtle.importKey("jwk", ...) aşırı dar Deno
+    #   · Ortam gürültüsü - crypto.subtle.importKey("jwk", ...) aşırı dar Deno
     #     tipleri, ve iki farklı esm.sh supabase-js sürümünün SupabaseClient
     #     generic'lerini çakıştırması. Bu function'lar üretimde çalışıyor.
-    #   · Gerçek şüpheliler — helm-test ve helm-verify connector dönüş şekli
+    #   · Gerçek şüpheliler - helm-test ve helm-verify connector dönüş şekli
     #     dizi'den {points,byCountry,byFormat}'a geçtiğinde güncellenmemiş;
     #     helm-send-push'ta PostgREST'in select string'i ayrıştıramadığı bir
     #     yer var. Bunlar temizlenince continue-on-error kaldırılacak.
@@ -51,7 +51,7 @@ jobs:
 
       # `deno check` her function'ın importlarını çözer ve tiplerini doğrular.
       # Bir function'ı tek tek koşuyoruz ki hangisinin düştüğü özet tablosunda
-      # görünsün — toplu koşuda ilk hata gerisini gizliyor.
+      # görünsün - toplu koşuda ilk hata gerisini gizliyor.
       - name: Check each function separately
         run: |
           set -uo pipefail
@@ -82,12 +82,12 @@ jobs:
       - uses: actions/checkout@v4
 
       # Aynı numarayı taşıyan iki migration, hangi sırayla uygulanacağı
-      # belirsiz bir şema demektir — iki dal birleşince sessizce oluşur.
+      # belirsiz bir şema demektir - iki dal birleşince sessizce oluşur.
       - name: Number collisions and naming
         run: |
           set -euo pipefail
           cd supabase/migrations
-          # NOT: `ls` bilerek kullanılmıyor — kullanıcının `ls` alias'ı renk kodu
+          # NOT: `ls` bilerek kullanılmıyor - kullanıcının `ls` alias'ı renk kodu
           # basınca regex eşleşmiyor ve kontrol yanlış alarm veriyor.
           names=$(printf '%s\n' *.sql)
           dupes=$(printf '%s\n' "$names" | cut -d_ -f1 | sort | uniq -d)

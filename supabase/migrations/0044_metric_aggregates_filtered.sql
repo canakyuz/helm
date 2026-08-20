@@ -10,7 +10,7 @@
 -- israf toplama eksikligi degil, GEREKSIZ VERI ISTEMEKTI. 0043 yalniz
 -- toplama yaptigi icin tek basina yetmiyordu.
 --
--- p_metrics null gecilirse tum metrikler doner — cagri yerinin acikca
+-- p_metrics null gecilirse tum metrikler doner - cagri yerinin acikca
 -- istemesi beklenir, varsayilan "hepsi" olmasi bu hatanin kaynagiydi.
 
 drop function if exists public.helm_metric_daily(date, uuid);
@@ -45,6 +45,6 @@ as $$
 $$;
 
 comment on function public.helm_metric_daily(date, text[], uuid) is
-  'Gunluk metrik toplamlari. p_metrics ile SADECE gereken metrikleri iste — filtresiz cagri 1000 satir tavanina carpar.';
+  'Gunluk metrik toplamlari. p_metrics ile SADECE gereken metrikleri iste - filtresiz cagri 1000 satir tavanina carpar.';
 
 grant execute on function public.helm_metric_daily(date, text[], uuid) to authenticated;

@@ -8,7 +8,7 @@
 #   - Ingest bir sure calismadiysa.
 #
 # NEDEN GUVENLI TEKRAR CALISTIRILIR: metrics_format PK'si
-# (project_id, date, source, metric, format) — upsert idempotent, ayni gun iki
+# (project_id, date, source, metric, format) - upsert idempotent, ayni gun iki
 # kez yazilirsa ikincisi birinciyi gunceller, toplam sismez.
 #
 # NEDEN ORAN YAZILMIYOR: yalnizca SAYIM (gelir, gosterim, istek, eslesen,
@@ -101,7 +101,7 @@ for project_id, cfg in integrations:
 
     # app_id virgulle ayrilmis liste: AdMob'da iOS ve Android AYRI uygulama
     # kayitlaridir, tek oyun iki app_id tasir. Tek deger yazilirsa digerinin
-    # geliri sessizce elenir — dogru gorunumlu, yanlis rakam.
+    # geliri sessizce elenir - dogru gorunumlu, yanlis rakam.
     raw = cfg.get("app_id")
     ids = {s.strip() for s in raw.split(",")} - {""} if isinstance(raw, str) else set()
 
@@ -126,7 +126,7 @@ for project_id, cfg in integrations:
             acc[metric] = acc.get(metric, 0) + v
 
     if ids and not agg:
-        sys.exit(f"AdMob app_id ({', '.join(ids)}) hicbir satirla eslesmedi — "
+        sys.exit(f"AdMob app_id ({', '.join(ids)}) hicbir satirla eslesmedi - "
                  f"AdMob uygulama kimligi (ca-app-pub-XXXX~YYYY) bekleniyor.")
 
     currency = cfg.get("currency") or "USD"
@@ -146,7 +146,7 @@ for project_id, cfg in integrations:
     for date, metrics in per_day.items():
         for metric, value in metrics.items():
             daily_rows.append((project_id, date, "admob", metric, value, currency))
-        # eCPM TOPLANAMAZ — oranlarin ortalamasi oran degildir. Toplanmis gelir
+        # eCPM TOPLANAMAZ - oranlarin ortalamasi oran degildir. Toplanmis gelir
         # ve gosterimden yeniden hesaplanir (connector ile ayni kural).
         imp = metrics.get("ad_impressions", 0)
         rev = metrics.get("ad_revenue", 0)
@@ -187,7 +187,7 @@ with psycopg.connect(os.environ["HELM_DB_URL"]) as conn, conn.cursor() as cur:
         """,
         rows,
     )
-    # metrics PK'si (project_id, date, source, metric) — ingest ile AYNI catisma
+    # metrics PK'si (project_id, date, source, metric) - ingest ile AYNI catisma
     # hedefi, yani betik ile zamanlanmis senkron birbirinin ustune guvenle yazar.
     cur.executemany(
         """

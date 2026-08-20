@@ -36,7 +36,7 @@ interface CronJob {
 }
 
 const fmt = (iso: string | null) => {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
   const diffMin = (Date.now() - d.getTime()) / 60_000;
   if (diffMin < 1) return "just now";
@@ -87,7 +87,7 @@ export const CronHealthCard = () => {
           Cron dispatch
         </CardTitle>
         <CardDescription>
-          Whether pg_cron fired the job — not whether the ingest worked.{" "}
+          Whether pg_cron fired the job - not whether the ingest worked.{" "}
           <code className="font-mono">net.http_post</code> is asynchronous, so a
           run is marked succeeded the moment the request is queued (note the
           ~40&nbsp;ms durations). The real outcome lives in{" "}
@@ -219,10 +219,10 @@ export const CronHealthCard = () => {
                                   )}
                                 </span>
                                 <span className="truncate text-xs text-muted-foreground">
-                                  {r.return_message ?? "—"}
+                                  {r.return_message ?? "-"}
                                 </span>
                                 <span className="text-right font-mono text-[10px] tabular-nums text-muted-foreground">
-                                  {dur !== null ? `${dur.toFixed(1)}s` : "—"}
+                                  {dur !== null ? `${dur.toFixed(1)}s` : "-"}
                                 </span>
                                 <span className="text-right">
                                   {r.status === "succeeded" ? (

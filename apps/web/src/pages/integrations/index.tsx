@@ -67,7 +67,7 @@ export const IntegrationsPage = () => {
             <EmptyState
               icon={<Plug className="size-6" />}
               title="Pick a project"
-              description="Integrations are per-property. Use the switcher at the top of the sidebar to pick one — nothing can be added while All properties is selected."
+              description="Integrations are per-property. Use the switcher at the top of the sidebar to pick one - nothing can be added while All properties is selected."
             />
           </CardContent>
         </Card>
@@ -88,7 +88,7 @@ export const IntegrationsPage = () => {
         </div>
       </div>
 
-      {/* KPI cluster — 6'lı */}
+      {/* KPI cluster - 6'lı */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <KpiPill
           label="Connected"

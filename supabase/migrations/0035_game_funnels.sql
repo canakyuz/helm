@@ -1,4 +1,4 @@
--- Oyun telemetrisi hunileri — tek RPC, sunucu tarafi toplama.
+-- Oyun telemetrisi hunileri - tek RPC, sunucu tarafi toplama.
 --
 -- NEDEN RPC: game_events 26k+ satir ve buyuyor. Ham satirlari istemciye cekip
 -- mobilde gruplamak hem ag hem bellek israfi olurdu. PostgREST tek basina
@@ -27,7 +27,7 @@ with scoped as (
     and (p_project_id is null or project_id = p_project_id)
 ),
 
--- Oturum: baslayan / biten. Fark "kapanmayan" demek — cokme veya surec olumu.
+-- Oturum: baslayan / biten. Fark "kapanmayan" demek - cokme veya surec olumu.
 sessions as (
   select
     coalesce(platform, 'bilinmiyor') platform,

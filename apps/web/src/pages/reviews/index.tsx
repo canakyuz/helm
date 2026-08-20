@@ -71,7 +71,7 @@ export const ReviewsPage = () => {
     pagination: { mode: "off" },
   });
   const projectName = (id: string) =>
-    projResult.data.find((p) => p.id === id)?.name ?? "—";
+    projResult.data.find((p) => p.id === id)?.name ?? "-";
 
   // A) platformFiltered
   const platformFiltered = useMemo(
@@ -79,7 +79,7 @@ export const ReviewsPage = () => {
     [reviews, platform],
   );
 
-  // B) rated / avg / distribution — all from platformFiltered
+  // B) rated / avg / distribution - all from platformFiltered
   const rated = platformFiltered.filter((r) => r.rating != null);
   const avg = rated.length
     ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
@@ -95,7 +95,7 @@ export const ReviewsPage = () => {
   }, [rated]);
   const distMax = Math.max(1, ...distribution);
 
-  // C) iOS + Android avg — always from full reviews, platform-filter independent
+  // C) iOS + Android avg - always from full reviews, platform-filter independent
   const iosRated = reviews.filter((r) => r.source === "appstore" && r.rating != null);
   const androidRated = reviews.filter((r) => r.source === "playstore" && r.rating != null);
   const iosAvg = iosRated.length
@@ -105,7 +105,7 @@ export const ReviewsPage = () => {
     ? androidRated.reduce((s, r) => s + (r.rating ?? 0), 0) / androidRated.length
     : 0;
 
-  // G) filtered — built from platformFiltered
+  // G) filtered - built from platformFiltered
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return platformFiltered.filter((r) => {
@@ -165,18 +165,18 @@ export const ReviewsPage = () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
         <StatCard
           title="Genel Ortalama"
-          value={avg ? `${avg.toFixed(2)} / 5` : "—"}
+          value={avg ? `${avg.toFixed(2)} / 5` : "-"}
           icon={<Star />}
           loading={query.isLoading}
         />
         <StatCard
           title="iOS Ortalama"
-          value={iosAvg ? `${iosAvg.toFixed(2)}` : "—"}
+          value={iosAvg ? `${iosAvg.toFixed(2)}` : "-"}
           loading={query.isLoading}
         />
         <StatCard
           title="Android Ortalama"
-          value={androidAvg ? `${androidAvg.toFixed(2)}` : "—"}
+          value={androidAvg ? `${androidAvg.toFixed(2)}` : "-"}
           loading={query.isLoading}
         />
         <StatCard

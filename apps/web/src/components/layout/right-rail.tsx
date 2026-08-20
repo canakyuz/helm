@@ -28,7 +28,7 @@ const timeAgo = (iso: string | null) => {
   return `${Math.round(min / 1440)}d ago`;
 };
 
-/** Dünya saatleri — 4 şehir, dakikada bir refresh. Airlinesim referansı. */
+/** Dünya saatleri - 4 şehir, dakikada bir refresh. Airlinesim referansı. */
 const WorldClock = () => {
   const [now, setNow] = useState<Date>(() => new Date());
   useEffect(() => {
@@ -175,7 +175,7 @@ const SyncStatus = () => {
   );
 };
 
-/** Dashboard-only right rail — world clock, alerts, sync. */
+/** Dashboard-only right rail - world clock, alerts, sync. */
 export const RightRail = () => (
   <aside className="hidden xl:flex w-[320px] shrink-0 flex-col gap-4">
     <WorldClock />

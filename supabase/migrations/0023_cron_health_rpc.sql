@@ -1,4 +1,4 @@
--- helm_cron_status() — cron.job + son N run'ı authenticated/service_role'e açar.
+-- helm_cron_status() - cron.job + son N run'ı authenticated/service_role'e açar.
 -- SECURITY DEFINER ile cron schema'sına erişir (default'ta sadece postgres'in).
 
 create or replace function public.helm_cron_status(limit_runs int default 10)

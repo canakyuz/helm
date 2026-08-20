@@ -8,7 +8,7 @@ import { FX_FALLBACK, fetchFxRates, metricValueUsd, toUsd } from "./fx-rates";
  * `app_revenue` BILEREK DISARIDA: olculdu, `subscription_revenue` ile birebir
  * ayni para (ayni toplam 92.49, ayni 8 sifir-disi gun). Iki isim altinda tek
  * kayit. Ikisini birden toplamak cift sayim olur; Overview `ad + app`, Kirilim
- * `ad + subs + iap` topluyordu — iki ekran iki farkli tanim. Tek tanim budur.
+ * `ad + subs + iap` topluyordu - iki ekran iki farkli tanim. Tek tanim budur.
  */
 export const REVENUE_SOURCES = [
   { metric: "ad_revenue", label: "Ad revenue" },
@@ -21,13 +21,13 @@ export type RevenueSource = (typeof REVENUE_SOURCES)[number]["metric"];
 /**
  * Bir gelir kaleminin iki bacagi.
  *
- * ANLIK  — RevenueCat webhook'u. Satin alma aninda gelir, revize olabilir.
- * KESIN  — magaza raporu (App Store Connect / Play). T-1 gecikmeli ama mutabakatli;
+ * ANLIK  - RevenueCat webhook'u. Satin alma aninda gelir, revize olabilir.
+ * KESIN  - magaza raporu (App Store Connect / Play). T-1 gecikmeli ama mutabakatli;
  *          komisyon, iade ve kur farki bu rakama yansir.
  *
  * NEDEN IKISI BIRDEN: yalnizca kesin gosterirsek bugunun geliri 1-2 gun gorunmez.
  * Yalnizca anligi gosterirsek iade ve komisyon hic yansimaz. Ikisini SESSIZCE
- * degistirmek de yanlis olurdu — o zaman magaza farkli bir rakam soyledigi anda
+ * degistirmek de yanlis olurdu - o zaman magaza farkli bir rakam soyledigi anda
  * fark kaybolurdu. Durum acikca tasinir.
  */
 export type ReconState =
@@ -35,7 +35,7 @@ export type ReconState =
   | "pending"
   /** Ikisi de var ve ortusuyor. */
   | "confirmed"
-  /** Ikisi de var ama farkli — iade, komisyon veya ayristirma hatasi. */
+  /** Ikisi de var ama farkli - iade, komisyon veya ayristirma hatasi. */
   | "mismatch"
   /** Yalnizca magaza raporu var. Webhook'tan onceki gunler icin normal. */
   | "storeOnly";
@@ -53,7 +53,7 @@ export type RevenueLeg = {
  *
  * IKI GRANULARITE: webhook baglandiktan sonrasi ISLEM bazinda (hangi urun, hangi
  * magaza, hangi tur), oncesi GUN bazinda (magaza raporu yalnizca gunluk toplam
- * verir). Ayrimi saklamiyoruz — "gunluk toplam" satirinin tek bir satin alma
+ * verir). Ayrimi saklamiyoruz - "gunluk toplam" satirinin tek bir satin alma
  * oldugunu ima etmek yanlis olurdu.
  */
 export type PaymentRow = {
@@ -77,18 +77,18 @@ export type RevenueBucket = {
   total: number;
   /** metric → tutar. Sifir olanlar da burada; gizleme karari UI'in. */
   bySource: Record<string, number>;
-  /** Gunluk toplamlar — bar grafigi icin. */
+  /** Gunluk toplamlar - bar grafigi icin. */
   days: Array<{ date: string; value: number }>;
   /** Magaza bazinda anlik/kesin mutabakat. Bos ise webhook verisi yok. */
   legs: RevenueLeg[];
-  /** Donem SONUNDAKI MRR. Nokta-zaman metrigi — donemin toplami degil. */
+  /** Donem SONUNDAKI MRR. Nokta-zaman metrigi - donemin toplami degil. */
   mrr: number | null;
   /** Donem sonundaki aktif abone. */
   activeSubs: number | null;
   /** Donemdeki odemeler, yeniden eskiye. */
   payments: PaymentRow[];
   /** bySource'ta tutari MAGAZA RAPORUNDAN DEGIL webhook'tan gelen kaynaklar.
-   *  Para gercek ama magaza henuz dogrulamadi — UI bunu "anlık" diye
+   *  Para gercek ama magaza henuz dogrulamadi - UI bunu "anlık" diye
    *  isaretlemeli, yoksa kesin rakamla ayni agirlikta okunur. */
   provisionalSources: string[];
 };
@@ -111,7 +111,7 @@ type EventRow = {
   event_type: string | null;
 };
 
-/** Kurus farklari mutabakati bozmasin — bu esigin altindaki fark "ayni" sayilir. */
+/** Kurus farklari mutabakati bozmasin - bu esigin altindaki fark "ayni" sayilir. */
 const RECON_TOLERANCE = 0.01;
 
 function reconcile(provisional: number, confirmed: number): ReconState {
@@ -147,11 +147,11 @@ function weekKey(monday: string): string {
 }
 
 /**
- * Gelir gecmisi — kaynak kirilimi ve gun/hafta/ay gruplari.
+ * Gelir gecmisi - kaynak kirilimi ve gun/hafta/ay gruplari.
  *
  * TEK SORGU, bellekte gruplama. Gelir satirlari ~300 civari (olculdu); ay basina
  * ayri sorgu atmak N+1 olurdu ve donem gezinmesi her dokunusta ag turu isterdi.
- * Time: O(n log n) — n satir, siralama gruplama sonrasi anahtar sayisi kadar.
+ * Time: O(n log n) - n satir, siralama gruplama sonrasi anahtar sayisi kadar.
  * Space: O(n).
  *
  * `since` verilmezse son 12 ay. Veri Nisan 2026'da basliyor, bu tamamini kapsar.
@@ -177,7 +177,7 @@ export async function fetchRevenueHistory(
 
   if (propertyId !== "all") q = q.eq("project_id", propertyId);
 
-  // Webhook olaylari ayni pencerede: anlik bacak. Ayri sorgu ama paralel —
+  // Webhook olaylari ayni pencerede: anlik bacak. Ayri sorgu ama paralel -
   // magaza metrikleriyle ayni gidis-donuste biter.
   let eq = client
     .from("revenue_events")
@@ -198,7 +198,7 @@ export async function fetchRevenueHistory(
 
   // Gun + kaynak kirilimini tek gecliste kur.
   const byDay = new Map<string, Map<string, number>>();
-  // Nokta-zaman metrikleri (mrr, active_subs) TOPLANMAZ — donem sonundaki deger
+  // Nokta-zaman metrikleri (mrr, active_subs) TOPLANMAZ - donem sonundaki deger
   // alinir. Toplamak "Temmuz'da 43.99 x 31 gun MRR" gibi anlamsiz bir sayi verirdi.
   const pointInTime = new Map<string, Map<string, number>>();
   for (const r of rows) {
@@ -256,8 +256,8 @@ export async function fetchRevenueHistory(
     const list = txByDay.get(day) ?? [];
     list.push({
       date: day,
-      label: e.product_id ?? "—",
-      kind: e.event_type ?? "—",
+      label: e.product_id ?? "-",
+      kind: e.event_type ?? "-",
       store: e.store,
       amount: amt,
       granularity: "transaction",
@@ -269,7 +269,7 @@ export async function fetchRevenueHistory(
 
   const bucket = (keyOf: (iso: string) => string): RevenueBucket[] => {
     const acc = new Map<string, RevenueBucket>();
-    // Mutabakat icin YALNIZCA magaza raporundan gelen toplam — asagida bySource
+    // Mutabakat icin YALNIZCA magaza raporundan gelen toplam - asagida bySource
     // anlik tarafi da icerebilecegi icin oradan okunamaz, yoksa dogrulanmamis
     // para "DOGRULANDI" gorunurdu.
     const confirmedStore = new Map<string, number>();
@@ -337,7 +337,7 @@ export async function fetchRevenueHistory(
     for (const b of acc.values()) {
       b.days.sort((x, y) => (x.date < y.date ? -1 : 1));
 
-      // ANLIK GELIRIN KOVAYA KATILMASI — karar KOVA BAZINDA, gun bazinda DEGIL.
+      // ANLIK GELIRIN KOVAYA KATILMASI - karar KOVA BAZINDA, gun bazinda DEGIL.
       //
       // Neden gun bazinda olmaz (olculdu): Apple geliri TAHSILAT gunune yazar,
       // RevenueCat ise SATIN ALMA anina. Ayni para iki farkli gune duser. Gun
@@ -350,7 +350,7 @@ export async function fetchRevenueHistory(
       //
       // Bedeli: magaza donemin bir kismini raporlamis ama son gunleri
       // raporlamamissa o gunlerin parasi TOPLAMDA gorunmez. Bilerek: eksik
-      // gostermek, fazla gostermekten iyidir — ustelik eksik kalan tutar
+      // gostermek, fazla gostermekten iyidir - ustelik eksik kalan tutar
       // mutabakat kartinda "anlık / bekliyor" olarak zaten duruyor.
       const prov = provByBucket.get(b.key);
       if (prov != null) {
@@ -423,7 +423,7 @@ export async function fetchRevenueHistory(
         });
       }
     }
-    // Yeniden eskiye — kullanici en cok guncel donemi acar.
+    // Yeniden eskiye - kullanici en cok guncel donemi acar.
     return [...acc.values()].sort((a, b) => (a.key < b.key ? 1 : -1));
   };
 
@@ -449,7 +449,7 @@ export async function fetchRevenueHistory(
   };
 }
 
-/** Haftanin baslangic/bitis gunleri — UI etiketi icin. */
+/** Haftanin baslangic/bitis gunleri - UI etiketi icin. */
 export function weekRange(bucket: RevenueBucket): { from: string; to: string } {
   const from = mondayOf(bucket.start);
   return { from, to: addDays(from, 6) };

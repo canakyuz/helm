@@ -226,7 +226,7 @@ export const FunnelPage = () => {
         </div>
       </div>
 
-      {/* Ürün funnel sağlığı — Empire snapshot'ı (PostHog'dan bağımsız, her scope'ta çalışır). */}
+      {/* Ürün funnel sağlığı - Empire snapshot'ı (PostHog'dan bağımsız, her scope'ta çalışır). */}
       <FunnelHealth />
 
       {isAll && (
@@ -287,7 +287,7 @@ export const FunnelPage = () => {
               <div className="space-y-1">
                 <div>
                   6+ adımda her drop küçük görünür, conversion neredeyse hep %0
-                  çıkar. Funnel ≠ event log — kullanıcı yolculuğunun{" "}
+                  çıkar. Funnel ≠ event log - kullanıcı yolculuğunun{" "}
                   <strong>ana</strong> kilometre taşlarını seç.
                 </div>
                 <div className="text-xs opacity-80">
@@ -490,7 +490,7 @@ export const FunnelPage = () => {
 
           {data.steps.length > 6 && (
             <ErrorBanner variant="warning">
-              <strong>{data.steps.length} adım çok fazla</strong> — her küçük
+              <strong>{data.steps.length} adım çok fazla</strong> - her küçük
               adım toplam conversion'u baltalar. Sağ üstteki{" "}
               <strong>Edit steps</strong> ile 3-5 ana kilometre taşına
               indir.
@@ -500,7 +500,7 @@ export const FunnelPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>
-                Onboarding Hunisi — son {days} gün
+                Onboarding Hunisi - son {days} gün
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
                   {data.steps.length} adım · sıralı · unique user
                 </span>
@@ -532,7 +532,7 @@ export const FunnelPage = () => {
             <EmptyState
               icon={<TrendingDown className="size-6" />}
               title="No data"
-              description="PostHog returned an empty funnel. Check that the event names in the steps are correct (they are case-sensitive) — use Edit steps."
+              description="PostHog returned an empty funnel. Check that the event names in the steps are correct (they are case-sensitive) - use Edit steps."
             />
           </CardContent>
         </Card>
@@ -543,9 +543,9 @@ export const FunnelPage = () => {
 
 /* ───────────────────────── FunnelBars (Mixpanel/Amplitude tarzı) ───────────────────────── */
 //
-// Yatay bar liste — her adım için tek satır:
+// Yatay bar liste - her adım için tek satır:
 //   • Üst: event adı + count + toplam%
-//   • Bar: solda kalan (renkli), sağda kaybedilen (gri) — kademeli renk
+//   • Bar: solda kalan (renkli), sağda kaybedilen (gri) - kademeli renk
 //   • Aralarda drop indicator: kaç kişi düştü, ne kalan %, önceki periyot delta
 
 const barFill = (stepPct: number, isFirst: boolean) => {

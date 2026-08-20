@@ -1,4 +1,4 @@
-// Hareket — tasarımın 7 CSS keyframe'inin karşılığı.
+// Hareket - tasarımın 7 CSS keyframe'inin karşılığı.
 //
 // Tasarım CSS animasyonlarıyla yazılmıştı; mobilde Reanimated worklet'leri
 // kullanılır (design.md §8: "CSS yok"). Süreler birebir kopyalanmadı, iki
@@ -6,7 +6,7 @@
 //
 // 1) UI girişi 300ms altında kalmalı. Mockup'ın 460ms `rise`'ı bir tile için
 //    ağır; 260ms'e indi. Grafik animasyonları (grow/rail/ring/count) UZUN
-//    KALDI — onlar UI değil, verinin kendini çizmesi; süre bilgi taşıyor.
+//    KALDI - onlar UI değil, verinin kendini çizmesi; süre bilgi taşıyor.
 // 2) `rail` mockup'ta width büyütüyordu → layout tetikler. scaleX + sol
 //    anchor'a çevrildi (sadece transform/opacity animasyonu).
 
@@ -16,21 +16,21 @@ export const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 export const EASE_IN_OUT = [0.77, 0, 0.175, 1] as const;
 
 export const duration = {
-  /** Tile girişi — opacity 0→1 + translateY 14→0. */
+  /** Tile girişi - opacity 0→1 + translateY 14→0. */
   rise: 260,
   /** Giriş ekranı blokları; tek seferlik, biraz daha yayvan olabilir. */
   riseLg: 320,
-  /** Bar çubuğu — scaleY 0.04→1, origin bottom. */
+  /** Bar çubuğu - scaleY 0.04→1, origin bottom. */
   grow: 620,
-  /** Yatay oran — scaleX 0→1, origin left. */
+  /** Yatay oran - scaleX 0→1, origin left. */
   rail: 760,
-  /** Ring gauge — Skia arc sweep. */
+  /** Ring gauge - Skia arc sweep. */
   ring: 900,
-  /** Sayaç — 0'dan hedefe. */
+  /** Sayaç - 0'dan hedefe. */
   count: 900,
-  /** Canlı nokta — sonsuz. */
+  /** Canlı nokta - sonsuz. */
   pulse: 1800,
-  /** Sync ikonu — sonsuz, linear. */
+  /** Sync ikonu - sonsuz, linear. */
   spin: 900,
   /** Basma geri bildirimi. */
   press: 120,
@@ -48,26 +48,26 @@ export const stagger = {
 } as const;
 
 export const press = {
-  /** Satır / tile basma — opaklık. */
+  /** Satır / tile basma - opaklık. */
   opacity: 0.85,
-  /** Buton basma — ölçek. scale(0) asla; 0.95–0.98 aralığı. */
+  /** Buton basma - ölçek. scale(0) asla; 0.95–0.98 aralığı. */
   scale: 0.97,
 } as const;
 
 // Sayaç ve grafiklerin NE ZAMAN yeniden oynayacağı.
 //
 // Mockup her sekme değişiminde play() çağırıyordu (demo davranışı). 5 sekmeli
-// bir cockpit'te sekme değişimi günde onlarca kez olur — o sıklıkta animasyon
+// bir cockpit'te sekme değişimi günde onlarca kez olur - o sıklıkta animasyon
 // bilgi değil gecikme taşır. Taze veri geldiğinde ise animasyon gerçekten
 // "bu rakam değişti" diyor.
 export type ReplayTrigger = "mount" | "refresh" | "tabChange";
 
 export const replayOn: Record<ReplayTrigger, boolean> = {
-  /** İlk mount — tam stagger + sayaç. */
+  /** İlk mount - tam stagger + sayaç. */
   mount: true,
-  /** Pull-to-refresh / sync — sayaç + grafikler tekrar. */
+  /** Pull-to-refresh / sync - sayaç + grafikler tekrar. */
   refresh: true,
-  /** Sekme değişimi — animasyon yok, değerler yerinde. */
+  /** Sekme değişimi - animasyon yok, değerler yerinde. */
   tabChange: false,
 };
 

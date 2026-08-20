@@ -8,7 +8,7 @@ import type { SyncRun } from "@/types";
  *
  * The ingest cron fires hourly, so 90 minutes means one missed run raises the
  * flag. The previous value was three hours, duplicated as a magic number in two
- * files — two consecutive misses could pass as healthy.
+ * files - two consecutive misses could pass as healthy.
  */
 const STALE_AFTER_MS = 90 * 60_000;
 
@@ -34,7 +34,7 @@ export type LastSyncRun = {
  * The most recent ingest run and what it means.
  *
  * Both call sites previously ran `useList` with `pagination: { mode: "off" }`
- * and then read `data[0]` — downloading every row of a table that grows by a
+ * and then read `data[0]` - downloading every row of a table that grows by a
  * row an hour, forever, to render one line. This asks for one row.
  */
 export function useLastSyncRun(): LastSyncRun {
@@ -70,10 +70,10 @@ export function useLastSyncRun(): LastSyncRun {
 export const SYNC_HEALTH_MESSAGE: Record<SyncHealth, string> = {
   ok: "",
   running: "",
-  stuck: "A run started but never finished — the ingest died mid-flight.",
+  stuck: "A run started but never finished - the ingest died mid-flight.",
   stale: "No sync in over 90 minutes; the hourly cron may not be firing.",
   never: "No sync has ever run. Check the Vault secrets and cron.job.",
-  failing: "The last run finished with errors — open the run detail.",
+  failing: "The last run finished with errors - open the run detail.",
 };
 
 /** Short badge text for the settings page. */

@@ -15,7 +15,7 @@ const ease = Easing.bezier(...EASE_OUT);
 
 type Props = {
   children: ReactNode;
-  /** Kacinci tile — stagger gecikmesi bundan hesaplanir (index * 40ms). */
+  /** Kacinci tile - stagger gecikmesi bundan hesaplanir (index * 40ms). */
   index?: number;
   /**
    * Degistiginde animasyon bastan oynar. Overview bunu yenileme sayacina baglar.
@@ -30,7 +30,7 @@ type Props = {
 };
 
 /**
- * Tile giris animasyonu — opaklik + asagidan yukari kayma, index'e gore staggerli.
+ * Tile giris animasyonu - opaklik + asagidan yukari kayma, index'e gore staggerli.
  *
  * Azaltilmis harekette kayma kalkar, FADE KALIR. "Azaltilmis hareket" sifir
  * animasyon demek degil; kavramaya yardim eden opaklik gecisleri korunur.
@@ -39,7 +39,7 @@ export function Rise({ children, index = 0, replayKey = 0, style }: Props) {
   const progress = useSharedValue(0);
   const noMotion = useReducedMotion();
 
-  // Shared value RENDER SIRASINDA yazilmaz — Reanimated uyarisi/jitter olur.
+  // Shared value RENDER SIRASINDA yazilmaz - Reanimated uyarisi/jitter olur.
   useEffect(() => {
     const delay = index * stagger.tile;
     progress.value = 0;

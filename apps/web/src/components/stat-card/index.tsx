@@ -8,14 +8,14 @@ interface StatCardProps {
   title: string;
   value: string | number;
   icon?: ReactNode;
-  /** Yüzde değişim. null/undefined ise trend satırı "—" gösterir. */
+  /** Yüzde değişim. null/undefined ise trend satırı "-" gösterir. */
   delta?: number | null;
   deltaLabel?: string;
   loading?: boolean;
 }
 
 // Başlık + büyük değer + trend göstergeli istatistik kartı.
-// Glass orb: ikonun arkasında bulanık primary halka — MarineX/Haulix referansı.
+// Glass orb: ikonun arkasında bulanık primary halka - MarineX/Haulix referansı.
 export const StatCard = ({
   title,
   value,
@@ -42,7 +42,7 @@ export const StatCard = ({
 
   return (
     <Card className="relative h-full overflow-hidden">
-      {/* Glass orb — ikonun arkasında soft primary glow */}
+      {/* Glass orb - ikonun arkasında soft primary glow */}
       {icon && (
         <div
           aria-hidden
@@ -59,7 +59,7 @@ export const StatCard = ({
           {value}
         </div>
 
-        {/* Trend satırı her zaman yer kaplar — kartlar aynı boyda kalsın. */}
+        {/* Trend satırı her zaman yer kaplar - kartlar aynı boyda kalsın. */}
         <div className="mt-1.5 min-h-5 text-sm">
           {hasDelta ? (
             <>
@@ -83,7 +83,7 @@ export const StatCard = ({
               </span>
             </>
           ) : (
-            <span className="text-xs text-muted-foreground">—</span>
+            <span className="text-xs text-muted-foreground">-</span>
           )}
         </div>
       </CardContent>

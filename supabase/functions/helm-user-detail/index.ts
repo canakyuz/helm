@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-user-detail — tek bir Auth kullanıcısının tam detayını döner.
+// helm-user-detail - tek bir Auth kullanıcısının tam detayını döner.
 // service_role key sunucuda kalır.
 
 const corsHeaders = {
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
 
   const u = data.user;
 
-  // CRM tabloları — `profiles:id, gems, subscriptions` → her biri için
+  // CRM tabloları - `profiles:id, gems, subscriptions` → her biri için
   // user UUID ile eşleşen satırları çek.
   //
   // GÜVENLİK:
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
       return { name: name.trim(), user_col: (col?.trim() || "user_id") };
     })
     .filter((spec) => {
-      // Güvenli olmayan adları sessizce at — config tek dosya, kullanıcı
+      // Güvenli olmayan adları sessizce at - config tek dosya, kullanıcı
       // hatayı integration formundan görür.
       return (
         isSafeName(spec.name) &&

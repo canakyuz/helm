@@ -1,8 +1,8 @@
-// Ölçek — bento tasarımının kendi değerleri, isimlendirilmiş.
+// Ölçek - bento tasarımının kendi değerleri, isimlendirilmiş.
 //
 // Neden sayısal merdiven (4·8·12·16) değil: bento'nun oranları 10px gap ve
 // 18px tile padding üzerine kurulu. 4pt'ye yuvarlamak (10→12, 18→16) tasarımın
-// ritmini bozar. İsimli ölçek "keyfi px" yasağını korur — her değerin bir
+// ritmini bozar. İsimli ölçek "keyfi px" yasağını korur - her değerin bir
 // kullanım yeri var, gelişigüzel sayı yazılamaz.
 
 /** Boşluk. Yeni sayı ekleme; bir kullanım buraya sığmıyorsa isim ekle. */
@@ -11,7 +11,7 @@ export const space = {
    * Etiket–değer arası, rozet dikey padding. Satır içi en küçük nefes.
    *
    * NEDEN SONRADAN EKLENDİ: `mt-xs` / `mb-xs` ekranlarda ZATEN yazılıydı ama
-   * ölçekte karşılığı yoktu — Tailwind'in varsayılan spacing'inde de `xs`/`sm`
+   * ölçekte karşılığı yoktu - Tailwind'in varsayılan spacing'inde de `xs`/`sm`
    * anahtarı yok, dolayısıyla o sınıflar hiç üretilmiyor, sessizce SIFIR
    * boşluk veriyordu. Hero'daki delta rozetinin yatay padding'i bu yüzden yoktu.
    */
@@ -34,7 +34,7 @@ export const space = {
   rowY: 12,
   /** Başlık şeridi dikey padding. */
   headerY: 14,
-  /** Alt sekme çubuğu — üst / alt (home indicator payı). */
+  /** Alt sekme çubuğu - üst / alt (home indicator payı). */
   tabBarTop: 12,
   tabBarBottom: 26,
 } as const;
@@ -61,9 +61,9 @@ export const radius = {
   pill: 999,
 } as const;
 
-/** Tip skalası. Yarım punto yok — mockup'taki tek 11.5px değeri 12'ye çekildi. */
+/** Tip skalası. Yarım punto yok - mockup'taki tek 11.5px değeri 12'ye çekildi. */
 export const type = {
-  /** Eyebrow — 10px mono, BÜYÜK HARF, geniş tracking. */
+  /** Eyebrow - 10px mono, BÜYÜK HARF, geniş tracking. */
   eyebrow: 10,
   /** Meta, zaman damgası, satır altı açıklama. */
   meta: 12,
@@ -79,21 +79,21 @@ export const type = {
   statSm: 22,
   /** 3'lü stat tile rakamı. Mockup 26 ve 28 arasında gidip geliyordu; 28'de birleşti. */
   stat: 28,
-  /** Hero rakamı. Mockup 44/46/50 kullanıyordu — tek boyut + adjustsFontSizeToFit,
+  /** Hero rakamı. Mockup 44/46/50 kullanıyordu - tek boyut + adjustsFontSizeToFit,
    *  uzun rakamda taşma kendiliğinden çözülür (design.md §3 kuralı). */
   hero: 48,
 } as const;
 
 // Tracking em cinsinden. React Native'de `letterSpacing` MUTLAK nokta değeri
-// ister, em değil — bu yüzden doğrudan kullanılamaz, track() ile çevrilir.
+// ister, em değil - bu yüzden doğrudan kullanılamaz, track() ile çevrilir.
 export const tracking = {
   hero: -0.045,
   tightest: -0.04,
   tighter: -0.03,
   tight: -0.02,
-  /** Eyebrow — tile içi. */
+  /** Eyebrow - tile içi. */
   wide: 0.16,
-  /** Eyebrow — ekran başlığı üstü. */
+  /** Eyebrow - ekran başlığı üstü. */
   wider: 0.18,
 } as const;
 
@@ -101,7 +101,7 @@ export const tracking = {
 export const track = (fontSize: number, em: number): number =>
   Math.round(fontSize * em * 100) / 100;
 
-/** Satır yükseklikleri — sadece çok satırlı metin için. Tek satırda RN'e bırak. */
+/** Satır yükseklikleri - sadece çok satırlı metin için. Tek satırda RN'e bırak. */
 export const leading = {
   meta: 18,
   row: 21,

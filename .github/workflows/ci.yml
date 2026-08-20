@@ -1,7 +1,7 @@
 # Her push ve PR'da koşan kapı. Üç iş paralel: sır → tip → lint.
 #
 # NEDEN AYRI JOB'LAR: tek job olsaydı sır taraması typecheck'in 90 saniyesini
-# beklerdi. Sır bulgusu en acil sinyal — kendi başına, saniyeler içinde kırmızı
+# beklerdi. Sır bulgusu en acil sinyal - kendi başına, saniyeler içinde kırmızı
 # olmalı. Ayrıca hangi katmanın düştüğü Actions listesinde tek bakışta görünür.
 name: CI
 
@@ -11,7 +11,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Aynı branch'e arka arkaya push edilirse eskisini iptal et — sıra beklemesin.
+# Aynı branch'e arka arkaya push edilirse eskisini iptal et - sıra beklemesin.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -51,14 +51,14 @@ jobs:
         run: bun run typecheck
 
       # Regresyon testleri. Bir bug duzeltildiginde testi de yaziliyor ama
-      # CI kosmuyorsa test dekordan ibaret kalir — bu adim onu engelliyor.
+      # CI kosmuyorsa test dekordan ibaret kalir - bu adim onu engelliyor.
       - name: Tests
         run: cd apps/mobile && bun test
 
   lint:
     name: Lint (mobile)
     runs-on: ubuntu-latest
-    # RAPORLAR, BLOKLAMAZ — bilinçli. Depoda 18 mevcut eslint hatası var
+    # RAPORLAR, BLOKLAMAZ - bilinçli. Depoda 18 mevcut eslint hatası var
     # (react-hooks/refs ve exhaustive-deps ağırlıklı). Bloklayan bir kapı ilk
     # günden kırmızı olurdu; kırmızı doğan kapı da okunmaz hale gelir. Borç
     # temizlenince continue-on-error kaldırılacak ve kapı sertleşecek.
@@ -73,7 +73,7 @@ jobs:
       - run: bun install --frozen-lockfile
 
       # Yalnızca mobilde eslint yapılandırması var. Web'e eklenirse buraya ikinci
-      # bir adım gelir — sessizce kapsam dışı kalmasın diye not düşülüyor.
+      # bir adım gelir - sessizce kapsam dışı kalmasın diye not düşülüyor.
       - name: Mobile
         run: |
           set -uo pipefail

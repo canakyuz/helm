@@ -40,7 +40,7 @@ export function AlertRow({ alert }: { alert: Alert }) {
         flexDirection: "row",
       }}
     >
-      {/* Sol kenar — severity color bar */}
+      {/* Sol kenar - severity color bar */}
       <View
         style={{
           width: 3,
@@ -49,7 +49,7 @@ export function AlertRow({ alert }: { alert: Alert }) {
       />
 
       <View style={{ flex: 1, padding: 14, gap: 6 }}>
-        {/* Top — severity badge + time */}
+        {/* Top - severity badge + time */}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <View
             style={{

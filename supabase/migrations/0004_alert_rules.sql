@@ -1,4 +1,4 @@
--- helm — uyarı kuralları. Uyarılar modülü bunları okur/yazar;
+-- helm - uyarı kuralları. Uyarılar modülü bunları okur/yazar;
 -- ileride helm-alert fonksiyonu senkron sonrası değerlendirir.
 
 create table if not exists public.alert_rules (

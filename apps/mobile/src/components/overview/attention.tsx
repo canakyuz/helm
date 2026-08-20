@@ -8,7 +8,7 @@ import { BentoTile } from "~/components/bento";
 import { Pill, SEVERITY_COLOR } from "./tiles";
 import { useT } from "~/lib/i18n";
 
-/** Ekranda kac madde gosterilir. Kalan sayisi BASLIKTA yazilir — sessizce
+/** Ekranda kac madde gosterilir. Kalan sayisi BASLIKTA yazilir - sessizce
  *  kirpmak "hepsi bu" diye okunur. */
 const VISIBLE = 3;
 
@@ -54,7 +54,7 @@ export function AttentionTile({
   onMute,
 }: {
   items: readonly AttentionItem[];
-  /** Yalnizca kaydedilmis olaylar icin — turetilenlerde "cozulecek" bir kayit yok. */
+  /** Yalnizca kaydedilmis olaylar icin - turetilenlerde "cozulecek" bir kayit yok. */
   onResolve: (eventId: number, key: string) => void;
   onMute: (key: string) => void;
 }) {

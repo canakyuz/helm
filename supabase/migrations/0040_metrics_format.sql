@@ -1,4 +1,4 @@
--- metrics_format — gunluk metrik kirilimi (reklam formati bazli).
+-- metrics_format - gunluk metrik kirilimi (reklam formati bazli).
 --
 -- NEDEN GEREKLI: gelirin buyuk kismi reklamdan geliyor ama panelde tek satir
 -- ("Reklam ₺340.71") olarak duruyordu; hangi formatin kazandirdigi, hangisinin
@@ -23,7 +23,7 @@ create table if not exists public.metrics_format (
   metric        text not null,
   -- AdMob FORMAT boyutu: app_open, banner, interstitial, rewarded
   -- (dogrulandi: networkReport FORMAT degerleri kucuk harf donuyor).
-  -- Serbest metin — AdMob yeni bir format eklerse migration gerekmesin.
+  -- Serbest metin - AdMob yeni bir format eklerse migration gerekmesin.
   format        text not null,
   value         numeric not null default 0,
   currency      text,

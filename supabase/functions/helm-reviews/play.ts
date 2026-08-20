@@ -1,6 +1,6 @@
 // supabase/functions/helm-reviews/play.ts
 // Google Play Developer Reviews API.
-// API SADECE son 7 günü döner — cron 30dk ile kayıp olmaz.
+// API SADECE son 7 günü döner - cron 30dk ile kayıp olmaz.
 
 export interface PlayReviewRow {
   project_id: string;

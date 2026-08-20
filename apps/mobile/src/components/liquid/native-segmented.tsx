@@ -2,7 +2,7 @@ import { Host, Picker, Text } from "@expo/ui/swift-ui";
 import { pickerStyle, tag } from "@expo/ui/swift-ui/modifiers";
 
 // Native iOS segmented control (SwiftUI Picker, .segmented style).
-// Drop-in replacement for the custom <Seg> — same prop shape.
+// Drop-in replacement for the custom <Seg> - same prop shape.
 export function NativeSegmented<T extends string>({
   value,
   options,

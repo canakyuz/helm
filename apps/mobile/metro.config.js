@@ -1,4 +1,4 @@
-// Monorepo Metro config — workspace/hoisted paketleri çöz + NativeWind koru.
+// Monorepo Metro config - workspace/hoisted paketleri çöz + NativeWind koru.
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 const path = require("path");

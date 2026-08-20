@@ -40,7 +40,7 @@ export const VersionsPage = () => {
   });
   const versions = result.data;
   const projectName = (id: string) =>
-    projectsResult.data.find((p) => p.id === id)?.name ?? "—";
+    projectsResult.data.find((p) => p.id === id)?.name ?? "-";
 
   const filtered = useMemo(() => {
     if (tab === "all") return versions;
@@ -59,7 +59,7 @@ export const VersionsPage = () => {
       );
       if (error) throw error;
       toast.success("Versions updated", {
-        description: `${data?.ios ?? 0} iOS, ${data?.android ?? 0} Android — toplam ${data?.versions ?? 0}`,
+        description: `${data?.ios ?? 0} iOS, ${data?.android ?? 0} Android - toplam ${data?.versions ?? 0}`,
       });
       if (data?.errors?.length) {
         toast.warning("Some versions could not be fetched", {
@@ -114,7 +114,7 @@ export const VersionsPage = () => {
         if (days < 30) return `${days} g`;
         return `${Math.floor(days / 30)} ay`;
       })()
-    : "—";
+    : "-";
 
   return (
     <div className="space-y-4">
@@ -143,12 +143,12 @@ export const VersionsPage = () => {
         />
         <VerKpi
           label="Latest iOS"
-          value={latestIos?.version ? `v${latestIos.version}` : "—"}
+          value={latestIos?.version ? `v${latestIos.version}` : "-"}
           icon={<Package className="size-3.5" />}
         />
         <VerKpi
           label={`Last updated (${lastUpdateRel})`}
-          value={latestAndroid?.version ? `v${latestAndroid.version}` : "—"}
+          value={latestAndroid?.version ? `v${latestAndroid.version}` : "-"}
           icon={<Package className="size-3.5" />}
           tone="primary"
         />
@@ -213,7 +213,7 @@ export const VersionsPage = () => {
                         → <strong>Edit</strong> ile{" "}
                         <code>app_store_id</code> /{" "}
                         <code>google_play_id</code> gir. Sonra{" "}
-                        <strong>Refresh</strong> — iOS iTunes lookup, Android
+                        <strong>Refresh</strong> - iOS iTunes lookup, Android
                         Play Store scrape.
                       </>
                     ) : (
@@ -286,7 +286,7 @@ const StatusBadge = ({ status }: { status: AppVersion["status"] }) => {
     rejected: { label: "RED", cls: "border-destructive/30 bg-destructive/15 text-destructive" },
     expired: { label: "EXPIRED", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
     removed: { label: "KALDIRILDI", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
-    unknown: { label: "—", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
+    unknown: { label: "-", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
   };
   const c = config[status] ?? config.unknown;
   return <Badge className={`${c.cls} text-[10px]`}>{c.label}</Badge>;

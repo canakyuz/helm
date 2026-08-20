@@ -11,7 +11,7 @@ type Props = {
   provider: ProviderName;
   /** Sir OLMAYAN mevcut degerler. */
   initial?: Record<string, string>;
-  /** Kayitli sir alanlarinin anahtarlari — degerleri gelmez, gelmemeli. */
+  /** Kayitli sir alanlarinin anahtarlari - degerleri gelmez, gelmemeli. */
   secretKeysSet?: string[];
   submitLabel: string;
   submitting: boolean;
@@ -19,7 +19,7 @@ type Props = {
 };
 
 /**
- * Saglayici formu — alanlar @helm/domain katalogundan gelir, burada elle
+ * Saglayici formu - alanlar @helm/domain katalogundan gelir, burada elle
  * tanimlanmaz. Katalog web ile ortak; ikisi ayrisamaz.
  */
 export function IntegrationForm({
@@ -68,7 +68,7 @@ export function IntegrationForm({
         accessibilityRole="button"
         accessibilityState={{ disabled: !canSubmit }}
       >
-        {/* Stil ic View'da: design.md §8 — Pressable'in fonksiyon style'inda
+        {/* Stil ic View'da: design.md §8 - Pressable'in fonksiyon style'inda
             layout ozellikleri uygulanmiyor, buton dolgusuz/paddingsiz cikardi. */}
         {({ pressed }) => (
           <View
@@ -119,7 +119,7 @@ function Field({
   // Kayitli sir: DEGER GELMEZ. Kullaniciya "dolu ama gostermiyorum" denir;
   // bos birakirsa mevcut deger korunur (bkz. updateIntegrationConfig).
   const placeholder = alreadySet
-    ? t("••••••••  kayıtlı — değiştirmek için yeni değer gir")
+    ? t("••••••••  kayıtlı - değiştirmek için yeni değer gir")
     : def.placeholder;
 
   return (

@@ -1,4 +1,4 @@
--- helm — store yorumları. App Store yorum RSS'i (auth gerektirmez) çekilir.
+-- helm - store yorumları. App Store yorum RSS'i (auth gerektirmez) çekilir.
 -- Proje, App Store ID'siyle eşlenir.
 
 alter table public.projects

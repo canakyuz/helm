@@ -3,7 +3,7 @@
 `helm` cockpit'inin **kişisel** mobil yoldaşı. Aynı Supabase'e bağlanır; sahada hızlı KPI + alert kontrolü için. TestFlight only.
 
 > Proje kuralları: [`CLAUDE.md`](./CLAUDE.md)  
-> Doküman indeksi: [`docs/README.md`](../../docs/README.md) — geçiş planı, mimari, entegrasyonlar
+> Doküman indeksi: [`docs/README.md`](../../docs/README.md) - geçiş planı, mimari, entegrasyonlar
 
 ## Kurulum
 
@@ -44,7 +44,7 @@ eas device:create          # kendi iPhone'unu kaydet
 Build + submit:
 
 ```bash
-bun run build:preview      # eas build -p ios --profile preview (cloud — aylık kota)
+bun run build:preview      # eas build -p ios --profile preview (cloud - aylık kota)
 bun run submit:preview     # son cloud build → TestFlight
 ```
 
@@ -81,7 +81,7 @@ Widget veri kaynağı:
 - App tarafı payload yazımı: `src/lib/widget-sync.ts`
 - Widget target config: `targets/widget/expo-target.config.js`
 - Widget Swift kaynakları: `targets/widget/*`
-- App Group: `group.com.canakyuz.helmmobile.shared` (main app + extension — `app.config.ts` `ios.entitlements`)
+- App Group: `group.com.canakyuz.helmmobile.shared` (main app + extension - `app.config.ts` `ios.entitlements`)
 - Widget sizes (home): **Small / Medium / Large** = dark glass total revenue board
 - Lock screen: **Inline** (`helm · ₺… · Δ%`) · **Rectangular** (total + ad/pay) · **Circular** (compact total + gauge)
 - Add lock screen: long-press lock screen → Customize → Lock Screen → add **helm** widget
@@ -112,7 +112,7 @@ Apple Developer → Identifiers → **App Groups** (App IDs değil) → `group.c
 
 ## Mimari
 
-- **Route grupları:** `(auth)` ve `(cockpit)` — Expo Router
+- **Route grupları:** `(auth)` ve `(cockpit)` - Expo Router
 - **State:** TanStack Query (cache 30s, refetch on focus)
 - **Auth:** Supabase magic link, token `expo-secure-store` (Keychain)
 - **Styling:** NativeWind v4 + dark-only palette
@@ -132,5 +132,5 @@ Apple Developer → Identifiers → **App Groups** (App IDs değil) → `group.c
 
 - `app.config.ts` içinde `projectId` ve update URL `eas init` sonrası doldurulacak
 - `eas.json` içinde `ascAppId` App Store Connect'te app oluşturduktan sonra
-- `src/types/database.ts` — `bun run gen:types` ile gerçek tipler üretilecek
-- `useCockpitKpis` MRR/DAU şu an placeholder — helm hub'da `vw_cockpit_kpis` view'ı eklenince güncellenecek
+- `src/types/database.ts` - `bun run gen:types` ile gerçek tipler üretilecek
+- `useCockpitKpis` MRR/DAU şu an placeholder - helm hub'da `vw_cockpit_kpis` view'ı eklenince güncellenecek

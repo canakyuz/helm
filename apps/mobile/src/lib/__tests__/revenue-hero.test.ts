@@ -4,8 +4,8 @@ import { amountOn, currentMonthTotal, heroDays, isoDay } from "../revenue-hero";
 
 /**
  * Fixture 2026-08-20'de canli veritabanindan olculdu:
- *   revenue_events (webhook)     : 96.91 USD / 9 olay — GERCEK para
- *   metrics.app_revenue (magaza) :  0.00 USD          — Apple raporu gecikmeli
+ *   revenue_events (webhook)     : 96.91 USD / 9 olay - GERCEK para
+ *   metrics.app_revenue (magaza) :  0.00 USD          - Apple raporu gecikmeli
  * Hero eskiden ikinciyi okudugu icin ayin tamamini sifir gosteriyordu.
  */
 const AUGUST = {
@@ -45,7 +45,7 @@ describe("heroDays", () => {
     expect(days.at(-1)).toEqual({ date: "2026-08-20", value: 9.99 });
   });
 
-  it("tarihe gore artan siralar — bucket'lar yeniden eskiye gelse bile", () => {
+  it("tarihe gore artan siralar - bucket'lar yeniden eskiye gelse bile", () => {
     const dates = heroDays([AUGUST, JULY], 10).map((d) => d.date);
     expect(dates).toEqual([...dates].sort());
   });

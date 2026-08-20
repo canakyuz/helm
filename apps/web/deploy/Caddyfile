@@ -1,4 +1,4 @@
-# helm.wesan.co — statik SPA + otomatik TLS + tek-kullanıcı auth duvarı.
+# helm.wesan.co - statik SPA + otomatik TLS + tek-kullanıcı auth duvarı.
 # Caddy 2.8+ : `basic_auth`. Daha eski Caddy'de `basicauth` yaz.
 # Şifre hash'i:  caddy hash-password   (bcrypt) → aşağıdaki <BCRYPT_HASH>'e koy.
 
@@ -6,12 +6,12 @@ helm.wesan.co {
 	root * /var/www/helm/dist
 	encode gzip zstd
 
-	# Auth duvarı — RLS permissive (tek kullanıcı), uygulamayı public'e açma.
+	# Auth duvarı - RLS permissive (tek kullanıcı), uygulamayı public'e açma.
 	basic_auth {
 		can <BCRYPT_HASH>
 	}
 
-	# SPA fallback — Refine route'ları index.html'e düşer.
+	# SPA fallback - Refine route'ları index.html'e düşer.
 	try_files {path} /index.html
 	file_server
 

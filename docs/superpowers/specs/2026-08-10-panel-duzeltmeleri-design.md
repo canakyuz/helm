@@ -1,8 +1,8 @@
-# Panel Düzeltmeleri — Tasarım
+# Panel Düzeltmeleri - Tasarım
 
 **Tarih:** 2026-08-10
 **Durum:** Tasarım onaylandı
-**Kapsam:** Üç bağımsız düzeltme — gelir çarpanı sınırı, AdMob app kırılımı, mobil oyuncu haritası
+**Kapsam:** Üç bağımsız düzeltme - gelir çarpanı sınırı, AdMob app kırılımı, mobil oyuncu haritası
 
 Üçü birbirinden bağımsızdır ve ayrı ayrı gönderilebilir. Ortak tek noktaları hepsinin mobil kabuğu (ve ikisinin veri hattını) ilgilendirmesi.
 
@@ -18,7 +18,7 @@
 const MAX_REVENUE_MULTIPLIER = 3;
 ```
 
-Giriş alanı zaten serbest metin (`Alert.prompt`, `decimal-pad`) — yani elle değer yazmak çalışıyor, yalnızca `normalizeRevenueMultiplier` içindeki clamp kesiyor. `apps/mobile/app/(cockpit)/settings.tsx:141` içindeki açıklama metni de "Enter a value from 1 to 3" diyor.
+Giriş alanı zaten serbest metin (`Alert.prompt`, `decimal-pad`) - yani elle değer yazmak çalışıyor, yalnızca `normalizeRevenueMultiplier` içindeki clamp kesiyor. `apps/mobile/app/(cockpit)/settings.tsx:141` içindeki açıklama metni de "Enter a value from 1 to 3" diyor.
 
 ### Değişiklik
 
@@ -28,10 +28,10 @@ Sınır 100'e çıkarılır, açıklama metni buna göre güncellenir.
 
 Çarpan yalnızca iki yerde uygulanıyor ve ikisi de saf gösterim:
 
-- `apps/mobile/src/hooks/use-format-currency.ts:16` — `valueUsd * rate * revenueMultiplier`
-- `apps/mobile/src/hooks/use-widget-sync.ts:26` — iOS widget'a gönderilen görüntüleme kuru
+- `apps/mobile/src/hooks/use-format-currency.ts:16` - `valueUsd * rate * revenueMultiplier`
+- `apps/mobile/src/hooks/use-widget-sync.ts:26` - iOS widget'a gönderilen görüntüleme kuru
 
-Hiçbir kalıcı veriye, hiçbir sunucu hesabına dokunmuyor. Ayarın kendi alt etiketi de bunu söylüyor: `local display only`. Alt sınır 1 olarak kalır — 1'in altı "geliri küçült" demek olurdu ve ayarın amacı bu değil.
+Hiçbir kalıcı veriye, hiçbir sunucu hesabına dokunmuyor. Ayarın kendi alt etiketi de bunu söylüyor: `local display only`. Alt sınır 1 olarak kalır - 1'in altı "geliri küçült" demek olurdu ve ayarın amacı bu değil.
 
 ---
 
@@ -46,7 +46,7 @@ dimensions: ["DATE"],
 metrics: ["ESTIMATED_EARNINGS", "IMPRESSIONS", "IMPRESSION_RPM"],
 ```
 
-AdMob `networkReport` API'si `APP` boyutunu da destekliyor ancak istenmiyor. Sonuç: yayıncı hesabındaki **tüm** uygulamaların geliri tek bir günlük rakamda toplanıyor. Empire Inc'in kendi reklam geliri, diğer oyunlarınkinden ayırt edilemiyor — dolayısıyla hangi oyunun para kazandığı panelde görünmüyor.
+AdMob `networkReport` API'si `APP` boyutunu da destekliyor ancak istenmiyor. Sonuç: yayıncı hesabındaki **tüm** uygulamaların geliri tek bir günlük rakamda toplanıyor. Empire Inc'in kendi reklam geliri, diğer oyunlarınkinden ayırt edilemiyor - dolayısıyla hangi oyunun para kazandığı panelde görünmüyor.
 
 ### Çözümün dayandığı gerçek
 
@@ -68,7 +68,7 @@ Bu yüzden **konnektör sözleşmesini değiştirmeye gerek yok**. Her helm proj
 
 - Rapor `dimensions: ["DATE", "APP"]` ile istenir.
 - `app_id` config'de tanımlıysa yalnızca o uygulamanın satırları toplanır.
-- `app_id` tanımlı değilse davranış bugünküyle aynı kalır: tüm satırlar toplanır. Bu geriye dönük uyumluluk bilinçlidir — mevcut entegrasyonlar bir migration beklemeden çalışmaya devam eder, `app_id` eklendikçe ayrışır.
+- `app_id` tanımlı değilse davranış bugünküyle aynı kalır: tüm satırlar toplanır. Bu geriye dönük uyumluluk bilinçlidir - mevcut entegrasyonlar bir migration beklemeden çalışmaya devam eder, `app_id` eklendikçe ayrışır.
 
 **Yeni migration yok.** `integrations.config` zaten JSON.
 
@@ -98,7 +98,7 @@ Bu bir bağlama işidir, yeni bileşen veya yeni sorgu yazılmaz.
 
 ### Boş ve hata durumları
 
-Geo verisi olmayan bir proje seçiliyse (henüz ülke kırılımı toplanmamışsa) harita yerine boş durum gösterilir; ekran çökmez ve boş bir dünya haritası da çizilmez. Sorgu hatasında da aynı davranış — panelin geri kalanı çalışmaya devam eder.
+Geo verisi olmayan bir proje seçiliyse (henüz ülke kırılımı toplanmamışsa) harita yerine boş durum gösterilir; ekran çökmez ve boş bir dünya haritası da çizilmez. Sorgu hatasında da aynı davranış - panelin geri kalanı çalışmaya devam eder.
 
 ---
 

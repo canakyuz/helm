@@ -29,7 +29,7 @@ export function writeHelmWidgetPayload(
       ok: false,
       hasContainer: false,
       hasDefaults: false,
-      reason: "HelmAppGroup native module missing — run bun run ios after prebuild",
+      reason: "HelmAppGroup native module missing - run bun run ios after prebuild",
     };
   }
   return native.writeWidgetPayload(json, group, widgetKind);

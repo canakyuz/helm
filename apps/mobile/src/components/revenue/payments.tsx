@@ -24,7 +24,7 @@ function shortDate(iso: string): string {
  * Donemdeki odemeler.
  *
  * IKI GRANULARITE bir arada: webhook baglandiktan sonrasi ISLEM bazinda, oncesi
- * GUN bazinda (magaza raporu yalnizca gunluk toplam verir). Ayrim gizlenmiyor —
+ * GUN bazinda (magaza raporu yalnizca gunluk toplam verir). Ayrim gizlenmiyor -
  * "gunluk toplam" satirini tek bir satin alma gibi gostermek yanlis olurdu.
  */
 export function PaymentsTile({

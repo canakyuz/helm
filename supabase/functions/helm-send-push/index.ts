@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-send-push — bir segmentin kullanıcılarına Expo Push bildirimi gönderir.
+// helm-send-push - bir segmentin kullanıcılarına Expo Push bildirimi gönderir.
 // Body: { project_id, segment_id, title, body, data?, dry_run? }
 // Push token'ları: project_integrations.supabase.config.push_token_{table,column,user_column}
 //   defaults: profiles / expo_push_token / id
@@ -225,7 +225,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Expo Push API — chunk 100
+  // Expo Push API - chunk 100
   let sent = 0;
   let failed = 0;
   const errors: string[] = [];

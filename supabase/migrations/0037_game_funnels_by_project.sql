@@ -1,6 +1,6 @@
 -- Oyun akisini PROJE BASINA dondur.
 --
--- NEDEN: "tum projeler" seciliyken akis hunisini toplamak anlamsiz veri uretir —
+-- NEDEN: "tum projeler" seciliyken akis hunisini toplamak anlamsiz veri uretir -
 -- Block Forge'un "oyun bitti"si ile Echo'nun "seviye tamamlandi"si ayni kutuya
 -- girer. Her oyunun kendi sozlugu var. UI proje basina ayri kart gosterir.
 --

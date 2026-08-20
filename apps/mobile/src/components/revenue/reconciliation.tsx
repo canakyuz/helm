@@ -29,7 +29,7 @@ const STATE_LABEL: Record<ReconState, string> = {
  * icerir. Tek kaynaga inmek ya bugunu gizler ya da farki gizler.
  *
  * "BEKLİYOR" bir hata degil, dogru durumdur: para geldi, magaza henuz
- * onaylamadi. Google Play icin dogrulama kaynagi HENUZ YOK — Play baglayicisi
+ * onaylamadi. Google Play icin dogrulama kaynagi HENUZ YOK - Play baglayicisi
  * yazilana kadar o bacak kalici olarak bekliyor gorunur, ki bu da dogru sinyal.
  */
 export function ReconciliationTile({
@@ -87,7 +87,7 @@ export function ReconciliationTile({
             <Text className="mt-[4px] font-mono-medium text-meta text-fg2">
               {fmt(l.provisional)}
               <Text className="text-fg3"> {t("anlık")} · </Text>
-              {l.confirmed > 0 ? fmt(l.confirmed) : "—"}
+              {l.confirmed > 0 ? fmt(l.confirmed) : "-"}
               <Text className="text-fg3"> {t("kesin")}</Text>
               {l.state === "mismatch" ? (
                 <Text style={{ color: theme.neg }}>

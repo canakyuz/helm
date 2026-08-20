@@ -1,4 +1,4 @@
-// helm — CMS için controlled Plate wrapper.
+// helm - CMS için controlled Plate wrapper.
 // `cms_entries.data.<richtext-field>` jsonb'sini doğrudan tutar.
 
 import { useEffect } from "react";

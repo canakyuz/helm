@@ -26,7 +26,7 @@ type Props = {
   radius?: number;
   padding?: number;
   glow?: string; // accent color for the inner glow spot
-  deco?: ReactNode; // e.g. <CornerTicks/> — sits above frost, below content
+  deco?: ReactNode; // e.g. <CornerTicks/> - sits above frost, below content
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
 };
@@ -86,7 +86,7 @@ export function LiquidGlass({
     </>
   );
 
-  // Each layer carries its own borderRadius — iOS native blur views don't reliably
+  // Each layer carries its own borderRadius - iOS native blur views don't reliably
   // clip to the parent's overflow:hidden, so a square corner pokes out under the
   // rounded border ("cut corner" artifact) unless the layer rounds itself.
   const base =
@@ -109,7 +109,7 @@ export function LiquidGlass({
     );
 
   // Always lay a semi-opaque elevated surface so cards read as distinct
-  // panels on the near-black background — GlassView's material alone is too
+  // panels on the near-black background - GlassView's material alone is too
   // dark/transparent here and the cards vanish. Faithful to the prototype,
   // whose .glass always carries a tint fill on top of the blur.
   const fill = (

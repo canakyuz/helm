@@ -61,7 +61,7 @@ function fixReactCodegenHeaders(projectRoot) {
 
   const headerPaths = fabricHeaderPaths(projectRoot);
   if (!fs.existsSync(headerPaths[0])) {
-    console.warn("[pods] react-native/ReactCommon not found — skip ReactCodegen header fix");
+    console.warn("[pods] react-native/ReactCommon not found - skip ReactCodegen header fix");
     return false;
   }
 

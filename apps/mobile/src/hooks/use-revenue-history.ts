@@ -7,7 +7,7 @@ import { usePreferences } from "~/lib/preferences";
 type QueryGate = { enabled?: boolean };
 
 /**
- * Gelir gecmisi — ay ve hafta gruplari, kaynak kirilimiyle.
+ * Gelir gecmisi - ay ve hafta gruplari, kaynak kirilimiyle.
  *
  * Tek sorgu tum donemleri getirir; donem degistirmek ag turu ISTEMEZ. Eski
  * ekran her donem icin ayri sorgu atsaydi, sekme her dokunusta beklerdi.

@@ -1,4 +1,4 @@
--- Audit log'a "kim yaptı" izlemesi — multi-user setup hazırlığı.
+-- Audit log'a "kim yaptı" izlemesi - multi-user setup hazırlığı.
 -- helm-action her insert'te actor_email set eder (JWT'den çıkarılır).
 
 alter table public.audit_log

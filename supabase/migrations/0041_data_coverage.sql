@@ -1,9 +1,9 @@
--- data_coverage — hangi proje/kaynak susmus, hangisi hic baglanmamis.
+-- data_coverage - hangi proje/kaynak susmus, hangisi hic baglanmamis.
 --
 -- NEDEN GEREKLI: alert_events 0 satir ve alert_rules da 0 satir; uyari motoru
 -- (helm-alert) calisiyor ama degerlendirecek KURAL yok, dolayisiyla kokpit hic
 -- uyari gostermiyor. Ustelik motorun destekledigi kosullar (drop_pct, rise_pct,
--- below, above) yalnizca DEGERE bakar — "veri akmayi kesti"yi hic goremez.
+-- below, above) yalnizca DEGERE bakar - "veri akmayi kesti"yi hic goremez.
 --
 -- Bir kokpitte en tehlikeli hata budur: AdMob senkronu susarsa gelir ₺0
 -- gorunur ve "para kazanmiyorum" diye okunur, oysa dogru okuma "olcum
@@ -36,7 +36,7 @@ as $$
   --
   -- KAYNAGA GORE DEGIL METRIGE GORE gruplanir: ayni metrigi birden fazla kaynak
   -- yazabilir. `dau`'yu posthog 24 Mayis'ta birakmis ama supabase her gun
-  -- yaziyor — metrik SAG. Kaynak-metrik ciftiyle gruplansaydi ilk acilista
+  -- yaziyor - metrik SAG. Kaynak-metrik ciftiyle gruplansaydi ilk acilista
   -- yanlis alarm cikardi ve alarm yorgunlugu gercek uyariyi korlestirirdi.
   per_metric as (
     select
@@ -101,4 +101,4 @@ as $$
 $$;
 
 comment on function public.data_coverage is
-  'Proje/kaynak bazinda veri tazeligi ve kapsam. Siniflandirma (taze/gec/susmus) okuma tarafinda yapilir — esikler kaynak kadansina gore degisir.';
+  'Proje/kaynak bazinda veri tazeligi ve kapsam. Siniflandirma (taze/gec/susmus) okuma tarafinda yapilir - esikler kaynak kadansina gore degisir.';

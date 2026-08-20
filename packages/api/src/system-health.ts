@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// Saglayici listesi ve etiketleri artik @helm/domain'de — tek dogruluk kaynagi.
+// Saglayici listesi ve etiketleri artik @helm/domain'de - tek dogruluk kaynagi.
 //
 // Buradaki eski kopya DB ile UYUSMUYORDU: "appstoreconnect" yaziyordu ama DB
 // "app_store_connect" bekliyor (0029_google_play_developer_provider.sql), ve
@@ -65,7 +65,7 @@ type SyncRow = {
   error_count: number;
 };
 
-// local — properties.deriveStatus ile isim çakışmasın diye export edilmez.
+// local - properties.deriveStatus ile isim çakışmasın diye export edilmez.
 function deriveStatus(
   enabled: boolean,
   lastSyncStatus: string | null,
