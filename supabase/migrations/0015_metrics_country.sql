@@ -21,5 +21,6 @@ create index if not exists metrics_country_metric_idx
 
 alter table public.metrics_country enable row level security;
 
+drop policy if exists "authenticated full access" on public.metrics_country;
 create policy "authenticated full access" on public.metrics_country
   for all to authenticated using (true) with check (true);

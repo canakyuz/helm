@@ -21,5 +21,6 @@ create index if not exists payouts_project_arrival_idx
 
 alter table public.payouts enable row level security;
 
+drop policy if exists "authenticated full access" on public.payouts;
 create policy "authenticated full access" on public.payouts
   for all to authenticated using (true) with check (true);

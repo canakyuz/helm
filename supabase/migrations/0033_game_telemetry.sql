@@ -37,5 +37,6 @@ alter table public.game_events enable row level security;
 
 -- Panel (authenticated) okur; yazımı yalnız service role (helm-game-ingest) yapar
 -- (service role RLS'i bypass eder, ayrı insert policy gerekmez).
+drop policy if exists "authenticated read game_events" on public.game_events;
 create policy "authenticated read game_events" on public.game_events
   for select to authenticated using (true);

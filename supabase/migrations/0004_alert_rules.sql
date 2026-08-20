@@ -17,5 +17,6 @@ create table if not exists public.alert_rules (
 
 alter table public.alert_rules enable row level security;
 
+drop policy if exists "authenticated full access" on public.alert_rules;
 create policy "authenticated full access" on public.alert_rules
   for all to authenticated using (true) with check (true);

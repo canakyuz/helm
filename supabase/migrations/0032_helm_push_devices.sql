@@ -17,14 +17,18 @@ create index if not exists idx_helm_push_devices_user
 
 alter table helm_push_devices enable row level security;
 
+drop policy if exists "own devices select" on helm_push_devices;
 create policy "own devices select" on helm_push_devices
   for select using (auth.uid() = user_id);
 
+drop policy if exists "own devices insert" on helm_push_devices;
 create policy "own devices insert" on helm_push_devices
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "own devices update" on helm_push_devices;
 create policy "own devices update" on helm_push_devices
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop policy if exists "own devices delete" on helm_push_devices;
 create policy "own devices delete" on helm_push_devices
   for delete using (auth.uid() = user_id);

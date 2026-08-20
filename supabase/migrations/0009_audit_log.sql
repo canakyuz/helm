@@ -15,5 +15,6 @@ create index if not exists audit_log_created_idx
 
 alter table public.audit_log enable row level security;
 
+drop policy if exists "authenticated read" on public.audit_log;
 create policy "authenticated read" on public.audit_log
   for select to authenticated using (true);

@@ -58,11 +58,14 @@ alter table public.projects             enable row level security;
 alter table public.project_integrations enable row level security;
 alter table public.metrics              enable row level security;
 
+drop policy if exists "authenticated full access" on public.projects;
 create policy "authenticated full access" on public.projects
   for all to authenticated using (true) with check (true);
 
+drop policy if exists "authenticated full access" on public.project_integrations;
 create policy "authenticated full access" on public.project_integrations
   for all to authenticated using (true) with check (true);
 
+drop policy if exists "authenticated full access" on public.metrics;
 create policy "authenticated full access" on public.metrics
   for all to authenticated using (true) with check (true);
