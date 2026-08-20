@@ -119,8 +119,23 @@ export const DashboardPage = () => {
   });
   const projects = projectsResult.data;
 
+  // Bu sayfanin GERCEKTEN okudugu metrikler. Tabloda 30 metrik var; filtresiz
+  // sorgu 90 gunluk pencerede 3.102 satir istiyordu ve PostgREST 1.000'de
+  // kesiyordu. Kesilen sorguda ORDER BY da yoktu, yani hangi 1.000 satirin
+  // gelecegi belirsizdi — en guncel gunler disarida kalinca "NOW · REKLAM"
+  // £0.00 gorunurken ayni sayfadaki proje tablosu £0.61 diyordu. Bu yavaslik
+  // degil, SESSIZ VERI KAYBIYDI.
+  //
+  // Yeni metrik eklerken bu listeye de ekle; unutulursa o kart bos kalir ama
+  // sayfa bozulmaz.
+  const DASHBOARD_METRICS = [
+    "ad_revenue", "mrr", "dau", "errors",
+    "wau", "ad_ecpm", "active_subs", "total_users",
+  ];
+
   const metricFilters: CrudFilter[] = [
     { field: "date", operator: "gte", value: since },
+    { field: "metric", operator: "in", value: DASHBOARD_METRICS },
   ];
   if (!isAll) {
     metricFilters.push({ field: "project_id", operator: "eq", value: scope });
@@ -128,6 +143,9 @@ export const DashboardPage = () => {
   const { result: metricsResult, query: metricsQuery } = useList<Metric>({
     resource: "metrics",
     filters: metricFilters,
+    // ORDER BY date DESC: tavan yine de asilirsa kaybedilen EN ESKI gunler
+    // olur, rastgele gunler degil. Grafik kisalir ama bugunun rakami durur.
+    sorters: [{ field: "date", order: "desc" }],
     pagination: { mode: "off" },
   });
   const metrics = metricsResult.data;
