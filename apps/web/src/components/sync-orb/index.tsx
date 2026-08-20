@@ -21,21 +21,15 @@ const healthOf = (ok: number, total: number): Health => {
   return "err";
 };
 
-const COLORS: Record<Health, { dot: string; ring: string; label: string }> = {
-  ok: { dot: "#10b981", ring: "rgba(16,185,129,0.5)", label: "Healthy" },
-  warn: { dot: "#f59e0b", ring: "rgba(245,158,11,0.5)", label: "Dikkat" },
-  err: { dot: "#ef4444", ring: "rgba(239,68,68,0.5)", label: "Errors" },
-  idle: {
-    dot: "var(--muted-foreground)",
-    ring: "rgba(120,120,130,0.3)",
-    label: "Waiting",
-  },
+const COLORS: Record<Health, { dot: string; label: string }> = {
+  ok: { dot: "bg-emerald-500", label: "Sağlıklı" },
+  warn: { dot: "bg-amber-500", label: "Dikkat" },
+  err: { dot: "bg-red-500", label: "Hata" },
+  idle: { dot: "bg-muted-foreground/50", label: "Bekliyor" },
 };
 
-/** Sync sağlık orb'u - nabız atan dot + halka.
- *  okCount/total ratio'ya göre renk değişir.
- *  CSS-only animasyon (sync-pulse keyframe glass.css'te).
- *  Helm cockpit ZONE A son cell. */
+/** Sync sağlık göstergesi - flat dot + ince halka (glow yok, Kravio dili).
+ *  okCount/total ratio'ya göre renk değişir. */
 export const SyncOrb = ({
   okCount,
   total,
@@ -49,31 +43,21 @@ export const SyncOrb = ({
     <div
       className={cn("flex flex-col items-center justify-center", className)}
       role="status"
-      aria-label={`Sync health: ${colors.label} - ${okCount} / ${total}`}
+      aria-label={`Sync sağlığı: ${colors.label} - ${okCount} / ${total}`}
     >
       <div
         className="relative grid place-items-center"
         style={{ width: size, height: size }}
       >
-        {/* Dış halka - pulse */}
+        {/* İnce dış halka - sabit, border rengi */}
         <span
           aria-hidden
-          className="absolute inset-0 rounded-full animate-[sync-pulse_1.5s_ease-out_infinite]"
-          style={{
-            background: `radial-gradient(circle, ${colors.ring} 0%, transparent 70%)`,
-          }}
+          className="absolute inset-3 rounded-full border border-border"
         />
-        {/* İç dot - sabit */}
-        <span
-          aria-hidden
-          className="relative size-3 rounded-full"
-          style={{
-            background: colors.dot,
-            boxShadow: `0 0 12px ${colors.dot}, 0 0 24px ${colors.dot}80`,
-          }}
-        />
+        {/* İç dot - sabit, flat */}
+        <span aria-hidden className={cn("relative size-3 rounded-full", colors.dot)} />
       </div>
-      <div className="mt-1 font-mono text-base font-semibold tabular-nums">
+      <div className="mt-1 text-base font-semibold tabular-nums">
         {okCount}
         <span className="text-muted-foreground">/{total}</span>
       </div>

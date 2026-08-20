@@ -49,7 +49,6 @@ export const TrendChart = ({
 
   const idSuffix = lineColor.replace(/[^a-z0-9]/gi, "");
   const gradientId = `helm-grad-${idSuffix}`;
-  const glowId = `helm-glow-${idSuffix}`;
   const isMinimal = variant === "minimal";
 
   return (
@@ -64,17 +63,9 @@ export const TrendChart = ({
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={lineColor} stopOpacity={0.45} />
-            <stop offset="100%" stopColor={lineColor} stopOpacity={0.04} />
+            <stop offset="0%" stopColor={lineColor} stopOpacity={0.22} />
+            <stop offset="100%" stopColor={lineColor} stopOpacity={0.02} />
           </linearGradient>
-          {/* Liquid Glass - line üzerinde soft glow (referans Airlinesim). */}
-          <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
         {!isMinimal && (
           <>
@@ -120,7 +111,6 @@ export const TrendChart = ({
           stroke={lineColor}
           strokeWidth={2}
           fill={`url(#${gradientId})`}
-          filter={`url(#${glowId})`}
         />
       </AreaChart>
     </ResponsiveContainer>

@@ -4,13 +4,12 @@ import { cn } from "@/lib/utils";
 export type StatusKind = "ok" | "error" | "warn" | "pending" | "info";
 
 const KIND_CLASSES: Record<StatusKind, string> = {
-  ok: "bg-emerald-500/15 text-emerald-500 ring-1 ring-emerald-500/30 shadow-[0_0_12px_-2px_rgb(16,185,129/0.5)]",
+  ok: "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-600/25 dark:text-emerald-400",
   error:
-    "bg-red-500/15 text-red-500 ring-1 ring-red-500/30 shadow-[0_0_12px_-2px_rgb(239,68,68/0.5)]",
-  warn: "bg-amber-500/15 text-amber-500 ring-1 ring-amber-500/30 shadow-[0_0_12px_-2px_rgb(245,158,11/0.45)]",
-  pending:
-    "bg-muted text-muted-foreground ring-1 ring-foreground/10",
-  info: "bg-sky-500/15 text-sky-500 ring-1 ring-sky-500/30 shadow-[0_0_12px_-2px_rgb(14,165,233/0.5)]",
+    "bg-red-500/10 text-red-700 ring-1 ring-red-600/25 dark:text-red-400",
+  warn: "bg-amber-500/10 text-amber-700 ring-1 ring-amber-600/25 dark:text-amber-400",
+  pending: "bg-muted text-muted-foreground ring-1 ring-border",
+  info: "bg-sky-500/10 text-sky-700 ring-1 ring-sky-600/25 dark:text-sky-400",
 };
 
 interface StatusBadgeProps {
@@ -20,8 +19,8 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-/** Glass status pill - emerald/red/amber/sky tonu + glow shadow.
- *  MarineX referansı (Delayed/On Schedule/At Berth/En Route). */
+/** Flat status pill - açık tonlu zemin + koyu metin (Kravio dili).
+ *  Light'ta 700, dark'ta 400 metin - iki temada da okunur kontrast. */
 export const StatusBadge = ({
   kind,
   children,

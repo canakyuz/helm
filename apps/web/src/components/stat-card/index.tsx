@@ -14,14 +14,13 @@ interface StatCardProps {
   loading?: boolean;
 }
 
-// Başlık + büyük değer + trend göstergeli istatistik kartı.
-// Glass orb: ikonun arkasında bulanık primary halka - MarineX/Haulix referansı.
+// Başlık + büyük değer + trend göstergeli istatistik kartı (flat, Kravio dili).
 export const StatCard = ({
   title,
   value,
   icon,
   delta,
-  deltaLabel = "last 7 days",
+  deltaLabel = "son 7 gün",
   loading,
 }: StatCardProps) => {
   if (loading) {
@@ -42,20 +41,13 @@ export const StatCard = ({
 
   return (
     <Card className="relative h-full overflow-hidden">
-      {/* Glass orb - ikonun arkasında soft primary glow */}
-      {icon && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-4 -top-4 size-20 rounded-full bg-primary/10 blur-2xl"
-        />
-      )}
       <CardContent>
         <div className="mb-2.5 flex items-center gap-2 text-muted-foreground">
           {icon && <span className="[&_svg]:size-4">{icon}</span>}
-          <span className="text-[13px]">{title}</span>
+          <span className="text-[13px] font-medium">{title}</span>
         </div>
 
-        <div className="font-mono text-3xl font-semibold tracking-tight tabular-nums">
+        <div className="text-3xl font-semibold tracking-tight tabular-nums">
           {value}
         </div>
 
@@ -65,10 +57,10 @@ export const StatCard = ({
             <>
               <span
                 className={cn(
-                  "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 font-mono text-xs font-medium tabular-nums",
+                  "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium tabular-nums",
                   positive
-                    ? "bg-emerald-500/15 text-emerald-500 ring-1 ring-emerald-500/30"
-                    : "bg-red-500/15 text-red-500 ring-1 ring-red-500/30",
+                    ? "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-600/25 dark:text-emerald-400"
+                    : "bg-red-500/10 text-red-700 ring-1 ring-red-600/25 dark:text-red-400",
                 )}
               >
                 {positive ? (
