@@ -8,7 +8,7 @@ import { formatInteger, formatRelativeTime } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
 import { BentoTile, Empty } from "~/components/bento";
 
-/** Listelerde ilk N satir gosterilir — kokpit tarama icin, arsiv icin degil. */
+/** Listelerde ilk N satir gosterilir - kokpit tarama icin, arsiv icin degil. */
 const TOP_CRASHES = 4;
 const TOP_VERSIONS = 4;
 
@@ -57,7 +57,7 @@ export function CrashTile({
                 {c.title}
               </Text>
               <Text className="mt-[1px] text-meta text-fg3" numberOfLines={1}>
-                {c.propertyName ?? "—"} · {c.level} · {formatRelativeTime(c.lastSeen)}
+                {c.propertyName ?? "-"} · {c.level} · {formatRelativeTime(c.lastSeen)}
               </Text>
             </View>
             <Text className="font-mono-semibold text-body text-fg2">
@@ -151,7 +151,7 @@ export function VersionsTile({
               {v.status != null ? ` · ${VERSION_STATUS_LABEL[v.status]}` : ""}
             </Text>
             <Text className="font-mono-medium text-[11px] text-fg3">
-              {v.releaseDate != null ? formatRelativeTime(v.releaseDate) : "—"}
+              {v.releaseDate != null ? formatRelativeTime(v.releaseDate) : "-"}
             </Text>
           </View>
         ))

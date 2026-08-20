@@ -7,7 +7,7 @@ import type { SelectedPropertyId } from "@helm/types";
  * Kaynak `game_events` (26k+ satir) ve `metrics` DEGIL. Ekranlarin bugune kadar
  * bakmadigi yer burasi: metrics gunluk toplamlari tutar, davranis burada.
  *
- * Toplama sunucuda (RPC `game_funnels`, migration 0035) — ham satirlari mobile
+ * Toplama sunucuda (RPC `game_funnels`, migration 0035) - ham satirlari mobile
  * cekmek hem ag hem bellek israfi olurdu.
  */
 
@@ -51,7 +51,7 @@ export type PerfRow = {
   samples: number;
   /** Ortanca fps. */
   p50: number;
-  /** Alt %5 — kotu deneyimin esigi. Ortalama burayi gizler. */
+  /** Alt %5 - kotu deneyimin esigi. Ortalama burayi gizler. */
   p05: number;
   /** Gorulen en kotu tek olcum. */
   worst: number;
@@ -96,7 +96,7 @@ const EMPTY: GameFunnels = {
 /**
  * Oyun akisindaki adim sirasi.
  *
- * NEDEN SABIT LISTE: RPC ham sayimlari dondurur, sirayi bilmez — "basla" olayi
+ * NEDEN SABIT LISTE: RPC ham sayimlari dondurur, sirayi bilmez - "basla" olayi
  * "bitir"den once gelmeli, sayisi kucuk olsa bile. Sayiya gore siralamak huniyi
  * ters cevirirdi.
  */
@@ -171,15 +171,15 @@ export async function fetchGameFunnels(
 /**
  * Oyun adimlarini siraya dizer.
  *
- * BILINEN anahtarlar once, KANONIK sirada — "basla" olayi "bitir"den once
+ * BILINEN anahtarlar once, KANONIK sirada - "basla" olayi "bitir"den once
  * gelmeli, sayisi kucuk olsa bile. Sayiya gore siralamak huniyi ters cevirirdi.
  *
  * BILINMEYEN anahtarlar ATILMAZ, sona eklenir (sayiya gore). Bu cok-urunlu
  * yapinin sarti: GAME_STEP_ORDER Block Forge'un sozlugu; Dante veya Echo baska
- * anahtarlar gonderecek. Filtrelemek onlari SESSIZCE gorunmez yapardi — yeni bir
+ * anahtarlar gonderecek. Filtrelemek onlari SESSIZCE gorunmez yapardi - yeni bir
  * oyun ekleyen kisi verisinin neden gelmedigini anlayamazdi.
  *
- * Time: O(n log n) — bilinmeyenlerin siralamasi. Space: O(n).
+ * Time: O(n log n) - bilinmeyenlerin siralamasi. Space: O(n).
  */
 export function orderedGameSteps(rows: readonly CountRow[]): CountRow[] {
   const byKey = new Map(rows.map((r) => [r.key, r.count]));
@@ -199,7 +199,7 @@ export function orderedGameSteps(rows: readonly CountRow[]): CountRow[] {
 }
 
 /**
- * Enstrümantasyon supheleri — kullanici davranisi gibi okunmamasi gereken sinyaller.
+ * Enstrümantasyon supheleri - kullanici davranisi gibi okunmamasi gereken sinyaller.
  *
  * NEDEN AYRI: "oturumlarin %100'u kapanmiyor" bir urun bulgusu degil, olcum
  * hatasidir. Ayni kutuda gostermek yanlis karar aldirir.
@@ -208,7 +208,7 @@ export function orderedGameSteps(rows: readonly CountRow[]): CountRow[] {
  * Ceviriye hazir uyari. `key` Turkce kaynak dizgi, `vars` yer tutucu degerleri.
  *
  * NEDEN HAZIR DIZGI DEGIL: eskiden bu fonksiyon bicimlenmis Turkce metin
- * donuyordu ve ekran onu oldugu gibi basiyordu — Ingilizce arayuzde bu uc uyari
+ * donuyordu ve ekran onu oldugu gibi basiyordu - Ingilizce arayuzde bu uc uyari
  * Turkce kaliyordu, cevrilebilecek bir yer yoktu. Anahtar + degiskene ayirinca
  * ceviri UI katmaninda yapilabiliyor ve paket dil bilmemeye devam ediyor.
  */
@@ -238,7 +238,7 @@ export function instrumentationWarnings(f: GameFunnels): InstrumentationWarning[
   const overs = f.game.find((g) => g.key === "game_over_score")?.count ?? 0;
   if (starts > 0 && overs > starts * 1.5) {
     out.push({
-      key: "Oyun bitişi ({overs}) başlangıçtan ({starts}) fazla — başlangıç olayı eksik",
+      key: "Oyun bitişi ({overs}) başlangıçtan ({starts}) fazla - başlangıç olayı eksik",
       vars: { overs, starts },
     });
   }

@@ -117,7 +117,7 @@ export const ProjectSwitcher = () => {
                   {g.brand.id !== "__orphan__" && (
                     <button
                       type="button"
-                      aria-label={`${g.brand.name} — edit brand`}
+                      aria-label={`${g.brand.name} - edit brand`}
                       onClick={(e) => {
                         e.stopPropagation();
                         edit("brands", g.brand.id);
@@ -143,7 +143,7 @@ export const ProjectSwitcher = () => {
                     </span>
                     <button
                       type="button"
-                      aria-label={`${p.name} — edit property`}
+                      aria-label={`${p.name} - edit property`}
                       onClick={(e) => {
                         e.stopPropagation();
                         edit("properties", p.id);

@@ -2,7 +2,7 @@
 --
 -- NEDEN VAR: 0038 txn_key'i NOT NULL yapti, ama edge function ayri deploy edilir.
 -- Ikisi ayni anda canliya cikmaz. Aradaki pencerede ESKI fonksiyon txn_key
--- gondermeden yazmaya calisir ve HER webhook olayi hata alir — yani tam olarak
+-- gondermeden yazmaya calisir ve HER webhook olayi hata alir - yani tam olarak
 -- kacirmamak icin bu isi yaptigimiz odemeler kaybolur.
 --
 -- Trigger, txn_key bos gelirse ayni anahtari SQL tarafinda uretir. Yeni fonksiyon

@@ -4,7 +4,7 @@
 // ikondan PIKSEL BAZINDA orneklendi, gozle tahmin edilmedi:
 //   indigo #496BFB · pembe #F3538C · camgobegi #02B8EE · teal #13CED0 · yesil #65CD64
 //
-// ACCENT TEK BIR HEX DEGILDIR — cifttir. Koyu temada accent'in ACIK olmasi
+// ACCENT TEK BIR HEX DEGILDIR - cifttir. Koyu temada accent'in ACIK olmasi
 // gerekir (koyu tile uzerinde metin olarak okunsun, dolgusunun ustune siyah
 // murekkep gitsin); acik temada tam tersi. Murekkep kurali tek satir: koyu tema
 // accent'i hep acik renktir, uzerine koyu murekkep; acik tema accent'i hep koyu
@@ -23,7 +23,7 @@
 // Cozum dosyanin kendi yontemi: ton korunur, parlaklik + doygunluk ayrisana
 // kadar kaydirilir. Asagidaki degerler "AA + ΔE≥30 (durum) + ΔE≥25 (diger
 // accent)" kisitlarini saglayan, ikon rengine EN YAKIN cozumlerdir. Her satirda
-// ikon renginden ne kadar saptigi (ΔE) yaziyor — sifira yakin olan ikonla birebir.
+// ikon renginden ne kadar saptigi (ΔE) yaziyor - sifira yakin olan ikonla birebir.
 //
 // ROSE FLAME (#E63946) ve INFERNO (#FF3030) hala listede YOK: ikisi de orta
 // parlaklikta, hicbir yuzeyde 4.5:1'i tutturmuyor.
@@ -34,9 +34,9 @@ export type AccentFamily = {
   id: AccentId;
   /** Ayarlarda gorunen ad. */
   label: string;
-  /** Koyu tema — acik renk. */
+  /** Koyu tema - acik renk. */
   dark: string;
-  /** Acik tema — koyu renk. */
+  /** Acik tema - koyu renk. */
   light: string;
 };
 
@@ -48,31 +48,31 @@ export const ACCENTS: readonly AccentFamily[] = [
   {
     id: "camgobegi",
     label: "Camgöbeği",
-    dark: "#06B9EF", // 5.41 / 8.20 · ΔE 0.4 — ikonla neredeyse birebir
+    dark: "#06B9EF", // 5.41 / 8.20 · ΔE 0.4 - ikonla neredeyse birebir
     light: "#037FAB", // 4.54          · ΔE 22.2
   },
   {
     id: "teal",
     label: "Teal",
-    dark: "#11CED0", // 6.33 / 9.60 · ΔE 0.1 — ikonla birebir
+    dark: "#11CED0", // 6.33 / 9.60 · ΔE 0.1 - ikonla birebir
     light: "#05857E", // 4.50          · ΔE 27.9
   },
   {
     id: "indigo",
     label: "İndigo",
-    dark: "#8F92FE", // 4.54 / 6.88 · ΔE 27.1 — acildi, ham ton camda 3.1'de kaliyordu
-    light: "#4668F6", // 4.59          · ΔE 1.5 — ikonla neredeyse birebir
+    dark: "#8F92FE", // 4.54 / 6.88 · ΔE 27.1 - acildi, ham ton camda 3.1'de kaliyordu
+    light: "#4668F6", // 4.59          · ΔE 1.5 - ikonla neredeyse birebir
   },
   {
     id: "pembe",
     label: "Pembe",
-    dark: "#F99ACC", // 6.19 / 9.38 · ΔE 31.0 — neg'den ayrismak icin acildi
+    dark: "#F99ACC", // 6.19 / 9.38 · ΔE 31.0 - neg'den ayrismak icin acildi
     light: "#D7287E", // 4.67          · ΔE 13.5
   },
   {
     id: "yesil",
     label: "Yeşil",
-    dark: "#36B71A", // 4.67 / 7.09 · ΔE 22.9 — pos'tan ayrismak icin doyuruldu
+    dark: "#36B71A", // 4.67 / 7.09 · ΔE 22.9 - pos'tan ayrismak icin doyuruldu
     light: "#1F8925", // 4.50          · ΔE 24.6
   },
 ] as const;

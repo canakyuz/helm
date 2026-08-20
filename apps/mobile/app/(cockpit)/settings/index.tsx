@@ -29,7 +29,7 @@ export default function SettingsHub() {
   const sources = healthQuery.data?.totalIntegrations ?? 0;
   const okCount = healthQuery.data?.okCount ?? 0;
   const errorCount = healthQuery.data?.errorCount ?? 0;
-  const version = Constants.expoConfig?.version ?? "—";
+  const version = Constants.expoConfig?.version ?? "-";
 
   function confirmSignOut() {
     haptic.tap();
@@ -47,7 +47,7 @@ export default function SettingsHub() {
   // Ic ekrani acmadan "tema neydi, hangi para birimi" sorusu cevaplanmali.
   const sourcesSummary =
     healthQuery.isLoading && healthQuery.data == null
-      ? "—"
+      ? "-"
       : errorCount > 0
         ? t("{n} bağlı · {m} hata", { n: okCount, m: errorCount })
         : t("{n} bağlı", { n: okCount });
@@ -78,7 +78,7 @@ export default function SettingsHub() {
             />
           }
         >
-          {/* Kimlik. Proje/kaynak sayilari YALNIZCA burada — eski ekranda hem
+          {/* Kimlik. Proje/kaynak sayilari YALNIZCA burada - eski ekranda hem
               burada hem alttaki sistem tile'inda tekrar ediyordu. */}
           <Rise index={0}>
             <BentoTile>

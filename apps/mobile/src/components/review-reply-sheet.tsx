@@ -105,7 +105,7 @@ export function ReviewReplySheet({ review, visible, onClose }: Props) {
                     fontSize: 13,
                   }}
                 >
-                  {review.title ?? "—"}
+                  {review.title ?? "-"}
                 </Text>
                 <Text
                   style={{
@@ -115,7 +115,7 @@ export function ReviewReplySheet({ review, visible, onClose }: Props) {
                   }}
                   numberOfLines={3}
                 >
-                  {review.body ?? "—"}
+                  {review.body ?? "-"}
                 </Text>
               </View>
             )}
@@ -142,7 +142,7 @@ export function ReviewReplySheet({ review, visible, onClose }: Props) {
               }}
             />
 
-            {/* Footer — char count + submit */}
+            {/* Footer - char count + submit */}
             <View
               style={{
                 flexDirection: "row",

@@ -1,19 +1,19 @@
-# Reviews Entegrasyon Onarımı — Tasarım Spec'i
+# Reviews Entegrasyon Onarımı - Tasarım Spec'i
 
 **Tarih:** 2026-05-26
 **Issue:** WES-000
 **Repo:** helm (web) + helm-mobile (UI tüketici)
-**Scope:** A alt-projesi (4 alt-projeden ilki — B/C/D backlog'da)
+**Scope:** A alt-projesi (4 alt-projeden ilki - B/C/D backlog'da)
 
 ## 1. Bağlam ve Sorun
 
 Mevcut durum (kanıtlı gözlem):
 
 - `helm-reviews/index.ts` Apple'ın **public iTunes RSS**'inden yorum çekiyor (`itunes.apple.com/.../rss/customerreviews`). Apple bu RSS'i resmi olarak desteklemiyor; eski/eksik veri dönebiliyor, `app_version` yok.
-- **`helm-reviews` cron'u yok** — sadece web "Yenile" butonu ve mobil pull-to-refresh tetikliyor. Yorumlar passive.
-- **Google Play yorum entegrasyonu yok** — `connectors/` altında play yok, reviews tablosuna Play'den hiç satır yazılmıyor.
+- **`helm-reviews` cron'u yok** - sadece web "Yenile" butonu ve mobil pull-to-refresh tetikliyor. Yorumlar passive.
+- **Google Play yorum entegrasyonu yok** - `connectors/` altında play yok, reviews tablosuna Play'den hiç satır yazılmıyor.
 - Mobile UI'da "Android" segmenti hazır (`app/(cockpit)/(reviews)/index.tsx:35-38`) ama veri kaynağı olmadığı için `playstoreCount` her zaman 0.
-- Web sayfa başlığı `"Yorumlar (App Store)"` — Play eksikliği kabul edilmiş.
+- Web sayfa başlığı `"Yorumlar (App Store)"` - Play eksikliği kabul edilmiş.
 - Yorum yanıtlama yolu yok (Apple Customer Review Responses / Google reviews.reply kullanılmıyor).
 
 Hedef: Web ve mobil için **tek backend** üzerinden hem App Store hem Google Play yorumlarını çekmek, otomatik tazelemek ve **yanıtlama** yapabilmek.
@@ -34,7 +34,7 @@ Hedef: Web ve mobil için **tek backend** üzerinden hem App Store hem Google Pl
 ```
 ┌────────────── pg_cron (her 30dk) ──────────────┐
 │                                                 │
-│   helm-reviews (Edge Function — refactor)       │
+│   helm-reviews (Edge Function - refactor)       │
 │   ├─ App Store: ASC Customer Reviews API        │
 │   │   └─ fallback → iTunes RSS                  │
 │   └─ Google Play: Reviews API (service account) │
@@ -53,7 +53,7 @@ Hedef: Web ve mobil için **tek backend** üzerinden hem App Store hem Google Pl
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-Tüm secret'lar `project_integrations.config` (JSONB) içinde — yeni env var **yok**, mevcut pattern korunur (RLS service_role only).
+Tüm secret'lar `project_integrations.config` (JSONB) içinde - yeni env var **yok**, mevcut pattern korunur (RLS service_role only).
 
 ## 4. Veri Modeli Değişiklikleri
 
@@ -105,11 +105,11 @@ Mevcut RSS row'larının `external_id`'si **değiştirilmiyor** (kırılma riski
 }
 ```
 
-App Store Connect zaten `project_integrations` içinde (Sales için kullanılıyor) — Customer Reviews yetkisi key role'ünde mevcutsa otomatik çalışır. Yeni alan eklenmez; key tarafında scope kontrolü API'ye bırakılır.
+App Store Connect zaten `project_integrations` içinde (Sales için kullanılıyor) - Customer Reviews yetkisi key role'ünde mevcutsa otomatik çalışır. Yeni alan eklenmez; key tarafında scope kontrolü API'ye bırakılır.
 
 ### 4.3 `audit_log` action'ı
 
-Yeni eylem türü: `review.reply`. Mevcut audit pattern (`helm-action`, commit e6b90a6) kullanılır. Payload: `{ review_id, source, territory, body_length }` (gövde tam metni audit'e yazılmaz — PII/uzunluk).
+Yeni eylem türü: `review.reply`. Mevcut audit pattern (`helm-action`, commit e6b90a6) kullanılır. Payload: `{ review_id, source, territory, body_length }` (gövde tam metni audit'e yazılmaz - PII/uzunluk).
 
 ## 5. Edge Function: `helm-reviews` (refactor)
 
@@ -137,7 +137,7 @@ Yeni eylem türü: `review.reply`. Mevcut audit pattern (`helm-action`, commit e
 // Customer Reviews için aud aynı: "appstoreconnect-v1".
 
 // GET /v1/apps/{appId}/customerReviews?limit=200&sort=-createdDate&filter[territory]=USA,TUR
-//   ?include=response — response varsa included[] içinde döner
+//   ?include=response - response varsa included[] içinde döner
 
 // İlk istek limit=200 (Apple max), sonraki istekler links.next üzerinden cursor pagination.
 // 24 saatten eski yorumlara ulaşılana kadar pagination devam; hedef: "incremental" fetch
@@ -162,18 +162,18 @@ Fallback durumunda mevcut RSS akışı çalışır (helm-reviews/index.ts:86-129
 // → GET https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{packageName}/reviews
 //      ?maxResults=100&translationLanguage={lang}
 
-// API SADECE son 7 günü döner — kayıp olmasın diye 30dk cron.
+// API SADECE son 7 günü döner - kayıp olmasın diye 30dk cron.
 // Pagination: `tokenPagination.nextPageToken`. Tek property için ortalama < 3 sayfa.
 ```
 
-**Önemli:** Google Play API'de yorum HER ZAMAN tekildir (Apple gibi territory çoğaltması yok). `language_codes` aslında **çeviri** dili — orijinal yorum üzerine seçilen dile çevirisi gelir. Default `["en", "tr"]` ile her yorum 2 kez çağrılır (token cache var, ucuz). Spec'te birinci dilin orijinal olduğunu varsayıyoruz; çeviri opsiyonel kalır.
+**Önemli:** Google Play API'de yorum HER ZAMAN tekildir (Apple gibi territory çoğaltması yok). `language_codes` aslında **çeviri** dili - orijinal yorum üzerine seçilen dile çevirisi gelir. Default `["en", "tr"]` ile her yorum 2 kez çağrılır (token cache var, ucuz). Spec'te birinci dilin orijinal olduğunu varsayıyoruz; çeviri opsiyonel kalır.
 
 ### 5.4 Karmaşıklık özeti
 
 - Time: O(P × (A_pages + (Play_pages × L)))
   - P = property sayısı, A_pages ≈ ASC pages/property, L = language_codes
   - Pratikte: P=5, A_pages=3, Play_pages=2, L=2 → 5 × (3 + 4) = 35 HTTP call/30dk
-- Space: O(R) — R = batch upsert chunk (≤100)
+- Space: O(R) - R = batch upsert chunk (≤100)
 - Cron başına latency hedef: < 30s (Edge Function timeout 60s)
 
 ## 6. Edge Function: `helm-review-reply` (yeni)
@@ -194,7 +194,7 @@ Body: { review_id: bigint, body: string }
    - trim whitespace
 5. API call:
    - Apple ASC: review.developer_response varsa PATCH, yoksa POST
-   - Google: PUT (idempotent — üzerine yazar)
+   - Google: PUT (idempotent - üzerine yazar)
 6. Başarılı → update reviews set developer_response=$1, responded_at=now() where id=$2
 7. audit_log insert: action='review.reply', payload={review_id, source, territory, body_length}
 8. Response 200: { ok: true, responded_at }
@@ -218,7 +218,7 @@ Hata yolları (4xx, body içinde JSON):
 // Apple'ın customerReviews response'unda included[] içinde mevcut response objesi geliyor.
 // helm-reviews ingest sırasında bu yakalanır → reviews.developer_response zaten dolu.
 // Spec: ingest tarafı developer_response_id'yi YANIT KARARLI tutmak için ayrı kolonda
-// saklamak ZORUNDA değil — reply endpoint'i ihtiyaç anında ASC'ye GET ile sorabilir
+// saklamak ZORUNDA değil - reply endpoint'i ihtiyaç anında ASC'ye GET ile sorabilir
 // (basit, az durum). Edge: response_id cache'i optimizasyon, spec dışı.
 ```
 
@@ -227,16 +227,16 @@ Hata yolları (4xx, body içinde JSON):
 ```ts
 // POST https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{pkg}/reviews/{reviewId}:reply
 // body: { replyText: string }
-// Idempotent — üzerine yazar; ayrı POST/PATCH ayrımı yok.
+// Idempotent - üzerine yazar; ayrı POST/PATCH ayrımı yok.
 ```
 
 ### 6.4 Rate limit
 
-Spec sınırı: kullanıcı (actor_email) başına 10 yanıt/dakika. Memory'de basit sliding-window sayaç (Edge Function in-memory yetersiz, multi-instance'da sızar). **Çözüm:** `audit_log`'a SELECT — son 60s içinde `actor_email = X AND action='review.reply'` count > 10 ise 429. Tek query, ucuz (`audit_log` üzerinde `(actor_email, created_at)` index'i zaten gerekecek — bonus migration).
+Spec sınırı: kullanıcı (actor_email) başına 10 yanıt/dakika. Memory'de basit sliding-window sayaç (Edge Function in-memory yetersiz, multi-instance'da sızar). **Çözüm:** `audit_log`'a SELECT - son 60s içinde `actor_email = X AND action='review.reply'` count > 10 ise 429. Tek query, ucuz (`audit_log` üzerinde `(actor_email, created_at)` index'i zaten gerekecek - bonus migration).
 
 ## 7. UI Değişiklikleri
 
-### 7.1 Web — `helm/src/pages/reviews/index.tsx`
+### 7.1 Web - `helm/src/pages/reviews/index.tsx`
 
 | # | Değişiklik |
 |---|---|
@@ -247,16 +247,16 @@ Spec sınırı: kullanıcı (actor_email) başına 10 yanıt/dakika. Memory'de b
 | 5 | Yorum satırı altında: yanıt yoksa **"Yanıtla"** buton; yanıt varsa **alıntı blok** + "Düzenle" |
 | 6 | Yanıt modal: textarea (350 char counter), Gönder/İptal; submit senkron → toast |
 
-### 7.2 Mobil — `helm-mobile/app/(cockpit)/(reviews)/index.tsx`
+### 7.2 Mobil - `helm-mobile/app/(cockpit)/(reviews)/index.tsx`
 
 | # | Değişiklik |
 |---|---|
 | 1 | Hero card avg'i platform filtre'ye göre değişir (segment iOS seçiliyse iOS avg) |
 | 2 | `ReviewRow`: version + territory badge (mevcut star/title/body altında) |
 | 3 | `ReviewRow` altında: **"Yanıtla"** buton veya **"Yanıtlandı"** chip + alıntı |
-| 4 | Yanıt sheet: react-native Modal (transparent: true) — TextInput (multiline, 350 char counter) + "Gönder" |
+| 4 | Yanıt sheet: react-native Modal (transparent: true) - TextInput (multiline, 350 char counter) + "Gönder" |
 | 5 | Senkron submit + `~/lib/toast` (zaten var) ile hata göstergesi |
-| 6 | `useReviews` hook: source filter zaten var, sadece veriye Android satırları girmesi gerekiyor — değişiklik yok |
+| 6 | `useReviews` hook: source filter zaten var, sadece veriye Android satırları girmesi gerekiyor - değişiklik yok |
 
 ### 7.3 Property edit formu (web)
 
@@ -268,7 +268,7 @@ Mevcut `google_play_id` alanı korunur (commit 6acc26c). Yardımcı satır:
 
 Yeni provider kartı: **"Google Play Developer"**
 - Açıklama: "Yorumları çekmek ve yanıtlamak için service account JSON gerekir."
-- Form: service account JSON textarea, package name (opsiyonel — property'den fallback), language codes (chips, default `en,tr`)
+- Form: service account JSON textarea, package name (opsiyonel - property'den fallback), language codes (chips, default `en,tr`)
 - "Bağla" butonu → `project_integrations` insert/update
 
 ## 8. Migration Sırası
@@ -277,7 +277,7 @@ Yeni provider kartı: **"Google Play Developer"**
 |---|---|---|
 | 1 | `0024_reviews_v2.sql` | `reviews` kolon eklemeleri + mevcut row'lara `source_method='rss'` backfill |
 | 2 | `0025_reviews_cron.sql` | `cron.schedule('helm-reviews-30m', '*/30 * * * *', ...)` |
-| 3 | `0026_audit_actor_index.sql` | `create index on audit_log (actor_email, created_at desc)` — rate limit query'si için |
+| 3 | `0026_audit_actor_index.sql` | `create index on audit_log (actor_email, created_at desc)` - rate limit query'si için |
 
 ## 9. Deploy Sırası
 
@@ -315,7 +315,7 @@ CLAUDE.md kuralı: **Unit test obsesyonu yasak**, **Mock data yasak**, gerçek D
 
 - `helm-reviews` cron run latency: P95 < 30s (Edge timeout 60s)
 - `helm-review-reply` latency: P95 < 3s (Apple/Google API round-trip + audit insert)
-- Reviews tablosu büyümesi: günlük yeni satır beklentisi ~100-500 (indie portföy ölçeği) — partition'a şu an gerek yok
+- Reviews tablosu büyümesi: günlük yeni satır beklentisi ~100-500 (indie portföy ölçeği) - partition'a şu an gerek yok
 - Index'ler:
   - `reviews_project_date_idx` (mevcut, `(project_id, review_date desc)`) korunur
   - `audit_log (actor_email, created_at desc)` yeni (rate limit query'si)
@@ -333,10 +333,10 @@ CLAUDE.md kuralı: **Unit test obsesyonu yasak**, **Mock data yasak**, gerçek D
 
 ## 13. Scope Dışı (Backlog)
 
-- **Yanıt silme** — Apple ASC `DELETE` + Google reviews.delete (Reply silme yok aslında, sadece edit). YAGNI; sonra eklenir.
-- **Push trigger**: ≤2★ yorum geldiğinde mobil push — bu **B alt-projesi**.
-- **Rating delta widget**: 7g/30g rating spike — **D alt-projesi**.
-- **Mobil ekran sayısı kısıtlama** ("acil aksiyon" odağı) — **C alt-projesi**.
+- **Yanıt silme** - Apple ASC `DELETE` + Google reviews.delete (Reply silme yok aslında, sadece edit). YAGNI; sonra eklenir.
+- **Push trigger**: ≤2★ yorum geldiğinde mobil push - bu **B alt-projesi**.
+- **Rating delta widget**: 7g/30g rating spike - **D alt-projesi**.
+- **Mobil ekran sayısı kısıtlama** ("acil aksiyon" odağı) - **C alt-projesi**.
 - **Yanıt taslakları / template**: yanıtın kaydedilip sonra gönderilmesi. Şu an senkron-only.
 - **ML/sentiment analiz**: yorumların pozitif/negatif/nötr sınıflandırması.
 
@@ -344,10 +344,10 @@ CLAUDE.md kuralı: **Unit test obsesyonu yasak**, **Mock data yasak**, gerçek D
 
 Spec onayında karara bağlanacak:
 
-1. **Web yanıt UI'sı** — modal mı popover mu? Tasarım önerisi modal (daha geniş alan, mobile uyumu kolay). Karar: **modal** (default).
-2. **Mobil yanıt sheet'i** — React Native Modal vs gorhom/bottom-sheet? Mobile şu an gorhom kullanmıyor (`bun.lock`'ta yok). Karar: **Modal** (yeni dependency yok).
-3. **Çoklu dil** Google Play tarafında — default `["en", "tr"]` mı, ilk fetch'te boş bırakıp dil tespitini Apple/Google'a mı bırakalım? Karar: **default `["en", "tr"]`** (Türkçe + İngilizce çoğunluğu kapsar; user portföyü TR ağırlıklı).
+1. **Web yanıt UI'sı** - modal mı popover mu? Tasarım önerisi modal (daha geniş alan, mobile uyumu kolay). Karar: **modal** (default).
+2. **Mobil yanıt sheet'i** - React Native Modal vs gorhom/bottom-sheet? Mobile şu an gorhom kullanmıyor (`bun.lock`'ta yok). Karar: **Modal** (yeni dependency yok).
+3. **Çoklu dil** Google Play tarafında - default `["en", "tr"]` mı, ilk fetch'te boş bırakıp dil tespitini Apple/Google'a mı bırakalım? Karar: **default `["en", "tr"]`** (Türkçe + İngilizce çoğunluğu kapsar; user portföyü TR ağırlıklı).
 
 ## 15. Sonraki Adım
 
-Bu spec onaylandığında `superpowers:writing-plans` skill ile implementation plan yazılır — adım adım dosya değişiklikleri + migration order + her adım için verification.
+Bu spec onaylandığında `superpowers:writing-plans` skill ile implementation plan yazılır - adım adım dosya değişiklikleri + migration order + her adım için verification.

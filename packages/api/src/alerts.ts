@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SelectedPropertyId } from "@helm/types";
 
-// Severity şemada YOK — condition + metric kombinasyonundan türetilir.
+// Severity şemada YOK - condition + metric kombinasyonundan türetilir.
 export type AlertSeverity = "info" | "warn" | "critical";
 
 export type Alert = {
@@ -76,7 +76,7 @@ export async function fetchAlerts(
   });
 }
 
-// Ack — şemada acknowledged_at yok, delivered=true ile işaretle (mevcut convention).
+// Ack - şemada acknowledged_at yok, delivered=true ile işaretle (mevcut convention).
 export async function ackAlert(client: SupabaseClient, id: number): Promise<void> {
   const { error } = await client
     .from("alert_events")

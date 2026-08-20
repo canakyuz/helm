@@ -1,13 +1,13 @@
-# helm liquid glass — UI Ruleset (v1)
+# helm liquid glass - UI Ruleset (v1)
 
 _2026-05-30 · WES-000 · feedback: "profesyonel değil, hızlar/compactlik" → hepsi + dengeli yoğunluk_
 
 Bu ruleset bağlayıcıdır. Liquid-glass katmanındaki ve ekranlardaki **her** ölçü
-buradan gelir. Keyfi/yarım px yasak. Amaç: **dengeli yoğunluk** — nefes alan ama
+buradan gelir. Keyfi/yarım px yasak. Amaç: **dengeli yoğunluk** - nefes alan ama
 boş durmayan, hizalı, profesyonel bir analitik kokpit (referans his: Linear / Things /
 iOS 26 native panel).
 
-## 1. Spacing — tek skala (4pt grid)
+## 1. Spacing - tek skala (4pt grid)
 
 Sadece şu değerler kullanılır. Aralarında değer yok.
 
@@ -15,7 +15,7 @@ Sadece şu değerler kullanılır. Aralarında değer yok.
 space.xs2 = 2   space.xs = 4   space.sm = 8   space.md = 12   space.lg = 16   space.xl = 24
 ```
 
-- Ekran section'ları arası dikey gap: **`md` (12)** — eski 18 değil.
+- Ekran section'ları arası dikey gap: **`md` (12)** - eski 18 değil.
 - Kart iç padding: **`md` (12)**.
 - Kart içi section üst padding: **`lg` (16)** baş, sonrakiler `md` (12); alt padding `sm` (8).
 - Satır (Row) dikey padding: **10** (sabit istisna), min dokunma alanı 44'ü korur.
@@ -23,7 +23,7 @@ space.xs2 = 2   space.xs = 4   space.sm = 8   space.md = 12   space.lg = 16   sp
 - Ekran kenar padding: **`lg` (16)**.
 - Yatay element gap: `sm` (8) varsayılan, ikon+metin `xs`+ (6–8).
 
-## 2. Tip skalası — 6 kademe, yarım punto yasak
+## 2. Tip skalası - 6 kademe, yarım punto yasak
 
 ```
 type.label = 10   (mono, uppercase, eyebrow/etiket)
@@ -39,12 +39,12 @@ type.hero  = 40   (hero rakamı)
 - Mono = sayılar/etiketler (tabular), Sans = isimler/başlıklar.
 - DEMO çipi tek istisna: 9px (mikro rozet).
 
-## 3. Hero — taşma yasak
+## 3. Hero - taşma yasak
 
 - Rakam `type.hero` (40), `lineHeight 44`, `letterSpacing -1`, **`numberOfLines={1}` +
   `adjustsFontSizeToFit`** → uzun para değerinde küçülür, asla taşmaz/kırpılmaz.
 - Delta hero rakamının baseline'ına hizalı (`marginBottom 6`).
-- Hero ile altındaki kart arası: section gap (`md` 12) — ekstra boşluk yok.
+- Hero ile altındaki kart arası: section gap (`md` 12) - ekstra boşluk yok.
 - Mini-stat şeridi: üst hairline + `md` padding-top; değer `type.stat`.
 
 ## 4. Radius
@@ -55,7 +55,7 @@ radius.lg = 22   (kart, hero kapsayıcı)   radius.md = 14   (iç bloklar, KV, b
 
 Eski 28 fazla yuvarlaktı; 22 daha enstrüman/pro.
 
-## 5. Glass — daha az "yıkama", daha çok cam
+## 5. Glass - daha az "yıkama", daha çok cam
 
 ```
 glass.tint   = rgba(255,255,255,0.045)   (eski 0.055)
@@ -67,9 +67,9 @@ glass.hairline = rgba(255,255,255,0.07)
 GlassView (iOS 26) zaten materyal sağlar; fallback tint'i hafiflet. Sheen kartın
 sadece üst ~22%'sinde, opacity 0.4.
 
-## 6. Arka plan — içerik nettir, aurora atmosferdir
+## 6. Arka plan - içerik nettir, aurora atmosferdir
 
-- Blob opacity **0.45** (eski 0.9) — içeriğin arkasında kalır, kontrastı bozmaz.
+- Blob opacity **0.45** (eski 0.9) - içeriğin arkasında kalır, kontrastı bozmaz.
 - Blur ≥ 60, alt fade güçlü (içeriğin olduğu orta-alt bölge neredeyse düz `bgBase`).
 - Blueprint grid yalnızca üst ~%35'te belli olur.
 
@@ -87,7 +87,7 @@ count-up: 800ms ease-out cubic        expand: 200ms        hbar fill: 700ms ease
 chevron: 200ms        press: opacity 0.85, 120ms
 ```
 
-Hepsi `useEffect` içinde (render-faz shared-value yazımı yasak — Reanimated).
+Hepsi `useEffect` içinde (render-faz shared-value yazımı yasak - Reanimated).
 
 ## 9. Dokunma & erişilebilirlik
 

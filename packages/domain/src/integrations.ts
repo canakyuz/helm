@@ -1,13 +1,13 @@
-// Entegrasyon saglayicilari — TEK DOGRULUK KAYNAGI.
+// Entegrasyon saglayicilari - TEK DOGRULUK KAYNAGI.
 //
 // NEDEN BURADA: bu bilgi uc yerde ayri ayri yasiyordu ve UCU DE FARKLIYDI:
 //   DB check (0029_google_play_developer_provider.sql)  11 saglayici
-//   PROVIDER_LABEL (packages/api/src/system-health.ts)   9  — resend + google_play eksik
-//   ProviderName tipi (ayni dosya)                       8  — "appstoreconnect" YANLIS
+//   PROVIDER_LABEL (packages/api/src/system-health.ts)   9  - resend + google_play eksik
+//   ProviderName tipi (ayni dosya)                       8  - "appstoreconnect" YANLIS
 //                                                            YAZIM; DB'de "app_store_connect"
 //
 // Sonucu urunde goruluyordu: etiketi olmayan saglayici ekranda ham DB kimligi
-// olarak cikiyordu (`google_play_developer`) — PROVIDER_LABEL tam da bunu
+// olarak cikiyordu (`google_play_developer`) - PROVIDER_LABEL tam da bunu
 // onlemek icin yazilmisti.
 //
 // LISTE DB CHECK CONSTRAINT'I ILE BIREBIR OLMALI. Yeni saglayici once migration
@@ -66,13 +66,13 @@ export const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "api_key", label: "v2 Secret API Key", secret: true },
     {
       key: "currency",
-      label: "Para birimi (ISO kodu — RC raporlama, genelde USD)",
+      label: "Para birimi (ISO kodu - RC raporlama, genelde USD)",
       placeholder: "USD",
       optional: true,
     },
     {
       key: "mrr_cents",
-      label: "Fiyat ondalığı (hep .99 ise — MRR kuruşunu RC yuvarlamasına rağmen ekler)",
+      label: "Fiyat ondalığı (hep .99 ise - MRR kuruşunu RC yuvarlamasına rağmen ekler)",
       placeholder: "0.99",
       optional: true,
     },
@@ -88,7 +88,7 @@ export const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "refresh_token", label: "Refresh Token", secret: true },
     {
       key: "currency",
-      label: "Para birimi (ISO kodu — TRY/USD/EUR)",
+      label: "Para birimi (ISO kodu - TRY/USD/EUR)",
       placeholder: "USD",
       optional: true,
     },
@@ -188,19 +188,19 @@ export const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   app_store_connect: [
     {
       key: "app_store_id",
-      label: "App Store ID (App Store URL'inde id sonrası rakam — yorumlar için)",
+      label: "App Store ID (App Store URL'inde id sonrası rakam - yorumlar için)",
       placeholder: "6451234567",
       optional: true,
     },
     {
       key: "app_store_country",
-      label: "App Store ülke kodları (virgülle ayır — yorumlar için)",
+      label: "App Store ülke kodları (virgülle ayır - yorumlar için)",
       placeholder: "tr,us,gb,de",
       optional: true,
     },
     {
       key: "issuer_id",
-      label: "Issuer ID (Team Key için — Individual API Key'de BOŞ bırak)",
+      label: "Issuer ID (Team Key için - Individual API Key'de BOŞ bırak)",
       placeholder: "57246542-96fe-1a63-e053-0824d011072a",
       optional: true,
     },
@@ -211,7 +211,7 @@ export const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "private_key",
-      label: "Private Key (.p8 içeriği — BEGIN/END dahil)",
+      label: "Private Key (.p8 içeriği - BEGIN/END dahil)",
       secret: true,
       multiline: true,
       placeholder: "-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY-----",
@@ -238,13 +238,13 @@ export const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "package_name",
-      label: "Package Name (opsiyonel — boşsa properties.google_play_id'den okunur)",
+      label: "Package Name (opsiyonel - boşsa properties.google_play_id'den okunur)",
       placeholder: "com.example.app",
       optional: true,
     },
     {
       key: "language_codes",
-      label: "Yorum çeviri dilleri (virgülle, opsiyonel — reviews için, versions etkilenmez)",
+      label: "Yorum çeviri dilleri (virgülle, opsiyonel - reviews için, versions etkilenmez)",
       placeholder: "en,tr",
       optional: true,
     },
@@ -258,7 +258,7 @@ export function isSecretKey(provider: ProviderName, key: string): boolean {
 }
 
 /**
- * Saglayici etiketi — bilinmeyen kimlik ham deger olarak doner.
+ * Saglayici etiketi - bilinmeyen kimlik ham deger olarak doner.
  *
  * NEDEN AYRI FONKSIYON: PROVIDER_LABEL artik `Record<ProviderName, string>`,
  * yani eksik saglayici DERLEME HATASI veriyor (kopyalarin ayrismasinin sebebi

@@ -48,7 +48,7 @@ export function LiquidBackground({ glow = 0.28 }: { glow?: number }) {
   return (
     <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.bgBase }]}>
       <Canvas style={StyleSheet.absoluteFill}>
-        {/* aurora blobs — blurred as a single layer */}
+        {/* aurora blobs - blurred as a single layer */}
         <Group layer={<Paint><Blur blur={50} /></Paint>}>
           {blobs.map((b, i) => (
             <Circle key={i} cx={b.cx} cy={b.cy} r={b.r} opacity={glow}>

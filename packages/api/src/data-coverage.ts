@@ -4,7 +4,7 @@ import type { SelectedPropertyId } from "@helm/types";
 import { providerLabel } from "@helm/domain";
 
 /**
- * Veri kapsami — hangi kaynak susmus, hangi proje hic baglanmamis.
+ * Veri kapsami - hangi kaynak susmus, hangi proje hic baglanmamis.
  *
  * NEDEN TURETME, OLAY DEGIL: bayatlik ANLIK BIR DURUM. alert_events'e yazilsa
  * kaynak duzeldikten sonra da uyari orada durur ve elle kapatilmasi gerekirdi.
@@ -18,7 +18,7 @@ import { providerLabel } from "@helm/domain";
 export type CoverageSeverity = "info" | "warn" | "critical";
 
 export type CoverageIssue = {
-  /** Kararli kimlik — kapatma (dismiss) durumu bunun uzerinden tutulur. */
+  /** Kararli kimlik - kapatma (dismiss) durumu bunun uzerinden tutulur. */
   id: string;
   severity: CoverageSeverity;
   title: string;
@@ -47,7 +47,7 @@ const DEFAULT_LAG = 1;
 /** Beklenen gecikmenin uzerine tanianan pay. 1 gun: tek bir gecikmis senkron
  *  uyari uretmemeli, alarm yorgunlugu gercek uyarilari kor eder. */
 const GRACE_DAYS = 1;
-/** Bu kadar gun asimda durum "kritik" — bir gunluk aksama degil, kopmus akis. */
+/** Bu kadar gun asimda durum "kritik" - bir gunluk aksama degil, kopmus akis. */
 const CRITICAL_AFTER = 3;
 
 type SourceRow = {
@@ -115,7 +115,7 @@ export async function fetchDataCoverage(
   const inScope = (projectId: string) =>
     propertyId === "all" || projectId === propertyId;
 
-  // 1) Susmus kaynak — gecmisi VAR ama akis durmus. En degerli sinyal bu:
+  // 1) Susmus kaynak - gecmisi VAR ama akis durmus. En degerli sinyal bu:
   //    hic baglanmamis bir kaynak bilinen bir eksiklik, susan kaynak sessiz
   //    bir yalan uretir.
   for (const s of payload.sources) {
@@ -132,7 +132,7 @@ export async function fetchDataCoverage(
     });
   }
 
-  // 2) Olmus METRIK — kaynak hala yaziyor ama bu olcum durmus. Kaynak bazinda
+  // 2) Olmus METRIK - kaynak hala yaziyor ama bu olcum durmus. Kaynak bazinda
   //    bakmak bunu kaciriyordu: sentry her gun `errors` yazarken
   //    `crash_free_sessions` 32 gundur gelmiyor ve ekranda yalnizca bos bir
   //    kutu kaliyor. Kutuyu bos birakip sebebini soylememek en kotusu.
@@ -156,20 +156,20 @@ export async function fetchDataCoverage(
     if (!inScope(p.projectId)) continue;
 
     // 3) Telemetri akiyor ama hicbir gelir/magaza kaynagi bagli degil.
-    //    Block Forge tam olarak boyle: 27bin olay gonderiyor, geliri "—".
+    //    Block Forge tam olarak boyle: 27bin olay gonderiyor, geliri "-".
     if (p.integrations === 0 && (p.eventRows > 0 || p.metricRows > 0)) {
       issues.push({
         id: `unconnected:${p.projectId}`,
         severity: "warn",
         title: `${p.projectName} kaynaklara bağlı değil`,
         detail:
-          "Telemetri geliyor ama mağaza/gelir entegrasyonu yok — kazancı ölçülemiyor",
+          "Telemetri geliyor ama mağaza/gelir entegrasyonu yok - kazancı ölçülemiyor",
         projectId: p.projectId,
       });
       continue;
     }
 
-    // 4) Hicbir verisi olmayan proje. "info": bilinen bir eksik, ariza degil —
+    // 4) Hicbir verisi olmayan proje. "info": bilinen bir eksik, ariza degil -
     //    henuz kurulmamis bir proje uyari kirmizisini hak etmez.
     if (p.integrations === 0 && p.metricRows === 0 && p.eventRows === 0) {
       issues.push({

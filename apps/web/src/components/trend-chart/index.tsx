@@ -67,7 +67,7 @@ export const TrendChart = ({
             <stop offset="0%" stopColor={lineColor} stopOpacity={0.45} />
             <stop offset="100%" stopColor={lineColor} stopOpacity={0.04} />
           </linearGradient>
-          {/* Liquid Glass — line üzerinde soft glow (referans Airlinesim). */}
+          {/* Liquid Glass - line üzerinde soft glow (referans Airlinesim). */}
           <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="2.5" result="blur" />
             <feMerge>

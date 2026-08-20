@@ -141,7 +141,7 @@ export default function SourceDetail() {
                 </Rise>
 
                 {/* Yikici eylem, hub'daki "Cikis yap" ile ayni bicimde: chevron
-                    YOK, cunku bir yere gitmiyor — onay diyalogu aciyor. */}
+                    YOK, cunku bir yere gitmiyor - onay diyalogu aciyor. */}
                 <Rise index={2}>
                   <Pressable onPress={confirmDelete} accessibilityRole="button">
                     {({ pressed }) => (

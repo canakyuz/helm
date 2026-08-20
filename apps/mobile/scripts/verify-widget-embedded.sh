@@ -4,7 +4,7 @@ set -euo pipefail
 APP=$(find "$HOME/Library/Developer/Xcode/DerivedData" -path "*/Debug-iphonesimulator/helm.app" -type d 2>/dev/null | head -1)
 
 if [[ -z "$APP" ]]; then
-  echo "❌ helm.app not found in DerivedData — run: bun run ios"
+  echo "❌ helm.app not found in DerivedData - run: bun run ios"
   exit 1
 fi
 

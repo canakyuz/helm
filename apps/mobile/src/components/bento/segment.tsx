@@ -11,14 +11,14 @@ type Props<T extends string> = {
   /** "accent": secili pill lime dolu (donem/para birimi secici).
    *  "chrome": secili pill yuzey rengi, metin fg (alt sekmeler). */
   tone?: "accent" | "chrome";
-  /** Mono yazi tipi — kisa kodlar icin (7G, USD). */
+  /** Mono yazi tipi - kisa kodlar icin (7G, USD). */
   mono?: boolean;
   /** Segmentler esit genislikte yayilsin (alt sekmeler). */
   fill?: boolean;
 };
 
 /**
- * Bento segment kontrolu — pill kap, secili pill dolu.
+ * Bento segment kontrolu - pill kap, secili pill dolu.
  *
  * NEDEN NATIVE DEGIL: design.md §1/§6 "native > custom" diyor ve bugune kadar
  * @expo/ui SwiftUI Picker kullaniliyordu. Bento tasarimi segmentleri kendi
@@ -27,7 +27,7 @@ type Props<T extends string> = {
  * tutmuyor. Bento benimsendigi icin custom kazaniyor; bilincli sapma.
  *
  * KRITIK: Pressable'in style'i FONKSIYON DEGIL. Fonksiyon-style'da layout ve
- * renk ozellikleri uygulanmiyor (design.md §8) — ilk surumde tam olarak bu
+ * renk ozellikleri uygulanmiyor (design.md §8) - ilk surumde tam olarak bu
  * yuzden secili pill'in dolgusu ve hizalamasi kayboldu. Basma geri bildirimi
  * icin ayri bir sarmalayici View kullaniliyor.
  */

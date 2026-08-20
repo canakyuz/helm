@@ -10,7 +10,7 @@ export type PropertyMetric = {
    *
    * Neden tasiniyor: bu sorgunun tarih filtresi yok, "en son satir"i alir. Ingest
    * durursa o satir haftalar oncesine ait olabilir. Deger tek basina tasinirsa
-   * arayuz onu "bugun" diye etiketler ve bayat rakam guncelmis gibi gorunur —
+   * arayuz onu "bugun" diye etiketler ve bayat rakam guncelmis gibi gorunur -
    * panelin onlemesi gereken sey tam olarak bu. Tarihi da tasiyip etiketi
    * gercege gore kurdurmak, degeri atmaktan daha dogru: dun senkron olmus bir
    * projeyi sifir gostermek de yanlis olurdu.

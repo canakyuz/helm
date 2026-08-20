@@ -1,4 +1,4 @@
--- helm — genel REST connector. Kullanıcı kendi endpoint'ini bağlar;
+-- helm - genel REST connector. Kullanıcı kendi endpoint'ini bağlar;
 -- endpoint helm sözleşmesine uyan JSON döndürür.
 
 alter table public.project_integrations

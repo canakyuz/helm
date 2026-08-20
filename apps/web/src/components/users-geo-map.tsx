@@ -17,7 +17,7 @@ interface UsersGeoMapProps {
   metrics?: string[];
   /** Map iç yüksekliği (px). Default 320. Haulix layout için 540. */
   mapHeight?: number;
-  /** Background mode — Card kabuğu yerine sadece map + overlays.
+  /** Background mode - Card kabuğu yerine sadece map + overlays.
    *  Map-as-background cockpit için. */
   fullCanvas?: boolean;
 }
@@ -25,7 +25,7 @@ interface UsersGeoMapProps {
 const DEFAULT_METRICS = ["app_downloads", "dau"];
 
 /** Marker boyutu için lineer-log ölçek: 1 → 10px, max → ~24px.
- *  Daha büyük marker'lar — map'te kaybolma riskini azaltır. */
+ *  Daha büyük marker'lar - map'te kaybolma riskini azaltır. */
 const radiusFor = (value: number, max: number) => {
   if (max <= 0) return 10;
   const ratio = Math.log10(Math.max(1, value)) / Math.log10(Math.max(10, max));
@@ -83,7 +83,7 @@ export const UsersGeoMap = ({
         id: cc,
         lat: geo.lat,
         lng: geo.lng,
-        label: `${geo.name} — ${compact(value)}`,
+        label: `${geo.name} - ${compact(value)}`,
         description: `${geo.name}: ${value.toLocaleString("en-US")} users/downloads`,
         tooltip: "hover",
         icon: {
@@ -182,7 +182,7 @@ export const UsersGeoMap = ({
     </div>
   );
 
-  // Full canvas modu — Card kabuğu yok, sadece map + overlays (map background).
+  // Full canvas modu - Card kabuğu yok, sadece map + overlays (map background).
   if (fullCanvas) {
     if (loading) {
       return <Skeleton className="absolute inset-0 rounded-none" />;

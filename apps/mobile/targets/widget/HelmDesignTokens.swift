@@ -1,4 +1,4 @@
-// URETILMIS DOSYA — elle duzenleme.
+// URETILMIS DOSYA - elle duzenleme.
 // Kaynak: packages/design/src/
 // Yeniden uret: bun run gen:design
 

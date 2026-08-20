@@ -1,4 +1,4 @@
--- Gelir olaylarina ORTAK DOGAL ANAHTAR — cift sayimi yapisal olarak engeller.
+-- Gelir olaylarina ORTAK DOGAL ANAHTAR - cift sayimi yapisal olarak engeller.
 --
 -- SORUN: ayni para iki yoldan geliyor.
 --   1. helm-revenuecat-webhook  → RC olay kimligiyle (event_id)
@@ -6,7 +6,7 @@
 -- Webhook kesintiye ugrayip geri doldurma calistirilirsa (tam olarak bugun olan
 -- sey: webhook yanlis Supabase projesine bakiyordu, iki odeme kayboldu) ayni
 -- odeme iki farkli kimlikle iki satir olur. Gelir kokpitinde iki kez sayilan
--- para, hic gosterilmeyen paradan daha kotudur — yanlis rakama guvenirsiniz.
+-- para, hic gosterilmeyen paradan daha kotudur - yanlis rakama guvenirsiniz.
 --
 -- COZUM: parayi kimlikleyen sey RC'nin olay kimligi degil, MAGAZANIN islem
 -- kimligi + odeme aninin kendisidir. Iki taraf da onu hesaplayabiliyor:
@@ -20,7 +20,7 @@
 -- anahtarda transaction_id DEGIL original kullaniliyor.
 --
 -- GELIR URETMEYEN OLAYLAR (CANCELLATION, BILLING_ISSUE...) ayni islemi isaret
--- eder; parayla ayrisamazlar. Onlar 'evt:<event_id>' ile anahtarlanir — boylece
+-- eder; parayla ayrisamazlar. Onlar 'evt:<event_id>' ile anahtarlanir - boylece
 -- iptal sinyali satin almanin kopyasi sanilip yutulmaz.
 
 alter table public.revenue_events add column if not exists txn_key text;
@@ -39,4 +39,4 @@ alter table public.revenue_events drop constraint if exists revenue_events_event
 alter table public.revenue_events alter column event_id drop not null;
 
 comment on column public.revenue_events.txn_key is
-  'Odemenin dogal anahtari: <store>:<original_txn_id>:<purchased_at_ms>. Gelir uretmeyen olaylarda evt:<event_id>. Webhook ve geri doldurma ayni anahtari uretir — cift sayim olmaz.';
+  'Odemenin dogal anahtari: <store>:<original_txn_id>:<purchased_at_ms>. Gelir uretmeyen olaylarda evt:<event_id>. Webhook ve geri doldurma ayni anahtari uretir - cift sayim olmaz.';

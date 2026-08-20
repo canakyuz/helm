@@ -19,7 +19,7 @@ export const HERO_NUMBER = {
   letterSpacing: -2,
 } as const;
 
-/** Küçük istatistik kutusu — etiket üstte, rakam altta. */
+/** Küçük istatistik kutusu - etiket üstte, rakam altta. */
 export function MiniTile({
   index,
   replayKey,
@@ -52,7 +52,7 @@ export function MiniTile({
   );
 }
 
-/** Boş durum satırı — mono, büyük harf, sönük. */
+/** Boş durum satırı - mono, büyük harf, sönük. */
 export function Empty({ label }: { label: string }) {
   return (
     <Text className="py-tilePad font-mono-medium text-eyebrow tracking-wide text-fg3">
@@ -61,7 +61,7 @@ export function Empty({ label }: { label: string }) {
   );
 }
 
-/** İki değerli satır — sol etiket, sağ değer. */
+/** İki değerli satır - sol etiket, sağ değer. */
 export function InfoRow({
   label,
   value,
@@ -71,7 +71,7 @@ export function InfoRow({
   value: string;
   divider?: boolean;
 }) {
-  // Bolucu `border-line` — tema-duyarli tek token. Elle yazilmis
+  // Bolucu `border-line` - tema-duyarli tek token. Elle yazilmis
   // rgba(128,128,128,0.18) hem acik temada yanlis tarafa dusuyor hem de
   // olculdugunde cam yuzeyde daha DUSUK kontrast veriyordu (1.24:1 / 1.33:1).
   return (

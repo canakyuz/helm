@@ -6,7 +6,7 @@ import { usePreferences } from "~/lib/preferences";
 
 type QueryGate = { enabled?: boolean };
 
-/** Gercek zamanli satin alma akisi — RevenueCat webhook'undan. */
+/** Gercek zamanli satin alma akisi - RevenueCat webhook'undan. */
 export function useRevenueEvents(options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
   return useQuery(revenueEventsQueryOptions(supabase, selectedPropertyId, options));

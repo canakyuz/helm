@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Sır tarayıcı. Placeholder'ları elemek için iki aşamalı: önce yüksek-sinyal
-# format eşleşmesi, sonra "bu gerçek mi?" filtresi. Amaç sıfır false-positive —
+# format eşleşmesi, sonra "bu gerçek mi?" filtresi. Amaç sıfır false-positive -
 # gürültü yapan hook, --no-verify'a davetiyedir.
 #
 #   ./scripts/check-secrets.sh staged    # sadece stage'lenmiş içerik (pre-commit)
 #   ./scripts/check-secrets.sh tree      # tracked dosyaların tamamı (CI)
-#   ./scripts/check-secrets.sh history   # tüm git history — yavaş, denetim için
+#   ./scripts/check-secrets.sh history   # tüm git history - yavaş, denetim için
 set -uo pipefail
 
 MODE="${1:-staged}"
@@ -34,7 +34,7 @@ https://[0-9a-f]{32}@[a-zA-Z0-9.-]+/[0-9]+
 -----BEGIN [A-Z ]*PRIVATE KEY-----[[:space:]]+[A-Za-z0-9+/]{40}
 [A-Z0-9_]*(PASSWORD|PASSWD|SECRET)[A-Z0-9_]*[=:][[:space:]]*"?[A-Za-z0-9!@#%^&*_+-]{12,}'
 
-# Şablon/örnek değerler — eşleşse bile sır değil.
+# Şablon/örnek değerler - eşleşse bile sır değil.
 PLACEHOLDER='\.\.\.|<[a-z-]+>|\{\{|\$\{|your[-_]|YOUR_|xxxx|XXXX|placeholder|PLACEHOLDER|example|EXAMPLE|changeme|CHANGEME|process\.env|Deno\.env|import\.meta\.env'
 
 RE=$(printf '%s' "$PATTERNS" | paste -sd'|' -)
@@ -65,7 +65,7 @@ case "$MODE" in
     ;;
   history)
     # Tüm ref'lerdeki her blob. 2MB üstü binary atlanır.
-    # NOT: while'a pipe ile beslemek onu subshell'e sokar ve `found` kaybolur —
+    # NOT: while'a pipe ile beslemek onu subshell'e sokar ve `found` kaybolur -
     # tarama bulgu yazdırıp exit 0 döner. Process substitution şart.
     objects=$(mktemp); trap 'rm -f "$objects"' EXIT
     git rev-list --objects --all > "$objects"
@@ -84,7 +84,7 @@ case "$MODE" in
 esac
 
 if [ "$found" -ne 0 ]; then
-  printf '\n\033[31mSır tespit edildi — commit durduruldu.\033[0m\n'
+  printf '\n\033[31mSır tespit edildi - commit durduruldu.\033[0m\n'
   printf 'Gerçekse: değeri .env'"'"'e taşı, .env.example'"'"'e placeholder koy.\n'
   printf 'Yanlış alarmsa: pattern'"'"'ı %s içinde daralt. --no-verify KULLANMA.\n' "$SELF"
   exit 1

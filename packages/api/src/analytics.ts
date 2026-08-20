@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// PostHog-backed edge'ler — tek project_id scope'lu (aggregate "all" yok).
+// PostHog-backed edge'ler - tek project_id scope'lu (aggregate "all" yok).
 // Çağıran efektif project id'yi (seçili ya da ilk property) geçer.
 
 export type AcquisitionRow = { source: string; type: string; users: number };

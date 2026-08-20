@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 interface GaugeWidgetProps {
   /** 0-100 arası yüzde değeri. */
   value: number;
-  /** Üst etiket — örn "Sync Health". */
+  /** Üst etiket - örn "Sync Health". */
   label?: string;
-  /** Değerin yanına gelen birim — örn "%", " mph". */
+  /** Değerin yanına gelen birim - örn "%", " mph". */
   unit?: string;
   /** Gauge boyutu (px). Default 140. */
   size?: number;
@@ -21,7 +21,7 @@ const DEFAULT_THRESHOLDS: { value: number; color: string }[] = [
   { value: 100, color: "var(--primary)" },
 ];
 
-/** Yarım daire gauge — Haulix Speedometer referansı.
+/** Yarım daire gauge - Haulix Speedometer referansı.
  *  SVG arc + ibre rotation. Pure CSS, framer-motion bağımlılığı yok. */
 export const GaugeWidget = ({
   value,
@@ -33,7 +33,7 @@ export const GaugeWidget = ({
 }: GaugeWidgetProps) => {
   const clamped = Math.max(0, Math.min(100, value));
 
-  // Eşik tabanlı renk — value <= threshold.value olanlardan ilki.
+  // Eşik tabanlı renk - value <= threshold.value olanlardan ilki.
   const color = useMemo(() => {
     for (const t of thresholds) {
       if (clamped <= t.value) return t.color;

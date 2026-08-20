@@ -1,4 +1,4 @@
-// useEnabledModules — aktif scope için aktif modüllerin listesini döner.
+// useEnabledModules - aktif scope için aktif modüllerin listesini döner.
 // Detay: .docs/MODULES.md §3-§4
 //
 // Şu anda scope iki seviyeli: "all" | property_id.
@@ -30,7 +30,7 @@ const ALL_MODULES: ModuleKey[] = [...MODULE_KEYS];
  * - scope === uuid:      o property'nin enabled_modules (boşsa preset fallback).
  *
  * Migration aşamasında enabled_modules text[] kolonu '{}' default ile gelir; bu yüzden
- * preset fallback elzem — eski projeler boş kalmasın, type'a göre default doldurulmuş gibi davransın.
+ * preset fallback elzem - eski projeler boş kalmasın, type'a göre default doldurulmuş gibi davransın.
  */
 export function useEnabledModules(): ModuleKey[] {
   const { scope } = useScope();

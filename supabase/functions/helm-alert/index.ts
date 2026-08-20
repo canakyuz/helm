@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-alert — alert_rules'u metrics'e karşı değerlendirir, tetiklenenleri
+// helm-alert - alert_rules'u metrics'e karşı değerlendirir, tetiklenenleri
 // alert_events'e yazar ve cockpit'e Expo push gönderir (asıl kanal; helm_push_devices
 // token'larına). Telegram bot env'i ayarlıysa paralel ping de atar (opsiyonel).
 // helm-ingest her senkron sonrası bunu çağırır; panelden de çağrılabilir.
@@ -46,7 +46,7 @@ async function sendTelegram(text: string) {
   }
 }
 
-// Cockpit'e Expo push — helm_push_devices'taki kayıtlı token'lara bildirim atar.
+// Cockpit'e Expo push - helm_push_devices'taki kayıtlı token'lara bildirim atar.
 // Asıl kanal bu; telefon titrer. Token yoksa (henüz build/izin yok) sessizce false.
 async function sendExpoPush(
   hub: ReturnType<typeof createClient>,
@@ -96,13 +96,13 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Body: { rule_id? } — verilirse sadece o kural değerlendirilir (test için)
+  // Body: { rule_id? } - verilirse sadece o kural değerlendirilir (test için)
   let onlyRuleId: string | undefined;
   try {
     const body = await req.json();
     if (typeof body?.rule_id === "string") onlyRuleId = body.rule_id;
   } catch {
-    // body yok — tüm kurallar
+    // body yok - tüm kurallar
   }
 
   const hub = createClient(
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
   let triggered = 0;
 
   for (const rule of (rules ?? []) as AlertRule[]) {
-    // Aynı kural 20 saatte bir kez tetiklensin — alarm yorgunluğu önleme.
+    // Aynı kural 20 saatte bir kez tetiklensin - alarm yorgunluğu önleme.
     const { count } = await hub
       .from("alert_events")
       .select("id", { count: "exact", head: true })

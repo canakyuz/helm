@@ -76,11 +76,11 @@ export const CampaignsPage = () => {
     pagination: { mode: "off" },
   });
   const projectName = (id: string | null) =>
-    id ? projResult.data.find((p) => p.id === id)?.name ?? "—" : "—";
+    id ? projResult.data.find((p) => p.id === id)?.name ?? "-" : "-";
 
   const campaigns = result.data;
 
-  // Campaign events — open/click tracking
+  // Campaign events - open/click tracking
   interface CampaignEvent {
     campaign_id: number | null;
     event: "sent" | "delivered" | "opened" | "clicked" | "bounced" | "complained";
@@ -231,7 +231,7 @@ export const CampaignsPage = () => {
                         </TableCell>
                       )}
                       <TableCell className="font-medium">
-                        {c.subject ?? "—"}
+                        {c.subject ?? "-"}
                       </TableCell>
                       <TableCell className="text-right font-mono tabular-nums">
                         <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
@@ -249,12 +249,12 @@ export const CampaignsPage = () => {
                             </span>
                           ) : (
                             <span className="text-xs text-muted-foreground">
-                              —
+                              -
                             </span>
                           )
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            —
+                            -
                           </span>
                         )}
                       </TableCell>
@@ -269,12 +269,12 @@ export const CampaignsPage = () => {
                             </span>
                           ) : (
                             <span className="text-xs text-muted-foreground">
-                              —
+                              -
                             </span>
                           )
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            —
+                            -
                           </span>
                         )}
                       </TableCell>

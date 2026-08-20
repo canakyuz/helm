@@ -1,17 +1,17 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-revenuecat-webhook — RevenueCat olaylarini revenue_events tablosuna yazar.
+// helm-revenuecat-webhook - RevenueCat olaylarini revenue_events tablosuna yazar.
 //
 // NEDEN VAR: subscription_revenue / iap_revenue metrikleri App Store Connect'ten
 // geliyor ve Apple gunluk raporlari T-1 + isleme gecikmesi tasiyor; bir satin alma
 // panelde 1-2 gun sonra goruluyor. RevenueCat olayi aninda biliyor.
 //
 // Sir IKI YOLDAN da kabul edilir:
-//   1) Authorization: Bearer <RC_WEBHOOK_SECRET>   — RC panelinden elle
-//   2) ?k=<RC_WEBHOOK_SECRET>                      — URL'in kendisinde
+//   1) Authorization: Bearer <RC_WEBHOOK_SECRET>   - RC panelinden elle
+//   2) ?k=<RC_WEBHOOK_SECRET>                      - URL'in kendisinde
 //
 // NEDEN IKISI: RevenueCat v2 API'si webhook kaydinda authorization BASLIGI
-// ayarlamaya izin vermiyor (kayit yaniti boyle bir alan dondurmuyor) — baslik
+// ayarlamaya izin vermiyor (kayit yaniti boyle bir alan dondurmuyor) - baslik
 // yalnizca panelden girilebiliyor. Sir URL'de tasinabilirse kayit tamamen
 // API'den yapilabilir, panele hic girilmez.
 //
@@ -62,7 +62,7 @@ interface RcEvent {
   environment?: string;
 }
 
-/** Odemenin dogal anahtari — REST geri doldurmasiyla ORTAK.
+/** Odemenin dogal anahtari - REST geri doldurmasiyla ORTAK.
  *
  *  Neden RC olay kimligi degil: geri doldurma REST API'sinden okur, orada olay
  *  kimligi yoktur. Iki taraf ayni parayi ayni anahtarla bulamazsa webhook
@@ -71,7 +71,7 @@ interface RcEvent {
  *  Yenilemede transaction_id degisir, original_transaction_id degismez; ayirici
  *  olan donem baslangicidir (purchased_at_ms). Bu yuzden original kullaniliyor.
  *
- *  Gelir uretmeyen olay parayla ayrisamaz — iptal, satin almanin kopyasi sanilip
+ *  Gelir uretmeyen olay parayla ayrisamaz - iptal, satin almanin kopyasi sanilip
  *  yutulmasin diye olay kimligiyle anahtarlanir. */
 function txnKey(ev: RcEvent, occurredMs: number, isRevenue: boolean): string {
   if (!isRevenue) return `evt:${ev.id}`;
@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
     : null;
 
   // upsert + ignoreDuplicates: RC teslimati garanti etmek icin ayni olayi
-  // tekrar gonderebilir. Catisma hedefi txn_key — hem RC'nin tekrar gonderimini
+  // tekrar gonderebilir. Catisma hedefi txn_key - hem RC'nin tekrar gonderimini
   // hem de REST geri doldurmasinin ayni odemeyi yazmasini ayni anda yutar.
   const { error } = await supabase.from("revenue_events").upsert(
     {

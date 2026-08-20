@@ -1,4 +1,4 @@
--- helm — oyun telemetrisi (Sentry'siz). İstemci oyunlar (Godot vb.) doğrudan
+-- helm - oyun telemetrisi (Sentry'siz). İstemci oyunlar (Godot vb.) doğrudan
 -- helm-game-ingest fonksiyonuna event POST eder: hata/crash, session, FPS, reklam,
 -- satın alma. Ham event'ler game_events'e yazılır; günlük sayımlar metrics'e
 -- (source='game') idempotent upsert edilir → mevcut panel/alert akışına girer.

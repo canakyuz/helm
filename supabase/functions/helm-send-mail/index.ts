@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-send-mail — bir segmentin kullanıcılarına Resend ile mail gönderir.
+// helm-send-mail - bir segmentin kullanıcılarına Resend ile mail gönderir.
 // Body: { project_id, segment_id, subject, body_html, body_text?, dry_run? }
 // Yanıt: { recipients, sent, failed, campaign_id, errors? }
 
@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
     return json({ error: "Segment not found" }, 404);
   }
 
-  // Resend entegrasyonu — proje üzerinde
+  // Resend entegrasyonu - proje üzerinde
   const { data: resendIntg } = await hub
     .from("project_integrations")
     .select("config")
@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
     ? `${resendCfg.from_name} <${resendCfg.from_email}>`
     : resendCfg.from_email;
 
-  // Campaign önce yarat — id'yi tag olarak gönderime ekle (webhook'tan dönecek)
+  // Campaign önce yarat - id'yi tag olarak gönderime ekle (webhook'tan dönecek)
   const { data: camp } = await hub
     .from("campaigns")
     .insert({

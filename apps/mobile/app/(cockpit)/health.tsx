@@ -61,9 +61,9 @@ export default function Health() {
 
   const f = funnels.data;
   const warnings = f != null ? instrumentationWarnings(f) : [];
-  const pct = (r: number | null): string => (r == null ? "—" : formatRatio(r));
+  const pct = (r: number | null): string => (r == null ? "-" : formatRatio(r));
 
-  // Oturum: degeri "kac oturum" degil, KAPANMAYAN oran — cokme gostergesi.
+  // Oturum: degeri "kac oturum" degil, KAPANMAYAN oran - cokme gostergesi.
   const sessionRows: FunnelRow[] = (f?.sessions ?? []).map((s) => ({
     label: s.platform,
     value: `${formatInteger(s.ended)} / ${formatInteger(s.started)}`,
@@ -74,12 +74,12 @@ export default function Health() {
       s.unclosedRate != null && s.unclosed > 0
         ? t("{n} oturum kapanmadı · {rate}", { n: formatInteger(s.unclosed), rate: pct(s.unclosedRate) })
         : s.ended > s.started
-          ? t("bitiş sayısı başlangıçtan fazla — ölçüm hatalı")
+          ? t("bitiş sayısı başlangıçtan fazla - ölçüm hatalı")
           : t("tümü kapandı"),
     tone: s.unclosedRate != null && s.unclosedRate >= 0.5 ? "loss" : "normal",
   }));
 
-  // Reklam: burada GELIR degil ARIZA olcusu — kac gosterim basarisiz oldu.
+  // Reklam: burada GELIR degil ARIZA olcusu - kac gosterim basarisiz oldu.
   const adRows: FunnelRow[] = (f?.ads ?? []).map((a) => ({
     label: t(AD_FORMAT_LABEL[a.format] ?? a.format),
     value: `${formatInteger(a.shown)} / ${formatInteger(a.shown + a.failed)}`,
@@ -129,7 +129,7 @@ export default function Health() {
             <CrashTile issues={issues} loading={issuesQuery.isLoading} />
           </Rise>
 
-          {/* Ölçüm şüpheleri — aşağıdaki her okumayı nitelendiriyor */}
+          {/* Ölçüm şüpheleri - aşağıdaki her okumayı nitelendiriyor */}
           <Rise index={2} replayKey={replayKey}>
             <InstrumentationTile warnings={warnings} />
           </Rise>

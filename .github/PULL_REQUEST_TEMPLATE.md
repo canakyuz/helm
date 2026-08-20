@@ -5,7 +5,7 @@ Example: fix(ingest): WES-000 stop dropping revenue rows when the provider omits
 
 ## What changed
 
-<!-- One paragraph. Don't restate the diff — say why it changed. -->
+<!-- One paragraph. Don't restate the diff - say why it changed. -->
 
 ## Why
 
@@ -14,7 +14,7 @@ Example: fix(ingest): WES-000 stop dropping revenue rows when the provider omits
 ## How you verified it
 
 <!--
-Against real data. "It works" isn't enough — what did you run, what did you see?
+Against real data. "It works" isn't enough - what did you run, what did you see?
 For UI changes, attach before/after screenshots.
 -->
 
@@ -25,6 +25,6 @@ For UI changes, attach before/after screenshots.
 ---
 
 - [ ] `make typecheck` is green
-- [ ] `make scan-secrets` is green — no real credentials added
+- [ ] `make scan-secrets` is green - no real credentials added
 - [ ] Behavioural changes verified against real data
-- [ ] One topic — nothing unrelated mixed in
+- [ ] One topic - nothing unrelated mixed in

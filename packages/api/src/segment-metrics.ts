@@ -16,7 +16,7 @@ export type SegmentMetrics = {
   total: number;
 };
 
-// local — users.ts'in export'lu fetchAllUsers'ı ile çakışmasın.
+// local - users.ts'in export'lu fetchAllUsers'ı ile çakışmasın.
 async function listSupabasePropertyIds(client: SupabaseClient): Promise<string[]> {
   const { data, error } = await client
     .from("project_integrations")

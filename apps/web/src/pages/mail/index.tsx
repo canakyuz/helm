@@ -136,7 +136,7 @@ export const MailPage = () => {
         toast.success(`${data.sent} emails sent`, {
           description:
             data.failed > 0
-              ? `${data.failed} failed — check the history`
+              ? `${data.failed} failed - check the history`
               : `${data.recipients} recipients`,
         });
         setSubject("");
@@ -188,7 +188,7 @@ export const MailPage = () => {
               <SelectContent>
                 {segments.length === 0 ? (
                   <SelectItem value="__none" disabled>
-                    Segment yok — Segments sayfasından oluştur
+                    Segment yok - Segments sayfasından oluştur
                   </SelectItem>
                 ) : (
                   segments.map((s) => (
@@ -306,7 +306,7 @@ export const MailPage = () => {
                   <TableRow key={c.id}>
                     <TableCell className="text-xs">{fmt(c.sent_at)}</TableCell>
                     <TableCell className="font-medium">
-                      {c.subject ?? "—"}
+                      {c.subject ?? "-"}
                     </TableCell>
                     <TableCell className="text-right font-mono">
                       {c.recipients}
@@ -338,12 +338,12 @@ const MAIL_TEMPLATES = [
   {
     label: "Welcome",
     subject: "Welcome aboard! 👋",
-    body: "Hi,\n\nThanks for joining Empire Inc. If you need a hand getting started, just write to us — we are here.\n\nAll the best,\nThe Empire team",
+    body: "Hi,\n\nThanks for joining Empire Inc. If you need a hand getting started, just write to us - we are here.\n\nAll the best,\nThe Empire team",
   },
   {
     label: "Win-back",
     subject: "We miss you 💙",
-    body: "Hi,\n\nYou have not been around for a while. We have a surprise gift waiting — visit your account and take a look.\n\nSee you soon!",
+    body: "Hi,\n\nYou have not been around for a while. We have a surprise gift waiting - visit your account and take a look.\n\nSee you soon!",
   },
   {
     label: "Payment failed",

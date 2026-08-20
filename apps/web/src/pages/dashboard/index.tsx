@@ -122,7 +122,7 @@ export const DashboardPage = () => {
   // Bu sayfanin GERCEKTEN okudugu metrikler. Tabloda 30 metrik var; filtresiz
   // sorgu 90 gunluk pencerede 3.102 satir istiyordu ve PostgREST 1.000'de
   // kesiyordu. Kesilen sorguda ORDER BY da yoktu, yani hangi 1.000 satirin
-  // gelecegi belirsizdi — en guncel gunler disarida kalinca "NOW · REKLAM"
+  // gelecegi belirsizdi - en guncel gunler disarida kalinca "NOW · REKLAM"
   // £0.00 gorunurken ayni sayfadaki proje tablosu £0.61 diyordu. Bu yavaslik
   // degil, SESSIZ VERI KAYBIYDI.
   //
@@ -197,7 +197,7 @@ export const DashboardPage = () => {
     ? null
     : projects.find((p) => p.id === scope);
 
-  // AdMob raporlama para birimi — entegrasyon config'inden okunur.
+  // AdMob raporlama para birimi - entegrasyon config'inden okunur.
   const adCurrency = useMemo(() => {
     const admobs = integrations.filter((i) => i.provider === "admob");
     if (!isAll) {
@@ -221,7 +221,7 @@ export const DashboardPage = () => {
     return cfg?.currency || "USD";
   };
 
-  // RevenueCat raporlama para birimi — config'ten (genelde USD).
+  // RevenueCat raporlama para birimi - config'ten (genelde USD).
   const rcCurrency = useMemo(() => {
     const rc = integrations.find(
       (i) =>
@@ -238,7 +238,7 @@ export const DashboardPage = () => {
     return parseMrrCents((rc?.config as { mrr_cents?: string })?.mrr_cents);
   }, [integrations, scope, isAll]);
 
-  // Ekran para birimi — Ayarlar'dan. Tüm para değerleri buna çevrilir.
+  // Ekran para birimi - Ayarlar'dan. Tüm para değerleri buna çevrilir.
   const { currency: displayCcy } = useDisplayCurrency();
   const sourceCurrencies = useMemo(() => {
     const set = new Set<string>(["USD"]);
@@ -299,7 +299,7 @@ export const DashboardPage = () => {
 
 
   // AdMob konsoluna paralel: Bugün / Dün / Bu ay / Geçen ay REKLAM geliri.
-  // Sadece ad_revenue (kart "REKLAM" — app/mağaza geliri Gelir & Reklam sayfasında).
+  // Sadece ad_revenue (kart "REKLAM" - app/mağaza geliri Gelir & Reklam sayfasında).
   const ranges = useMemo(() => moneyRanges(), []);
   const adTotals = useMemo(() => {
     const ar = rateOf(adCurrency);
@@ -340,7 +340,7 @@ export const DashboardPage = () => {
     }
   };
 
-  // MRR sparkline serisi — display ccy converted (USD * rate).
+  // MRR sparkline serisi - display ccy converted (USD * rate).
   const mrrSpark: TrendPoint[] = useMemo(() => {
     const map = new Map<string, number>();
     for (const m of metrics) {
@@ -355,7 +355,7 @@ export const DashboardPage = () => {
 
   return (
     <div className="absolute inset-0 grid grid-rows-[36px_112px_minmax(0,1fr)_220px] gap-3 overflow-hidden p-3">
-      {/* ════════ STATUS STRIP — 36px ════════ */}
+      {/* ════════ STATUS STRIP - 36px ════════ */}
       <div className="flex items-center gap-2 px-1 text-[11px]">
         <div className="flex flex-1 items-center gap-3">
           <div>
@@ -395,7 +395,7 @@ export const DashboardPage = () => {
           )}
           title={
             syncStale
-              ? "The nightly cron may not be running — check the Vault secrets"
+              ? "The nightly cron may not be running - check the Vault secrets"
               : undefined
           }
         >
@@ -453,7 +453,7 @@ export const DashboardPage = () => {
         </Button>
       </div>
 
-      {/* ════════ ZONE A — KPI Cluster (220px) ════════ */}
+      {/* ════════ ZONE A - KPI Cluster (220px) ════════ */}
       <div
         className={cn(
           "grid gap-3 min-h-0",
@@ -462,7 +462,7 @@ export const DashboardPage = () => {
             : "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr]",
         )}
       >
-        {/* Cell 1: Hero ₺ (col-span-2 for prominence) — yatay layout */}
+        {/* Cell 1: Hero ₺ (col-span-2 for prominence) - yatay layout */}
         <Card className="relative xl:col-span-1 col-span-2 overflow-hidden mt-0 pt-0">
           <HeroSpark
             data={adRevenueSeriesDisplay}
@@ -498,7 +498,7 @@ export const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        {/* Cell 2: MRR — subscriptions */}
+        {/* Cell 2: MRR - subscriptions */}
         {subsEnabled ? (
           <KpiCell
             label={isAll ? "Total MRR" : "MRR"}
@@ -510,7 +510,7 @@ export const DashboardPage = () => {
           <KpiPlaceholder label={isAll ? "Total MRR" : "MRR"} module="Abonelik" />
         )}
 
-        {/* Cell 3: DAU — analytics */}
+        {/* Cell 3: DAU - analytics */}
         {analyticsEnabled ? (
           <KpiCell
             label={isAll ? "Total DAU" : "DAU"}
@@ -576,10 +576,10 @@ export const DashboardPage = () => {
 
       </div>
 
-      {/* ════════ ZONE B — Living Canvas (map full) ════════ */}
+      {/* ════════ ZONE B - Living Canvas (map full) ════════ */}
       {/* ZONE B grid: map 8 col + Projeler tablo 4 col yan */}
       <div className="grid min-h-0 gap-3 lg:grid-cols-12">
-        {/* Map — 8 col */}
+        {/* Map - 8 col */}
         <Card className="relative overflow-hidden lg:col-span-8">
           <Suspense
             fallback={
@@ -596,7 +596,7 @@ export const DashboardPage = () => {
             />
           </Suspense>
         </Card>
-        {/* Side panel — 4 col: Hatalar tablo (tıklayınca detay dialog) */}
+        {/* Side panel - 4 col: Hatalar tablo (tıklayınca detay dialog) */}
         <ErrorsPanel
           hasSentry={hasSentry}
           projectName={(id) =>
@@ -606,7 +606,7 @@ export const DashboardPage = () => {
         />
       </div>
 
-      {/* ════════ ZONE C — 3 trend chart (Projeler ZONE B yan'a taşındı) ════════ */}
+      {/* ════════ ZONE C - 3 trend chart (Projeler ZONE B yan'a taşındı) ════════ */}
       <div className="grid min-h-0 grid-cols-1 gap-3 md:grid-cols-3">
         <Card className="overflow-hidden">
           <CardHeader className="pb-2">

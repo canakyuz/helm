@@ -5,7 +5,7 @@ export type HeroPoint = { date: string; value: number };
 /**
  * Overview hero'sunun gunluk gelir serisi.
  *
- * NEDEN BUCKET'TAN OKUNUYOR — onceki hal `ad_revenue` + `app_revenue`
+ * NEDEN BUCKET'TAN OKUNUYOR - onceki hal `ad_revenue` + `app_revenue`
  * METRIKLERINI topluyordu. app_revenue App Store Connect gunluk satis
  * raporundan gelir ve Apple bunu ~2 gun gecikmeli yayinlar. Olculen sonuc
  * (2026-08-20):
@@ -18,7 +18,7 @@ export type HeroPoint = { date: string; value: number };
  * gorunmez bir eksige donusuyordu.
  *
  * revenue-history bucket'lari webhook'u (anlik) magaza raporuyla (kesin) zaten
- * mutabakatliyor — iOS widget'i bu yuzden dogru rakami gosteriyordu. Hero'yu
+ * mutabakatliyor - iOS widget'i bu yuzden dogru rakami gosteriyordu. Hero'yu
  * ayni kaynaga baglamak iki ekranin celismesini de bitiriyor.
  *
  * Ay bucket'lari ortusmez, bu yuzden duz Map yeterli.
@@ -43,7 +43,7 @@ export function heroDays(
 /**
  * Takvimsel bir gunun tutari.
  *
- * Seride o gun yoksa 0 doner — "olcum yok" degil "henuz para girmedi" demek,
+ * Seride o gun yoksa 0 doner - "olcum yok" degil "henuz para girmedi" demek,
  * cunku seri gelir olaylarindan uretiliyor ve olaysiz gun gercekten sifirdir.
  */
 export function amountOn(days: readonly HeroPoint[], date: string): number {

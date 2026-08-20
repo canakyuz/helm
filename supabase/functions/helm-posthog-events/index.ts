@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-posthog-events — bağlı PostHog projesinin event tanımlarını çeker.
+// helm-posthog-events - bağlı PostHog projesinin event tanımlarını çeker.
 // Funnel adımlarını elle yazmamak için: "son görülenden" sıralı top N.
 // Body: { project_id }
 // Yanıt: { events: [{ name, last_seen_at, volume_30_day? }] }

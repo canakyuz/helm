@@ -1,14 +1,14 @@
-# helm BACKEND — İş Emirleri (mobile gerçek-veri için)
+# helm BACKEND - İş Emirleri (mobile gerçek-veri için)
 
 _2026-05-30 · helm-mobile'da demo kalan kalemlerin backend kaynağı. Her iş emri `/helm`
-repo'sunda (ayrı chat) yapılacak. Mobile tarafı bu kontratlara göre HAZIR — backend bitince
+repo'sunda (ayrı chat) yapılacak. Mobile tarafı bu kontratlara göre HAZIR - backend bitince
 mobilde sadece `demoData.X` → yeni hook değişir (her birinin mobil-tarafı notu altta)._
 
 ## Bağlam (kanıt: helm repo)
 - `public.metrics` generic: `(project_id, date, source, metric, value)` → **yeni metrik = yeni
   `metric` string + onu yazan connector**. Mobil `useMetricDetail(metric)` / `useCockpitKpis`
   bu tabloyu zaten okuyor; yeni anahtar eklenince mobil otomatik okur.
-- `public.metrics_country` var (ülke kırılımı) — geo zaten bağlandı.
+- `public.metrics_country` var (ülke kırılımı) - geo zaten bağlandı.
 - Edge invoke: `supabase.functions.invoke("<name>", { body: {...} })`, snake_case I/O,
   service-role server-side, `project_id` ile scope (yoksa "tüm aktif entegrasyon").
 - Sentry edge'i SADECE issues çekiyor; **session/crash-free YOK**.
@@ -16,8 +16,8 @@ mobilde sadece `demoData.X` → yeni hook değişir (her birinin mobil-tarafı n
 
 ---
 
-## İŞ EMRİ 1 — Crash-free sessions (öncelik: yüksek)
-**Neden:** Overview hero mini-stat "Crash-free" + Health hero büyük "%99.2" + trend — şu an demo.
+## İŞ EMRİ 1 - Crash-free sessions (öncelik: yüksek)
+**Neden:** Overview hero mini-stat "Crash-free" + Health hero büyük "%99.2" + trend - şu an demo.
 Indie founder için en kritik sağlık sinyali.
 
 **Yapılacak:**
@@ -41,7 +41,7 @@ günlük seri. Mobil `useMetricDetail('crash_free_sessions')` ile okuyacak (toda
 
 ---
 
-## İŞ EMRİ 2 — Revenue derinliği (öncelik: yüksek — ana odak ödemeler)
+## İŞ EMRİ 2 - Revenue derinliği (öncelik: yüksek - ana odak ödemeler)
 **Neden:** Revenue ekranının kartı (Mix / Subs / Payouts) tamamen demo. Ana ürün vaadi bu.
 
 **2a · Gelir mix + platform (RevenueCat/AdMob/App Store Connect)**
@@ -71,7 +71,7 @@ türetilemeyen alanlarda.
 
 ---
 
-## İŞ EMRİ 3 — Analytics retention + engagement (öncelik: orta — PostHog)
+## İŞ EMRİ 3 - Analytics retention + engagement (öncelik: orta - PostHog)
 **Neden:** Analytics'te retention, stickiness, avg session, OS demo.
 
 **Yapılacak (PostHog API, entegrasyon zaten var):**
@@ -89,7 +89,7 @@ WAU/MAU Seg'i gerçek (şu an sadece DAU gerçek).
 
 ---
 
-## İŞ EMRİ 4 — Aylık gelir hedefi (öncelik: düşük — küçük)
+## İŞ EMRİ 4 - Aylık gelir hedefi (öncelik: düşük - küçük)
 **Neden:** Overview "MAY TARGET" demo. Kullanıcı-set hedef.
 **Yapılacak:** `revenue_goals (project_id null=all, month, target_amount, currency)` tablosu
 + basit GET/UPSERT (PostgREST yeter, edge gerekmez). RLS authenticated.
@@ -99,10 +99,10 @@ WAU/MAU Seg'i gerçek (şu an sadece DAU gerçek).
 ---
 
 ## Özet öncelik
-1. **Crash-free sessions** (İş Emri 1) — en kritik sağlık sinyali, tek metrik + cron.
-2. **Revenue derinliği** (İş Emri 2) — ana ürün; en büyük iş (connector'lar).
-3. **Analytics retention/OS** (İş Emri 3) — PostHog, orta.
-4. **Hedef** (İş Emri 4) — kozmetik, küçük.
+1. **Crash-free sessions** (İş Emri 1) - en kritik sağlık sinyali, tek metrik + cron.
+2. **Revenue derinliği** (İş Emri 2) - ana ürün; en büyük iş (connector'lar).
+3. **Analytics retention/OS** (İş Emri 3) - PostHog, orta.
+4. **Hedef** (İş Emri 4) - kozmetik, küçük.
 
-Her iş emri bitince bana "İş Emri N bitti" de — mobil-tarafı bağlamayı (demo→hook) o ekranda
+Her iş emri bitince bana "İş Emri N bitti" de - mobil-tarafı bağlamayı (demo→hook) o ekranda
 dakikalar içinde yaparım; kontratlar bu dokümanda sabit.

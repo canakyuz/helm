@@ -45,7 +45,7 @@ export function ReviewRow({ review, onReply }: ReviewRowProps) {
         gap: 8,
       }}
     >
-      {/* Top — stars + platform chip + relative time */}
+      {/* Top - stars + platform chip + relative time */}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Stars rating={review.rating ?? 0} />
         <View
@@ -98,7 +98,7 @@ export function ReviewRow({ review, onReply }: ReviewRowProps) {
         </Text>
       ) : null}
 
-      {/* Badges — source / version / territory */}
+      {/* Badges - source / version / territory */}
       <View style={{ flexDirection: "row", gap: 4, marginTop: 4 }}>
         <View style={{
           backgroundColor: colors.bgHigher,
@@ -156,7 +156,7 @@ export function ReviewRow({ review, onReply }: ReviewRowProps) {
             letterSpacing: 0.5,
           }}
         >
-          — {review.author}
+          - {review.author}
         </Text>
       ) : null}
 

@@ -4,7 +4,7 @@ import { monthFromBucket, buildWidgetPayload, normalizeBars } from "../widget-pa
 /**
  * Widget "Total Revenue" regresyonu.
  *
- * BUG: widget `adRevenue + mrr` topluyordu — BIR GUNUN reklam geliri artI
+ * BUG: widget `adRevenue + mrr` topluyordu - BIR GUNUN reklam geliri artI
  * AYLIK tekrarli gelir ORANI. Farkli birimler. Widget £45.12 gosterirken
  * uygulama ayni an £95.57 diyordu ve uygulama-ici gelir bacagi hic yoktu.
  *
@@ -54,9 +54,9 @@ test("ESKI mantik yanlisti: gunluk reklam + aylik MRR", () => {
   expect(gunlukReklam + mrr).not.toBeCloseTo(bucket.total, 1);
 });
 
-test("olcum yoksa '—', sifir degil", () => {
+test("olcum yoksa '-', sifir degil", () => {
   const p = buildWidgetPayload({ dau: null, mrrDelta: null, openAlerts: 0 }, null, "GBP", 1);
-  expect(p.totalRevenueText).toBe("—");
+  expect(p.totalRevenueText).toBe("-");
   expect(p.sparkline).toBeUndefined();
 });
 

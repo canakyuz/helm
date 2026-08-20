@@ -22,10 +22,10 @@ const TYPE_LABEL: Record<PropertyType, string> = {
 };
 
 /**
- * Proje seçici — portföy cockpit'inin en temel kontrolü.
+ * Proje seçici - portföy cockpit'inin en temel kontrolü.
  *
  * NEDEN YENİDEN YAZILDI: mevcut src/components/property-picker.tsx (277 satır)
- * eski statik `colors` token'larını kullanıyor — dark hardcode. Bento'da light
+ * eski statik `colors` token'larını kullanıyor - dark hardcode. Bento'da light
  * temada bozulur ve seçili accent'i takip etmez. 277 satırı çevirmek yerine
  * başlığa sığan kompakt ve tema-duyarlı bir sürüm.
  */

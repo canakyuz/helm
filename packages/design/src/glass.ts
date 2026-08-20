@@ -1,11 +1,11 @@
-// Cam reçetesi — tema başına.
+// Cam reçetesi - tema başına.
 //
 // KRİTİK (design.md §4): GlassView tek başına görünmez. Koyu zeminde kaybolur,
 // bu yüzden ÜSTÜNE her zaman bir tint fill konur. Light temada aynı sorunun
 // aynası vardır: beyaz zemine beyaz kenar görünmez, o yüzden kenar rengi
 // temayla TERS döner (light'ta koyu hairline).
 //
-// Yüzey kuralı — sistemin tamamı buna uyar:
+// Yüzey kuralı - sistemin tamamı buna uyar:
 //   accent → SOLID   (lime hero; cam olmaz)
 //   tile   → GLASS   (cam burada yaşar)
 //   tile2  → SOLID   (tile içi kutu; cam içinde cam = çamur + 2x maliyet)
@@ -23,7 +23,7 @@ export type GlassRecipe = {
   blurIntensity: number;
   /** expo-glass-effect `colorScheme` prop'u. */
   colorScheme: ThemeName;
-  /** Tile gölgesi. Dark'ta yok — koyu zeminde gölge kir yapar. */
+  /** Tile gölgesi. Dark'ta yok - koyu zeminde gölge kir yapar. */
   shadow: {
     color: string;
     offsetY: number;
@@ -52,7 +52,7 @@ export const glass: Record<ThemeName, GlassRecipe> = {
   dark: {
     // Aurora camı GÖRÜNÜR yapan şey; fill ise yüzeyi YIKAYAN şey. 0.12'de
     // render edilen tile #3C3E36'ya çıkıyor ve fg2/fg3 kontrastı AA'nın altına
-    // düşüyordu (3.25:1 / 2.84:1 — ekran görüntüsünden ölçüldü). Aurora güçlü
+    // düşüyordu (3.25:1 / 2.84:1 - ekran görüntüsünden ölçüldü). Aurora güçlü
     // kalır, fill geri çekilir: cam belirginliği aurora'dan gelir, bedeli metin
     // ödemez.
     fill: "rgba(255,255,255,0.09)",

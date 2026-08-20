@@ -144,7 +144,7 @@ const PropertyCard = ({ property, onEdit }: PropertyCardProps) => {
 
       {modules.length === 0 ? (
         <div className="text-xs text-muted-foreground">
-          Aktif modül yok — düzenle, seç.
+          Aktif modül yok - düzenle, seç.
         </div>
       ) : (
         <div className="flex flex-wrap gap-1">

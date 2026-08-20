@@ -1,4 +1,4 @@
-# Geçiş Planı — Genel Bakış
+# Geçiş Planı - Genel Bakış
 
 6 fazlı yol haritası. Tahmini süre: **5–6 ay part-time** / **~3 ay full-time**.
 
@@ -8,10 +8,10 @@
 |-----|-----|------|-------|---------|
 | **0** | Scaffold | 1 hf | Monorepo iskelet, CI, types | [phase-0-scaffold.md](./phase-0-scaffold.md) |
 | **1** | API extract | 2–3 hf | `@helm/api` + thin hooks | [phase-1-api-extract.md](./phase-1-api-extract.md) |
-| **2** | Web adopt | 2–3 hf | Web duplicate sil | — |
-| **3** | Multi-tenant | 4–6 hf | RLS, signup, org | — |
+| **2** | Web adopt | 2–3 hf | Web duplicate sil | - |
+| **3** | Multi-tenant | 4–6 hf | RLS, signup, org | - |
 | **4** | Integrations MVP | 4–6 hf | RC + App Store + Sentry wizard | [../integrations/providers.md](../integrations/providers.md) |
-| **5** | Launch | 2–4 hf | Billing, App Store, landing | — |
+| **5** | Launch | 2–4 hf | Billing, App Store, landing | - |
 
 ## Bağımlılık grafiği
 
@@ -26,7 +26,7 @@ flowchart LR
 
 Faz 1 mobile-only tamamlanabilir (web repo olmadan). Faz 2 web repo birleşimini gerektirir.
 
-## Faz 2 — Web adopt (özet)
+## Faz 2 - Web adopt (özet)
 
 **Hedef:** Web'deki duplicate Supabase query'leri `@helm/queries` ile değiştir.
 
@@ -39,9 +39,9 @@ Faz 1 mobile-only tamamlanabilir (web repo olmadan). Faz 2 web repo birleşimini
 
 **Önkoşul:** `helm` web repo monorepo'ya taşınmış (`apps/web`).
 
-## Faz 3 — Multi-tenant (özet)
+## Faz 3 - Multi-tenant (özet)
 
-**Hedef:** Hosted SaaS — org-scoped RLS.
+**Hedef:** Hosted SaaS - org-scoped RLS.
 
 **Checklist:**
 
@@ -54,7 +54,7 @@ Faz 1 mobile-only tamamlanabilir (web repo olmadan). Faz 2 web repo birleşimini
 
 **Karar:** v1 commercial = **hosted hub only** (BYO Supabase = Enterprise v2).
 
-## Faz 4 — Integrations MVP (özet)
+## Faz 4 - Integrations MVP (özet)
 
 **Hedef:** Yeni kullanıcı 15 dk'da ilk KPI.
 
@@ -62,7 +62,7 @@ Faz 1 mobile-only tamamlanabilir (web repo olmadan). Faz 2 web repo birleşimini
 
 Detay: [integrations/providers.md](../integrations/providers.md)
 
-## Faz 5 — Launch (özet)
+## Faz 5 - Launch (özet)
 
 - [ ] Stripe Billing + plan limit enforcement
 - [ ] Privacy policy, ToS

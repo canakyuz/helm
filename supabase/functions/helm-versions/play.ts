@@ -1,12 +1,12 @@
 // supabase/functions/helm-versions/play.ts
-// Google Play Developer API — tracks endpoint.
+// Google Play Developer API - tracks endpoint.
 //   Apple eşdeğeri: appStoreVersions + TestFlight builds tek call
 //   Google'da bu = "tracks" (production / internal / alpha / beta)
 //
 // Akış:
 //   1. POST   /edits          → edit oturumu aç (id 24 saat TTL)
 //   2. GET    /edits/{id}/tracks → tüm tracks + releases + versionCodes
-//   3. (cleanup: edit'i delete etmeye gerek yok — sadece commit yapılmadığı sürece state'i değiştirmez)
+//   3. (cleanup: edit'i delete etmeye gerek yok - sadece commit yapılmadığı sürece state'i değiştirmez)
 //
 // versionCode (integer string) = build_number; release.name = semver (1.2.0).
 
@@ -182,7 +182,7 @@ export async function fetchPlayVersions(
             : null;
         const codes = r.versionCodes ?? [];
         if (codes.length === 0) {
-          // release var ama versionCode yok (nadir) — tek satır build_number=null
+          // release var ama versionCode yok (nadir) - tek satır build_number=null
           rows.push({
             project_id: input.projectId,
             source: "android",

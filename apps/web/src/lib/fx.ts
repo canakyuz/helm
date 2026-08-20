@@ -1,4 +1,4 @@
-// FX dönüşümü — Frankfurter API (ücretsiz, auth'suz, ECB rate'leri).
+// FX dönüşümü - Frankfurter API (ücretsiz, auth'suz, ECB rate'leri).
 // Günlük rate'leri localStorage'a cache'ler.
 
 import { useEffect, useState } from "react";
@@ -38,7 +38,7 @@ export async function getFxRate(from: string, to: string): Promise<number> {
   const cached = cache.rates[from]?.[to];
   if (cached != null) return cached;
   try {
-    // open.er-api.com — ücretsiz, anahtarsız, CORS açık, her gün güncel.
+    // open.er-api.com - ücretsiz, anahtarsız, CORS açık, her gün güncel.
     // /v6/latest/{base} → { result, rates: { [code]: rate } }. base=from.
     const res = await fetch(`https://open.er-api.com/v6/latest/${from}`);
     if (!res.ok) return 1;

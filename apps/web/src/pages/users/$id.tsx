@@ -69,7 +69,7 @@ interface CrmTable {
 }
 
 const fmt = (value: string | null) =>
-  value ? new Date(value).toLocaleString("en-US") : "—";
+  value ? new Date(value).toLocaleString("en-US") : "-";
 
 const isBanned = (u: UserDetail) => {
   if (!u.banned_until) return false;
@@ -396,10 +396,10 @@ export const UserDetailPage = () => {
           <CardContent>
             <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
               <dt className="text-muted-foreground">Email</dt>
-              <dd className="font-mono">{user.email ?? "—"}</dd>
+              <dd className="font-mono">{user.email ?? "-"}</dd>
 
               <dt className="text-muted-foreground">Phone</dt>
-              <dd className="font-mono">{user.phone ?? "—"}</dd>
+              <dd className="font-mono">{user.phone ?? "-"}</dd>
 
               <dt className="text-muted-foreground">Signup</dt>
               <dd>{fmt(user.created_at)}</dd>
@@ -422,7 +422,7 @@ export const UserDetailPage = () => {
               <dt className="text-muted-foreground">Providers</dt>
               <dd className="space-x-1">
                 {user.identities.length === 0 ? (
-                  <span className="text-muted-foreground">—</span>
+                  <span className="text-muted-foreground">-</span>
                 ) : (
                   user.identities.map((i, idx) => (
                     <Badge key={idx} variant="secondary">
@@ -559,7 +559,7 @@ export const UserDetailPage = () => {
 };
 
 const formatCell = (v: unknown): string => {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   if (typeof v === "object") return JSON.stringify(v);
   if (typeof v === "boolean") return v ? "✓" : "✗";
   return String(v);

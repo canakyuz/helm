@@ -1,4 +1,4 @@
--- helm — Sentry connector. Proje stats endpoint'inden günlük hata sayısı.
+-- helm - Sentry connector. Proje stats endpoint'inden günlük hata sayısı.
 
 alter table public.project_integrations
   drop constraint if exists project_integrations_provider_check;

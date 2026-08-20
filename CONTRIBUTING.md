@@ -1,14 +1,14 @@
 # Contributing
 
 Helm is a one-person project, written first for its author's own needs. Contributions
-are welcome, but I'm selective about scope — open an issue before starting anything
+are welcome, but I'm selective about scope - open an issue before starting anything
 large so we can agree on it. A rejected PR wastes both our time.
 
 ## Setup
 
 ```bash
 bun install
-make hooks    # git hooks — don't skip this
+make hooks    # git hooks - don't skip this
 cp apps/mobile/.env.example apps/mobile/.env
 ```
 
@@ -34,7 +34,7 @@ make typecheck     # every workspace
 
 ## Expectations
 
-**Type safety.** TypeScript strict. No `any` — use `unknown` and narrow. If it's
+**Type safety.** TypeScript strict. No `any` - use `unknown` and narrow. If it's
 truly unavoidable, leave a comment explaining why.
 
 **Layer boundaries.** `app/` holds routes only; logic goes in `src/`. Components are
@@ -46,7 +46,7 @@ presentational, data fetching lives in hooks. Details:
 widen the palette.
 
 **No secrets.** Real credentials belong in `.env`. `.env.example` holds placeholders
-only. The pre-commit hook enforces this — see [SECURITY.md](./SECURITY.md).
+only. The pre-commit hook enforces this - see [SECURITY.md](./SECURITY.md).
 
 ## Commit format
 
@@ -57,7 +57,7 @@ type(scope): WES-XXX what changed
 ```
 
 `type`: `feat` `fix` `refactor` `chore` `docs` `style` `perf` `test` `ci` `build`
-`scope`: the area affected — `mobile`, `web`, `domain`, `ingest`, `root`
+`scope`: the area affected - `mobile`, `web`, `domain`, `ingest`, `root`
 
 Use `WES-000` if you don't have an issue ID. For example:
 
@@ -65,7 +65,7 @@ Use `WES-000` if you don't have an issue ID. For example:
 fix(ingest): WES-000 stop dropping rows when the provider omits a currency
 ```
 
-Write the message about **why**, not what — the diff already shows what.
+Write the message about **why**, not what - the diff already shows what.
 
 This format is enforced by the `commit-msg` hook
 ([scripts/check-commit-msg.sh](./scripts/check-commit-msg.sh)): single line, valid
@@ -75,7 +75,7 @@ is wrong, fix the script rather than reaching for `--no-verify`.
 ## Pull requests
 
 - One PR, one topic. Mixed PRs get reviewed slowly.
-- `make typecheck` and `make scan-secrets` must be green — CI enforces both.
+- `make typecheck` and `make scan-secrets` must be green - CI enforces both.
 - Verify behavioural changes against real data and attach a screenshot.
 - If something is left broken, say so in the description. A surprise found late is
   worse than one disclosed up front.

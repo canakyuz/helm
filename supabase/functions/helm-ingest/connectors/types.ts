@@ -1,4 +1,4 @@
-// helm-ingest — connector ortak tipleri
+// helm-ingest - connector ortak tipleri
 
 /** Bir connector'ın ürettiği tek metrik noktası. */
 export interface MetricPoint {
@@ -7,12 +7,12 @@ export interface MetricPoint {
   value: number;
 }
 
-/** Ülke kırılımlı metrik noktası — metrics_country tablosuna yazılır. */
+/** Ülke kırılımlı metrik noktası - metrics_country tablosuna yazılır. */
 export interface CountryMetricPoint extends MetricPoint {
   country_code: string; // ISO 3166-1 alpha-2 (US, TR, DE...)
 }
 
-/** Reklam formatı kırılımlı metrik noktası — metrics_format tablosuna yazılır. */
+/** Reklam formatı kırılımlı metrik noktası - metrics_format tablosuna yazılır. */
 export interface FormatMetricPoint extends MetricPoint {
   format: string; // app_open, banner, interstitial, rewarded
 }

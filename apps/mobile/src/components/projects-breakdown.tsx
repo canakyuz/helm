@@ -23,7 +23,7 @@ export function ProjectsBreakdown() {
 
   if (isLoading || !data || data.length === 0) return null;
 
-  // En çok MRR'lı projeler önde — kullanıcı önemliyi hızlı görsün.
+  // En çok MRR'lı projeler önde - kullanıcı önemliyi hızlı görsün.
   const sorted = [...data].sort((a, b) => b.mrr - a.mrr);
 
   return (
@@ -58,7 +58,7 @@ export function ProjectsBreakdown() {
                   {p.name}
                 </Text>
                 <Text className="text-fg-subtle text-xs" numberOfLines={1}>
-                  {p.brandName ?? "—"}
+                  {p.brandName ?? "-"}
                   {p.dau > 0 ? ` · DAU ${formatInteger(p.dau)}` : ""}
                 </Text>
               </View>

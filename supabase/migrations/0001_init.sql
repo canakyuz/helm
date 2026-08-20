@@ -1,4 +1,4 @@
--- helm hub şeması — çok-projeli founder cockpit
+-- helm hub şeması - çok-projeli founder cockpit
 -- Tüm projelerin (mobil uygulama / web / SaaS) gelir + kullanıcı metriklerini toplar.
 
 -- ─────────────────────────────────────────────────────────────
@@ -13,7 +13,7 @@ create table if not exists public.projects (
 
 -- ─────────────────────────────────────────────────────────────
 -- project_integrations: bir projeye bağlı veri kaynakları
--- "tek tıkla bağla" — provider seç, config gir, kaydet.
+-- "tek tıkla bağla" - provider seç, config gir, kaydet.
 -- ─────────────────────────────────────────────────────────────
 create table if not exists public.project_integrations (
   id                uuid primary key default gen_random_uuid(),
@@ -33,7 +33,7 @@ create index if not exists project_integrations_project_idx
   on public.project_integrations (project_id);
 
 -- ─────────────────────────────────────────────────────────────
--- metrics: günlük metrik snapshot'ları (long format — esnek)
+-- metrics: günlük metrik snapshot'ları (long format - esnek)
 -- Yeni metrik tipi eklemek migration gerektirmez.
 -- PK (project_id,date,source,metric) → upsert idempotent.
 -- ─────────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ create index if not exists metrics_project_date_idx
   on public.metrics (project_id, date desc);
 
 -- ─────────────────────────────────────────────────────────────
--- RLS — tek kişilik founder paneli: giriş yapan herkes tam yetkili.
+-- RLS - tek kişilik founder paneli: giriş yapan herkes tam yetkili.
 -- Edge Function ingestion service_role ile RLS'i bypass eder.
 -- ─────────────────────────────────────────────────────────────
 alter table public.projects             enable row level security;

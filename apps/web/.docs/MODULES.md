@@ -1,7 +1,7 @@
-# Helm — Brand → Property → Module Mimarisi
+# Helm - Brand → Property → Module Mimarisi
 
 > Helm = founder cockpit. Kullanıcı (Can) kendi indie projelerini tek yerden yönetir.
-> Para kazanma ürünü değil — kişisel atölye. Bu YAGNI'yi gevşetir (billing tier yok, marketplace yok).
+> Para kazanma ürünü değil - kişisel atölye. Bu YAGNI'yi gevşetir (billing tier yok, marketplace yok).
 >
 > **Bu doküman = sözleşme.** Şema ve UI değişiklikleri buradaki modele bağlı olacak. Konsept değiştiğinde önce burayı güncelle, sonra kodu.
 
@@ -10,8 +10,8 @@
 ## 1. Hiyerarşi
 
 ```
-Brand (üst seviye — şirket/marka)
-  └─ Property (alt seviye — platform/ürün, brand_id NOT NULL)
+Brand (üst seviye - şirket/marka)
+  └─ Property (alt seviye - platform/ürün, brand_id NOT NULL)
         └─ Module (property üzerinde toggle edilebilir özellik)
 ```
 
@@ -33,7 +33,7 @@ Brand: Friday
   └─ Property: Friday SaaS         (type: web_app)
 ```
 
-**Brand zorunlu.** Tek property'li brand olabilir (Van, Empire) — overhead değil, agregat dashboard'un kararlı şeması için gerekli.
+**Brand zorunlu.** Tek property'li brand olabilir (Van, Empire) - overhead değil, agregat dashboard'un kararlı şeması için gerekli.
 
 ---
 
@@ -66,7 +66,7 @@ Her modülün **3 yüzü** var: sidebar nav, dashboard KPI seti, ayarlar bölüm
 | `funnel` | Huni | Adım dönüşüm, drop indicator | posthog |
 | `push` | Push | Bildirim segmentleri, kampanya | helm-native (push_tokens + campaigns) |
 | `mail` | Mail | Email kampanyaları, transactional | resend |
-| `social` | Sosyal medya | Post planlama, scheduler (gelecek) | placeholder — Mixpost/Postiz entegrasyonu sonra |
+| `social` | Sosyal medya | Post planlama, scheduler (gelecek) | placeholder - Mixpost/Postiz entegrasyonu sonra |
 
 ### 3.1. Modül ↔ provider eşlemesi (`metrics.source` → `module_key`)
 
@@ -98,20 +98,20 @@ Wizard'da property type seçilince bu liste otomatik gelir. Kullanıcı checkbox
 
 | modül \ tip | website | web_app | mobile_app | desktop_app | game |
 |---|---|---|---|---|---|
-| content       | ✅ | ⚪ | — | — | — |
-| users         | — | ✅ | ✅ | ✅ | ✅ |
+| content       | ✅ | ⚪ | - | - | - |
+| users         | - | ✅ | ✅ | ✅ | ✅ |
 | analytics     | ✅ | ✅ | ✅ | ✅ | ✅ |
-| subscriptions | — | ✅ | ✅ | ⚪ | ⚪ |
-| ads           | — | ⚪ | ✅ | — | ✅ |
-| reviews       | — | — | ✅ | ⚪ | ✅ |
-| funnel        | ⚪ | ✅ | ✅ | — | ✅ |
-| push          | — | ⚪ | ✅ | — | ✅ |
+| subscriptions | - | ✅ | ✅ | ⚪ | ⚪ |
+| ads           | - | ⚪ | ✅ | - | ✅ |
+| reviews       | - | - | ✅ | ⚪ | ✅ |
+| funnel        | ⚪ | ✅ | ✅ | - | ✅ |
+| push          | - | ⚪ | ✅ | - | ✅ |
 | mail          | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
-| social        | ⚪ | — | — | — | — |
+| social        | ⚪ | - | - | - | - |
 
 - `✅` = preset default (otomatik açık)
 - `⚪` = opsiyonel (preset'te kapalı ama UI'da seçilebilir)
-- `—` = bu type için anlamsız (UI'da gizli)
+- `-` = bu type için anlamsız (UI'da gizli)
 
 **Preset kaynağı:** `src/lib/modules.ts` içinde sabit obje. DB'ye yazmıyoruz çünkü preset şema değil; kullanıcının seçtiği `properties.enabled_modules` array'i tek doğru kaynak.
 
@@ -122,23 +122,23 @@ Wizard'da property type seçilince bu liste otomatik gelir. Kullanıcı checkbox
 ### 5.1. Property oluşturma (wizard)
 
 ```
-Step 1 — Brand seç (mevcut listeden) veya yeni brand oluştur
-Step 2 — Property bilgileri:
+Step 1 - Brand seç (mevcut listeden) veya yeni brand oluştur
+Step 2 - Property bilgileri:
   • name (text, required)
   • slug (auto from name, editable)
   • type (radio: website | web_app | mobile_app | desktop_app | game)
-Step 3 — Modüller:
+Step 3 - Modüller:
   • type seçildiği anda preset modüller otomatik checked gelir
   • Kullanıcı checkbox ile ekler/çıkarır
   • "Sonra entegrasyon ekle" notu (boş modül = sayfa açılır, empty state gösterir)
-Step 4 — (opsiyonel) App Store ID + country (mobile_app/game ise göster)
+Step 4 - (opsiyonel) App Store ID + country (mobile_app/game ise göster)
 ```
 
 ### 5.2. Property ayarları (`/properties/edit/:id`)
 
 Mevcut `/projects/edit/:id` sayfası **eski adıyla redirect** + yeni sayfa içeriği:
-- Üstte: name, slug, type, brand_id (read-only — brand transfer ayrı flow)
-- Ortada: **Modüller** bölümü — her modül için Switch (aç/kapat) + son kullanım tarihi (varsa)
+- Üstte: name, slug, type, brand_id (read-only - brand transfer ayrı flow)
+- Ortada: **Modüller** bölümü - her modül için Switch (aç/kapat) + son kullanım tarihi (varsa)
 - Altta: `app_store_id`, `app_store_country` (sadece mobile_app/game ise)
 - En altta: "Bu property'yi sil" (cascade onay)
 
@@ -198,10 +198,10 @@ Analitik
 İletişim
   • Mail                /mail            (mail)
   • Push                /push            (push)
-  • Sosyal              /social          (social — coming-soon badge)
+  • Sosyal              /social          (social - coming-soon badge)
   • Kampanya Geçmişi    /campaigns       (mail || push)
 
-DevOps  (her zaman görünür — sistem işleri)
+DevOps  (her zaman görünür - sistem işleri)
   • Entegrasyonlar      /integrations
   • Senkron & Sağlık    /system
   • Loglar              /logs
@@ -217,7 +217,7 @@ Sistem
 
 ## 7. Dashboard cockpit davranışı
 
-Mevcut 3-zone Liquid Cells **dokunulmaz** — sadece KPI seti modüle göre filtrelenir:
+Mevcut 3-zone Liquid Cells **dokunulmaz** - sadece KPI seti modüle göre filtrelenir:
 
 | KpiCell | Hangi modül gerekir |
 |---|---|
@@ -227,9 +227,9 @@ Mevcut 3-zone Liquid Cells **dokunulmaz** — sadece KPI seti modüle göre filt
 | DAU/MAU | users + analytics |
 | Yeni Kullanıcı | users |
 
-**Modül kapalıysa:** O cell'in yerine "Modülü aç" placeholder (ghost card) — boş bırakma, zone iskeleti bozulmasın.
+**Modül kapalıysa:** O cell'in yerine "Modülü aç" placeholder (ghost card) - boş bırakma, zone iskeleti bozulmasın.
 
-**Brand=All / Property=All durumu:** Tüm modüllerin union'ı + her KPI brand-level sum. Bu zaten mevcut `scope === "all"` davranışı — sadece "all" değil "brand:X" seviyesi ekleniyor.
+**Brand=All / Property=All durumu:** Tüm modüllerin union'ı + her KPI brand-level sum. Bu zaten mevcut `scope === "all"` davranışı - sadece "all" değil "brand:X" seviyesi ekleniyor.
 
 ---
 
@@ -240,6 +240,6 @@ Yapılmayacak:
 - Plan/tier-based modül kilidi (ücretsiz vs.)
 - Marketplace / modül store
 - Property-level white-label / domain mapping
-- Modüller arası dependency engine (örn. "subscriptions açtın ama users kapalı") — sadece UI uyarısı, blocking yok
+- Modüller arası dependency engine (örn. "subscriptions açtın ama users kapalı") - sadece UI uyarısı, blocking yok
 
 Bir gün lazım olursa eklenir; bugün eklenirse YAGNI.

@@ -8,7 +8,7 @@ export type RevenueGoal = {
   project_id: string | null;
 };
 
-// Bulunduğumuz ayın ilk günü (YYYY-MM-01) — hedefler ay bazlı.
+// Bulunduğumuz ayın ilk günü (YYYY-MM-01) - hedefler ay bazlı.
 export function revenueGoalMonth(d = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
 }

@@ -1,4 +1,4 @@
-// Compatibility shim — the panel now lives in the liquid design-system layer.
+// Compatibility shim - the panel now lives in the liquid design-system layer.
 import { type ReactNode } from "react";
 import { type StyleProp, type ViewStyle } from "react-native";
 

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Üç bağımsız panel kusurunu gidermek — gelir çarpanının 3'te kilitli olması, AdMob gelirinin uygulamalara ayrışmaması, ve mobilde yazılmış ama hiçbir ekrana bağlanmamış oyuncu haritası.
+**Goal:** Üç bağımsız panel kusurunu gidermek - gelir çarpanının 3'te kilitli olması, AdMob gelirinin uygulamalara ayrışmaması, ve mobilde yazılmış ama hiçbir ekrana bağlanmamış oyuncu haritası.
 
 **Architecture:** Üç görev birbirinden tamamen bağımsızdır; sırayla ya da ayrı ayrı gönderilebilir. İkisi mobil kabuğa (`apps/mobile`), biri ingest konnektörüne (`supabase/functions/helm-ingest/connectors/admob.ts`) dokunur. Hiçbiri veritabanı migration'ı gerektirmez.
 
@@ -12,12 +12,12 @@
 
 ## Global Constraints
 
-- **Çarpan üst sınırı 100, alt sınır 1.** Alt sınır değişmez — 1'in altı "geliri küçült" demek olur ve ayarın amacı bu değil.
+- **Çarpan üst sınırı 100, alt sınır 1.** Alt sınır değişmez - 1'in altı "geliri küçült" demek olur ve ayarın amacı bu değil.
 - **Çarpan yalnızca gösterimdir.** Hiçbir kalıcı veriye veya sunucu hesabına yazılmaz. Ayarın alt etiketi `local display only` bunu söyler ve doğrudur.
 - **AdMob değişikliği geriye dönük uyumlu olmalı.** `app_id` config'de yoksa davranış bugünküyle birebir aynı kalır: yayıncı hesabındaki tüm uygulamaların toplamı.
 - **Yeni migration yok.** `integrations.config` zaten JSON; alan eklemek şema değişikliği gerektirmez.
 - **Harita için yeni bileşen veya yeni sorgu yazılmaz.** İkisi de mevcut; iş yalnızca bağlamaktır.
-- Commit formatı: `type(scope): WES-000 message` — tek satır, gövde yok, Co-Authored-By yok, `--no-verify` yok.
+- Commit formatı: `type(scope): WES-000 message` - tek satır, gövde yok, Co-Authored-By yok, `--no-verify` yok.
 - Yorumlar Türkçe ve NEDEN'i açıklar.
 
 ## Dosya yapısı
@@ -39,7 +39,7 @@
 
 **Interfaces:**
 - Consumes: yok
-- Produces: `normalizeRevenueMultiplier(value: number): number` davranışı değişir — üst sınır 3 yerine 100. İmza aynı kalır.
+- Produces: `normalizeRevenueMultiplier(value: number): number` davranışı değişir - üst sınır 3 yerine 100. İmza aynı kalır.
 
 - [ ] **Step 1: Sabiti güncelle**
 
@@ -50,7 +50,7 @@ const MIN_REVENUE_MULTIPLIER = 1;
 const MAX_REVENUE_MULTIPLIER = 100;
 ```
 
-`MIN_REVENUE_MULTIPLIER` değişmez. `normalizeRevenueMultiplier` gövdesine dokunma — clamp ve yuvarlama mantığı doğru, yalnızca sınır değişiyor.
+`MIN_REVENUE_MULTIPLIER` değişmez. `normalizeRevenueMultiplier` gövdesine dokunma - clamp ve yuvarlama mantığı doğru, yalnızca sınır değişiyor.
 
 - [ ] **Step 2: Giriş metnini güncelle**
 
@@ -60,7 +60,7 @@ const MAX_REVENUE_MULTIPLIER = 100;
 "Enter a value from 1 to 100. This only changes local display values.",
 ```
 
-Fonksiyonun geri kalanına dokunma. Giriş zaten serbest metin (`plain-text` + `decimal-pad`) — elle değer yazmak baştan beri çalışıyordu, kesen tek şey clamp'ti.
+Fonksiyonun geri kalanına dokunma. Giriş zaten serbest metin (`plain-text` + `decimal-pad`) - elle değer yazmak baştan beri çalışıyordu, kesen tek şey clamp'ti.
 
 - [ ] **Step 3: Tip kontrolü**
 
@@ -87,10 +87,10 @@ git commit -m "fix(mobile): WES-000 raise revenue multiplier cap from 3x to 100x
 - Modify: `supabase/functions/helm-ingest/connectors/admob.ts`
 
 **Interfaces:**
-- Consumes: `integrations.config` JSON'u — mevcut alanlar `publisher_id`, `client_id`, `client_secret`, `refresh_token`; bu görevle opsiyonel `app_id` eklenir.
+- Consumes: `integrations.config` JSON'u - mevcut alanlar `publisher_id`, `client_id`, `client_secret`, `refresh_token`; bu görevle opsiyonel `app_id` eklenir.
 - Produces: `fetchAdMob` aynı `Connector` imzasını korur ve aynı üç metriği (`ad_revenue`, `ad_impressions`, `ad_ecpm`) döndürür. Değişen tek şey hangi satırların sayıldığı.
 
-**Neden dikkatli olunmalı:** `helm-ingest` metrikleri `onConflict: "project_id,date,source,metric"` ile upsert ediyor. `APP` boyutu eklenince aynı tarih için birden fazla satır döner. Bunlar toplanmadan tek tek push edilirse upsert son satırı yazar ve **toplam gelir sessizce tek bir uygulamanınkine düşer** — mevcut entegrasyonlar için sessiz veri kaybı olur. Bu yüzden gün bazında toplama şart.
+**Neden dikkatli olunmalı:** `helm-ingest` metrikleri `onConflict: "project_id,date,source,metric"` ile upsert ediyor. `APP` boyutu eklenince aynı tarih için birden fazla satır döner. Bunlar toplanmadan tek tek push edilirse upsert son satırı yazar ve **toplam gelir sessizce tek bir uygulamanınkine düşer** - mevcut entegrasyonlar için sessiz veri kaybı olur. Bu yüzden gün bazında toplama şart.
 
 - [ ] **Step 1: Rapora APP boyutunu ekle**
 
@@ -119,7 +119,7 @@ Mevcut döngüde her satır doğrudan `points`'e üç nokta push ediyor. Bunun y
 
   // Gun bazinda toplama: APP boyutu ile ayni tarih icin birden fazla satir
   // doner. Tek tek push edilirse ingest'in upsert'i (project_id,date,source,
-  // metric) son satiri yazar ve toplam tek uygulamaya duser — sessiz veri kaybi.
+  // metric) son satiri yazar ve toplam tek uygulamaya duser - sessiz veri kaybi.
   const daily = new Map<string, { revenue: number; impressions: number }>();
 
   for (const item of items) {
@@ -135,7 +135,7 @@ Mevcut döngüde her satır doğrudan `points`'e üç nokta push ediyor. Bunun y
     if (!row) continue;
 
     // app_id tanimliysa yalnizca o uygulamanin satirlari sayilir. Tanimli
-    // degilse hepsi toplanir — mevcut entegrasyonlar icin davranis degismez.
+    // degilse hepsi toplanir - mevcut entegrasyonlar icin davranis degismez.
     if (appFilter) {
       const appId = row.dimensionValues?.APP?.value;
       if (appId !== appFilter) continue;
@@ -158,7 +158,7 @@ Mevcut döngüde her satır doğrudan `points`'e üç nokta push ediyor. Bunun y
 
   const points: MetricPoint[] = [];
   for (const [date, acc] of daily) {
-    // eCPM toplanamaz — oranlarin ortalamasi yanlis sonuc verir. Toplanmis
+    // eCPM toplanamaz - oranlarin ortalamasi yanlis sonuc verir. Toplanmis
     // gelir ve gosterimden yeniden hesaplanir.
     const ecpm = acc.impressions > 0 ? (acc.revenue / acc.impressions) * 1000 : 0;
     points.push({ date, metric: "ad_revenue", value: acc.revenue });
@@ -168,14 +168,14 @@ Mevcut döngüde her satır doğrudan `points`'e üç nokta push ediyor. Bunun y
   return points;
 ```
 
-`const points: MetricPoint[] = [];` satırının döngüden **önceki** eski tanımını sil — yukarıdaki blok onu döngüden sonra yeniden tanımlıyor. İki tanım kalırsa TypeScript hata verir.
+`const points: MetricPoint[] = [];` satırının döngüden **önceki** eski tanımını sil - yukarıdaki blok onu döngüden sonra yeniden tanımlıyor. İki tanım kalırsa TypeScript hata verir.
 
-`IMPRESSION_RPM` artık okunmuyor: eCPM her durumda toplanmış değerlerden hesaplanıyor. Metrik listesinden çıkarma — AdMob'un döndürdüğü alanları daraltmak ileride başka bir kırılım gerektiğinde tekrar eklemeyi gerektirir ve maliyeti yok.
+`IMPRESSION_RPM` artık okunmuyor: eCPM her durumda toplanmış değerlerden hesaplanıyor. Metrik listesinden çıkarma - AdMob'un döndürdüğü alanları daraltmak ileride başka bir kırılım gerektiğinde tekrar eklemeyi gerektirir ve maliyeti yok.
 
 - [ ] **Step 3: Tip kontrolü**
 
 Run: `cd supabase/functions && deno check helm-ingest/connectors/admob.ts`
-Beklenen: hata yok. `deno` kurulu değilse bu adımı atla ve raporunda açıkça belirt — uydurma bir doğrulama yazma.
+Beklenen: hata yok. `deno` kurulu değilse bu adımı atla ve raporunda açıkça belirt - uydurma bir doğrulama yazma.
 
 - [ ] **Step 4: Geriye dönük uyumluluğu gözle doğrula**
 
@@ -197,9 +197,9 @@ git commit -m "fix(ingest): WES-000 split admob revenue per app via APP dimensio
 
 **Interfaces:**
 - Consumes:
-  - `AudienceMap` — `apps/mobile/src/components/liquid/audience-map.tsx`, `~/components/liquid`'den export ediliyor. Props: `{ rows: AudienceMapRow[]; height?: number; fill?: boolean; showPill?: boolean }`
+  - `AudienceMap` - `apps/mobile/src/components/liquid/audience-map.tsx`, `~/components/liquid`'den export ediliyor. Props: `{ rows: AudienceMapRow[]; height?: number; fill?: boolean; showPill?: boolean }`
   - `AudienceMapRow = { country: string; country_name: string | null; users: number }`
-  - `useGeoBreakdown(projectId?: string)` — `~/hooks/use-analytics`, TanStack Query sonucu döner (`data`, `isLoading`, `isError`)
+  - `useGeoBreakdown(projectId?: string)` - `~/hooks/use-analytics`, TanStack Query sonucu döner (`data`, `isLoading`, `isError`)
 - Produces: yok (yaprak değişiklik)
 
 `overview.tsx` cockpit'in ilk sekmesidir (`_layout.tsx:35`, `NativeTabs.Trigger name="overview"`), yani ana ekran burasıdır.
@@ -217,7 +217,7 @@ Dosyada zaten `~/components/liquid`'den bir import varsa `AudienceMap`'i ona ekl
 
 - [ ] **Step 2: Veriyi çek**
 
-Bileşenin gövdesinde, diğer hook çağrılarının yanında. `projectId` olarak ekranın halihazırda kullandığı seçili proje kimliğini ver — dosyada `usePropertyMetrics` / `useMetricDetail` gibi hook'lara geçirilen değişkenin aynısı:
+Bileşenin gövdesinde, diğer hook çağrılarının yanında. `projectId` olarak ekranın halihazırda kullandığı seçili proje kimliğini ver - dosyada `usePropertyMetrics` / `useMetricDetail` gibi hook'lara geçirilen değişkenin aynısı:
 
 ```ts
 const geo = useGeoBreakdown(selectedPropertyId);
@@ -235,12 +235,12 @@ KPI bloklarının altına, mevcut kart deseniyle uyumlu şekilde:
 ) : null}
 ```
 
-Boş/hata durumunda hiçbir şey çizilmez. Gerekçe: veri yokken boş bir dünya haritası göstermek "hiç oyuncun yok" gibi okunur ve yanıltır; kart hiç görünmezse ekran sessizce eksik kalır, bu daha dürüsttür. Yükleme sırasında da aynı — ekranın geri kalanı çalışmaya devam eder.
+Boş/hata durumunda hiçbir şey çizilmez. Gerekçe: veri yokken boş bir dünya haritası göstermek "hiç oyuncun yok" gibi okunur ve yanıltır; kart hiç görünmezse ekran sessizce eksik kalır, bu daha dürüsttür. Yükleme sırasında da aynı - ekranın geri kalanı çalışmaya devam eder.
 
 - [ ] **Step 4: Tip kontrolü**
 
 Run: `cd apps/mobile && bun run typecheck`
-Beklenen: `overview.tsx` ile ilgili yeni hata yok. `geo.data`'nın tipi `AudienceMapRow[]` ile uyuşmuyorsa DUR ve raporla — sorgunun döndürdüğü şekil bileşenin beklediğinden farklı demektir, bu plan onları uyumlu varsayıyor.
+Beklenen: `overview.tsx` ile ilgili yeni hata yok. `geo.data`'nın tipi `AudienceMapRow[]` ile uyuşmuyorsa DUR ve raporla - sorgunun döndürdüğü şekil bileşenin beklediğinden farklı demektir, bu plan onları uyumlu varsayıyor.
 
 - [ ] **Step 5: Uygulamada doğrula**
 
@@ -260,8 +260,8 @@ git commit -m "feat(mobile): WES-000 surface audience map on cockpit overview"
 
 **Spec kapsamı:** Spec bölüm 1 (çarpan) → Task 1. Bölüm 2 (AdMob) → Task 2. Bölüm 3 (harita) → Task 3. Karşılıksız gereksinim yok.
 
-**Spec'in öngörmediği, planın eklediği şey:** Spec AdMob için yalnızca "APP boyutunu iste ve filtrele" diyordu. Kodu okuyunca ortaya çıktı ki filtre olmayan durumda gün bazında toplama yapılmazsa ingest'in upsert'i toplam geliri sessizce tek uygulamaya düşürür — yani "geriye dönük uyumlu" şartı toplama olmadan sağlanamıyor. Task 2 Step 2 bunu kapsıyor ve gerekçesi kod yorumuna da yazılıyor. eCPM'in oran olduğu için toplanamayacağı da aynı adımda ele alındı.
+**Spec'in öngörmediği, planın eklediği şey:** Spec AdMob için yalnızca "APP boyutunu iste ve filtrele" diyordu. Kodu okuyunca ortaya çıktı ki filtre olmayan durumda gün bazında toplama yapılmazsa ingest'in upsert'i toplam geliri sessizce tek uygulamaya düşürür - yani "geriye dönük uyumlu" şartı toplama olmadan sağlanamıyor. Task 2 Step 2 bunu kapsıyor ve gerekçesi kod yorumuna da yazılıyor. eCPM'in oran olduğu için toplanamayacağı da aynı adımda ele alındı.
 
 **Tip tutarlılığı:** `AudienceMapRow` alan adları (`country`, `country_name`, `users`) bileşenin kendi tanımından birebir alındı. `normalizeRevenueMultiplier` imzası değişmiyor. `fetchAdMob` `Connector` imzasını ve üç metrik adını (`ad_revenue`, `ad_impressions`, `ad_ecpm`) koruyor.
 
-**Test:** Üç görevin hiçbirinde otomatik test yok. Gerekçe: Task 1 bir sabit, Task 3 bir bağlama, Task 2 ise canlı AdMob API yanıtına bağlı ve anlamlı bir birim testi ancak API yanıtını mock'lamakla kurulur — mock'un doğruluğu test edilmiş olmaz. Üçü de elle gözlemlenebilir ve adımlarda nasıl gözleneceği yazılı.
+**Test:** Üç görevin hiçbirinde otomatik test yok. Gerekçe: Task 1 bir sabit, Task 3 bir bağlama, Task 2 ise canlı AdMob API yanıtına bağlı ve anlamlı bir birim testi ancak API yanıtını mock'lamakla kurulur - mock'un doğruluğu test edilmiş olmaz. Üçü de elle gözlemlenebilir ve adımlarda nasıl gözleneceği yazılı.

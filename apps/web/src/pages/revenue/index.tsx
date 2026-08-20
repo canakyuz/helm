@@ -225,7 +225,7 @@ export const RevenuePage = () => {
   );
   const downloadsLatest = latest(metrics, "app_downloads");
 
-  // Birleşik gelir özeti — 3 kanal toplamı (MRR günlük tahmini + ad + app)
+  // Birleşik gelir özeti - 3 kanal toplamı (MRR günlük tahmini + ad + app)
   const combinedTotals = useMemo(() => {
     const mrr = withMrrCents(latest(metrics, "mrr"), mrrCents) * rateOf(rcCurrency);
     const mrrDaily = mrr / 30;
@@ -245,7 +245,7 @@ export const RevenuePage = () => {
       { name: "Abonelik", value: withMrrCents(latest(metrics, "mrr"), mrrCents) * rateOf(rcCurrency) },
     ];
     const max = channels.reduce((a, b) => (b.value > a.value ? b : a));
-    return max.value > 0 ? max.name : "—";
+    return max.value > 0 ? max.name : "-";
   }, [adTotals, appTotals, metrics, fxRates]);
 
   return (
@@ -257,7 +257,7 @@ export const RevenuePage = () => {
         <RangeSelect value={range} onChange={setRange} />
       </div>
 
-      {/* Üst KPI cluster — 3 kanal birleşik gelir özeti */}
+      {/* Üst KPI cluster - 3 kanal birleşik gelir özeti */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <RevKpi
           label="Today (combined)"
@@ -297,7 +297,7 @@ export const RevenuePage = () => {
         <TabsContent value="subscription" className="space-y-4">
           {!hasRevenueCat && (
             <ErrorBanner variant="warning" title="RevenueCat is not connected">
-              Abonelik geliri akmıyor — Entegrasyonlar → <strong>+</strong> →
+              Abonelik geliri akmıyor - Entegrasyonlar → <strong>+</strong> →
               RevenueCat (v2 secret key + project_id).
             </ErrorBanner>
           )}
@@ -323,7 +323,7 @@ export const RevenuePage = () => {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>{`MRR — last ${range} days`}</CardTitle>
+              <CardTitle>{`MRR - last ${range} days`}</CardTitle>
             </CardHeader>
             <CardContent>
               <TrendChart
@@ -400,7 +400,7 @@ export const RevenuePage = () => {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{`Ad revenue — last ${range} days`}</CardTitle>
+                <CardTitle>{`Ad revenue - last ${range} days`}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TrendChart
@@ -412,7 +412,7 @@ export const RevenuePage = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>{`Impressions — last ${range} days`}</CardTitle>
+                <CardTitle>{`Impressions - last ${range} days`}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TrendChart
@@ -480,7 +480,7 @@ export const RevenuePage = () => {
                 value={
                   downloadsLatest > 0
                     ? formatMoney2(appRevDisplay / downloadsLatest, displayCcy)
-                    : "—"
+                    : "-"
                 }
                 icon={<Gauge />}
                 loading={loading}
@@ -489,7 +489,7 @@ export const RevenuePage = () => {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>{`Store revenue — last ${range} days`}</CardTitle>
+                  <CardTitle>{`Store revenue - last ${range} days`}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <TrendChart
@@ -501,7 +501,7 @@ export const RevenuePage = () => {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>{`Downloads — last ${range} days`}</CardTitle>
+                  <CardTitle>{`Downloads - last ${range} days`}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <TrendChart

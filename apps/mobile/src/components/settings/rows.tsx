@@ -8,7 +8,7 @@ import { preferences, type Accent } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
 
 /**
- * Ayar satiri. onPress verilmezse basilamaz — dekoratif buton yok.
+ * Ayar satiri. onPress verilmezse basilamaz - dekoratif buton yok.
  *
  * Eski ekranda dokuz satir `onPress={() => haptic.tap()}` idi: basinca titriyor,
  * baska hicbir sey yapmiyordu. Redesign'da tasinmadilar; calismayan bir butonu
@@ -30,10 +30,10 @@ export function SettingsRow({
   onPress?: () => void;
 }) {
   const body = (
-    // Bolucu `border-line` — uygulamanin geri kalaniyla ayni token. Onceki hali
+    // Bolucu `border-line` - uygulamanin geri kalaniyla ayni token. Onceki hali
     // elle yazilmis rgba(128,128,128,0.18) idi: tema-kor (acik temada yanlis
     // tarafa duser) ve olculdugunde cam yuzeyde theme.line'dan DAHA DUSUK
-    // kontrast veriyordu (1.24:1 karsi 1.33:1) — yani gorunurluk de kazandirmiyordu.
+    // kontrast veriyordu (1.24:1 karsi 1.33:1) - yani gorunurluk de kazandirmiyordu.
     <View
       className={`flex-row items-center justify-between py-headerY${
         divider === true ? " border-t border-line" : ""
@@ -64,7 +64,7 @@ export function SettingsRow({
 }
 
 /**
- * Accent secici — renk orneklerinin kendisi.
+ * Accent secici - renk orneklerinin kendisi.
  *
  * Ad yerine RENK gosteriliyor: "Teal" yazisi hangi tonu sececegini soylemez,
  * ornek soyler. Secili olan halka ile isaretlenir; renk korlugunde de ayirt

@@ -20,7 +20,7 @@ export function useFormatCurrency() {
 }
 
 /**
- * Stat kutusu icin kurussuz para. Ayni cevrim, farkli gosterim — tam tutarin
+ * Stat kutusu icin kurussuz para. Ayni cevrim, farkli gosterim - tam tutarin
  * gerektigi yerlerde useFormatCurrency kullanilmaya devam eder.
  */
 export function useFormatCurrencyCompact() {

@@ -7,7 +7,7 @@ import { fetchFxRates, metricValueUsd, type FxRates } from "./fx-rates";
  *
  * OLCUM METRIKLERI NULLABLE: `null` = olcum yok (o kaynak bu projeye bagli
  * degil), `0` = olculdu ve sifir. Ikisini 0'a katlamak, kullanici olcumu
- * olmayan bir projede "DAU 0" yazdirir ve bu "kimse oynamiyor" diye okunur —
+ * olmayan bir projede "DAU 0" yazdirir ve bu "kimse oynamiyor" diye okunur -
  * dogru cevap "bilmiyoruz". Sayaclar (openAlerts, syncIngested) nullable
  * DEGIL: onlar her zaman sayilabilir, yoklugu gercekten sifirdir.
  */
@@ -65,7 +65,7 @@ function sumByDate(
  *
  * `null` = OLCUM YOK, `0` = olculdu ve sifir. Onceki hal ikisini de 0'a
  * ceviriyordu: kullanici olcumu hic baglanmamis bir projede "DAU 0" yaziyordu
- * ve bu "kimse oynamiyor" diye okunuyordu — oysa dogru cevap "bilmiyoruz".
+ * ve bu "kimse oynamiyor" diye okunuyordu - oysa dogru cevap "bilmiyoruz".
  * Ayni ayrimi gelir tarafinda da yaptik (bkz. revenue-history provisionalSources).
  */
 function latestTwo(map: Map<string, number>): [number | null, number | null] {
@@ -109,7 +109,7 @@ export async function fetchCockpitKpis(
   if (propertyId !== "all") {
     metricsQuery = metricsQuery.eq("project_id", propertyId);
     alertsCountQuery = alertsCountQuery.eq("alert_rules.project_id", propertyId);
-    // sync_runs property bazlı değil — global kalır.
+    // sync_runs property bazlı değil - global kalır.
   }
 
   const [metricsRes, alertsRes, syncRes, rates] = await Promise.all([

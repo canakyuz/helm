@@ -135,7 +135,7 @@ export default function Analytics() {
           },
         ];
 
-  // Kaynak metrics_country / app_downloads — PostHog geo ucu bos donuyor.
+  // Kaynak metrics_country / app_downloads - PostHog geo ucu bos donuyor.
   // Etiket "indirme": dau kirilimi 15 satir ve Mayis'ta donmus, onu kullanici
   // diye gostermek yaniltici olurdu.
   const countries = (geo.data?.rows ?? []).slice(0, TOP_COUNTRIES);
@@ -174,13 +174,13 @@ export default function Analytics() {
             />
           }
         >
-          {/* Kim — sayaç. Geri kalan ekran "ne yapıyorlar"ı anlatır. */}
+          {/* Kim - sayaç. Geri kalan ekran "ne yapıyorlar"ı anlatır. */}
           <Rise index={0} replayKey={replayKey}>
             <BentoTile padding={space.tilePadLg}>
               <View className="flex-row items-center justify-between">
                 <Text className="font-mono-medium text-eyebrow tracking-wider text-fg3">
                   {/* "· 30G" DEGIL: bu rakam kpis.dau, yani GUNLUK aktif
-                      kullanici — Ozet'teki "DAU" tile'i ile ayni deger. 30 gun
+                      kullanici - Ozet'teki "DAU" tile'i ile ayni deger. 30 gun
                       yazmak metrigi 30 gunluk sanmaya yol aciyordu; ustelik
                       alttaki grafik de 30 degil 14 gun. 30 gunluk olcu zaten
                       yandaki MAU. */}
@@ -194,7 +194,7 @@ export default function Analytics() {
                 </View>
               </View>
 
-              {/* Olcum yoksa "—": bu projede kullanici kaynagi bagli degil,
+              {/* Olcum yoksa "-": bu projede kullanici kaynagi bagli degil,
                   "0 kullanici" demek DEGIL. Sifir yazmak "kimse oynamiyor"
                   diye okunur ve yanlis bir panik uretir. */}
               {dau != null ? (
@@ -205,10 +205,10 @@ export default function Analytics() {
                   style={{ ...HERO_NUMBER, color: theme.fg }}
                 />
               ) : (
-                <Text style={{ ...HERO_NUMBER, color: theme.fg3 }}>—</Text>
+                <Text style={{ ...HERO_NUMBER, color: theme.fg3 }}>-</Text>
               )}
               <Text className="mt-[6px] text-meta text-fg2">
-                MAU {mau != null ? formatInteger(mau) : "—"}
+                MAU {mau != null ? formatInteger(mau) : "-"}
                 {stickiness != null ? ` ${t("· yapışkanlık {value}", { value: formatRatio(stickiness, 1) })}` : ""}
                 {session != null ? ` · oturum ${fmtSession(session)}` : ""}
               </Text>
@@ -293,7 +293,7 @@ export default function Analytics() {
   );
 }
 
-/** Nabiz atan canli gostergesi — 1800ms, sonsuz. */
+/** Nabiz atan canli gostergesi - 1800ms, sonsuz. */
 function LiveDot({ color }: { color: string }) {
   const pulse = useSharedValue(1);
   const noMotion = useReducedMotion();

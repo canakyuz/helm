@@ -1,4 +1,4 @@
-// helm — CMS asset seçici (dialog + grid + inline upload).
+// helm - CMS asset seçici (dialog + grid + inline upload).
 // FormRenderer'ın `kind: 'asset'` alanlarında kullanılır.
 
 import { useRef, useState } from "react";

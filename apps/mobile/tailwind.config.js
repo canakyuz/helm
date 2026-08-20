@@ -14,7 +14,7 @@ module.exports = {
         // --- Bento sistemi (uretilmis: tailwind.tokens.js) ---
         ...bento.colors,
 
-        // --- Liquid Glass paleti — GECIS DONEMI ---
+        // --- Liquid Glass paleti - GECIS DONEMI ---
         // Henuz bento'ya cevrilmemis ekranlar bu adlari kullaniyor. Son ekran
         // cevrildiginde bu blok silinecek. Yeni kodda KULLANMA.
         "bg-base": "#08080A",
@@ -49,7 +49,7 @@ module.exports = {
       },
       letterSpacing: {
         ...bento.letterSpacing,
-        // Gecis donemi — liquid ekranlari bu adlari kullaniyor.
+        // Gecis donemi - liquid ekranlari bu adlari kullaniyor.
         widest: "0.18em",
       },
     },

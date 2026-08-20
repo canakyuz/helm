@@ -9,7 +9,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * gereksiz bir yuk bindirirdi. Bu sorgu tek satir okur.
  *
  * NEDEN ISTEMCI ZAMANI DEGIL: "son yenileme" diye TanStack'in `dataUpdatedAt`
- * degerini gostermek yalan olurdu — istemci bir dakika once fetch etmis olsa
+ * degerini gostermek yalan olurdu - istemci bir dakika once fetch etmis olsa
  * bile satirlar saatlik cron'dan geliyor olabilir. Kullanicinin sordugu soru
  * "veri ne kadar taze", "telefon ne zaman istek atti" degil.
  */

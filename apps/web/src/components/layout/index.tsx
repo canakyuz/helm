@@ -80,7 +80,7 @@ type NavGroup = {
   alwaysVisible?: boolean;
 };
 
-// Sidebar modül haritası — gruplu. Yeni modül = buraya bir girdi.
+// Sidebar modül haritası - gruplu. Yeni modül = buraya bir girdi.
 // Detay: .docs/MODULES.md §6
 const NAV_GROUPS: NavGroup[] = [
   {
@@ -155,7 +155,7 @@ function itemVisible(item: NavItem, enabled: ModuleKey[]): boolean {
   return reqs.some((r) => enabled.includes(r));
 }
 
-/** Dark/Light tek toggle — sidebar footer'da NavUser üstünde. */
+/** Dark/Light tek toggle - sidebar footer'da NavUser üstünde. */
 const ModeToggle = () => {
   const { theme, toggleMode } = useHelmTheme();
   const isDark = theme.mode === "dark";
@@ -321,7 +321,7 @@ const HeaderBar = ({ scrolled }: { scrolled: boolean }) => {
         <h2 className="text-sm font-medium tracking-tight">{title}</h2>
       )}
 
-      {/* Orta — Command/Search trigger (⌘K) */}
+      {/* Orta - Command/Search trigger (⌘K) */}
       <button
         type="button"
         onClick={() => query.toggle()}
@@ -364,8 +364,8 @@ export const HelmLayout = () => {
   const [scrolled, setScrolled] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // Sentinel + IntersectionObserver — scroll container'dan bağımsız çalışır
-  // (window scroll, sidebar inset scroll, body scroll — hangisi varsa).
+  // Sentinel + IntersectionObserver - scroll container'dan bağımsız çalışır
+  // (window scroll, sidebar inset scroll, body scroll - hangisi varsa).
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;

@@ -7,7 +7,7 @@ import { usePreferences } from "~/lib/preferences";
 type QueryGate = { enabled?: boolean };
 
 /**
- * Reklam ekonomisi — format basina gelir, eCPM, doluluk.
+ * Reklam ekonomisi - format basina gelir, eCPM, doluluk.
  *
  * `metrics` tablosundaki tek `ad_revenue` satirindan farkli olarak
  * `metrics_format` kirilimina bakar: hangi formatin kazandirdigini soyler.

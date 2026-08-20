@@ -7,7 +7,7 @@ import type { SelectedPropertyId } from "@helm/types";
  * NEDEN AYRI KAYNAK: subscription_revenue / iap_revenue metrikleri App Store
  * Connect'ten geliyor ve Apple gunluk raporlari T-1 + isleme gecikmesi tasiyor.
  * Bu tablo "az once ne oldu"yu gosterir; gunluk mutabakat metrics'te kalir.
- * Ikisini toplamak CIFT SAYIM olur — ayni para iki kez gorunur.
+ * Ikisini toplamak CIFT SAYIM olur - ayni para iki kez gorunur.
  */
 
 export type RevenueEvent = {
@@ -15,7 +15,7 @@ export type RevenueEvent = {
   eventType: string;
   store: string | null;
   productId: string | null;
-  /** Kirpilmis kullanici kimligi — tam kimlik ekranda gosterilmez. */
+  /** Kirpilmis kullanici kimligi - tam kimlik ekranda gosterilmez. */
   userRef: string | null;
   countryCode: string | null;
   amount: number | null;

@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-heartbeat — bir heartbeat ping'ini kaydeder.
+// helm-heartbeat - bir heartbeat ping'ini kaydeder.
 // Kullanım (izlenen cron job sonuna eklenir):
 //   curl "https://<hub>.supabase.co/functions/v1/helm-heartbeat?id=<heartbeat-id>"
 // id (uuid) tahmin edilemez olduğu için endpoint JWT istemez (--no-verify-jwt).

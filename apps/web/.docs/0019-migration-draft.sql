@@ -1,5 +1,5 @@
 -- ==========================================================================
--- 0019_brands_and_properties.sql — TASLAK referansı (asıl dosya: supabase/migrations/0019_*.sql)
+-- 0019_brands_and_properties.sql - TASLAK referansı (asıl dosya: supabase/migrations/0019_*.sql)
 -- ==========================================================================
 -- Amaç: Brand → Property → Module hierarchy'ine geçiş.
 --   - `brands` tablosu yeni.
@@ -8,7 +8,7 @@
 --   - `properties.type` enum (website|web_app|mobile_app|desktop_app|game).
 --   - `properties.enabled_modules` text[] (modül toggle state).
 --
--- DİKKAT — mevcut FK'lar:
+-- DİKKAT - mevcut FK'lar:
 --   project_integrations.project_id, metrics.project_id, metrics_country.project_id,
 --   reviews.project_id, alert_rules.project_id (nullable), heartbeats.project_id (nullable),
 --   user_segments.project_id, app_versions.project_id, audit_log.project_id (nullable),
@@ -58,22 +58,22 @@ update public.properties p
 alter table public.properties alter column brand_id set not null;
 create index properties_brand_idx on public.properties(brand_id);
 
--- 6) properties.type — tüm mevcut property'ler default 'mobile_app' (kullanıcı sonra düzeltir)
+-- 6) properties.type - tüm mevcut property'ler default 'mobile_app' (kullanıcı sonra düzeltir)
 --    Empire Inc + Friday + Dante şu an mobile/SaaS karışık, manuel onay sonrası UPDATE çalıştırılır.
 alter table public.properties add column type property_type not null default 'mobile_app';
 
--- 7) properties.enabled_modules — boş array default, app code'unda preset'e göre doldurulur
+-- 7) properties.enabled_modules - boş array default, app code'unda preset'e göre doldurulur
 alter table public.properties add column enabled_modules text[] not null default '{}';
 
 -- 8) Geri-uyumlu view: eski `projects` adıyla read-only erişim (eski kod kırılmasın diye)
---    Bu view IN PLACE — Refine'in projects resource'u henüz update edilmediği sürece sorunsuz.
+--    Bu view IN PLACE - Refine'in projects resource'u henüz update edilmediği sürece sorunsuz.
 --    UI migrasyonu bittikten sonra DROP edilecek.
 create view public.projects as
   select id, name, slug, created_at, app_store_id, app_store_country
     from public.properties;
 
--- 9) RLS — properties tablo seviyesinde aynı policy (rename ile policy taşınır, manuel adım yok)
---    Audit: pg_policies'ten kontrol et — bazı PG versiyonlarında policy adı tabloyla bağlı.
+-- 9) RLS - properties tablo seviyesinde aynı policy (rename ile policy taşınır, manuel adım yok)
+--    Audit: pg_policies'ten kontrol et - bazı PG versiyonlarında policy adı tabloyla bağlı.
 
 commit;
 
@@ -112,7 +112,7 @@ commit;
 --         end
 --       where enabled_modules = '{}';
 --
--- 3) Brand seviyesinde gruplama — şu an her property'nin kendi brand'i (1:1). Manuel:
+-- 3) Brand seviyesinde gruplama - şu an her property'nin kendi brand'i (1:1). Manuel:
 --      -- Dante markası altında 3 property birleştirme örneği:
 --      with dante as (insert into brands (name, slug) values ('Dante', 'dante-group')
 --                     on conflict (slug) do update set name = excluded.name returning id)

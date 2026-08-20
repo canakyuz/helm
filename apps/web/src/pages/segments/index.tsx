@@ -51,9 +51,9 @@ import {
 import type { Project, UserSegment } from "@/types";
 
 const RULE_LABELS: Record<UserSegment["rule_type"], string> = {
-  new: "New — signed up within the last N days",
-  active: "Active — last sign-in within the last N days",
-  inactive: "Dormant — last sign-in older than N days",
+  new: "New - signed up within the last N days",
+  active: "Active - last sign-in within the last N days",
+  inactive: "Dormant - last sign-in older than N days",
 };
 
 interface CountResult {
@@ -125,7 +125,7 @@ export const SegmentsPage = () => {
   const { mutate: remove } = useDelete();
 
   const projectName = (id: string | null) =>
-    id ? (projects.find((p) => p.id === id)?.name ?? "—") : "All projects";
+    id ? (projects.find((p) => p.id === id)?.name ?? "-") : "All projects";
 
   const reset = () => {
     setName("");
@@ -155,7 +155,7 @@ export const SegmentsPage = () => {
     );
   };
 
-  // KPI hesapları — sadece hesaplanmış segmentleri kapsar
+  // KPI hesapları - sadece hesaplanmış segmentleri kapsar
   const stats = useMemo(() => {
     const computed = Object.values(counts).map((c) => c.count);
     const total = computed.reduce((s, n) => s + n, 0);
@@ -220,13 +220,13 @@ export const SegmentsPage = () => {
           value={
             stats.computed > 0
               ? `${stats.largest} / ${stats.smallest}`
-              : "—"
+              : "-"
           }
           icon={<Layers />}
         />
       </div>
 
-      {/* Şablonlar — segment hiç yoksa veya az ise göster */}
+      {/* Şablonlar - segment hiç yoksa veya az ise göster */}
       {segments.length < 4 && (
         <Card>
           <CardHeader>
@@ -357,7 +357,7 @@ export const SegmentsPage = () => {
             <EmptyState
               icon={<Layers className="size-6" />}
               title="No segments yet"
-              description="A segment is a rule-defined group of users. It becomes a target for Mail and Push. Start with + above — e.g. Active users (signed in within 7d)."
+              description="A segment is a rule-defined group of users. It becomes a target for Mail and Push. Start with + above - e.g. Active users (signed in within 7d)."
               compact
             />
           ) : (
@@ -393,7 +393,7 @@ export const SegmentsPage = () => {
                           </Badge>
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            —
+                            -
                           </span>
                         )}
                       </TableCell>
@@ -474,7 +474,7 @@ export const SegmentsPage = () => {
           <DialogHeader>
             <DialogTitle>
               {sampleOpen
-                ? `${segments.find((s) => s.id === sampleOpen)?.name} — sample users (ilk 10)`
+                ? `${segments.find((s) => s.id === sampleOpen)?.name} - sample users (ilk 10)`
                 : ""}
             </DialogTitle>
           </DialogHeader>
@@ -493,7 +493,7 @@ export const SegmentsPage = () => {
                   ? counts[sampleOpen]?.sample.map((u) => (
                       <TableRow key={u.id}>
                         <TableCell className="font-medium">
-                          {u.email ?? "—"}
+                          {u.email ?? "-"}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {projectName(u.project_id)}
@@ -503,7 +503,7 @@ export const SegmentsPage = () => {
                             ? new Date(u.last_sign_in_at).toLocaleString(
                                 "en-US",
                               )
-                            : "—"}
+                            : "-"}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -537,25 +537,25 @@ const SEGMENT_TEMPLATES: Array<{
 }> = [
   {
     name: "New users (7d)",
-    description: "Signed up within 7 days — optimise onboarding",
+    description: "Signed up within 7 days - optimise onboarding",
     rule_type: "new",
     rule_days: 7,
   },
   {
     name: "Active users (30d)",
-    description: "Signed in within 30 days — campaign target",
+    description: "Signed in within 30 days - campaign target",
     rule_type: "active",
     rule_days: 30,
   },
   {
     name: "At risk (14d)",
-    description: "Inactive for 14 days — win-back email",
+    description: "Inactive for 14 days - win-back email",
     rule_type: "inactive",
     rule_days: 14,
   },
   {
     name: "Lost users (60d)",
-    description: "Gone for 60 days — last-chance campaign",
+    description: "Gone for 60 days - last-chance campaign",
     rule_type: "inactive",
     rule_days: 60,
   },

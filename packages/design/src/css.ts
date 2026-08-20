@@ -1,7 +1,7 @@
 // Tema → CSS custom property üretici.
 //
 // apps/web Tailwind v4 kullanıyor (@theme inline + CSS değişkenleri); apps/mobile
-// Tailwind v3 JS config kullanıyor. İkisi aynı dosyayı okuyamaz — bu yüzden
+// Tailwind v3 JS config kullanıyor. İkisi aynı dosyayı okuyamaz - bu yüzden
 // ortak kaynak düz TS, web çıktısı buradan TÜRETİLİR.
 //
 // Bu tur mobil odaklı; fonksiyon web adımı geldiğinde tüketilecek.
@@ -25,7 +25,7 @@ export const toRgbChannels = (hex: string): string => {
 };
 
 /**
- * NativeWind tema bloğu — renkler RGB kanal üçlüsü olarak yazılır ki
+ * NativeWind tema bloğu - renkler RGB kanal üçlüsü olarak yazılır ki
  * Tailwind alfa modifier'ı (`bg-tile/50`) çalışsın. Hex yazılırsa alfa kırılır.
  */
 export const nativewindVars = (name: ThemeName): string => {
@@ -35,7 +35,7 @@ export const nativewindVars = (name: ThemeName): string => {
     .join("\n");
 };
 
-/** Temadan bağımsız değişkenler — marka, ölçek. */
+/** Temadan bağımsız değişkenler - marka, ölçek. */
 export const staticVars = (): string =>
   [
     ...Object.entries(brand).map(([k, v]) => `  --${k}: ${v};`),
@@ -44,7 +44,7 @@ export const staticVars = (): string =>
     ...Object.entries(type).map(([k, v]) => `  --text-${k}: ${v}px;`),
   ].join("\n");
 
-/** Tam stylesheet parçası — :root + [data-theme] blokları. */
+/** Tam stylesheet parçası - :root + [data-theme] blokları. */
 export const toStylesheet = (): string =>
   [
     `:root {\n${staticVars()}\n}`,

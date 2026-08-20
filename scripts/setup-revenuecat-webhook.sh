@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# RevenueCat webhook kurulumu — tek komut.
+# RevenueCat webhook kurulumu - tek komut.
 #
 # NE YAPAR (bu sirayla, sira onemli):
 #   1. Rastgele bir sir uretir
@@ -41,7 +41,7 @@ supabase secrets set "RC_WEBHOOK_SECRET=${SECRET}" --project-ref "${HELM_SUPABAS
 
 echo "▸ Fonksiyon deploy ediliyor (${FN})…"
 # --no-verify-jwt SART: RevenueCat Supabase JWT'si gondermez. Bu bayrak olmadan
-# ag gecidi her teslimati 401 ile reddeder — mevcut revenuecat-webhook'ta tam
+# ag gecidi her teslimati 401 ile reddeder - mevcut revenuecat-webhook'ta tam
 # olarak bu olmus olabilir.
 supabase functions deploy "${FN}" \
   --project-ref "${HELM_SUPABASE_PROJECT_ID}" \
@@ -108,12 +108,12 @@ else:
 if st not in (200, 201):
     # 403 = API anahtarinin integrations yazma yetkisi yok. Kurulumun geri kalani
     # tamam; geriye yalnizca URL'i girmek kaliyor. Adresi basiyoruz ki elle
-    # yapistirilabilsin — sir zaten URL'in icinde.
+    # yapistirilabilsin - sir zaten URL'in icinde.
     print(f"  ! RevenueCat kaydi API'den guncellenemedi: {st}")
     if "integrations:read_write" in str(res):
         print("    Sebep: RC API anahtarinda project_configuration:integrations:read_write yetkisi yok.")
     print()
-    print("    ELLE GIR — RevenueCat > Project > Integrations > Webhooks:")
+    print("    ELLE GIR - RevenueCat > Project > Integrations > Webhooks:")
     print(f"    {target}")
     print()
     print("    (Alternatif: RC panelinden API anahtarina yukaridaki yetkiyi ver, betigi tekrar calistir.)")

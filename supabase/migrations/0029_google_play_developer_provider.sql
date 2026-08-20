@@ -1,4 +1,4 @@
--- Google Play Developer sağlayıcısı — Android yorumları + sürüm tracks API'si için.
+-- Google Play Developer sağlayıcısı - Android yorumları + sürüm tracks API'si için.
 -- helm-reviews ve helm-versions Edge Function'ları bu entegrasyondan
 -- service_account_json + package_name + language_codes okur.
 

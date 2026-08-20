@@ -6,7 +6,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RN="$ROOT/node_modules/react-native/scripts/generate-codegen-artifacts.js"
 
 if [[ ! -f "$RN" ]]; then
-  echo "error: react-native not found — run bun install" >&2
+  echo "error: react-native not found - run bun install" >&2
   exit 1
 fi
 

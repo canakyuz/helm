@@ -71,7 +71,7 @@ export function ModuleCard({
         minHeight: CARD_HEIGHT,
       })}
     >
-      {/* Skia background — gradient + accent corner glow */}
+      {/* Skia background - gradient + accent corner glow */}
       {size.width > 0 ? (
         <Canvas
           style={{
@@ -127,7 +127,7 @@ export function ModuleCard({
 
       {/* Content */}
       <View style={{ padding: 18, gap: 14, flex: 1 }}>
-        {/* Top row — icon + label/sublabel + chevron */}
+        {/* Top row - icon + label/sublabel + chevron */}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View
             style={{
@@ -184,7 +184,7 @@ export function ModuleCard({
         {/* Divider */}
         <View style={{ height: 1, backgroundColor: colors.border }} />
 
-        {/* Bottom row — primary + secondary stats */}
+        {/* Bottom row - primary + secondary stats */}
         <View
           style={{
             flexDirection: "row",

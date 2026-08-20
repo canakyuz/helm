@@ -18,13 +18,13 @@ export type TileDef = {
   label: string;
   // formatCurrency parametresine düşmesi gereken değerler için flag.
   isCurrency?: boolean;
-  /** null = olcum yok — kart "—" gostermeli, 0 DEGIL. */
+  /** null = olcum yok - kart "-" gostermeli, 0 DEGIL. */
   pick: (k: CockpitKpis) => number | null;
 };
 
 // Modüllere göre tile registry. "core" tiles her zaman görünür (modülden bağımsız).
 export const TILE_REGISTRY: TileDef[] = [
-  // CORE — modülden bağımsız her zaman göster.
+  // CORE - modülden bağımsız her zaman göster.
   {
     key: "open-alerts",
     module: "core",
@@ -39,7 +39,7 @@ export const TILE_REGISTRY: TileDef[] = [
     label: "Kritik",
     pick: (k) => k.criticalAlerts,
   },
-  // SUBSCRIPTIONS — MRR rich-tile'da, basit grid'de sadece aktif abone.
+  // SUBSCRIPTIONS - MRR rich-tile'da, basit grid'de sadece aktif abone.
   {
     key: "active-subs",
     module: "subscriptions",
@@ -69,7 +69,7 @@ export const TILE_REGISTRY: TileDef[] = [
     label: "Yeni kullanıcı",
     pick: (k) => k.newUsers,
   },
-  // ADS — ad_revenue rich-tile'da gösteriliyor, basit grid'e koymuyoruz.
+  // ADS - ad_revenue rich-tile'da gösteriliyor, basit grid'e koymuyoruz.
 ];
 
 export function tilesForModules(modules: ModuleId[] | "all"): TileDef[] {

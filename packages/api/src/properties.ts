@@ -72,7 +72,7 @@ export async function fetchProperties(client: SupabaseClient): Promise<Property[
         "id, name, slug, brand_id, type, enabled_modules, brands ( name ), heartbeats ( name, interval_minutes, last_ping_at )",
       )
       .order("name", { ascending: true }),
-    // Heartbeat'siz projeler için aktivite fallback'i — son 14g metric tarihleri.
+    // Heartbeat'siz projeler için aktivite fallback'i - son 14g metric tarihleri.
     client
       .from("metrics")
       .select("project_id, date")
@@ -92,7 +92,7 @@ export async function fetchProperties(client: SupabaseClient): Promise<Property[
   }
 
   return ((propsRes.data as unknown as PropertyRow[] | null) ?? []).map((row) => {
-    // Bir property'nin birden çok heartbeat'i olabilir — en son ping'i seç.
+    // Bir property'nin birden çok heartbeat'i olabilir - en son ping'i seç.
     const beats = row.heartbeats ?? [];
     const latest = beats.reduce<(typeof beats)[number] | null>((acc, beat) => {
       if (!beat.last_ping_at) return acc;

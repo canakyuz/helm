@@ -1,4 +1,4 @@
--- helm — müdahale kayıt günlüğü (CRM → Müdahale Geçmişi).
+-- helm - müdahale kayıt günlüğü (CRM → Müdahale Geçmişi).
 -- İleride helm-action fonksiyonu (gem ver / ban vb.) buraya yazacak.
 
 create table if not exists public.audit_log (

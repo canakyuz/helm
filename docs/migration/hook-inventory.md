@@ -1,6 +1,6 @@
 # Mobile Hook Envanteri
 
-> Kaynak: `helm-mobile/src/hooks/` — 2026-05-29  
+> Kaynak: `helm-mobile/src/hooks/` - 2026-05-29  
 > Faz 1 extract için referans tablo.
 
 ## Özet
@@ -11,30 +11,30 @@
 | Platform-only | 3 |
 | **Toplam** | 21 |
 
-## Data hooks — extract hedefi
+## Data hooks - extract hedefi
 
 | Hook dosyası | Fetch fn | Hub tabloları | `@helm/api` modül | Mutations |
 |--------------|----------|---------------|-------------------|-----------|
-| `use-cockpit-kpis.ts` | `fetchCockpitKpis`, `fetchMrrSpark`, `fetchTotalRevenueSpark` | `metrics`, `alert_events`, `sync_runs` | `cockpit-kpis.ts` | — |
+| `use-cockpit-kpis.ts` | `fetchCockpitKpis`, `fetchMrrSpark`, `fetchTotalRevenueSpark` | `metrics`, `alert_events`, `sync_runs` | `cockpit-kpis.ts` | - |
 | `use-alerts.ts` | `fetchAlerts` | `alert_events`, `alert_rules` | `alerts.ts` | `ackAlert` |
-| `use-properties.ts` | `fetchProperties` | `properties`, `brands`, `heartbeats` | `properties.ts` | — |
-| `use-property-list.ts` | `fetchPropertyList` | `properties` | `property-list.ts` | — |
-| `use-reviews.ts` | `fetchReviews` | `reviews` | `reviews.ts` | — |
-| `use-review-reply.ts` | — | App Store API via hub | `reviews.ts` | `submitReviewReply` |
-| `use-system-health.ts` | `fetchHealth` | `project_integrations`, `sync_runs` | `system-health.ts` | — |
-| `use-audit.ts` | `fetchAudit` | audit table (hook içinde) | `audit.ts` | — |
-| `use-users.ts` | `fetchAllUsers`, `fetchUsersForProperty` | `project_integrations`, edge fn | `users.ts` | — |
-| `use-property-dau.ts` | `fetchPropertyDau`, `fetchUsers` | `properties`, integrations | `users.ts` veya `property-dau.ts` | — |
-| `use-sentry-issues.ts` | `fetchIssues`, `fetchPropertyMap` | properties + sentry | `sentry-issues.ts` | — |
-| `use-app-versions.ts` | `fetchVersions` | app metadata | `app-versions.ts` | — |
-| `use-metric-detail.ts` | `fetchDetail` | `metrics` | `metric-detail.ts` | — |
-| `use-projects-breakdown.ts` | `fetchBreakdown` | `metrics`, `properties` | `projects-breakdown.ts` | — |
-| `use-segments.ts` | `fetchSegments` | segments table | `segments.ts` | — |
-| `use-segment-template-counts.ts` | `fetchAllUsers`, `fetchUsersForProperty` | integrations + auth users | `segment-metrics.ts` | — |
-| `use-property-metric-totals.ts` | `fetchTotals` | `metrics` | `property-metric-totals.ts` | — |
-| `use-fx-rates.ts` | `fetchRates` | external / hub fx | `fx-rates.ts` | — |
+| `use-properties.ts` | `fetchProperties` | `properties`, `brands`, `heartbeats` | `properties.ts` | - |
+| `use-property-list.ts` | `fetchPropertyList` | `properties` | `property-list.ts` | - |
+| `use-reviews.ts` | `fetchReviews` | `reviews` | `reviews.ts` | - |
+| `use-review-reply.ts` | - | App Store API via hub | `reviews.ts` | `submitReviewReply` |
+| `use-system-health.ts` | `fetchHealth` | `project_integrations`, `sync_runs` | `system-health.ts` | - |
+| `use-audit.ts` | `fetchAudit` | audit table (hook içinde) | `audit.ts` | - |
+| `use-users.ts` | `fetchAllUsers`, `fetchUsersForProperty` | `project_integrations`, edge fn | `users.ts` | - |
+| `use-property-dau.ts` | `fetchPropertyDau`, `fetchUsers` | `properties`, integrations | `users.ts` veya `property-dau.ts` | - |
+| `use-sentry-issues.ts` | `fetchIssues`, `fetchPropertyMap` | properties + sentry | `sentry-issues.ts` | - |
+| `use-app-versions.ts` | `fetchVersions` | app metadata | `app-versions.ts` | - |
+| `use-metric-detail.ts` | `fetchDetail` | `metrics` | `metric-detail.ts` | - |
+| `use-projects-breakdown.ts` | `fetchBreakdown` | `metrics`, `properties` | `projects-breakdown.ts` | - |
+| `use-segments.ts` | `fetchSegments` | segments table | `segments.ts` | - |
+| `use-segment-template-counts.ts` | `fetchAllUsers`, `fetchUsersForProperty` | integrations + auth users | `segment-metrics.ts` | - |
+| `use-property-metric-totals.ts` | `fetchTotals` | `metrics` | `property-metric-totals.ts` | - |
+| `use-fx-rates.ts` | `fetchRates` | external / hub fx | `fx-rates.ts` | - |
 
-## Platform-only — extract yok
+## Platform-only - extract yok
 
 | Hook | Neden |
 |------|-------|

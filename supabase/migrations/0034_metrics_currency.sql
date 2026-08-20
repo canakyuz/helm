@@ -1,4 +1,4 @@
--- WES-000 metrics.currency — kaynak para birimi etiketi.
+-- WES-000 metrics.currency - kaynak para birimi etiketi.
 -- Revenue değerleri KAYNAK para biriminde saklanır (AdMob ad_revenue → TRY,
 -- RevenueCat mrr → USD, App Store proceeds → vendor ccy). Bu kolon her satırı
 -- kaynağının currency'siyle etiketler; değer HAM kalır (çeviri gösterimde,

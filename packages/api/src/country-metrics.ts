@@ -2,12 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SelectedPropertyId } from "@helm/types";
 
 /**
- * Ulke kirilimi — metrics_country tablosundan.
+ * Ulke kirilimi - metrics_country tablosundan.
  *
  * NEDEN POSTHOG DEGIL: PostHog geo ucu bu projede bos donuyor. metrics_country
  * ise dolu (app_downloads: 1.077 satir, 71 ulke). Ekran yanlis kaynaga bakiyordu.
  *
- * VARSAYILAN METRIK app_downloads — cunku dolu olan o. `dau` kirilimi 15 satir ve
+ * VARSAYILAN METRIK app_downloads - cunku dolu olan o. `dau` kirilimi 15 satir ve
  * Mayis'ta donmus; onu "kullanici" diye gostermek yaniltici olurdu. Metrik disari
  * acik ki ekran neyi gosterdigini DOGRU etiketleyebilsin.
  */
@@ -42,7 +42,7 @@ export async function fetchCountryMetrics(
   const { data, error } = await q;
   if (error) throw error;
 
-  // Ulke basina topla. Time: O(n), Space: O(u) — u = benzersiz ulke.
+  // Ulke basina topla. Time: O(n), Space: O(u) - u = benzersiz ulke.
   const byCode = new Map<string, number>();
   for (const r of (data ?? []) as Row[]) {
     const v = Number(r.value) || 0;

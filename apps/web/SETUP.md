@@ -1,4 +1,4 @@
-# helm — Kurulum
+# helm - Kurulum
 
 Çok-projeli founder cockpit. Tüm projelerin gelir + kullanıcı metriklerini tek
 panelde toplar. Lokal çalışır (`npm run dev`).
@@ -29,7 +29,7 @@ Supabase   ─┘                                            project_integration
 npx supabase link --project-ref <hub-ref>
 npx supabase db push          # 0001_init.sql tabloları kurar
 ```
-> `0002_cron.sql` cron job'u kurar ama önce Vault secret'larını ister — bkz. adım 6.
+> `0002_cron.sql` cron job'u kurar ama önce Vault secret'larını ister - bkz. adım 6.
 
 ### 3. Panel kullanıcısı
 - Supabase Dashboard → Authentication → Users → kendine bir kullanıcı ekle
@@ -47,7 +47,7 @@ npm run dev
 npx supabase functions deploy helm-ingest
 ```
 `SUPABASE_URL` ve `SUPABASE_SERVICE_ROLE_KEY` Edge Function ortamında
-otomatik tanımlıdır — ekstra ayar gerekmez.
+otomatik tanımlıdır - ekstra ayar gerekmez.
 
 ### 6. Gece cron (opsiyonel ama önerilir)
 Supabase SQL Editor'da, **gerçek hub değerleriyle** bir kez çalıştır:

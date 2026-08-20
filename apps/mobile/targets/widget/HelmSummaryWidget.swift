@@ -26,7 +26,7 @@ private struct HelmWidgetPayload: Decodable {
     totalRevenueText ?? legacyMoney(totalRevenue ?? ((adRevenue ?? 0) + (incomingPayments ?? 0)))
   }
 
-  /// "21:00" — verinin YAZILDIGI an, widget'in cizildigi an degil.
+  /// "21:00" - verinin YAZILDIGI an, widget'in cizildigi an degil.
   ///
   /// NEDEN GEREKLI: widget agdan veri cekmiyor; yalnizca uygulamanin en son
   /// yazdigi dosyayi okuyor. Uygulama acilmadigi surece rakam gunlerce ayni
@@ -52,7 +52,7 @@ private struct HelmWidgetPayload: Decodable {
     if let mrrDeltaText { return mrrDeltaText }
     if let conversionRateText { return conversionRateText }
     guard let mrrDelta else {
-      guard let conversionRate else { return "—" }
+      guard let conversionRate else { return "-" }
       return String(format: "%+.0f%%", conversionRate)
     }
     return String(format: "%+.0f%%", mrrDelta)
@@ -80,7 +80,7 @@ private struct HelmWidgetPayload: Decodable {
     formatter.currencyCode = currency ?? "TRY"
     formatter.minimumFractionDigits = 2
     formatter.maximumFractionDigits = 2
-    return formatter.string(from: NSNumber(value: value)) ?? "—"
+    return formatter.string(from: NSNumber(value: value)) ?? "-"
   }
 }
 
@@ -167,7 +167,7 @@ private extension View {
 
 // MARK: - Glass tokens
 
-// Tum degerler HelmDesignTokens.swift'ten — o dosya `bun run gen:design` ile
+// Tum degerler HelmDesignTokens.swift'ten - o dosya `bun run gen:design` ile
 // packages/design/src/themes.ts'ten uretilir. Buraya ham hex YAZMA: widget'in
 // eski paleti (grafik gradyani #FF6B6B/#C56CF0/#4834D4, base #0C0C10) sistemde
 // hicbir yerde yoktu, cunku elle kopyalanmisti.
@@ -182,7 +182,7 @@ private enum G {
   static let track = Color.white.opacity(0.1)
   static let up = HelmTokens.pos
   static let down = HelmTokens.neg
-  // Grafik: tek accent, son bar vurgulu (design.md §7 — Bars).
+  // Grafik: tek accent, son bar vurgulu (design.md §7 - Bars).
   static let bar = HelmTokens.accent
   static let barDim = HelmTokens.accent.opacity(0.42)
 }
@@ -645,7 +645,7 @@ private struct HelmLockOfflineBody: View {
   var body: some View {
     switch family {
     case .accessoryInline:
-      Text("helm — open app to sync")
+      Text("helm - open app to sync")
     case .accessoryRectangular:
       VStack(alignment: .leading, spacing: 2) {
         Text("helm")
@@ -659,7 +659,7 @@ private struct HelmLockOfflineBody: View {
       Gauge(value: 0, in: 0...1) {
         Image(systemName: "chart.line.uptrend.xyaxis")
       } currentValueLabel: {
-        Text("—")
+        Text("-")
       }
       .gaugeStyle(.accessoryCircular)
     }
@@ -674,7 +674,7 @@ private struct HelmOfflineBody: View {
       Text("Total Revenue")
         .font(.system(size: 11, weight: .medium))
         .helmText(.secondary)
-      HelmTotalAmount(full: "—", mainPt: small ? 22 : 28, centsPt: small ? 12 : 15)
+      HelmTotalAmount(full: "-", mainPt: small ? 22 : 28, centsPt: small ? 12 : 15)
       Text("Open helm · sync cockpit")
         .font(.system(size: 10, weight: .medium))
         .helmText(.tertiary)
@@ -693,7 +693,7 @@ private struct HelmSummaryWidgetView: View {
 
   private var homeRenderStyle: HelmRenderStyle {
     if #available(iOS 17.0, *) {
-      // Tinted / vibrant home screen — glass chrome off, accent on hero metrics only.
+      // Tinted / vibrant home screen - glass chrome off, accent on hero metrics only.
       return renderingMode == .fullColor ? .glass : .accented
     }
     return .glass

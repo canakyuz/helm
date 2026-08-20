@@ -1,4 +1,4 @@
--- helm — reviews v2: yeni kaynak (Google Play), version + territory + yanıt alanları.
+-- helm - reviews v2: yeni kaynak (Google Play), version + territory + yanıt alanları.
 -- ASC Customer Reviews API'ye geçiş için source_method ayrımı.
 
 alter table public.reviews
@@ -8,7 +8,7 @@ alter table public.reviews
   add column if not exists responded_at       timestamptz,
   add column if not exists source_method      text;
 
--- Mevcut row'lar RSS kaynaklı — backfill
+-- Mevcut row'lar RSS kaynaklı - backfill
 update public.reviews
   set source_method = 'rss'
   where source_method is null and source = 'appstore';

@@ -1,36 +1,36 @@
-# helm-mobile — Proje Kuralları
+# helm-mobile - Proje Kuralları
 
 Bu, `helm` cockpit'inin **kişisel** mobil yoldaşıdır. Refine masaüstünde kalır; bu uygulama sadece sahada/yolda hızlı KPI + alert kontrolü için. Kendi TestFlight'ından dağıtılır, App Store'a gitmez.
 
-> Global kurallar: `~/.claude/CLAUDE.md` — kanıt önce yargı, algoritmik mükemmellik, polyrepo, no `any`, conventional commits + WES-XXX.
+> Global kurallar: `~/.claude/CLAUDE.md` - kanıt önce yargı, algoritmik mükemmellik, polyrepo, no `any`, conventional commits + WES-XXX.
 >
-> **Tasarım sistemi: [`design.md`](./design.md)** — liquid glass token'ları (`src/theme/tokens.ts`: colors/type/space/glass/radius), bileşen envanteri (`src/components/liquid/`), native parçalar (@expo/ui NativeSegmented, expo-maps AudienceMap), hareket + gotcha kuralları. UI yazmadan önce oku; token/bileşen adı uydurma.
+> **Tasarım sistemi: [`design.md`](./design.md)** - liquid glass token'ları (`src/theme/tokens.ts`: colors/type/space/glass/radius), bileşen envanteri (`src/components/liquid/`), native parçalar (@expo/ui NativeSegmented, expo-maps AudienceMap), hareket + gotcha kuralları. UI yazmadan önce oku; token/bileşen adı uydurma.
 
 ---
 
 ## UI/UX Skill Workflow (ZORUNLU)
 
 Arayüz, ekran, component, layout, görsel, motion veya UX ile ilgili **her işte**
-— yeni ekran, redesign, hizalama/spacing düzeltme, animasyon, renk, tipografi,
-review/audit, "şu ekranı düzelt" — kod yazmadan/önermeden ÖNCE şu üç skill'i
+- yeni ekran, redesign, hizalama/spacing düzeltme, animasyon, renk, tipografi,
+review/audit, "şu ekranı düzelt" - kod yazmadan/önermeden ÖNCE şu üç skill'i
 `Skill` tool ile çağır:
 
-1. **`emil-design-eng`** — bir **motion/animasyon kararı** verirken (geçiş, spring,
+1. **`emil-design-eng`** - bir **motion/animasyon kararı** verirken (geçiş, spring,
    press feedback, enter/exit timing, easing, stagger). Statik UI'ı canlı/cilalı
    yapan kararlar buradan. Her küçük dokunuşta değil, hareket kararı varken aç.
-2. **`impeccable`** — **görsel incelik** için (tipografi, renk, hiyerarşi, spacing,
+2. **`impeccable`** - **görsel incelik** için (tipografi, renk, hiyerarşi, spacing,
    hizalama, kontrast, layout, audit). Mevcut tasarım sistemini DEVRALIR, üzerine
    yazmaz. Slop detector + komut modları var.
-3. **`design-taste-frontend`** (Taste) — **tasarım zevki / anti-slop** için.
+3. **`design-taste-frontend`** (Taste) - **tasarım zevki / anti-slop** için.
    Şablonvari, karaktersiz AI arayüzlerini engeller; consistency lock'lar
    (tek accent, tek radius, tek tema), accent economy.
 
 **Dürüstlük kuralı:** `design-taste-frontend` bir **web landing/portfolio** skill'i.
 RN/Expo mobilde sadece **transfer olan ilkelerini** uygula (consistency lock'lar,
-accent economy, OKLCH, anti-slop) — web-only pattern'leri (GSAP ScrollTrigger,
+accent economy, OKLCH, anti-slop) - web-only pattern'leri (GSAP ScrollTrigger,
 Next.js RSC, Tailwind utilities) zorla sokma. Hangi ilkenin geçerli olduğunu işaretle.
 
-**Sınır:** Bu üç skill mevcut tasarım dilimizi (`design.md` — Liquid Glass
+**Sınır:** Bu üç skill mevcut tasarım dilimizi (`design.md` - Liquid Glass
 + native iOS) BOZMAZ; onun ÜSTÜNE cila/karar katar. Çakışırsa design.md + bu
 CLAUDE.md kazanır. Backend-only / non-UI işlerde bu skill'ler gerekmez.
 
@@ -117,7 +117,7 @@ helm-mobile/
 - **Componentler:** PascalCase (`KpiCard`).
 - **Hooks:** `use*` prefix, camelCase (`useCockpitKpis`).
 - **Tipler:** PascalCase, suffix yok (`Alert`, `Property`). Supabase row tipleri: `T<TableName>Row` (`TAlertRow`).
-- **Test ID'leri:** kebab-case (`testID="kpi-mrr"`) — Maestro/Detox için.
+- **Test ID'leri:** kebab-case (`testID="kpi-mrr"`) - Maestro/Detox için.
 
 ## 5) Routing (Expo Router)
 
@@ -146,7 +146,7 @@ helm-mobile/
 ## 7) Styling
 
 - **NativeWind v4** className. Inline style yasak (animasyon hariç).
-- **Tokens:** `src/theme/tokens.ts` — semantic isimler (`bg-surface-1`, `text-fg-muted`). helm ile aynı palet.
+- **Tokens:** `src/theme/tokens.ts` - semantic isimler (`bg-surface-1`, `text-fg-muted`). helm ile aynı palet.
 - **Dark mode:** Sistem değil, varsayılan dark. Light mode YOK.
 - **Spacing:** Sadece Tailwind scale (4'ün katları). Custom px değer YOK.
 - **Safe area:** `react-native-safe-area-context` kullan, hardcoded padding YOK.
@@ -168,7 +168,7 @@ helm-mobile/
 
 - TanStack Query `error` state UI'a düşer. Toast yok, inline error gösterir.
 - Network kaybı: Banner üstte, query otomatik retry.
-- Supabase error: `error.message` user-facing değil — generic mesaj göster, console.log detay.
+- Supabase error: `error.message` user-facing değil - generic mesaj göster, console.log detay.
 
 ## 11) EAS / TestFlight Akışı
 
@@ -188,9 +188,9 @@ eas update --branch preview --message "WES-XXX neden"
 ```
 
 **eas.json profilleri:**
-- `development` — dev client, simulator + device
-- `preview` — internal distribution, TestFlight'a submit edilir
-- `production` — KULLANMA (App Store için, kapsam dışı)
+- `development` - dev client, simulator + device
+- `preview` - internal distribution, TestFlight'a submit edilir
+- `production` - KULLANMA (App Store için, kapsam dışı)
 
 ## 12) Environment
 
@@ -206,7 +206,7 @@ EXPO_PUBLIC_HELM_SUPABASE_ANON_KEY=eyJ...
 
 - Conventional commits + WES-XXX (global kuraldan miras).
 - Scope: `mobile`, `mobile-auth`, `mobile-cockpit`, `mobile-alerts`, `mobile-build`.
-- Örnek: `feat(mobile-cockpit): WES-000 KPI ekranı — MRR/DAU/aktif alert`.
+- Örnek: `feat(mobile-cockpit): WES-000 KPI ekranı - MRR/DAU/aktif alert`.
 
 ## 14) Self-Review (her PR/commit öncesi)
 

@@ -5,7 +5,7 @@ web-build/
 *.log
 .DS_Store
 
-# Env — .env.example dışında hiçbir env dosyası commit edilmez
+# Env - .env.example dışında hiçbir env dosyası commit edilmez
 .env
 .env.*
 !.env.example

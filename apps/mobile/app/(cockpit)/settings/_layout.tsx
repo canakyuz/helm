@@ -5,7 +5,7 @@ import { Stack } from "expo-router";
  *
  * NEDEN: entegrasyonlar, gorunum ve veri ayarlari tek kaydirmaya sigmiyordu;
  * hepsini alt alta dizmek "sonsuz ayar sayfasi" uretir. Hub kisa kalir, agir
- * icerik itilen ekranlara gider — iOS Ayarlar idiomu.
+ * icerik itilen ekranlara gider - iOS Ayarlar idiomu.
  *
  * headerShown false: baslik ekranin ICINDE (`BentoHeader`), cunku arka plan
  * (`BentoBackground`) basligin altindan gecmeli. Native baslik onu keserdi.

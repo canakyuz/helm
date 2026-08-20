@@ -5,7 +5,7 @@ import {
   today,
 } from "./types.ts";
 
-// PostHog — HogQL query API. Günlük DAU serisi + anlık WAU.
+// PostHog - HogQL query API. Günlük DAU serisi + anlık WAU.
 // config: { project_id, api_key, host }
 
 async function hogql(
@@ -34,7 +34,7 @@ export const fetchPostHog: Connector = async (config) => {
   const pid = config.project_id;
   const key = config.api_key;
 
-  // Günlük DAU serisi (90 gün) — grafik için geçmiş veri.
+  // Günlük DAU serisi (90 gün) - grafik için geçmiş veri.
   const dauRows = await hogql(
     host,
     pid,
@@ -52,7 +52,7 @@ export const fetchPostHog: Connector = async (config) => {
     value: Number(r[1] ?? 0),
   }));
 
-  // Anlık WAU — son 7 günün tekil kullanıcısı.
+  // Anlık WAU - son 7 günün tekil kullanıcısı.
   const wauRows = await hogql(
     host,
     pid,
@@ -67,7 +67,7 @@ export const fetchPostHog: Connector = async (config) => {
     value: Number(wauRows[0]?.[0] ?? 0),
   });
 
-  // Anlık MAU — son 30 günün tekil kullanıcısı (stickiness = dau/mau türetilir).
+  // Anlık MAU - son 30 günün tekil kullanıcısı (stickiness = dau/mau türetilir).
   const mauRows = await hogql(
     host,
     pid,
@@ -82,7 +82,7 @@ export const fetchPostHog: Connector = async (config) => {
     value: Number(mauRows[0]?.[0] ?? 0),
   });
 
-  // Ortalama oturum süresi (sn) — son 7 gün, $session_id bazında. Bazı
+  // Ortalama oturum süresi (sn) - son 7 gün, $session_id bazında. Bazı
   // projelerde session property yok → graceful, dau/wau/mau'yu bloklamaz.
   try {
     const sessRows = await hogql(
@@ -106,7 +106,7 @@ export const fetchPostHog: Connector = async (config) => {
     // $session_id yoksa oturum süresi atlanır.
   }
 
-  // Ülke kırılımı — son 30 gün DAU. PostHog otomatik geoip_country_code yakalar
+  // Ülke kırılımı - son 30 gün DAU. PostHog otomatik geoip_country_code yakalar
   // (kişi properties veya event properties). Boş/null olanları atla.
   const byCountry: CountryMetricPoint[] = [];
   try {

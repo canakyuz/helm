@@ -21,7 +21,7 @@ htpasswd -c /etc/nginx/.htpasswd-helm can
 ```bash
 HOST=user@<wesan-ip> REMOTE_DIR=/var/www/helm/dist ./deploy/deploy.sh
 ```
-Build lokal yapılır, `dist/` rsync'lenir. `apps/web/.env`'de `VITE_HELM_SUPABASE_URL` + `VITE_HELM_SUPABASE_ANON_KEY` dolu olmalı (bunlar dist'e gömülür — public anon key, RLS korumalı).
+Build lokal yapılır, `dist/` rsync'lenir. `apps/web/.env`'de `VITE_HELM_SUPABASE_URL` + `VITE_HELM_SUPABASE_ANON_KEY` dolu olmalı (bunlar dist'e gömülür - public anon key, RLS korumalı).
 
 ## 5. Supabase kilidi (kuşak+askı)
 - Supabase Dashboard → Auth → **public signup KAPALI**, sadece kendi email'ine magic link.

@@ -433,7 +433,7 @@ export function Toggle({
   );
 }
 
-// small DEMO chip — required next to any demo-sourced value
+// small DEMO chip - required next to any demo-sourced value
 export function DemoChip() {
   return (
     <View

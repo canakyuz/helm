@@ -69,7 +69,7 @@ interface AppStoreVersionAttrs {
   versionString?: string;
   appStoreState?: string;
   createdDate?: string;
-  releaseNotes?: string; // genelde appStoreVersionLocalizations'ta — opsiyonel skip
+  releaseNotes?: string; // genelde appStoreVersionLocalizations'ta - opsiyonel skip
 }
 interface AppStoreVersionResource {
   id: string;
@@ -149,7 +149,7 @@ export async function fetchAscVersions(
     const res = await fetchWithTimeout(url, { headers });
     diag.appStoreVersionsStatus = res.status;
     if (res.status === 401) {
-      return { ok: false, status: 401, message: "ASC 401 — App Manager/Admin scope required (for appStoreVersions)" };
+      return { ok: false, status: 401, message: "ASC 401 - App Manager/Admin scope required (for appStoreVersions)" };
     }
     if (!res.ok) {
       diag.appStoreVersionsError = `${res.status}: ${(await res.text()).slice(0, 200)}`;
@@ -184,7 +184,7 @@ export async function fetchAscVersions(
     diag.appStoreVersionsError = e instanceof Error ? e.message : String(e);
   }
 
-  // 2. Builds (TestFlight) — top-level /v1/builds?filter[app]=...&include=preReleaseVersion
+  // 2. Builds (TestFlight) - top-level /v1/builds?filter[app]=...&include=preReleaseVersion
   //    Relationship endpoint /v1/apps/{id}/preReleaseVersions ?include= parametresini
   //    reddediyor (PARAMETER_ERROR.ILLEGAL); top-level collection ile filter + include
   //    tek call'da build + parent version verir.

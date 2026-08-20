@@ -42,7 +42,7 @@ export function RichMetricTile({
   const formatNumber = (v: number) =>
     isCurrency ? fmt(v) : formatInteger(v);
 
-  const nowValue = isLoading ? "—" : formatNumber(data?.today ?? 0);
+  const nowValue = isLoading ? "-" : formatNumber(data?.today ?? 0);
 
   const delta = useMemo(() => {
     if (!data || data.yesterday === 0) return null;
@@ -230,17 +230,17 @@ export function RichMetricTile({
         >
           <PeriodCell
             label={t("DÜN")}
-            value={data ? formatNumber(data.yesterday) : "—"}
+            value={data ? formatNumber(data.yesterday) : "-"}
           />
           <Divider />
           <PeriodCell
             label="BU AY"
-            value={data ? formatNumber(data.thisMonth) : "—"}
+            value={data ? formatNumber(data.thisMonth) : "-"}
           />
           <Divider />
           <PeriodCell
             label={t("GEÇEN AY")}
-            value={data ? formatNumber(data.lastMonth) : "—"}
+            value={data ? formatNumber(data.lastMonth) : "-"}
           />
         </View>
       </View>

@@ -1,4 +1,4 @@
--- helm — app_versions v2: TestFlight + App Store Connect entegrasyonu.
+-- helm - app_versions v2: TestFlight + App Store Connect entegrasyonu.
 -- iTunes lookup sadece publicly released sürümü döner; ASC API ile
 -- appStoreVersions + preReleaseVersions + builds çekilince satır başına
 -- status + build_number + expires_at bilgisi de tutmamız gerekiyor.
@@ -9,7 +9,7 @@ alter table public.app_versions
   add column if not exists expires_at        timestamptz,
   add column if not exists state_changed_at  timestamptz;
 
--- Mevcut unique key (project_id, source, version) TestFlight için yetersiz —
+-- Mevcut unique key (project_id, source, version) TestFlight için yetersiz -
 -- aynı 1.0.0 versiyonu birden fazla build (23/24/26/29/30) içerebilir.
 -- build_number dahil et; NULL'lar Postgres'te distinct sayılmaz (iTunes lookup
 -- canlı sürüm satırı = build_number NULL → tek kayıt kalır, çatışmaz).

@@ -1,4 +1,4 @@
-# helm-mobile — local iOS release (EAS cloud quota bypass)
+# helm-mobile - local iOS release (EAS cloud quota bypass)
 # Requires: macOS, Xcode, bun, eas-cli, Apple team AZPJSKX9C9
 
 SHELL := /bin/bash
@@ -11,7 +11,7 @@ IPA         ?= $(DIST)/helm-ios-$(EAS_PROFILE).ipa
 .PHONY: help check install ios-prebuild pod-install ios-codegen ios-local-build ios-submit ios-local-release ios-cloud-build ios-device clean-dist
 
 help:
-	@echo "helm-mobile — iOS Makefile"
+	@echo "helm-mobile - iOS Makefile"
 	@echo ""
 	@echo "  make ios-local-release    Build IPA on this Mac + submit TestFlight (no cloud slot)"
 	@echo "  make ios-local-build      Local EAS build only → $(IPA)"
@@ -45,7 +45,7 @@ pod-install:
 ios-codegen:
 	bun run ios:codegen
 
-# Local EAS build — does not consume Expo cloud build quota
+# Local EAS build - does not consume Expo cloud build quota
 ios-local-build: check
 	@mkdir -p "$(DIST)"
 	@echo "→ eas build --local profile=$(EAS_PROFILE) output=$(IPA)"

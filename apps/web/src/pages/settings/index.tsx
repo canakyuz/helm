@@ -79,7 +79,7 @@ export const SettingsPage = () => {
               <Switch checked={!isDark} onCheckedChange={toggleMode} />
             </Label>
             <p className="text-xs text-muted-foreground">
-              Liquid Glass — {isDark ? "dark" : "light"} mod.
+              Liquid Glass - {isDark ? "dark" : "light"} mod.
             </p>
           </CardContent>
         </Card>
@@ -119,18 +119,18 @@ export const SettingsPage = () => {
             <dt className="flex items-center gap-2 text-muted-foreground">
               <Mail className="size-3.5" /> Oturum
             </dt>
-            <dd className="font-mono">{identity?.email ?? "—"}</dd>
+            <dd className="font-mono">{identity?.email ?? "-"}</dd>
 
             <dt className="flex items-center gap-2 text-muted-foreground">
               <Server className="size-3.5" /> Hub URL
             </dt>
-            <dd className="font-mono text-xs">{HUB_URL ?? "—"}</dd>
+            <dd className="font-mono text-xs">{HUB_URL ?? "-"}</dd>
 
             <dt className="flex items-center gap-2 text-muted-foreground">
               <Database className="size-3.5" /> Hub Project Ref
             </dt>
             <dd className="font-mono text-xs">
-              {HUB_URL?.match(/https:\/\/([^.]+)\./)?.[1] ?? "—"}
+              {HUB_URL?.match(/https:\/\/([^.]+)\./)?.[1] ?? "-"}
             </dd>
 
             <dt className="flex items-center gap-2 text-muted-foreground">

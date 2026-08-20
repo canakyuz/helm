@@ -1,4 +1,4 @@
-# Ayarlar yeniden yapılandırma — tasarım
+# Ayarlar yeniden yapılandırma - tasarım
 
 **Durum:** uygulandı, görsel doğrulama bekliyor
 **Kapsam:** yalnızca B. Entegrasyon yönetimi (C) ve i18n (A) ayrı spec'ler.
@@ -11,7 +11,7 @@ Ayarlar tek ekranda beş düz tile idi. Üç somut kusur ölçüldü:
    biçimlendirme kararı, görsel tercih değil.
 2. **Tekrar.** Üstteki tile `N PROJE · M KAYNAK` yazıyor, alttaki sistem tile'ı
    aynı sayıları satır satır tekrar ediyordu.
-3. **Çıkmaz.** Projeler, uyarı kuralları, son senkron — hepsi salt okunur sayı.
+3. **Çıkmaz.** Projeler, uyarı kuralları, son senkron - hepsi salt okunur sayı.
    Hiçbiri tıklanmıyordu, detaya gitmenin yolu yoktu.
 
 Ayrıca istenen yeni işlevin (entegrasyon yönetimi, ~1250 satırlık web
@@ -46,7 +46,7 @@ başlık onu keserdi.
 
 ## Hub
 
-Kimlik tile'ı, dört grup satırı, çıkış. Her satır sağda **özet** taşır — hub bir
+Kimlik tile'ı, dört grup satırı, çıkış. Her satır sağda **özet** taşır - hub bir
 menü değil, durum özeti; iç ekranı açmadan "tema neydi" cevaplanmalı.
 
 | Satır | Özet |

@@ -1,4 +1,4 @@
-// helm — domain tipleri
+// helm - domain tipleri
 
 export * from "./cms";
 
@@ -25,7 +25,7 @@ export interface Project {
   created_at: string;
 }
 
-// Brand / Property / Module — modül mimarisi (0019). Detay: .docs/MODULES.md
+// Brand / Property / Module - modül mimarisi (0019). Detay: .docs/MODULES.md
 export interface Brand {
   id: string;
   name: string;
@@ -118,7 +118,7 @@ export interface Metric {
   ingested_at: string;
 }
 
-/** metrics_country — günlük metrik ülke kırılımı (ISO 3166-1 alpha-2). */
+/** metrics_country - günlük metrik ülke kırılımı (ISO 3166-1 alpha-2). */
 export interface MetricCountry {
   project_id: string;
   date: string;

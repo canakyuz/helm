@@ -57,7 +57,7 @@ function linkPodPublicHeaders(podsRoot, podName) {
 function fixCocoaPodsModulemaps(projectRoot) {
   const podsRoot = path.join(projectRoot, "ios", "Pods");
   if (!fs.existsSync(podsRoot)) {
-    console.warn("[pods] ios/Pods not found — run pod install first");
+    console.warn("[pods] ios/Pods not found - run pod install first");
     return 0;
   }
 

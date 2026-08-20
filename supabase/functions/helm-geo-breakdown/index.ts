@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-geo-breakdown — PostHog $geoip_* property'lerinden ülke/eyalet/şehir
-// kırılımı (izinsiz, IP tabanlı GeoIP — kullanıcıya konum sorulmaz).
+// helm-geo-breakdown - PostHog $geoip_* property'lerinden ülke/eyalet/şehir
+// kırılımı (izinsiz, IP tabanlı GeoIP - kullanıcıya konum sorulmaz).
 //
 // Body: { project_id, days?, country? }
 //   country verilirse: o ülkenin eyalet+şehir kırılımı
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
   }
   const host = (cfg.host || "https://eu.posthog.com").replace(/\/+$/, "");
 
-  // HogQL — country verilirse o ülkeyi drill-down (region+city), yoksa ülke özeti
+  // HogQL - country verilirse o ülkeyi drill-down (region+city), yoksa ülke özeti
   const dateFilter = `timestamp > now() - INTERVAL ${days} DAY`;
   const hogql = country
     ? `
@@ -112,8 +112,8 @@ Deno.serve(async (req) => {
   if (country) {
     rows = results
       .map((r) => ({
-        region: (r[0] as string) ?? "—",
-        city: (r[1] as string) ?? "—",
+        region: (r[0] as string) ?? "-",
+        city: (r[1] as string) ?? "-",
         users: Number(r[2] ?? 0),
       }))
       .filter((r) => r.users > 0);

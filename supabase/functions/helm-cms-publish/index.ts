@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-cms-publish — bir entry'yi yayınla + hedef sitelere webhook gönder.
+// helm-cms-publish - bir entry'yi yayınla + hedef sitelere webhook gönder.
 //
 // Body: { entry_id: string, action?: 'publish' | 'invalidate_only', note?: string }
 // Yanıt: { tags: string[], results: Array<{ target, ok, status, error? }> }

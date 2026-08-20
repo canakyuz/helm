@@ -146,7 +146,7 @@ export function Row({
   );
 }
 
-// Detail readout: one full-width row per metric — label left, value right,
+// Detail readout: one full-width row per metric - label left, value right,
 // hairline between. Single column scans cleanly; value (mono+tabular, colored)
 // is the hero, label sits quietly beside it. (`full` kept for API compat, no-op.)
 export function KV({

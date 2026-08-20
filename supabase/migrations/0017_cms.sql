@@ -1,4 +1,4 @@
--- helm — CMS modülü: çok-projeli içerik yönetimi
+-- helm - CMS modülü: çok-projeli içerik yönetimi
 -- Şemalar (cms_collections.jsonb) + entries (jsonb data, locale, draft/published)
 -- + revisions (publish snapshot) + assets (Supabase Storage).
 -- Helm RLS konvansiyonu: authenticated tam yetkili; anon sadece published okur.
@@ -25,7 +25,7 @@ create index if not exists cms_collections_project_idx
 
 -- ─────────────────────────────────────────────────────────────
 -- cms_entries: gerçek içerik. data jsonb schema'ya uyar.
--- project_id denormalize — anon RLS ve listeleme hızı için.
+-- project_id denormalize - anon RLS ve listeleme hızı için.
 -- ─────────────────────────────────────────────────────────────
 create table if not exists public.cms_entries (
   id            uuid primary key default gen_random_uuid(),
@@ -120,7 +120,7 @@ create index if not exists cms_assets_project_idx
   on public.cms_assets (project_id, created_at desc);
 
 -- ─────────────────────────────────────────────────────────────
--- RLS — helm konvansiyonu: authenticated tam yetkili.
+-- RLS - helm konvansiyonu: authenticated tam yetkili.
 -- Anon sadece published entry / public schema / public asset okur.
 -- ─────────────────────────────────────────────────────────────
 alter table public.cms_collections enable row level security;

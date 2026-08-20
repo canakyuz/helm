@@ -1,13 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-mrr-movement — RevenueCat Charts API (2026-02-05'te REST'e açıldı).
+// helm-mrr-movement - RevenueCat Charts API (2026-02-05'te REST'e açıldı).
 // GET /v2/projects/{id}/charts/mrr_movement  (scope: charts_metrics:charts:read)
 // Body: { project_id }
 // Response: { segments: [{ label, value }], net, raw? }
 //
 // ÖNEMLİ: RC'nin MRR Movement modeli doküman olarak 2 bileşenli (New + Churned),
 // 4'lü expansion/contraction TEYİTLİ DEĞİL. Bu yüzden segment adları HARDCODE
-// EDİLMEZ — summary ne dönerse toleranslı parse edilir. Tanınmayan şekilde `raw`
+// EDİLMEZ - summary ne dönerse toleranslı parse edilir. Tanınmayan şekilde `raw`
 // aynen döner ki canlı yanıt incelenip parser kesinleştirilebilsin.
 
 const corsHeaders = {
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
   const data = await res.json();
   const segments = normalizeSegments(data?.summary ?? data);
   if (!segments) {
-    // Tanınmadı — ham yanıtı döndür, parser canlı şekle göre kesinleştirilsin.
+    // Tanınmadı - ham yanıtı döndür, parser canlı şekle göre kesinleştirilsin.
     return json({ segments: [], net: 0, raw: data });
   }
   const net = segments.reduce((a, b) => a + b.value, 0);

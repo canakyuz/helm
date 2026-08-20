@@ -1,7 +1,7 @@
 import type { TrendPoint } from "../components/trend-chart";
 import type { Metric } from "../types";
 
-// Metrik dönüşüm yardımcıları — Cockpit ve proje detayı ortak kullanır.
+// Metrik dönüşüm yardımcıları - Cockpit ve proje detayı ortak kullanır.
 
 export const usd = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -11,7 +11,7 @@ export const usd = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-/** İki ondalıklı dolar — eCPM gibi küçük tutarlar için. */
+/** İki ondalıklı dolar - eCPM gibi küçük tutarlar için. */
 export const usd2 = (value: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -22,7 +22,7 @@ export const usd2 = (value: number) =>
   }).format(value);
 
 /** Verilen ISO para birimi koduyla biçimlendirir (TRY/USD/EUR …).
- *  narrowSymbol → her zaman sembol (₺, $, €, £) — kod (TRY, USD) değil. */
+ *  narrowSymbol → her zaman sembol (₺, $, €, £) - kod (TRY, USD) değil. */
 export const formatMoney = (value: number, currency = "USD") => {
   try {
     return new Intl.NumberFormat("en-US", {
@@ -37,7 +37,7 @@ export const formatMoney = (value: number, currency = "USD") => {
   }
 };
 
-/** Geriye uyumluluk — eski adıyla aynı format. */
+/** Geriye uyumluluk - eski adıyla aynı format. */
 export const formatMoney2 = formatMoney;
 
 export const compact = (value: number) =>
@@ -147,7 +147,7 @@ export const valueOnDate = (
 
 /** Serinin son değeri ile ~days gün öncesi arasındaki yüzde değişim.
  *  Seride o yaşta sıfır-olmayan nokta yoksa, en eski sıfır-olmayan değerle
- *  kıyaslar — yeni başlayan projelerde delta yine de görünsün diye. */
+ *  kıyaslar - yeni başlayan projelerde delta yine de görünsün diye. */
 export const deltaPct = (s: TrendPoint[], days = 7): number | null => {
   if (s.length < 2) return null;
   const last = s[s.length - 1].value;

@@ -1,4 +1,4 @@
-# helm liquid glass — Foundation + Overview (Slice 1)
+# helm liquid glass - Foundation + Overview (Slice 1)
 
 _Design spec · 2026-05-30 · WES-000_
 
@@ -37,9 +37,9 @@ separate later slices.
 ### Non-goals (this slice)
 
 - Revenue / Analytics / Health / Settings full builds (placeholders only).
-- Accent-color customization — V1 stays fixed lime (`#D4FF4D`) per project rules.
-- The prototype's dev "tweaks panel" — prototype-only, not shipping.
-- Light mode — dark only, per project rules.
+- Accent-color customization - V1 stays fixed lime (`#D4FF4D`) per project rules.
+- The prototype's dev "tweaks panel" - prototype-only, not shipping.
+- Light mode - dark only, per project rules.
 
 ## Architecture
 
@@ -67,7 +67,7 @@ app/(cockpit)/
   (home)/ (growth)/ (reviews)/ more/   ← REMOVED after the above land
 ```
 
-Each `liquid/` unit is presentational (props in, JSX out) — no data fetching, matching
+Each `liquid/` unit is presentational (props in, JSX out) - no data fetching, matching
 the project rule that hooks own data and components stay pure. Screens compose hooks +
 liquid primitives.
 
@@ -100,13 +100,13 @@ Skia `Canvas` absolute-filled behind scroll content:
 - Honors a `glow` intensity prop (default 0.9).
 
 ### Layout primitives
-- `<OpenHero>` — eyebrow (+ optional live dot), big mono `CountUp` value + `<Delta>`,
+- `<OpenHero>` - eyebrow (+ optional live dot), big mono `CountUp` value + `<Delta>`,
   optional `<Ring>`, caption, area chart (or custom `chartEl`), optional mini-stat strip
-  (`<MiniStat>` separated by `<Sep>`). Card-less — sits on the glass background.
-- `<CardSection>` — indexed header (`01` mono + title + count badge + hairline rule +
+  (`<MiniStat>` separated by `<Sep>`). Card-less - sits on the glass background.
+- `<CardSection>` - indexed header (`01` mono + title + count badge + hairline rule +
   optional action link) + children, used inside a single big `<LiquidGlass pad={0}>` card.
   `<FullDivider>` between sections.
-- `<Row>` — tappable header + animated chevron (rotate 90° on open) + reveal `detail`
+- `<Row>` - tappable header + animated chevron (rotate 90° on open) + reveal `detail`
   (Reanimated height/opacity). `<KV>` 2-col key/value grid for expanded details.
 - `<ActionBtn>` (default/accent/danger tones), `<SearchInput>`, `<Seg>` (segmented
   control, full-width option), `<Delta>` (▲/▼ + colored %), `<Glyph>` (project badge),
@@ -122,7 +122,7 @@ starts at target if reduced-motion/hidden), `StackBar`, `Spark`. Animations via 
 Single row: lime `h` logo tile + "helm" + pulsing sync dot · `<PropertyPicker>` (reuse
 existing modal picker, restyled to glass pill) · bell pill with alert-count badge.
 
-## Data flow — Overview screen
+## Data flow - Overview screen
 
 | Prototype block | Real source | Mapping / notes |
 |---|---|---|

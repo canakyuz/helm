@@ -11,7 +11,7 @@ const MARKER_DEPLOYMENT = "# helm-minimum-ios-deployment";
 const MIN_IOS = "16.4";
 
 /**
- * ios/ is gitignored — EAS runs prebuild on the server.
+ * ios/ is gitignored - EAS runs prebuild on the server.
  * Apply Podfile.properties + ExtensionStorage podspec + Podfile post_install here.
  */
 function withIosPodfileProperties(config) {

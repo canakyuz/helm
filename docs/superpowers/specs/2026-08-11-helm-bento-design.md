@@ -1,4 +1,4 @@
-# Helm Bento Sistemi — Tasarım Spec'i
+# Helm Bento Sistemi - Tasarım Spec'i
 
 **Tarih:** 2026-08-11 · **Dal:** `feat/bento-design-system` · **Kaynak:** `Helm Bento Sistemi.dc.html` (447 satır)
 
@@ -10,18 +10,18 @@ gerekçesiyle işaretlidir.
 
 ## 1. Karar: ne değişiyor, ne kalıyor
 
-Bento, Liquid Glass'ın üstüne sürülen bir cila değil — `design.md` §4/§5/§6/§8'i ve
+Bento, Liquid Glass'ın üstüne sürülen bir cila değil - `design.md` §4/§5/§6/§8'i ve
 `CLAUDE.md` §7'yi iptal eden bir dil değişimi. Ama malzeme korunuyor.
 
 | Katman | Karar |
 |---|---|
-| Düzen | **Bento** — çok sayıda ayrı tile, 10px gap. "Tek büyük kart" deseni emekli. |
-| Yüzey malzemesi | **Cam korunur** — `expo-glass-effect` / `BlurView` yaşamaya devam eder. |
+| Düzen | **Bento** - çok sayıda ayrı tile, 10px gap. "Tek büyük kart" deseni emekli. |
+| Yüzey malzemesi | **Cam korunur** - `expo-glass-effect` / `BlurView` yaşamaya devam eder. |
 | Arka plan | Aurora **korunur ama kısılır**; blueprint grid kaldırılır. |
 | Tema | **Light + dark**, sistem takipli (`useColorScheme`), Settings'te Sistem/Koyu/Açık. |
 | Ölçek | Bento'nun kendi değerleri, isimlendirilmiş. 4pt merdiveni emekli. |
-| Veri | Değişmez — mevcut 29 hook aynen kullanılır. |
-| IA | Değişmez — 5 sekme + login, rotalar birebir eşleşiyor. |
+| Veri | Değişmez - mevcut 29 hook aynen kullanılır. |
+| IA | Değişmez - 5 sekme + login, rotalar birebir eşleşiyor. |
 
 **Taşınan (dokunulmadı):** accent `#D4FF4D`, accentInk `#11130A`, Geist + Geist Mono,
 `charts.tsx` (Skia eğri/ring/stack), `primitives.tsx` (`CountUp`, `Eyebrow`, `Delta`),
@@ -56,7 +56,7 @@ Overview'da bu kural cam yüzey sayısını 7'den 4'e indiriyor.
 
 ---
 
-## 3. Renk — ölçülmüş sapmalar
+## 3. Renk - ölçülmüş sapmalar
 
 Mockup'ın light paleti kontrast açısından test edilmemişti. WCAG 2.1 AA (normal
 metin 4.5:1, dolgu 3:1) ölçümü ve düzeltmeler:
@@ -74,7 +74,7 @@ metin 4.5:1, dolgu 3:1) ölçümü ve düzeltmeler:
 düzeltme gerektirmedi; accent üstündeki `#11130A` metin 16.24:1, %60 alfalı eyebrow
 bile 4.70:1.
 
-### Cam yüzey ölçümü değiştirdi — ve önceki ölçüm yanlıştı
+### Cam yüzey ölçümü değiştirdi - ve önceki ölçüm yanlıştı
 
 İlk kontrast doğrulaması **token hex'ine karşı** yapılmıştı (`fg3` vs `tile #131318`).
 Bu yanlıştı: `GlassView` malzemesi tile'ı token değerinde bırakmıyor. Ekran
@@ -89,7 +89,7 @@ Gerçek yüzeye karşı ölçüm:
 | Belirgin (fill .09, aurora .28–.45) | 3.72:1 ✗ | 3.25:1 ✗ |
 
 Yani `fg3` ince camda bile sınırın altındaydı. Aurora'yı kısmak neredeyse hiçbir şey
-değiştirmiyor (3.62 → 3.72) — yüzeyi açan şey aurora değil, `GlassView`'in kendi
+değiştirmiyor (3.62 → 3.72) - yüzeyi açan şey aurora değil, `GlassView`'in kendi
 malzemesi.
 
 **Karar:** Belirgin cam korunur (Can'ın tercihi), metin yüzeye uyarlanır. Ölçülen
@@ -98,7 +98,7 @@ zorunda ve aralarında yer kalmıyor (parlaklık farkı **1.001x**).
 
 Dolayısıyla **dark temada `fg2` ve `fg3` aynı değerdir.** Üç kademeli gri merdiven bu
 yüzeyde AA ile birlikte mümkün değil. Ayrım kaybolmuyor, taşıyıcısı değişiyor: `fg3`
-metni her zaman 10px mono, BÜYÜK HARF, .16em tracking — biçim farkı renk farkından
+metni her zaman 10px mono, BÜYÜK HARF, .16em tracking - biçim farkı renk farkından
 güçlü. Light tema etkilenmez; orada tile opak beyaz, üç kademe ayrık kalır.
 
 **Ders:** Cam yüzeyde kontrast token hex'inden hesaplanamaz. Render edilen pikselden
@@ -121,7 +121,7 @@ dark'ta ≥1.97:1, light'ta ≥4.32:1.
 
 Sayısal merdiven yerine **isimli semantik ölçek**. Gerekçe: bento'nun oranları 10px gap
 ve 18px tile padding üzerine kurulu; 4pt'ye yuvarlamak (10→12, 18→16) ritmi bozar.
-İsimlendirme "keyfi px" yasağını korur — her değerin bir kullanım yeri var.
+İsimlendirme "keyfi px" yasağını korur - her değerin bir kullanım yeri var.
 
 ```
 space   screenX 16 · tileGap 10 · tilePad 18 · tilePadLg 20 · tilePadSm 16
@@ -134,7 +134,7 @@ type    eyebrow 10 · meta 12 · body 13 · row 14 · emph 15 · title 19
 
 İki sadeleştirme: `11.5px → 12` (tek yarım punto, 3 yerde geçiyordu);
 `44/46/50px hero → tek 48` + `adjustsFontSizeToFit` (`design.md` §3 zaten şart
-koşuyordu — uzun rakamda taşma kendiliğinden çözülür). Stat boyutu mockup'ta 26 ve 28
+koşuyordu - uzun rakamda taşma kendiliğinden çözülür). Stat boyutu mockup'ta 26 ve 28
 arasında gidip geliyordu, 28'de birleşti.
 
 `tracking` em cinsinden tutulur; React Native `letterSpacing` mutlak nokta ister,
@@ -149,12 +149,12 @@ Tasarımın 7 CSS keyframe'i Reanimated'e çevrildi (`design.md` §8: "CSS yok")
 | Anim | Mockup | Spec | Gerekçe |
 |---|---|---|---|
 | `rise` tile girişi | 460ms | **260ms** | UI girişi 300ms altında kalmalı |
-| `grow` bar | 620ms | 620ms | Grafik — süre bilgi taşır |
+| `grow` bar | 620ms | 620ms | Grafik - süre bilgi taşır |
 | `rail` yatay oran | 760ms `width` | 760ms **`scaleX`** | `width` layout tetikler |
 | `ring` gauge | 900ms | 900ms | Grafik |
 | `count` sayaç | 900ms cubic-out | 900ms | Mevcut `CountUp` birebir aynı |
-| `pulse` canlı nokta | 1800ms ∞ | 1800ms ∞ | — |
-| `spin` sync | 900ms linear ∞ | 900ms linear ∞ | — |
+| `pulse` canlı nokta | 1800ms ∞ | 1800ms ∞ | - |
+| `spin` sync | 900ms linear ∞ | 900ms linear ∞ | - |
 
 Easing: `cubic-bezier(0.23, 1, 0.32, 1)`. Stagger: tile 40ms, bar 34ms, rail 80ms.
 Press: satır/tile `opacity 0.85` @120ms, buton `scale 0.97` @140ms.
@@ -184,7 +184,7 @@ Sayaç son değerde başlar. `useReducedMotion()` ile.
 ## 6. Mimari
 
 ```
-packages/design/          framework-bağımsız TS — TEK KAYNAK
+packages/design/          framework-bağımsız TS - TEK KAYNAK
 ├── palette.ts            marka renkleri + seri ladder'ı
 ├── themes.ts             dark + light, aynı 14 anahtar
 ├── glass.ts              tema başına cam reçetesi + aurora opaklığı
@@ -197,20 +197,20 @@ packages/design/          framework-bağımsız TS — TEK KAYNAK
         └─→ [sonra] apps/web/src/styles/
 ```
 
-Mobil Tailwind v3 JS config, web Tailwind v4 `@theme inline` — ikisi aynı dosyayı
+Mobil Tailwind v3 JS config, web Tailwind v4 `@theme inline` - ikisi aynı dosyayı
 okuyamaz, bu yüzden ortak kaynak düz TS, hedefler ondan **türetilir**.
 `tailwind.config.js` bir `.ts` dosyasını require edemediği için ölçek de üretilir.
 
 Renkler CSS değişkeninden okunur (`rgb(var(--tile) / <alpha-value>)`), böylece
 `bg-tile` **tek className** olarak iki temada da doğru çözülür ve `CLAUDE.md` §7'nin
-"inline style yasak" kuralı korunur. RGB kanal üçlüsü olarak yazılır — hex yazılırsa
+"inline style yasak" kuralı korunur. RGB kanal üçlüsü olarak yazılır - hex yazılırsa
 Tailwind alfa modifier'ı (`bg-tile/50`) kırılır.
 
 `useTheme()` runtime renkleri döndürür; yalnızca className ile çözülemeyen yerler
 için: Skia, GlassView prop'ları, Reanimated interpolasyonu.
 
 **Tema tek kaynak:** tercih (`preferences.themeMode`) → NativeWind `colorScheme` →
-CSS değişkenleri. İkisi ayrı ayrı set edilirse kaçınılmaz olarak ayrışırlar —
+CSS değişkenleri. İkisi ayrı ayrı set edilirse kaçınılmaz olarak ayrışırlar -
 className koyu, Skia grafiği açık kalır.
 
 ---
@@ -256,7 +256,7 @@ istemez. Yalnızca **verisi olan** dönemler listelenir.
 
 ### Çift sayım düzeltildi
 
-Ölçüm: `app_revenue` ile `subscription_revenue` **aynı para** — toplamları
+Ölçüm: `app_revenue` ile `subscription_revenue` **aynı para** - toplamları
 (92.49) ve sıfır-dışı gün sayıları (8) birebir aynı. İki isim altında tek kayıt.
 Overview `ad + app`, Kırılım `ad + subs + iap` topluyordu; iki ekran iki farklı
 tanım kullanıyordu.
@@ -266,7 +266,7 @@ tanım kullanıyordu.
 
 ### Sıfır kaynaklar gizlenir
 
-`iap_revenue` 80 satırın 80'inde sıfır — kaynak bağlı değil. Sıfır kalan kaynak
+`iap_revenue` 80 satırın 80'inde sıfır - kaynak bağlı değil. Sıfır kalan kaynak
 listelenmez; ilk sıfır-dışı değerde `activeSources` üzerinden kendiliğinden geri
 gelir. Gerekçe: sürekli `₺0.00` göstermek "bağlı ama üretmiyor" izlenimi verir ve
 ekranda ölü satır taşır.
@@ -280,12 +280,12 @@ ekranda ölü satır taşır.
 light + dark. 13 commit.
 
 **Kalan:** **Ayar** ve **login** ekranları · alt sekme çubuğu kararı (tasarım
-custom pill kullanıyor, uygulama `NativeTabs` — `design.md` §6 native diyor) ·
+custom pill kullanıyor, uygulama `NativeTabs` - `design.md` §6 native diyor) ·
 `design.md` yeniden yazımı · `CLAUDE.md` §7 güncellemesi (light mode yasağı) ·
 geçiş dönemi palet bloğunun silinmesi · `apps/web` token tüketimi.
 
 **Ayar ekranı neden bekletildi:** mevcut `settings.tsx` 549 satır ve gerçek
-işlevsellik taşıyor — gelir hedefi düzenleyici, para birimi, gelir çarpanı, uyarı
+işlevsellik taşıyor - gelir hedefi düzenleyici, para birimi, gelir çarpanı, uyarı
 kuralları. Aceleyle yeniden yazmak çalışan özellikleri sessizce düşürme riski
 taşır. Tema seçici (Sistem/Koyu/Açık) oraya bağlanacak; `preferences.themeMode`
 hazır ama henüz onu değiştirecek arayüz yok.

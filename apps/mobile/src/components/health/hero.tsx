@@ -7,7 +7,7 @@ import { useTheme } from "~/theme/use-theme";
 import { Ring } from "~/components/liquid";
 import { BentoTile } from "~/components/bento";
 
-/** Crash-free esikleri — ekrandaki "Sağlıklı" hukmunu bunlar verir.
+/** Crash-free esikleri - ekrandaki "Sağlıklı" hukmunu bunlar verir.
  *  Bilesenle BIRLIKTE duruyor: esik ile onu gosteren metin ayri dosyalara
  *  dagilirsa biri degisip digeri kalir. */
 const HEALTHY_AT = 99.5;
@@ -53,7 +53,7 @@ export function CrashFreeHero({
           trackColor={glass.chartDim}
         >
           <Text className="font-semibold text-title tracking-tighter text-fg">
-            {crashFree != null ? formatPercent(crashFree, 1) : "—"}
+            {crashFree != null ? formatPercent(crashFree, 1) : "-"}
           </Text>
         </Ring>
 

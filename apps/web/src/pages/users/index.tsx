@@ -88,12 +88,12 @@ const ACTIVE_DAYS = 7;
 const INACTIVE_DAYS = 30;
 
 const fmt = (value: string | null) => {
-  if (!value) return "—";
+  if (!value) return "-";
   return new Date(value).toLocaleDateString("en-US");
 };
 
 const fmtRelative = (value: string | null) => {
-  if (!value) return "—";
+  if (!value) return "-";
   const min = (Date.now() - new Date(value).getTime()) / 60_000;
   if (min < 60) return `${Math.round(min)} dk`;
   if (min < 1440) return `${Math.round(min / 60)} sa`;
@@ -479,7 +479,7 @@ export const UsersPage = () => {
                                   </span>
                                 </div>
                               ) : (
-                                <span>—</span>
+                                <span>-</span>
                               )}
                             </TableCell>
                             <TableCell className="py-2">
@@ -560,7 +560,7 @@ export const UsersPage = () => {
           </CardContent>
         </Card>
 
-        {/* Yan panel — seçili kullanıcı önizleme */}
+        {/* Yan panel - seçili kullanıcı önizleme */}
         <div className="space-y-4">
           <PreviewPanel user={preview} />
         </div>
@@ -667,7 +667,7 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
           <EmptyState
             icon={<UserCog className="size-6" />}
             title="Pick a user"
-            description="Click a row in the left list — summary, labels and quick actions open here. Use the ➜ icon for the detail page."
+            description="Click a row in the left list - summary, labels and quick actions open here. Use the ➜ icon for the detail page."
             compact
           />
         </CardContent>
@@ -721,7 +721,7 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
           <dd>
             {user.email_confirmed_at
               ? new Date(user.email_confirmed_at).toLocaleDateString("en-US")
-              : "—"}
+              : "-"}
           </dd>
 
           {(user.country || user.city) && (
@@ -748,7 +748,7 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
 
           <dt className="text-muted-foreground">Provider</dt>
           <dd>
-            {user.providers.length > 0 ? user.providers.join(", ") : "—"}
+            {user.providers.length > 0 ? user.providers.join(", ") : "-"}
           </dd>
         </dl>
 

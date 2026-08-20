@@ -25,7 +25,7 @@ export {
 } from "@helm/domain";
 
 /**
- * Goreli zaman — dile duyarli surum.
+ * Goreli zaman - dile duyarli surum.
  *
  * NEDEN DOMAIN SURUMU KULLANILMIYOR: `formatRelativeTimeTR` hazir Turkce dizgi
  * donuyor ("8 dk önce") ve on ekranda Ingilizce arayuzde Turkce kaliyordu.

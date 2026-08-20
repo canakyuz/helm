@@ -26,7 +26,7 @@ type TileProps = {
 };
 
 /**
- * Bento'nun ana yuzeyi — cam.
+ * Bento'nun ana yuzeyi - cam.
  *
  * YUZEY KURALI (packages/design/src/glass.ts): cam SADECE burada. Accent dolgu
  * ve tile-ici kutular SolidTile kullanir. Cam icinde cam hem gorsel camur
@@ -78,7 +78,7 @@ export function BentoTile({
       />
     ) : null;
 
-  // Cam TEK BASINA gorunmez — uzerine her zaman tint fill konur, yoksa kart
+  // Cam TEK BASINA gorunmez - uzerine her zaman tint fill konur, yoksa kart
   // kaybolur (design.md §4). Light temada ayni sorunun aynasi: fill daha parlak,
   // kenar koyu. Android'de blur yok, fill tek basina yuzeyi tasir.
   const fill = (
@@ -117,7 +117,7 @@ type SolidProps = TileProps & {
 };
 
 /**
- * Opak yuzey — accent hero ve tile-ici kutular.
+ * Opak yuzey - accent hero ve tile-ici kutular.
  * Cam degil: accent dolgunun altinda bulaniklastiracak bir sey yok, tile2 ise
  * zaten bir camin icinde oturuyor.
  */

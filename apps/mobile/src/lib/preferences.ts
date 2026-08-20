@@ -8,7 +8,7 @@ export type Currency = "USD" | "TRY" | "EUR" | "GBP";
 export type SelectedPropertyId = string | "all";
 /** "system" iOS gorunum ayarini takip eder; digerleri elle kilitler. */
 export type ThemeMode = "system" | "dark" | "light";
-/** Accent ailesi kimligi — packages/design/src/accents.ts ile ayni kume. */
+/** Accent ailesi kimligi - packages/design/src/accents.ts ile ayni kume. */
 export type Accent = AccentId;
 /**
  * Arayuz dili. Kaynak dil TR; EN bir ceviri tablosu (bkz. src/lib/i18n.ts).
@@ -92,7 +92,7 @@ function readCurrent(): Preferences {
   };
 }
 
-// Module-level snapshot + subscribers — useSyncExternalStore için identity-stable snapshot.
+// Module-level snapshot + subscribers - useSyncExternalStore için identity-stable snapshot.
 let snapshot: Preferences = readCurrent();
 const listeners = new Set<() => void>();
 

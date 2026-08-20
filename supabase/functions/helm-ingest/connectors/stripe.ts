@@ -1,6 +1,6 @@
 import { type Connector, type MetricPoint, today } from "./types.ts";
 
-// Stripe — aktif abonelikleri çeker, MRR hesaplar (web/SaaS aboneliği).
+// Stripe - aktif abonelikleri çeker, MRR hesaplar (web/SaaS aboneliği).
 // config: { secret_key }
 
 const monthlyAmount = (

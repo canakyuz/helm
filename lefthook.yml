@@ -1,11 +1,11 @@
-# Helm — git hook'ları
+# Helm - git hook'ları
 #
 # NEDEN LEFTHOOK: önceki kurulum ham bir `.githooks/pre-commit` dosyasıydı;
 # çalışıyordu ama tek kancaya bakıyordu ve commit formatını kimse denetlemiyordu.
 # Lefthook paralel koşum, aşama başına birden çok komut ve tek bir okunur config
 # veriyor. Kurulum: `make hooks`.
 #
-# Tarama motoru hâlâ scripts/check-secrets.sh — lefthook'suz da elle koşulabilir.
+# Tarama motoru hâlâ scripts/check-secrets.sh - lefthook'suz da elle koşulabilir.
 
 pre-commit:
   parallel: true

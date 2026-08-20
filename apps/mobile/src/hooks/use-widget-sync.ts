@@ -17,7 +17,7 @@ type WidgetSyncOptions = { enabled?: boolean };
  * Kokpit verisi geldikce ana ekran widget'ini besler.
  *
  * NEDEN GELIR GECMISI: widget eskiden `useCockpitKpis`'ten `adRevenue + mrr`
- * aliyordu — bir gunun reklami artI aylik oran. Artik Gelir ekraninin
+ * aliyordu - bir gunun reklami artI aylik oran. Artik Gelir ekraninin
  * kullandigi ayni kovadan (aybasindan bugune) besleniyor; iki ekran ayni
  * sayiyi soyluyor.
  */

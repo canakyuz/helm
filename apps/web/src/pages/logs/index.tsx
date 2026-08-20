@@ -61,7 +61,7 @@ export const LogsPage = () => {
     projResult.data.find((p) => p.id === id)?.name ?? id.slice(0, 8);
 
   const duration = (r: SyncRun) => {
-    if (!r.finished_at) return "—";
+    if (!r.finished_at) return "-";
     const ms =
       new Date(r.finished_at).getTime() - new Date(r.started_at).getTime();
     return `${(ms / 1000).toFixed(1)} sn`;
@@ -266,7 +266,7 @@ export const LogsPage = () => {
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              Senkron detayı —{" "}
+              Senkron detayı -{" "}
               {selected &&
                 new Date(selected.started_at).toLocaleString("en-US")}
             </DialogTitle>
@@ -289,10 +289,10 @@ export const LogsPage = () => {
                   {details.map((d, i) => (
                     <TableRow key={i}>
                       <TableCell className="font-medium">
-                        {d.provider ?? "—"}
+                        {d.provider ?? "-"}
                       </TableCell>
                       <TableCell className="text-xs">
-                        {d.project_id ? projectName(d.project_id) : "—"}
+                        {d.project_id ? projectName(d.project_id) : "-"}
                       </TableCell>
                       <TableCell className="text-right font-mono">
                         {d.points ?? 0}

@@ -1,13 +1,13 @@
-// helm — CMS şema çıkarımı: örnek JSON'(lar)dan FieldDef ağacı türetir.
+// helm - CMS şema çıkarımı: örnek JSON'(lar)dan FieldDef ağacı türetir.
 // "schema-derived-from-data": yapı veriye göre çıkar; çıktı TASLAKTIR, insan onayı
 // schema-designer'da düzeltir (string→slug/date yanlış tahminini orada yakalar).
 //
-// Karmaşıklık: Time O(N·K) (N = örnek sayısı, K = ağaçtaki toplam düğüm) — girdi
+// Karmaşıklık: Time O(N·K) (N = örnek sayısı, K = ağaçtaki toplam düğüm) - girdi
 // boyutunda lineer; her düğüm örnek başına bir kez ziyaret edilir. Space O(K) (şema ağacı).
 
 import type { FieldDef } from "@/types/cms";
 
-const MAX_DEPTH = 6; // nesting guard — gerçek content bundle (footer.columns.links.href = derinlik 4)
+const MAX_DEPTH = 6; // nesting guard - gerçek content bundle (footer.columns.links.href = derinlik 4)
 //                      tipli kalsın; yalnız patolojik derinlik json fallback'e düşsün.
 const RESERVED_TOP = new Set(["_meta"]); // sistem metadata'sı (lang/updated), content değil
 
@@ -31,7 +31,7 @@ const stringKind = (values: string[]): "date" | "textarea" | "text" => {
   return "text";
 };
 
-// Görsel tespiti — DEĞER bazlı (key tek başına güvenilmez: mediaSide="right", icon="mail").
+// Görsel tespiti - DEĞER bazlı (key tek başına güvenilmez: mediaSide="right", icon="mail").
 // image: değer image uzantılı, VEYA key görsel-ismi + değer url/path. Boş string tolere edilir.
 const IMG_EXT = /\.(png|jpe?g|webp|avif|svg|gif)(\?|#|$)/i;
 const IMG_KEY = /^(src|file|image|img|photo|logo|cover|avatar|banner|thumbnail|thumb|picture|poster|background)$/i;
@@ -60,7 +60,7 @@ const inferField = (
   }
   if (nonNull.every((v) => Array.isArray(v))) {
     // Tüm array elemanlarını birleştir → tek `of` FieldDef çıkar. Liste sarmalayıcısı
-    // ayrı bir nesting seviyesi sayılmaz (asıl derinlik object'te) — depth artırılmaz.
+    // ayrı bir nesting seviyesi sayılmaz (asıl derinlik object'te) - depth artırılmaz.
     const elements = (nonNull as unknown[][]).flat();
     const of = inferField("item", elements, true, depth);
     return { ...base, kind: "list", of };
@@ -80,7 +80,7 @@ const inferField = (
     return { ...base, kind: "boolean" };
   }
 
-  // Karışık tip — FieldDef union ifade edemez → bilinçli json fallback.
+  // Karışık tip - FieldDef union ifade edemez → bilinçli json fallback.
   return { ...base, kind: "json" };
 };
 

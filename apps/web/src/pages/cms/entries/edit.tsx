@@ -1,4 +1,4 @@
-// helm — CMS içerik editor. FormRenderer + LocaleSwitcher + PublishButton + revisions rail.
+// helm - CMS içerik editor. FormRenderer + LocaleSwitcher + PublishButton + revisions rail.
 // Create + edit aynı sayfada; /cms/entries/create ya da /cms/entries/edit/:id.
 
 import { useEffect, useMemo, useState } from "react";

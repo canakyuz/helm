@@ -1,4 +1,4 @@
--- helm_push_devices — cockpit cihazlarının Expo push token kayıtları.
+-- helm_push_devices - cockpit cihazlarının Expo push token kayıtları.
 -- Tek kullanıcı (Can) ama yine de RLS ile her kullanıcı yalnız kendi cihazını görür/yazar.
 -- Token = ExponentPushToken[...]; aynı cihaz token'ı yenilenebilir → (user_id, token) unique.
 

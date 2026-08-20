@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// AdMob refresh_token üretici — TEK SEFERLİK çalıştırılır.
+// AdMob refresh_token üretici - TEK SEFERLİK çalıştırılır.
 // AdMob API service account desteklemediği için bir kez kullanıcı onayıyla
 // refresh_token alınır; helm-ingest connector'ı bununla access_token tazeler.
 //

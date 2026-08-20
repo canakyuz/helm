@@ -20,7 +20,7 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-/** Glass status pill — emerald/red/amber/sky tonu + glow shadow.
+/** Glass status pill - emerald/red/amber/sky tonu + glow shadow.
  *  MarineX referansı (Delayed/On Schedule/At Berth/En Route). */
 export const StatusBadge = ({
   kind,

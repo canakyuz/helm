@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-segment-count — bir segmentin kaç kullanıcıyı eşlediğini hesaplar.
+// helm-segment-count - bir segmentin kaç kullanıcıyı eşlediğini hesaplar.
 // Auth listUsers'i tüm sayfalarıyla çeker, kuralı uygular.
 //
 // Body: { segment_id: string }

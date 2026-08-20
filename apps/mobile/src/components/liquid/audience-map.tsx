@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 import { AppleMaps } from "expo-maps";
 // The AppleMaps namespace exposes MapType/MapColorScheme/MapStyleElevation as
-// consts but omits MapStyleEmphasis — deep-import the enum to mute the basemap.
+// consts but omits MapStyleEmphasis - deep-import the enum to mute the basemap.
 import { AppleMapsMapStyleEmphasis } from "expo-maps/build/apple/AppleMaps.types";
 
 import { countryGeo, countryFlag } from "~/lib/country-geo";
@@ -135,7 +135,7 @@ export function AudienceMap({
         }}
       />
 
-      {/* selected-country info pill — animates in/out + cross-fades on change */}
+      {/* selected-country info pill - animates in/out + cross-fades on change */}
       {showPill && active ? (
         <View pointerEvents="none" style={{ position: "absolute", left: 16, top: 16 }}>
           <Animated.View

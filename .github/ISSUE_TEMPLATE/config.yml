@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
     url: https://github.com/canakyuz/helm/security/advisories/new
-    about: Don't open a public issue for security problems — report them privately here.
+    about: Don't open a public issue for security problems - report them privately here.
   - name: Question or idea
     url: https://github.com/canakyuz/helm/discussions
     about: Not a bug? Take it to Discussions.

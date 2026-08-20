@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-// expo-secure-store async — sync API simülasyonu için in-memory cache + lazy hydration.
+// expo-secure-store async - sync API simülasyonu için in-memory cache + lazy hydration.
 // Preferences (currency, selectedPropertyId) hassas değil ama bu paket zaten kurulu, ek pod yok.
 
 const cache = new Map<string, string>();
@@ -8,7 +8,7 @@ const listeners = new Set<() => void>();
 let hydrated = false;
 
 /**
- * Acilista SecureStore'dan geri okunacak anahtarlar — TEK KAYNAK.
+ * Acilista SecureStore'dan geri okunacak anahtarlar - TEK KAYNAK.
  *
  * NEDEN BURADA: bu liste eskiden yalnizca dort anahtar iceriyordu; sonradan
  * eklenen `pref.themeMode`, `pref.accent` ve `pref.language` buraya yazilmadi.
@@ -40,7 +40,7 @@ async function hydrate() {
         const v = await SecureStore.getItemAsync(k);
         if (v !== null) cache.set(k, v);
       } catch {
-        // ignore — default values used
+        // ignore - default values used
       }
     }),
   );

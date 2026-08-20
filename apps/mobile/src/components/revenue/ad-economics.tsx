@@ -5,7 +5,7 @@ import { formatInteger, formatRatio } from "~/lib/format";
 import { FunnelTile, type FunnelRow } from "~/components/analytics";
 
 /**
- * Reklam ekonomisi — hangi format kazandiriyor.
+ * Reklam ekonomisi - hangi format kazandiriyor.
  *
  * NEDEN GEREKLI: gelirin buyuk kismi reklamdan geliyor ama ekranda tek satir
  * ("Reklam ₺340.71") olarak duruyordu. Olculdu (6-13 Agustos): `rewarded`
@@ -18,7 +18,7 @@ import { FunnelTile, type FunnelRow } from "~/components/analytics";
  * kullaniliyor). Dorduncu bir cubuk uygulamasi yazmak ayni seyin dorduncu
  * kez ayrisan hali olurdu.
  *
- * CUBUK NEYI GOSTERIR: gelir PAYI — doluluk veya eCPM degil. Sorunun cevabi
+ * CUBUK NEYI GOSTERIR: gelir PAYI - doluluk veya eCPM degil. Sorunun cevabi
  * "param nereden geliyor"; cubuk onu gosterir, kalan olculer notta durur.
  */
 export function AdEconomicsTile({
@@ -30,7 +30,7 @@ export function AdEconomicsTile({
 }: {
   data: AdEconomics | undefined;
   loading: boolean;
-  /** Sorgu hatasi. Yutulmaz: veri gelmiyorsa ekran bunu SOYLEMELI — sessizce
+  /** Sorgu hatasi. Yutulmaz: veri gelmiyorsa ekran bunu SOYLEMELI - sessizce
    *  bos gorunen bir gelir karti "reklam geliri yok" diye okunur. */
   error?: Error | null;
   /** Tutarlar USD normalize gelir; gosterim secili para birimine cevrilir. */
@@ -50,12 +50,12 @@ export function AdEconomicsTile({
       .filter((s): s is string => s != null)
       .join(" · "),
     // Dusuk doluluk = masada kalmis para. "loss" (kirmizi) degil "warn":
-    // kayip degil, kacirilmis firsat — ikisini ayni renge boyamak siddet
+    // kayip degil, kacirilmis firsat - ikisini ayni renge boyamak siddet
     // sinyalini duzlestirirdi.
     tone: r.lowFill ? "warn" : "normal",
   }));
 
-  // Baslik sagi: TUM formatlar birlikte. Satir eCPM'lerinin ortalamasi DEGIL —
+  // Baslik sagi: TUM formatlar birlikte. Satir eCPM'lerinin ortalamasi DEGIL -
   // oranlarin ortalamasi oran degildir; toplanmis gelir/gosterimden geliyor.
   const summary =
     data == null

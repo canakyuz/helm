@@ -24,7 +24,7 @@ export default function NewSource() {
   const [provider, setProvider] = useState<ProviderName | null>(null);
 
   const projects = properties.data ?? [];
-  // Tek proje varsa secim sormak gereksiz tiklama — otomatik sec.
+  // Tek proje varsa secim sormak gereksiz tiklama - otomatik sec.
   const effectiveProjectId = projectId ?? (projects.length === 1 ? projects[0]!.id : null);
 
   return (
@@ -141,7 +141,7 @@ function Chip({
       accessibilityState={{ selected: active }}
     >
       {/* Stil Pressable'in FONKSIYON style'inda DEGIL, ic View'da.
-          design.md §8: fonksiyon-style'da layout ozellikleri uygulanmiyor —
+          design.md §8: fonksiyon-style'da layout ozellikleri uygulanmiyor -
           ilk yazimda cipin dolgusu, kenarligi ve padding'i tamamen dusuyordu,
           secenekler akan duz metin gibi goruunuyordu. */}
       {({ pressed }) => (

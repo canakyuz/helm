@@ -31,7 +31,7 @@ export default function DataSettings() {
   function promptGoal() {
     haptic.tap();
     // Para birimi BASLIKTA yaziyor: hedef, o anki goruntuleme para birimiyle
-    // kaydediliyor. Sormadan kaydetmek sessiz bir tuzak — "90000" yazan biri
+    // kaydediliyor. Sormadan kaydetmek sessiz bir tuzak - "90000" yazan biri
     // TL sanip GBP kaydedebiliyordu (olculdu: 90.000 GBP hedefi ~₺5,8M cikti).
     Alert.prompt(
       t("Aylık gelir hedefi ({cur})", { cur: currency }),

@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-cron-health — pg_cron job durumu + son N run.
+// helm-cron-health - pg_cron job durumu + son N run.
 // helm_cron_status() RPC fonksiyonunu çağırır (SECURITY DEFINER ile cron.* okur).
 //
 // Body: { limit?: number }  (default 10 son run / job)

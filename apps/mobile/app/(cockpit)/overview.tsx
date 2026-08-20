@@ -42,16 +42,16 @@ import {
   SolidTile,
 } from "~/components/bento";
 
-/** Hero sparkline'daki cubuk sayisi — tasarim 10 kullaniyor. */
+/** Hero sparkline'daki cubuk sayisi - tasarim 10 kullaniyor. */
 const SPARK_BARS = 10;
 /** Listede gosterilen proje sayisi; toplam basliktaki sayida kalir. */
 const TOP_N = 5;
 
-/** Hero rakaminin stili — CountUp ve duz Text ayni gorunmeli. */
+/** Hero rakaminin stili - CountUp ve duz Text ayni gorunmeli. */
 /**
  * Bir gunun serideki degeri ve bir onceki OLCUME gore yuzde degisimi.
  *
- * date verilmezse (gun secili degil) null doner — cagiran taraf bugunun
+ * date verilmezse (gun secili degil) null doner - cagiran taraf bugunun
  * kpi'sine duser. Seride o gun YOKSA da null: sifir gostermek "o gun sifirdi"
  * demek olurdu, oysa dogru cevap "olcum yok".
  *
@@ -61,7 +61,7 @@ const TOP_N = 5;
 function dayPoint(
   series: ReadonlyArray<{ date: string; value: number }>,
   date: string | undefined,
-  /** "percent" yuzde degisim; "points" ham fark. Crash-free zaten bir yuzde —
+  /** "percent" yuzde degisim; "points" ham fark. Crash-free zaten bir yuzde -
    *  %99.5'ten %99.0'a dusus "%0.5 dustu" degil "0.5 PUAN dustu"dur. */
   deltaMode: "percent" | "points" = "percent",
 ): { value: number; delta: number | null } | null {
@@ -92,7 +92,7 @@ export default function Overview() {
   const crashFree = useMetricDetail("crash_free_sessions");
   // Gun secilince alttaki kartlar da O GUNU gostermeli. kpis yalnizca bugunun
   // anlik goruntusu; onceki hal gecmis bir gun secilince hero'yu degistirip
-  // altindaki uc karti bugunde birakiyordu — ekran iki farkli gunu ayni anda
+  // altindaki uc karti bugunde birakiyordu - ekran iki farkli gunu ayni anda
   // gosteriyor ve secim calismiyormus gibi duruyordu.
   const mrrDetail = useMetricDetail("mrr");
   const dauDetail = useMetricDetail("dau");
@@ -101,14 +101,14 @@ export default function Overview() {
 
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
   // Yenileme sayaci: giris animasyonlarini SADECE taze veri geldiginde tekrar
-  // oynatir. Sekme degisiminde oynatmaz — o siklikta animasyon gecikme demek
+  // oynatir. Sekme degisiminde oynatmaz - o siklikta animasyon gecikme demek
   // (packages/design/src/motion.ts → replayOn).
   const [replayKey, setReplayKey] = useState(0);
   /** Hero'da hangi gun gosteriliyor. null = bugun. */
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   // Hero serisi widget ile AYNI kaynaktan: revenue-history bucket'lari.
-  // Gerekcesi ~/lib/revenue-hero.ts basinda — ozeti: ad_revenue + app_revenue
+  // Gerekcesi ~/lib/revenue-hero.ts basinda - ozeti: ad_revenue + app_revenue
   // metrikleri magaza gelirini bu ay %100 eksik gosteriyordu.
   const sparkPoints = useMemo(
     () => heroDays(history.data?.months ?? [], SPARK_BARS),
@@ -142,7 +142,7 @@ export default function Overview() {
   const goalCurrent = currentMonthTotal(history.data?.months ?? []);
   const goalRatio = goalTarget != null && goalTarget > 0 ? goalCurrent / goalTarget : 0;
 
-  // Secili gun. Yenileme seriyi kisaltabilecegi icin indeks dogrulanir —
+  // Secili gun. Yenileme seriyi kisaltabilecegi icin indeks dogrulanir -
   // aksi halde eski bir indeks undefined'a duser.
   const picked = selectedDay != null ? (sparkPoints[selectedDay] ?? null) : null;
 
@@ -155,19 +155,19 @@ export default function Overview() {
   // secilip ucune de verilir (bkz. statFontSize). Aksi halde her kutu kendi
   // basina kuculuyor ve satirin tipografik ritmi bozuluyordu.
   const mrrText =
-    picked != null ? (mrrDay != null ? fmtStat(mrrDay.value) : "—") : data.mrr != null ? fmtStat(data.mrr) : "—";
+    picked != null ? (mrrDay != null ? fmtStat(mrrDay.value) : "-") : data.mrr != null ? fmtStat(data.mrr) : "-";
   const dauText =
     picked != null
-      ? (dauDay != null ? formatInteger(dauDay.value) : "—")
+      ? (dauDay != null ? formatInteger(dauDay.value) : "-")
       : data.dau != null
         ? formatInteger(data.dau)
-        : "—";
+        : "-";
   const crashText =
     picked != null
-      ? (cfDay != null ? formatPercent(cfDay.value, 1) : "—")
+      ? (cfDay != null ? formatPercent(cfDay.value, 1) : "-")
       : cfNow != null
         ? formatPercent(cfNow, 1)
-        : "—";
+        : "-";
   const statSize = statFontSize([mrrText, dauText, crashText]);
 
   // Kaydedilmis uyarilar ve turetilen veri sinyalleri TEK LISTE: kullanici
@@ -211,7 +211,7 @@ export default function Overview() {
             />
           }
         >
-          {/* Hero — accent dolgu, cam DEGIL: accent'in altinda bulaniklastiracak
+          {/* Hero - accent dolgu, cam DEGIL: accent'in altinda bulaniklastiracak
               bir sey yok, cam orada sadece rengi kirletirdi. */}
           <Rise index={0} replayKey={replayKey}>
             <SolidTile color={theme.accent} padding={space.tilePadLg}>
@@ -225,10 +225,10 @@ export default function Overview() {
                   // Rozet accent zeminin UZERINDE duruyor. Onceki hal ink'i .14
                   // alfayla zemine katiyordu: hem koyu hem acik temada rozet
                   // accent'ten ayirt edilemiyordu (alti da ustu de ayni renk
-                  // ailesi). Cozum ters kontrast — hero sayisinin kullandigi
+                  // ailesi). Cozum ters kontrast - hero sayisinin kullandigi
                   // ink/accent ciftinin AYNISI, sadece yer degistirmis halde.
                   // px-sm / py-xs ARTIK gercek deger uretiyor: olcekte `sm` ve
-                  // `xs` yoktu, Tailwind'in varsayilaninda da yok — rozet
+                  // `xs` yoktu, Tailwind'in varsayilaninda da yok - rozet
                   // padding'siz, metin kenara yapisik duruyordu (scale.ts).
                   <View
                     className="rounded-pill px-sm py-xs"
@@ -279,7 +279,7 @@ export default function Overview() {
                 <BentoBars
                   points={sparkPoints}
                   activeColor={theme.accentInk}
-                  // .22 alfa zemine karsi 1.61:1 idi — grafik goruunmuyordu.
+                  // .22 alfa zemine karsi 1.61:1 idi - grafik goruunmuyordu.
                   // .50 → 3.42:1 (non-text esigi 3:1) ve vurgulu barla 4.75:1.
                   dimColor={withAlpha(theme.accentInk, 0.5)}
                   height={44}
@@ -294,10 +294,10 @@ export default function Overview() {
             </SolidTile>
           </Rise>
 
-          {/* Uc kucuk stat — cam */}
+          {/* Uc kucuk stat - cam */}
           <View className="flex-row gap-tileGap">
             {/* Gun secildiginde uc kart da O GUNU gosterir. Secili gun seride
-                yoksa "—": o gun icin olcum yok demek, sifir demek degil. */}
+                yoksa "-": o gun icin olcum yok demek, sifir demek degil. */}
             <StatTile
               index={1}
               replayKey={replayKey}
@@ -305,7 +305,7 @@ export default function Overview() {
               value={mrrText}
               delta={picked != null ? mrrDay?.delta : data.mrrDelta}
               fontSize={statSize}
-              note={mrrText === "—" ? t("ölçüm yok") : undefined}
+              note={mrrText === "-" ? t("ölçüm yok") : undefined}
             />
             <StatTile
               index={2}
@@ -314,14 +314,14 @@ export default function Overview() {
               value={dauText}
               delta={picked != null ? dauDay?.delta : data.dauDelta}
               fontSize={statSize}
-              note={dauText === "—" ? t("ölçüm yok") : undefined}
+              note={dauText === "-" ? t("ölçüm yok") : undefined}
             />
             <StatTile
               index={3}
               replayKey={replayKey}
               label="CRASH"
               value={crashText}
-              note={crashText === "—" ? t("ölçüm yok") : undefined}
+              note={crashText === "-" ? t("ölçüm yok") : undefined}
               fontSize={statSize}
               // Crash-free'de delta YUZDE DEGISIM degil PUAN farki: %99.5'ten
               // %99.0'a dusus "%0.5 dustu" degil "0.5 puan dustu".
@@ -406,10 +406,10 @@ export default function Overview() {
                           {t(TYPE_LABEL[p.type] ?? p.type)} · {t(STATUS_LABEL[p.status])}
                         </Text>
                       </View>
-                      {/* Proje bazli delta kaynagi yok — uydurmak yerine
+                      {/* Proje bazli delta kaynagi yok - uydurmak yerine
                           yalnizca gelir gosteriliyor (design.md §10). */}
                       <Text className="font-semibold text-emph tracking-tighter text-fg">
-                        {pm != null ? fmt(pm.adRevenue) : "—"}
+                        {pm != null ? fmt(pm.adRevenue) : "-"}
                       </Text>
                     </View>
                   );
@@ -418,7 +418,7 @@ export default function Overview() {
             </BentoTile>
           </Rise>
 
-          {/* Dikkat gerekiyor — kaydedilmis uyarilar + turetilen veri sinyalleri */}
+          {/* Dikkat gerekiyor - kaydedilmis uyarilar + turetilen veri sinyalleri */}
           <Rise index={6} replayKey={replayKey}>
             <AttentionTile
               items={attention}

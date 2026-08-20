@@ -23,7 +23,7 @@ import { dataProvider } from "@/providers/data";
 import { notificationProvider } from "@/providers/notification";
 import { supabaseClient } from "@/providers/supabase-client";
 
-// Route bazlı kod bölme — her sayfa kendi chunk'ında.
+// Route bazlı kod bölme - her sayfa kendi chunk'ında.
 const DashboardPage = lazy(() =>
   import("@/pages/dashboard").then((m) => ({ default: m.DashboardPage })),
 );
@@ -83,7 +83,7 @@ const CampaignsPage = lazy(() =>
 const AuditPage = lazy(() =>
   import("@/pages/audit").then((m) => ({ default: m.AuditPage })),
 );
-// ProjectCreate kaldırıldı — /projects/create artık /properties/create'e redirect olur.
+// ProjectCreate kaldırıldı - /projects/create artık /properties/create'e redirect olur.
 // ProjectEdit korunuyor (CMS publish targets paralel iş edit.tsx'i kullanıyor).
 const ProjectEdit = lazy(() =>
   import("@/pages/projects").then((m) => ({ default: m.ProjectEdit })),
@@ -286,7 +286,7 @@ function App() {
                       path="/projects/create"
                       element={<Navigate to="/properties/create" replace />}
                     />
-                    {/* Legacy projects/edit: ProjectEdit korunuyor — kullanıcının
+                    {/* Legacy projects/edit: ProjectEdit korunuyor - kullanıcının
                         paralel CMS publish targets işine dokunulmuyor. Yeni Property
                         UI'sı için /properties/edit/:id açıkça çağrılır. */}
                     <Route

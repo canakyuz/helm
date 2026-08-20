@@ -232,7 +232,7 @@ export const AlertsPage = () => {
   const { mutate: remove } = useDelete();
 
   const projectName = (id: string | null) =>
-    id ? (projects.find((p) => p.id === id)?.name ?? "—") : "All projects";
+    id ? (projects.find((p) => p.id === id)?.name ?? "-") : "All projects";
   const ruleName = (id: string) =>
     rules.find((r) => r.id === id)?.name ?? id.slice(0, 8);
 
@@ -437,7 +437,7 @@ export const AlertsPage = () => {
               title="No alert rules yet"
               description={
                 <>
-                  Kural ekle ile başla — örn.{" "}
+                  Kural ekle ile başla - örn.{" "}
                   <strong>"DAU down 20% over 7d → Telegram"</strong> veya{" "}
                   <strong>"Error count went above 100 → email"</strong>.
                 </>
@@ -488,7 +488,7 @@ export const AlertsPage = () => {
                           {lastWeek.length}×
                         </Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
+                        <span className="text-xs text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>

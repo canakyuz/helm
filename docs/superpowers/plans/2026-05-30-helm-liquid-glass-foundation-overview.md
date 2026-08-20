@@ -1,8 +1,8 @@
-# helm liquid glass — Foundation + Overview Implementation Plan
+# helm liquid glass - Foundation + Overview Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Recreate the `helm liquid glass.html` prototype's visual + interaction language in the real Expo/React Native app — a shared liquid-glass design system plus a fully-wired Overview screen — keeping the native tab bar and folding the old 4-tab IA into a new 5-tab IA.
+**Goal:** Recreate the `helm liquid glass.html` prototype's visual + interaction language in the real Expo/React Native app - a shared liquid-glass design system plus a fully-wired Overview screen - keeping the native tab bar and folding the old 4-tab IA into a new 5-tab IA.
 
 **Architecture:** A new presentational design-system layer under `src/components/liquid/` (pure components, props-in/JSX-out, no data fetching) built on `expo-glass-effect` (GlassView, iOS-26 Liquid Glass) with a `expo-blur` BlurView fallback, `@shopify/react-native-skia` for charts/background, and `react-native-reanimated` for fills. Screens compose existing Supabase hooks + these primitives. Mock-only prototype concepts live in a single `demoData` object, every demo value visibly tagged.
 
@@ -15,23 +15,23 @@
 ## File Structure
 
 ```
-src/theme/tokens.ts                 MODIFY  — add glass recipe + extended fg/green tokens
-src/lib/demo-data.ts                CREATE  — tagged demo values for mock-only concepts
-src/components/liquid/glass.tsx     CREATE  — <LiquidGlass> (GlassView | BlurView)
-src/components/liquid/charts.tsx    CREATE  — AreaChart, Bars, Ring, HBar, StackBar, Spark
-src/components/liquid/background.tsx CREATE — <LiquidBackground> (Skia blobs + grid)
-src/components/liquid/primitives.tsx CREATE — Delta, Eyebrow, Glyph, StatusDot, CornerTicks, CountUp, Seg, ActionBtn, SearchInput, EmptyHint
-src/components/liquid/hero.tsx      CREATE  — OpenHero, MiniStat, Sep
-src/components/liquid/card.tsx      CREATE  — CardSection, FullDivider, Row, KV, Chevron
-src/components/liquid/header.tsx    CREATE  — LiquidHeader
-src/components/liquid/index.ts      CREATE  — barrel exports
-src/components/ui/liquid-glass.tsx  MODIFY  — re-export from liquid/glass (compat shim)
-app/(cockpit)/_layout.tsx           MODIFY  — NativeTabs → 5 tabs
-app/(cockpit)/overview.tsx          CREATE  — Overview screen (real build)
-app/(cockpit)/revenue.tsx           CREATE  — placeholder
-app/(cockpit)/analytics.tsx         CREATE  — placeholder
-app/(cockpit)/health.tsx            CREATE  — placeholder
-app/(cockpit)/settings.tsx          CREATE  — placeholder
+src/theme/tokens.ts                 MODIFY  - add glass recipe + extended fg/green tokens
+src/lib/demo-data.ts                CREATE  - tagged demo values for mock-only concepts
+src/components/liquid/glass.tsx     CREATE  - <LiquidGlass> (GlassView | BlurView)
+src/components/liquid/charts.tsx    CREATE  - AreaChart, Bars, Ring, HBar, StackBar, Spark
+src/components/liquid/background.tsx CREATE - <LiquidBackground> (Skia blobs + grid)
+src/components/liquid/primitives.tsx CREATE - Delta, Eyebrow, Glyph, StatusDot, CornerTicks, CountUp, Seg, ActionBtn, SearchInput, EmptyHint
+src/components/liquid/hero.tsx      CREATE  - OpenHero, MiniStat, Sep
+src/components/liquid/card.tsx      CREATE  - CardSection, FullDivider, Row, KV, Chevron
+src/components/liquid/header.tsx    CREATE  - LiquidHeader
+src/components/liquid/index.ts      CREATE  - barrel exports
+src/components/ui/liquid-glass.tsx  MODIFY  - re-export from liquid/glass (compat shim)
+app/(cockpit)/_layout.tsx           MODIFY  - NativeTabs → 5 tabs
+app/(cockpit)/overview.tsx          CREATE  - Overview screen (real build)
+app/(cockpit)/revenue.tsx           CREATE  - placeholder
+app/(cockpit)/analytics.tsx         CREATE  - placeholder
+app/(cockpit)/health.tsx            CREATE  - placeholder
+app/(cockpit)/settings.tsx          CREATE  - placeholder
 app/(cockpit)/(home)/ (growth)/ (reviews)/ more/   DELETE (Task 12)
 ```
 
@@ -47,7 +47,7 @@ app/(cockpit)/(home)/ (growth)/ (reviews)/ more/   DELETE (Task 12)
 Replace the `colors` object and append `glass` to `src/theme/tokens.ts` (keep `fonts` as-is):
 
 ```typescript
-// Tailwind config ile birebir senkron — runtime/inline kullanım için aynı palet.
+// Tailwind config ile birebir senkron - runtime/inline kullanım için aynı palet.
 
 export const colors = {
   bgBase: "#07070A",
@@ -99,7 +99,7 @@ export const glass = {
 - [ ] **Step 2: Typecheck**
 
 Run: `bun run typecheck`
-Expected: PASS (no references broke — `fgPrimary/Secondary/Muted/Subtle` names unchanged; only hex values + additive keys).
+Expected: PASS (no references broke - `fgPrimary/Secondary/Muted/Subtle` names unchanged; only hex values + additive keys).
 
 - [ ] **Step 3: Commit**
 
@@ -119,7 +119,7 @@ git commit -m "feat(mobile): WES-000 extend theme tokens with liquid glass recip
 
 ```typescript
 // Mock-only prototype concepts NOT present in the real Supabase layer.
-// Every value here is DEMO — consumers MUST render a `DEMO` chip next to it.
+// Every value here is DEMO - consumers MUST render a `DEMO` chip next to it.
 // See docs/superpowers/specs/2026-05-30-helm-liquid-glass-foundation-overview-design.md
 
 export const DEMO_TAG = "DEMO" as const;
@@ -131,7 +131,7 @@ export const demoData = {
   crashFree: 99.2,
   crashFreeDelta: -1.8,
   // per-project KV detail values shown when expanding an Overview project row
-  // keyed by intent, not by project — purely illustrative
+  // keyed by intent, not by project - purely illustrative
   projectDetail: {
     revToday: 1680,
     mrr: 14_100,
@@ -193,7 +193,7 @@ type Props = {
   radius?: number;
   padding?: number;
   glow?: string; // accent color for the inner glow spot
-  deco?: ReactNode; // e.g. <CornerTicks/> — sits above frost, below content
+  deco?: ReactNode; // e.g. <CornerTicks/> - sits above frost, below content
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
 };
@@ -324,7 +324,7 @@ export function LiquidGlass({
 Replace the entire contents of `src/components/ui/liquid-glass.tsx` with:
 
 ```typescript
-// Compatibility shim — the panel now lives in the liquid design-system layer.
+// Compatibility shim - the panel now lives in the liquid design-system layer.
 import { LiquidGlass, type GlassTone } from "~/components/liquid/glass";
 
 export type { GlassTone };
@@ -613,7 +613,7 @@ export function Spark({
 - [ ] **Step 2: Typecheck**
 
 Run: `bun run typecheck`
-Expected: PASS. If `Skia.RRectXY`/`XYWHRect` type names mismatch the installed Skia version, switch `Bars` to draw plain rects in a loop (`<RoundedRect>` per bar) — keep behavior identical.
+Expected: PASS. If `Skia.RRectXY`/`XYWHRect` type names mismatch the installed Skia version, switch `Bars` to draw plain rects in a loop (`<RoundedRect>` per bar) - keep behavior identical.
 
 - [ ] **Step 3: Commit**
 
@@ -719,7 +719,7 @@ export function LiquidBackground({ glow = 0.9 }: { glow?: number }) {
 - [ ] **Step 2: Typecheck**
 
 Run: `bun run typecheck`
-Expected: PASS. If `<Blur>` as a child filter mismatches the installed Skia API, wrap blobs in `<Group layer={<Paint><Blur blur={60}/></Paint>}>` per the installed version's docs — keep the visual identical.
+Expected: PASS. If `<Blur>` as a child filter mismatches the installed Skia API, wrap blobs in `<Group layer={<Paint><Blur blur={60}/></Paint>}>` per the installed version's docs - keep the visual identical.
 
 - [ ] **Step 3: Commit**
 
@@ -1058,7 +1058,7 @@ export function EmptyHint({ children }: { children: string }) {
   );
 }
 
-// small DEMO chip — required next to any demo-sourced value
+// small DEMO chip - required next to any demo-sourced value
 export function DemoChip() {
   return (
     <View
@@ -1509,7 +1509,7 @@ export function LiquidHeader({ showPicker = true }: { showPicker?: boolean }) {
 }
 ```
 
-> NOTE: If `PropertyPicker` / `HeaderAlertsButton` require props, open each file and pass what they need. If the existing `PropertyPicker` doesn't lay out well inline, wrap it in `<View style={{ flexShrink: 1 }}>`. Do not rebuild them — reuse.
+> NOTE: If `PropertyPicker` / `HeaderAlertsButton` require props, open each file and pass what they need. If the existing `PropertyPicker` doesn't lay out well inline, wrap it in `<View style={{ flexShrink: 1 }}>`. Do not rebuild them - reuse.
 
 - [ ] **Step 2: Create the barrel `index.ts`**
 
@@ -1556,7 +1556,7 @@ git commit -m "feat(mobile): WES-000 add LiquidHeader + liquid barrel exports"
 **Files:**
 - Create: `app/(cockpit)/overview.tsx`
 
-> Maps the prototype's Overview to real hooks (`useCockpitKpis`, `useMetricDetail`, `useAlerts`, `useAckAlert`, `useProperties`) + `demoData`. Project-row metric details are demo-tagged (no per-row hooks — avoids N+1 / rules-of-hooks). Kind filter maps `Property.type`: Games=`game`, Apps=`*_app`, Web=`website`.
+> Maps the prototype's Overview to real hooks (`useCockpitKpis`, `useMetricDetail`, `useAlerts`, `useAckAlert`, `useProperties`) + `demoData`. Project-row metric details are demo-tagged (no per-row hooks - avoids N+1 / rules-of-hooks). Kind filter maps `Property.type`: Games=`game`, Apps=`*_app`, Web=`website`.
 
 - [ ] **Step 1: Create `overview.tsx`**
 
@@ -1828,7 +1828,7 @@ export default function Overview() {
             }
           />
 
-          {/* monthly goal — DEMO */}
+          {/* monthly goal - DEMO */}
           <LiquidGlass padding={14}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -1863,7 +1863,7 @@ export default function Overview() {
 }
 ```
 
-> CLEANUP IN STEP: delete the bogus `count={(useProperties as never)...}` expression on the `Projects` `CardSection` — it was a placeholder for a count. Replace that whole `count=` prop with nothing (omit it), OR lift `const properties = useProperties()` into the `Overview` component and pass `count={(properties.data ?? []).length}`. Do the latter: add `const properties = useProperties();` near the other hooks in `Overview`, pass `count={(properties.data ?? []).length}`, and pass `properties` down to `<ProjectRows properties={properties} fmt={fmt} />` so the list isn't fetched twice. Update `ProjectRows` signature to `({ properties, fmt }: { properties: ReturnType<typeof useProperties>; fmt: (n: number) => string })` and remove its internal `useProperties()` call.
+> CLEANUP IN STEP: delete the bogus `count={(useProperties as never)...}` expression on the `Projects` `CardSection` - it was a placeholder for a count. Replace that whole `count=` prop with nothing (omit it), OR lift `const properties = useProperties()` into the `Overview` component and pass `count={(properties.data ?? []).length}`. Do the latter: add `const properties = useProperties();` near the other hooks in `Overview`, pass `count={(properties.data ?? []).length}`, and pass `properties` down to `<ProjectRows properties={properties} fmt={fmt} />` so the list isn't fetched twice. Update `ProjectRows` signature to `({ properties, fmt }: { properties: ReturnType<typeof useProperties>; fmt: (n: number) => string })` and remove its internal `useProperties()` call.
 
 - [ ] **Step 2: Apply the cleanup described above**
 
@@ -1989,8 +1989,8 @@ export default function CockpitLayout() {
 - [ ] **Step 3: Update the auth-gate redirect target**
 
 The app redirects to `/(cockpit)/(home)` in two places. Update both to `/(cockpit)/overview`:
-- `src/lib/auth-gate.tsx` — find the post-login redirect and change `(home)` → `overview`.
-- `app/index.tsx` — find the authed redirect and change `(home)` → `overview`.
+- `src/lib/auth-gate.tsx` - find the post-login redirect and change `(home)` → `overview`.
+- `app/index.tsx` - find the authed redirect and change `(home)` → `overview`.
 
 Search command to locate them:
 ```bash
@@ -2023,7 +2023,7 @@ Run:
 ```bash
 grep -rn "(cockpit)/(home)\|(cockpit)/(growth)\|(cockpit)/(reviews)\|(cockpit)/more" app src
 ```
-Expected: no remaining references (Task 11 already fixed redirects). If any router `push`/`href` still targets `more/alerts`, `more/errors`, etc., those are deep links into screens that no longer exist — for this slice, repoint them to the relevant new tab (`/(cockpit)/health` or `/(cockpit)/overview`) or remove the navigation. List each and fix.
+Expected: no remaining references (Task 11 already fixed redirects). If any router `push`/`href` still targets `more/alerts`, `more/errors`, etc., those are deep links into screens that no longer exist - for this slice, repoint them to the relevant new tab (`/(cockpit)/health` or `/(cockpit)/overview`) or remove the navigation. List each and fix.
 
 - [ ] **Step 2: Delete the old route directories**
 
@@ -2036,7 +2036,7 @@ git rm -r "app/(cockpit)/(home)" "app/(cockpit)/(growth)" "app/(cockpit)/(review
 Run: `bun run typecheck` → PASS.
 Run: `bun run ios` → app still boots to Overview, all tabs work, no dead-link crashes.
 
-> Components that were ONLY used by the deleted screens (e.g. `kpi-tile`, `rich-metric-tile`, `module-card`, `projects-breakdown`, `rating-histogram`, etc.) may now be unreferenced. Do NOT delete them in this slice — Revenue/Analytics/Health builds may reuse them. Leaving them is harmless; `tsc` does not fail on unused files. (A dead-code sweep is a later slice.)
+> Components that were ONLY used by the deleted screens (e.g. `kpi-tile`, `rich-metric-tile`, `module-card`, `projects-breakdown`, `rating-histogram`, etc.) may now be unreferenced. Do NOT delete them in this slice - Revenue/Analytics/Health builds may reuse them. Leaving them is harmless; `tsc` does not fail on unused files. (A dead-code sweep is a later slice.)
 
 - [ ] **Step 4: Commit**
 
@@ -2061,7 +2061,7 @@ git commit -m "refactor(mobile): WES-000 remove legacy 4-tab route trees"
 - Native tab bar kept, 5 tabs, SF icons → Task 11 ✓
 - Replace + remove old IA → Tasks 11–12 ✓
 
-**Placeholder scan:** Task 10 intentionally contains a wrong-on-purpose `count=` expression that Step 1's inline NOTE + Step 2 explicitly fix — this is a guided refactor, not a silent placeholder. No other TBD/TODO.
+**Placeholder scan:** Task 10 intentionally contains a wrong-on-purpose `count=` expression that Step 1's inline NOTE + Step 2 explicitly fix - this is a guided refactor, not a silent placeholder. No other TBD/TODO.
 
 **Type consistency:** `GlassTone` defined in Task 3, re-exported Task 9, consumed Task 10. `HeroStat` defined Task 7, consumed Tasks 7+10. `Kind` local to Overview. Chart prop names consistent between Task 4 defs and Task 7/10 uses. Hook field names are flagged in Task 10 Step 3 to be verified against real sources (the plan must not invent fields).
 

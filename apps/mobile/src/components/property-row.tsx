@@ -17,7 +17,7 @@ const STATUS_LABEL: Record<PropertyStatus, string> = {
   healthy: "UP",
   stale: "STALE",
   down: "DOWN",
-  unknown: "—",
+  unknown: "-",
 };
 
 const TYPE_LABEL: Record<PropertyType, string> = {
@@ -70,7 +70,7 @@ export function PropertyRow({ property }: { property: Property }) {
       </View>
 
       <View style={{ flex: 1, gap: 3 }}>
-        {/* Top — type chip + name */}
+        {/* Top - type chip + name */}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <View
             style={{
@@ -109,7 +109,7 @@ export function PropertyRow({ property }: { property: Property }) {
           </Text>
         </View>
 
-        {/* Bottom — brand + modules + heartbeat */}
+        {/* Bottom - brand + modules + heartbeat */}
         <Text
           style={{
             fontFamily: "Geist-400",
@@ -125,7 +125,7 @@ export function PropertyRow({ property }: { property: Property }) {
         </Text>
       </View>
 
-      {/* Right — status badge + relative time */}
+      {/* Right - status badge + relative time */}
       <View style={{ alignItems: "flex-end", gap: 3 }}>
         <View
           style={{

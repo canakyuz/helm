@@ -2,10 +2,10 @@
 # RevenueCat gelir olaylarini REST API'sinden geri doldurur.
 #
 # NE ZAMAN CALISTIRILIR: webhook bir sure calismadiysa. RevenueCat gecmis
-# olaylari GERI GONDERMEZ — webhook yanlis adrese bakarken gelen her satin alma
+# olaylari GERI GONDERMEZ - webhook yanlis adrese bakarken gelen her satin alma
 # kalicı olarak kaybolur. Bu betik onlari REST'ten kurtarir.
 #
-# NEDEN CIFT SAYIM OLMAZ: her satir txn_key ile yazilir (migration 0038) —
+# NEDEN CIFT SAYIM OLMAZ: her satir txn_key ile yazilir (migration 0038) -
 # <store>:<original_txn_id>:<odeme_ani>. Webhook ayni anahtari uretir. Betigi
 # iki kez calistirmak, ya da webhook'un ayni odemeyi yazmis olmasi, sessizce
 # yutulur.
@@ -81,7 +81,7 @@ print(f"  {len(products)} urun")
 
 
 def product_of(internal_id):
-    """(magaza kimligi, gosterim adi) — bilinmeyen id ham haliyle gecer."""
+    """(magaza kimligi, gosterim adi) - bilinmeyen id ham haliyle gecer."""
     p = products.get(internal_id) or {}
     return p.get("store_identifier") or internal_id, p.get("display_name")
 
@@ -122,7 +122,7 @@ rows, unknown_amount, sandbox, done = [], 0, 0, 0
 
 def is_production(o):
     """Sandbox/test satin almalari gercek gelir DEGIL. RC bunlari environment
-    alaninda isaretler; store da 'test_store' olabilir. Ikisini de eliyoruz —
+    alaninda isaretler; store da 'test_store' olabilir. Ikisini de eliyoruz -
     bir kokpitte 'gelir' rakamina test parasi karisirsa rakam yalan olur."""
     return o.get("environment") == "production" and o.get("store") != "test_store"
 with ThreadPoolExecutor(max_workers=10) as ex:
@@ -168,7 +168,7 @@ with ThreadPoolExecutor(max_workers=10) as ex:
             # total_revenue_in_usd OMUR BOYU toplamdir, donem basi degil. Yalnizca
             # ILK donemdeyse (starts_at == donem baslangici) toplam tek odemeye
             # esittir ve para olarak yazilabilir. Yenilenmis abonelikte donem
-            # fiyatini bolerek TAHMIN etmiyoruz — para rakamina tahmin konmaz;
+            # fiyatini bolerek TAHMIN etmiyoruz - para rakamina tahmin konmaz;
             # satir amount=null yazilir, resmi rakam Apple gunluk raporundan gelir.
             first_period = s.get("starts_at") == s.get("current_period_starts_at")
             amount = rev.get("gross") if first_period else None
@@ -195,7 +195,7 @@ if sandbox:
     print(f"  {sandbox} sandbox/test satin almasi elendi")
 if unknown_amount:
     print(f"  ! {unknown_amount} yenilenmis abonelikte donem tutari REST'ten "
-          f"turetilemedi — satir yazilir, tutar bos kalir.")
+          f"turetilemedi - satir yazilir, tutar bos kalir.")
 
 if not rows:
     sys.exit(0)
@@ -204,7 +204,7 @@ if dry:
     for r in sorted(rows, key=lambda x: x["occurred_at"], reverse=True)[:20]:
         ts = time.strftime("%Y-%m-%d %H:%M", time.localtime(r["occurred_at"] / 1000))
         print(f"  {ts}  {r['event_type']:<22} {r['store']:<10} "
-              f"{r['amount'] if r['amount'] is not None else '—':>7} {r['currency']}")
+              f"{r['amount'] if r['amount'] is not None else '-':>7} {r['currency']}")
     print("\n(--dry-run: hicbir sey yazilmadi)")
     sys.exit(0)
 

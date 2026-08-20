@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-resend-webhook — Resend webhook event'lerini kabul eder, campaign_events
+// helm-resend-webhook - Resend webhook event'lerini kabul eder, campaign_events
 // tablosuna yazar.
 //
 // Resend tarafında bu URL webhook olarak eklenmeli:
@@ -11,7 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // data içinde: email_id, from, to, subject, tags?, click? (clicked event'inde)
 //
 // Tag tabanlı eşleme: helm-send-mail her gönderime "helm_campaign_id" tag'i
-// ekliyor — webhook'ta o tag'den campaign_id parse ederiz.
+// ekliyor - webhook'ta o tag'den campaign_id parse ederiz.
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -49,7 +49,7 @@ interface ResendPayload {
   };
 }
 
-// Svix HMAC SHA256 doğrulama — Resend webhook'larında imza svix headers ile gelir.
+// Svix HMAC SHA256 doğrulama - Resend webhook'larında imza svix headers ile gelir.
 // İlgili docs: https://docs.svix.com/receiving/verifying-payloads/how-manual
 // Secret format: "whsec_xxx" (base64 sonrası); raw secret base64 decode edilir.
 async function verifySvixSignature(
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: cors });
   }
 
-  // Webhook signature doğrulama — RESEND_WEBHOOK_SECRET set'liyse zorunlu
+  // Webhook signature doğrulama - RESEND_WEBHOOK_SECRET set'liyse zorunlu
   const secret = Deno.env.get("RESEND_WEBHOOK_SECRET");
   const rawBody = await req.text();
 
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
     if (!svixId || !svixTs || !svixSig) {
       return json({ error: "svix-* header eksik" }, 401);
     }
-    // Replay koruması — 5 dk dışı reddet
+    // Replay koruması - 5 dk dışı reddet
     const tsMs = Number(svixTs) * 1000;
     if (Math.abs(Date.now() - tsMs) > 5 * 60_000) {
       return json({ error: "Timestamp eski/gelecekten" }, 401);

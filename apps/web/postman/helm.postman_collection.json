@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "8a7e2b14-6c4a-4f2b-9d11-helm00000001",
     "name": "helm",
-    "description": "helm — connector'ların yaptığı TAM HTTP çağrıları + helm Edge Function'ları. Variables sekmesinden değerleri doldur, çalıştır, ham yanıtı gör. Connector kodu: supabase/functions/helm-ingest/connectors/.\n\nKullanım:\n1) Import → bu JSON.\n2) Collection 'Variables' sekmesi — anahtarları doldur.\n3) AdMob için önce '0 — Refresh access token' çalıştır (token otomatik kaydolur).\n4) İstediğin connector çağrısını çalıştır, ham yanıtı incele.",
+    "description": "helm - connector'ların yaptığı TAM HTTP çağrıları + helm Edge Function'ları. Variables sekmesinden değerleri doldur, çalıştır, ham yanıtı gör. Connector kodu: supabase/functions/helm-ingest/connectors/.\n\nKullanım:\n1) Import → bu JSON.\n2) Collection 'Variables' sekmesi - anahtarları doldur.\n3) AdMob için önce '0 - Refresh access token' çalıştır (token otomatik kaydolur).\n4) İstediğin connector çağrısını çalıştır, ham yanıtı incele.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -11,7 +11,7 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "// Koleksiyon-genel pre-request — tarih değişkenlerini hesapla.",
+          "// Koleksiyon-genel pre-request - tarih değişkenlerini hesapla.",
           "const now = new Date();",
           "const start = new Date(now.getTime() - 90 * 86400000);",
           "const fmt = (d) => d.toISOString().slice(0, 10);",
@@ -29,10 +29,10 @@
   "item": [
     {
       "name": "AdMob",
-      "description": "helm connector: connectors/admob.ts. Önce 0 — refresh_token ile access_token al; sonra 1 — networkReport.",
+      "description": "helm connector: connectors/admob.ts. Önce 0 - refresh_token ile access_token al; sonra 1 - networkReport.",
       "item": [
         {
-          "name": "0 — Refresh access token",
+          "name": "0 - Refresh access token",
           "event": [
             {
               "listen": "test",
@@ -73,7 +73,7 @@
           }
         },
         {
-          "name": "1 — Network report (son 90 gün)",
+          "name": "1 - Network report (son 90 gün)",
           "request": {
             "method": "POST",
             "header": [
@@ -120,7 +120,7 @@
       "name": "PostHog",
       "item": [
         {
-          "name": "HogQL — günlük DAU (son 90 gün)",
+          "name": "HogQL - günlük DAU (son 90 gün)",
           "request": {
             "method": "POST",
             "header": [
@@ -140,7 +140,7 @@
           }
         },
         {
-          "name": "HogQL — anlık WAU (son 7 gün)",
+          "name": "HogQL - anlık WAU (son 7 gün)",
           "request": {
             "method": "POST",
             "header": [
@@ -189,7 +189,7 @@
       "name": "Plausible",
       "item": [
         {
-          "name": "Timeseries — günlük ziyaretçi 90g",
+          "name": "Timeseries - günlük ziyaretçi 90g",
           "request": {
             "method": "GET",
             "header": [
@@ -216,7 +216,7 @@
       "name": "Sentry",
       "item": [
         {
-          "name": "Project stats — received 90g",
+          "name": "Project stats - received 90g",
           "request": {
             "method": "GET",
             "header": [
@@ -302,10 +302,10 @@
     },
     {
       "name": "helm Edge Functions",
-      "description": "helm'in kendi endpoint'leri — HELM_SUPABASE_URL + ANON_KEY ile.",
+      "description": "helm'in kendi endpoint'leri - HELM_SUPABASE_URL + ANON_KEY ile.",
       "item": [
         {
-          "name": "helm-ingest — manuel senkron",
+          "name": "helm-ingest - manuel senkron",
           "request": {
             "method": "POST",
             "header": [
@@ -325,7 +325,7 @@
           }
         },
         {
-          "name": "helm-test — tek entegrasyon",
+          "name": "helm-test - tek entegrasyon",
           "request": {
             "method": "POST",
             "header": [
@@ -345,7 +345,7 @@
           }
         },
         {
-          "name": "helm-verify — upstream vs DB diff",
+          "name": "helm-verify - upstream vs DB diff",
           "request": {
             "method": "POST",
             "header": [
@@ -365,7 +365,7 @@
           }
         },
         {
-          "name": "helm-users — proje kullanıcıları",
+          "name": "helm-users - proje kullanıcıları",
           "request": {
             "method": "POST",
             "header": [
@@ -384,7 +384,7 @@
           }
         },
         {
-          "name": "helm-alert — uyarı değerlendir",
+          "name": "helm-alert - uyarı değerlendir",
           "request": {
             "method": "POST",
             "header": [
@@ -400,7 +400,7 @@
           }
         },
         {
-          "name": "helm-reviews — yorumları çek",
+          "name": "helm-reviews - yorumları çek",
           "request": {
             "method": "POST",
             "header": [
@@ -416,7 +416,7 @@
           }
         },
         {
-          "name": "helm-versions — sürümleri çek",
+          "name": "helm-versions - sürümleri çek",
           "request": {
             "method": "POST",
             "header": [
@@ -432,7 +432,7 @@
           }
         },
         {
-          "name": "helm-heartbeat — ping",
+          "name": "helm-heartbeat - ping",
           "request": {
             "method": "POST",
             "header": [],

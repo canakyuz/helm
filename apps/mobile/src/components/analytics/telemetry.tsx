@@ -9,7 +9,7 @@ import type { InstrumentationWarning } from "@helm/api";
 import { useT } from "~/lib/i18n";
 import { usePreferences } from "~/lib/preferences";
 
-/** fps eşikleri — 60 hedef, 45 altı hissedilir, 30 altı kırık. */
+/** fps eşikleri - 60 hedef, 45 altı hissedilir, 30 altı kırık. */
 const FPS_OK = 45;
 const FPS_BAD = 30;
 
@@ -22,7 +22,7 @@ const PERF_LABEL: Record<string, string> = {
  * Performans karti.
  *
  * NEDEN ORTALAMA YOK: ortalama fps neredeyse her zaman 60 cikar ve hicbir sey
- * soylemez — birkac saniyelik takilma ortalamada kaybolur. Alt %5 ve gorulen en
+ * soylemez - birkac saniyelik takilma ortalamada kaybolur. Alt %5 ve gorulen en
  * kotu olcum, kullanicinin gercekten hissettigi seydir.
  */
 export function PerfTile({ rows }: { rows: readonly PerfRow[] }) {
@@ -78,7 +78,7 @@ function Stat({ label, value, color }: { label: string; value: number; color: st
   );
 }
 
-/** Platform kirilimi — sorunun her yerde mi tek platformda mi oldugunu soyler. */
+/** Platform kirilimi - sorunun her yerde mi tek platformda mi oldugunu soyler. */
 export function PlatformTile({ rows }: { rows: readonly PlatformRow[] }) {
   const t = useT();
   const { theme, glass } = useTheme();
@@ -132,7 +132,7 @@ export function PlatformTile({ rows }: { rows: readonly PlatformRow[] }) {
  * Enstrümantasyon uyarilari.
  *
  * NEDEN AYRI KART: "oturumlarin %100'u kapanmiyor" bir urun bulgusu degil, olcum
- * hatasidir. Kullanici davranisiyla ayni kutuda gostermek yanlis karar aldirir —
+ * hatasidir. Kullanici davranisiyla ayni kutuda gostermek yanlis karar aldirir -
  * "kullanicilar kaciyor" diye okunur, oysa olay hic gonderilmiyordur.
  */
 export function InstrumentationTile({

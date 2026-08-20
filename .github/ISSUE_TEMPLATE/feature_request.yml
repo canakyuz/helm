@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Helm was written for one person's needs first and is selective about scope.
-        Talk it through here before starting anything large — a rejected PR wastes
+        Talk it through here before starting anything large - a rejected PR wastes
         both our time.
 
   - type: textarea

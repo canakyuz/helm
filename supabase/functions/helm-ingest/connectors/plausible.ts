@@ -1,6 +1,6 @@
 import { type Connector, type MetricPoint } from "./types.ts";
 
-// Plausible — son 90 günün günlük web ziyaretçisi (web projeleri için DAU).
+// Plausible - son 90 günün günlük web ziyaretçisi (web projeleri için DAU).
 // config: { site_id, api_key, host }
 
 export const fetchPlausible: Connector = async (config) => {

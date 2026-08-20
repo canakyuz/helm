@@ -58,7 +58,7 @@ export function RankedPropertyRow({
         borderBottomColor: colors.border,
       })}
     >
-      {/* Rank — accent number, fixed width */}
+      {/* Rank - accent number, fixed width */}
       <View
         style={{
           width: 28,
@@ -122,11 +122,11 @@ export function RankedPropertyRow({
           }}
           numberOfLines={1}
         >
-          {(brandName ?? "—").toUpperCase()}
+          {(brandName ?? "-").toUpperCase()}
         </Text>
       </View>
 
-      {/* Stats — primary big + secondary small */}
+      {/* Stats - primary big + secondary small */}
       <View
         style={{
           alignItems: "flex-end",

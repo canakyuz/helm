@@ -1,6 +1,6 @@
 import { createClient, type User } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-users — bir projenin Supabase kullanıcılarını + profiles join'i listeler.
+// helm-users - bir projenin Supabase kullanıcılarını + profiles join'i listeler.
 // auth.users (admin API) + public.profiles (username, country, city, location)
 // service_role key sunucuda kalır; panel sadece sonucu alır.
 
@@ -26,7 +26,7 @@ type ProfileRow = {
   city?: string | null;
   location?: string | null;
   avatar_url?: string | null;
-  // Premium — projeye özgü (Empire-Inc: profiles.premium_tier + premium_expires_at).
+  // Premium - projeye özgü (Empire-Inc: profiles.premium_tier + premium_expires_at).
   premium_tier?: number | null;
   premium_expires_at?: string | null;
 };
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // 1. Auth kullanıcılarını sayfalı çek — eski 200 limiti UUID/e-posta aramasını
+  // 1. Auth kullanıcılarını sayfalı çek - eski 200 limiti UUID/e-posta aramasını
   //    ilk 200 kayıtla sınırlıyordu (201+ bulunamıyordu). Artık hepsini yüklüyoruz.
   //    Güvenlik freni: en fazla MAX_PAGES * PER_PAGE kayıt (runaway koruması).
   const PER_PAGE = 1000;
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
 
   const userIds = authUsers.map((u) => u.id);
 
-  // 2. profiles join — username + lokasyon + premium. Kolon seti projeye göre
+  // 2. profiles join - username + lokasyon + premium. Kolon seti projeye göre
   //    değişir; ilk başarılı select'i kullan (eksik kolonda hepsi patlamasın).
   const profileMap = new Map<string, ProfileRow>();
   if (userIds.length > 0) {

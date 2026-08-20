@@ -4,11 +4,11 @@ import { cn } from "@/lib/utils";
 interface EmptyStateProps {
   /** Sol üstte icon (lucide veya custom). */
   icon?: ReactNode;
-  /** Ana başlık — kısa, ne eksik. */
+  /** Ana başlık - kısa, ne eksik. */
   title: string;
-  /** Açıklama — neden eksik + ne yapılmalı. */
+  /** Açıklama - neden eksik + ne yapılmalı. */
   description?: ReactNode;
-  /** Aksiyon butonu (opsiyonel) — `<Button>` veya `<Link>`. */
+  /** Aksiyon butonu (opsiyonel) - `<Button>` veya `<Link>`. */
   action?: ReactNode;
   /** İkincil aksiyon (link gibi, daha az vurgu). */
   secondaryAction?: ReactNode;

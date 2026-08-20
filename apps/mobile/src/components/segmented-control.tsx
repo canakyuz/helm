@@ -24,7 +24,7 @@ type Props<T extends string> = {
 
 const PADDING = 3;
 
-// iOS-native styled segmented control — animasyonlu pill, mono uppercase label.
+// iOS-native styled segmented control - animasyonlu pill, mono uppercase label.
 export function SegmentedControl<T extends string>({
   segments,
   active,

@@ -1,4 +1,4 @@
-# Helm monorepo — kök Makefile (apps/web + apps/mobile + supabase)
+# Helm monorepo - kök Makefile (apps/web + apps/mobile + supabase)
 # .env'den HELM_SUPABASE_PROJECT_ID okunur (gen-types için).
 -include .env
 export
@@ -39,7 +39,7 @@ build-web: ## web prod build → apps/web/dist
 # Supabase CLI'ı helm hesabıyla doğrular.
 #
 # NEDEN BU GUARD VAR: token .env'de yoksa CLI sessizce makinedeki VARSAYILAN
-# hesaba düşer ve "403 — account does not have the necessary privileges" der.
+# hesaba düşer ve "403 - account does not have the necessary privileges" der.
 # O mesaj kimin adına konuşulduğunu söylemediği için yanlış yere baktırıyor.
 # Token global export'tan bilerek çıkarıldı (bkz. ~/.zshrc notu); projeye ait
 # token projenin kendi .env'inde durur.
@@ -50,7 +50,7 @@ require-token:
 		echo "DIKKAT: bu makinedeki supabase CLI BASKA bir hesapta."; \
 		echo "  gorunen projeler : begahome, empireinc"; \
 		echo "  gereken proje    : $(HELM_SUPABASE_PROJECT_ID) (Helm Ops)"; \
-		echo "Yani 'supabase login' yetmez — token HELM hesabindan alinmali."; \
+		echo "Yani 'supabase login' yetmez - token HELM hesabindan alinmali."; \
 		echo ""; \
 		echo "1) Helm hesabiyla gir: supabase.com/dashboard/account/tokens"; \
 		echo "2) .env'i EDITORLE ac ve satiri ekle."; \
@@ -104,7 +104,7 @@ CHANNEL ?= production
 # Yayindan ONCE hedef ortamin anahtarini dogrula.
 #
 # NEDEN: `eas update` EXPO_PUBLIC_* degerlerini bundle'a GOMER. Hedef ortamda
-# olu bir anahtar duruyorsa yayin, calisan bir uygulamayi bozar — yasandi:
+# olu bir anahtar duruyorsa yayin, calisan bir uygulamayi bozar - yasandi:
 # production ortami legacy JWT (eyJ...) tasiyordu, Supabase'de legacy anahtarlar
 # kapatilmisti, yayindan sonra telefonda TUM ekranlar bosaldi. Anahtar formati
 # tek satirlik bir kontrol; yayindan sonra fark etmek cok pahali.

@@ -5,8 +5,8 @@
 ```
 helm/
 ├── apps/
-│   ├── web/                 # Refine cockpit — entegrasyon, admin, billing
-│   └── mobile/              # Expo — KPI, alerts, widget (mevcut helm-mobile)
+│   ├── web/                 # Refine cockpit - entegrasyon, admin, billing
+│   └── mobile/              # Expo - KPI, alerts, widget (mevcut helm-mobile)
 ├── packages/
 │   ├── types/               # Database + domain types (@helm/types)
 │   ├── api/                 # Saf fetch fonksiyonları (@helm/api)

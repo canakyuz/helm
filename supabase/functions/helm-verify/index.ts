@@ -9,9 +9,9 @@ import { fetchPlausible } from "../helm-ingest/connectors/plausible.ts";
 import { fetchRest } from "../helm-ingest/connectors/rest.ts";
 import { fetchSentry } from "../helm-ingest/connectors/sentry.ts";
 
-// helm-verify — bir entegrasyonun connector'ını koşar + son N gün
+// helm-verify - bir entegrasyonun connector'ını koşar + son N gün
 // stored metric'leri okur + (date, metric) üzerinden DIFF tablosu döner.
-// "upstream gerçekte ne döndü vs helm DB'ye ne yazdı" — yanyana.
+// "upstream gerçekte ne döndü vs helm DB'ye ne yazdı" - yanyana.
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -170,7 +170,7 @@ Deno.serve(async (req) => {
   };
   for (const d of diffs) summary[d.status]++;
 
-  // Sayfa boyutunu sınırla — UI rahat çizsin
+  // Sayfa boyutunu sınırla - UI rahat çizsin
   const MAX = 200;
   return json({
     ok: true,

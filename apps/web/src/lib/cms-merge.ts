@@ -1,4 +1,4 @@
-// helm — CMS şema merge: ingest tekrar çalıştığında NON-DESTRUCTIVE birleştirme.
+// helm - CMS şema merge: ingest tekrar çalıştığında NON-DESTRUCTIVE birleştirme.
 // Var olanı koru (dev tweak'leri: kind/label/select options) · yeni alanı ekle ·
 // object/list-of-object içine recurse · kaynakta silineni RAPORLA (otomatik silme yok) ·
 // kind çakışmasını raporla (mevcut korunur). Drift governance'ın "güncelleme" yolu.

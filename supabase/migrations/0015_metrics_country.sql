@@ -1,4 +1,4 @@
--- metrics_country — günlük metrik kırılımı (ülke bazlı).
+-- metrics_country - günlük metrik kırılımı (ülke bazlı).
 -- Ana metrics tablosunu kirletmemek için ayrı tablo.
 -- PK (project_id, date, source, metric, country_code) → upsert idempotent.
 

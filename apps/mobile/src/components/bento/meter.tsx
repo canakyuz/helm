@@ -23,7 +23,7 @@ type Props = {
 };
 
 /**
- * Segmentli ilerleme olcegi — surekli bir cubuk degil, 10 ayri dilim.
+ * Segmentli ilerleme olcegi - surekli bir cubuk degil, 10 ayri dilim.
  *
  * NEDEN SEGMENT: surekli bar "yuzde kac" sorusunu yaklasik cevaplar; 10 dilim
  * sayilabilir, "6/10" diye okunur. Aylik hedef gibi sayilabilir bir sey icin
@@ -68,7 +68,7 @@ function Segment({
   const noMotion = useReducedMotion();
 
   useEffect(() => {
-    // Dolu olmayan segmentler animasyonsuz — onlar zemin, olay degil.
+    // Dolu olmayan segmentler animasyonsuz - onlar zemin, olay degil.
     if (!active) {
       progress.value = 1;
       return;

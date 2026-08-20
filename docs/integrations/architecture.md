@@ -4,11 +4,11 @@ Otomatik entegrasyonların hub üzerinden nasıl çalışacağı.
 
 ## Prensipler
 
-1. **Normalize early** — Provider ham verisi UI'a gitmez; `metrics`, `reviews`, `issues` tablolarına yazılır.
-2. **Adapter pattern** — Her provider: `validate` + `sync` + opsiyonel `webhook`.
-3. **Secrets hub'da** — Credentials encrypted; client (web/mobile) raw key görmez.
-4. **Idempotent sync** — Upsert: `(project_id, provider, metric, date)` veya `(external_id)`.
-5. **Observable** — Her run → `sync_runs`; integration → `last_sync_*`.
+1. **Normalize early** - Provider ham verisi UI'a gitmez; `metrics`, `reviews`, `issues` tablolarına yazılır.
+2. **Adapter pattern** - Her provider: `validate` + `sync` + opsiyonel `webhook`.
+3. **Secrets hub'da** - Credentials encrypted; client (web/mobile) raw key görmez.
+4. **Idempotent sync** - Upsert: `(project_id, provider, metric, date)` veya `(external_id)`.
+5. **Observable** - Her run → `sync_runs`; integration → `last_sync_*`.
 
 ## Veri akışı
 
@@ -53,7 +53,7 @@ create table organizations (
   created_at timestamptz default now()
 );
 
--- Mevcut properties — org_id eklenir
+-- Mevcut properties - org_id eklenir
 alter table properties add column org_id uuid references organizations(id);
 
 -- project_integrations (genişletme)
@@ -146,16 +146,16 @@ sequenceDiagram
 |----------|----------|----------|
 | RevenueCat | Webhook (REAL_TIME) | hourly poll |
 | Sentry | Webhook (issue events) | 6h poll |
-| App Store Connect | — | 6h poll |
-| AdMob | — | daily poll |
-| PostHog | — | daily poll |
-| Supabase | — | 6h poll |
+| App Store Connect | - | 6h poll |
+| AdMob | - | daily poll |
+| PostHog | - | daily poll |
+| Supabase | - | 6h poll |
 
 ## Web wizard UX (3 adım)
 
-1. **Choose provider** — kart grid
-2. **Connect** — OAuth veya credential form + inline `validateCredentials`
-3. **Confirm** — ilk sync progress → KPI preview → opsiyonel alert template
+1. **Choose provider** - kart grid
+2. **Connect** - OAuth veya credential form + inline `validateCredentials`
+3. **Confirm** - ilk sync progress → KPI preview → opsiyonel alert template
 
 ## Health UI (web + mobile)
 
@@ -180,11 +180,11 @@ Web'de aynı `@helm/api/system-health` + admin detay (raw error, retry button).
 
 - [ ] Credentials never in client bundle or logs
 - [ ] RLS: integration row sadece org member
-- [ ] Worker service role — scoped to sync only
+- [ ] Worker service role - scoped to sync only
 - [ ] OAuth tokens refresh otomatik
 - [ ] .p8 / private keys Vault'ta; upload sonrası memory clear
 
 ## İlgili
 
-- [providers.md](./providers.md) — provider başına spec
-- [hook-inventory.md](../migration/hook-inventory.md) — `use-system-health`
+- [providers.md](./providers.md) - provider başına spec
+- [hook-inventory.md](../migration/hook-inventory.md) - `use-system-health`

@@ -7,7 +7,7 @@ interface HeroGhostProps {
   label: string;
   /** Büyük hero rakamı (formatlanmış string). */
   value: string;
-  /** Sub satır (opsiyonel) — hero rakamın hemen altında doğal akışta render edilir. */
+  /** Sub satır (opsiyonel) - hero rakamın hemen altında doğal akışta render edilir. */
   sub?: React.ReactNode;
   /** Arkada ghost olarak çizilecek son N gün serisi. */
   spark?: TrendPoint[];
@@ -17,7 +17,7 @@ interface HeroGhostProps {
 }
 
 /** Hero number + arkada ghost sparkline.
- *  Layout: label / hero rakam / (opsiyonel) sub. Doğal akış — sub her zaman görünür.
+ *  Layout: label / hero rakam / (opsiyonel) sub. Doğal akış - sub her zaman görünür.
  *  Sparkline arkada absolute, içeriğe karışmaz. */
 export const HeroGhost = ({
   label,
@@ -48,7 +48,7 @@ export const HeroGhost = ({
 
   return (
     <div className={cn("relative flex flex-col gap-2", className)}>
-      {/* Ghost sparkline — arka plan, içeriğe karışmaz */}
+      {/* Ghost sparkline - arka plan, içeriğe karışmaz */}
       {path && (
         <svg
           aria-hidden
@@ -72,15 +72,15 @@ export const HeroGhost = ({
           />
         </svg>
       )}
-      {/* Üst — label */}
+      {/* Üst - label */}
       <div className="relative text-[10px] uppercase tracking-wide text-muted-foreground">
         {label}
       </div>
-      {/* Orta — hero sayı */}
+      {/* Orta - hero sayı */}
       <div className="helm-hero-number relative text-[clamp(2rem,4.4cqw,2.75rem)] leading-none">
         {value}
       </div>
-      {/* Alt — sub doğal akışta hemen altta */}
+      {/* Alt - sub doğal akışta hemen altta */}
       {sub && <div className="relative text-xs">{sub}</div>}
     </div>
   );

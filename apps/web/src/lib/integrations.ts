@@ -1,4 +1,4 @@
-// Provider taxonomy — Entegrasyonlar sayfasında kategori grupları + ikon + açıklama.
+// Provider taxonomy - Entegrasyonlar sayfasında kategori grupları + ikon + açıklama.
 
 import type { ProviderName } from "@/types";
 

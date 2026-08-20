@@ -9,7 +9,7 @@ import {
 
 import { supabase } from "~/lib/supabase";
 
-// PostHog-backed edge'ler tek project_id scope'lu — çağıran efektif id'yi geçer.
+// PostHog-backed edge'ler tek project_id scope'lu - çağıran efektif id'yi geçer.
 export type {
   AcquisitionRow,
   AcquisitionData,

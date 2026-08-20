@@ -1,4 +1,4 @@
-// helm — CMS publish action butonu.
+// helm - CMS publish action butonu.
 // Edge fn `helm-cms-publish` revision + status update + webhook dağıtımı yapar.
 
 import { useState } from "react";
@@ -52,8 +52,8 @@ export const PublishButton = ({ entry, disabled, onPublished }: Props) => {
         toast.success("Published", {
           description:
             data.targets_total === 0
-              ? `${entry.slug} (${entry.locale}) — hedef yok, sadece DB`
-              : `${entry.slug} (${entry.locale}) — ${okCount}/${data.targets_matched} targets published`,
+              ? `${entry.slug} (${entry.locale}) - hedef yok, sadece DB`
+              : `${entry.slug} (${entry.locale}) - ${okCount}/${data.targets_matched} targets published`,
         });
       } else {
         toast.warning("Published, but some targets failed", {

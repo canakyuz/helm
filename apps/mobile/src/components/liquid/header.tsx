@@ -17,7 +17,7 @@ import { HeaderAlertsButton } from "~/components/header-alerts-button";
 import { haptic } from "~/lib/haptics";
 import { supabase } from "~/lib/supabase";
 
-// icon-only sync pill — rotates while syncing, refetches all queries on tap
+// icon-only sync pill - rotates while syncing, refetches all queries on tap
 function SyncButton() {
   const qc = useQueryClient();
   const [syncing, setSyncing] = useState(false);
@@ -44,7 +44,7 @@ function SyncButton() {
       //    helm-ingest accepts { trigger: "manual" } and runs all integrations.
       await supabase.functions.invoke("helm-ingest", { body: { trigger: "manual" } });
     } catch {
-      // ingest failure is non-fatal — still refetch whatever the hub already has
+      // ingest failure is non-fatal - still refetch whatever the hub already has
     }
     try {
       // 2) refetch ALL cached queries (active + inactive, not just the mounted

@@ -1,4 +1,4 @@
-# Helm — Modül Mimarisi UI Implementasyon Planı
+# Helm - Modül Mimarisi UI Implementasyon Planı
 
 > Eşlik eden dokümanlar: `.docs/MODULES.md` (model sözleşmesi), `.docs/0019-migration-draft.sql` (DB taslağı; gerçek dosya `supabase/migrations/0019_brands_and_properties.sql`. 0018 numarası `cms_publish_targets` için ayrıldı.)
 >
@@ -7,16 +7,16 @@
 
 ---
 
-## Faz 0 — Hazırlık (kod yok, sadece checklist)
+## Faz 0 - Hazırlık (kod yok, sadece checklist)
 
 - [ ] `.docs/MODULES.md` kullanıcı tarafından onaylandı
 - [ ] `.docs/0019-migration-draft.sql` review edildi, post-migration TODO'lar onaylandı
 - [ ] Dev DB snapshot (geri alma için): `pg_dump` veya Supabase dashboard backup
-- [ ] Çalışan dev sunucu kapatılıyor (5173) — migration sırasında React Query cache karışmasın
+- [ ] Çalışan dev sunucu kapatılıyor (5173) - migration sırasında React Query cache karışmasın
 
 ---
 
-## Faz 1 — DB migration (1 commit)
+## Faz 1 - DB migration (1 commit)
 
 **Dosya:** `supabase/migrations/0019_brands_and_properties.sql` (taslaktan kopyala)
 
@@ -26,11 +26,11 @@
 3. Doğrulama: `select * from properties limit 1`, `select * from brands limit 1`, `select * from projects limit 1` (view çalışıyor mu)
 4. Post-migration TODO 1 + 2 SQL'leri elle çalıştır (type set + enabled_modules backfill)
 
-**Commit:** `feat(helm): WES-000 0019 — brands tablosu + projects→properties rename + enabled_modules`
+**Commit:** `feat(helm): WES-000 0019 - brands tablosu + projects→properties rename + enabled_modules`
 
 ---
 
-## Faz 2 — Ortak kütüphane (1 commit)
+## Faz 2 - Ortak kütüphane (1 commit)
 
 ### 2.1. `src/lib/modules.ts` (yeni)
 
@@ -110,13 +110,13 @@ export interface Property {
 }
 ```
 
-**Commit:** `feat(helm): WES-000 modules — modül kataloğu + property type + brand/property type`
+**Commit:** `feat(helm): WES-000 modules - modül kataloğu + property type + brand/property type`
 
 ---
 
-## Faz 3 — Context / Hook (1 commit)
+## Faz 3 - Context / Hook (1 commit)
 
-### 3.1. `src/context/scope.tsx` (refactor — silmiyoruz, genişletiyoruz)
+### 3.1. `src/context/scope.tsx` (refactor - silmiyoruz, genişletiyoruz)
 
 Mevcut: `scope: "all" | string` (project_id).
 
@@ -156,11 +156,11 @@ export function useIsModuleEnabled(key: ModuleKey): boolean {
 }
 ```
 
-**Commit:** `feat(helm): WES-000 scope — brand/property scope context + useEnabledModules hook`
+**Commit:** `feat(helm): WES-000 scope - brand/property scope context + useEnabledModules hook`
 
 ---
 
-## Faz 4 — Property create wizard (1 commit)
+## Faz 4 - Property create wizard (1 commit)
 
 **Dosya:** `src/pages/projects/create.tsx` → `src/pages/properties/create.tsx` (move)
 
@@ -168,22 +168,22 @@ Mevcut form: name + slug (2 alan).
 Yeni form: 4 adım (1 modal, multi-step):
 
 ```
-Step 1 — Brand:
+Step 1 - Brand:
   RadioGroup (mevcut brand listesi) + "Yeni brand oluştur" → inline input
 
-Step 2 — Property:
+Step 2 - Property:
   Input name
   Input slug (slugify auto)
   RadioGroup type (5 seçenek, icon + açıklama)
 
-Step 3 — Modüller:
+Step 3 - Modüller:
   type seçildiği anda PRESET_MODULES[type] otomatik checked
   Tüm modüllerin Checkbox listesi (MODULE_META'dan label/icon)
   comingSoon olanlar disabled + badge "Yakında"
   OPTIONAL_MODULES vurgulu (subtle), gerisi normal
   PRESET değil ve type için anlamsız olanlar gizli
 
-Step 4 — (sadece mobile_app/game ise):
+Step 4 - (sadece mobile_app/game ise):
   app_store_id input
   app_store_country select
 ```
@@ -206,18 +206,18 @@ await supabase.from("properties").insert({
 - Yeni route: `/properties/create`, `/properties/edit/:id`, `/brands/edit/:id`
 - Refine resource adı `projects` → `properties` (DB view geri-uyumlu olduğu için aşamalı geçiş mümkün)
 
-**Commit:** `feat(helm): WES-000 properties — create wizard (brand + type + modules)`
+**Commit:** `feat(helm): WES-000 properties - create wizard (brand + type + modules)`
 
 ---
 
-## Faz 5 — Property settings (1 commit)
+## Faz 5 - Property settings (1 commit)
 
 **Dosya:** `src/pages/properties/edit.tsx` (eski `src/pages/projects/edit.tsx`'tan move)
 
 Üst bölüm (mevcut):
 - name, slug, app_store_id, app_store_country
 
-Yeni orta bölüm — **Modüller**:
+Yeni orta bölüm - **Modüller**:
 ```tsx
 <Card>
   <CardHeader>
@@ -245,26 +245,26 @@ Yeni orta bölüm — **Modüller**:
 
 Submit → `update properties set enabled_modules = $1 where id = $2`.
 
-**Commit:** `feat(helm): WES-000 properties — settings sayfasında modül toggle`
+**Commit:** `feat(helm): WES-000 properties - settings sayfasında modül toggle`
 
 ---
 
-## Faz 6 — Brand sayfası (1 commit, opsiyonel ama önerilen)
+## Faz 6 - Brand sayfası (1 commit, opsiyonel ama önerilen)
 
 **Dosya:** `src/pages/brands/edit.tsx` (yeni)
 
 - name, slug edit
 - Alt: o brand'in property listesi (DataTable: name, type, modül sayısı, son sync)
 - "Yeni property" butonu → `/properties/create?brand_id=X` (Step 1 atlanır)
-- "Brand sil" → property'leri taşımayı şart koş (UI engelleme — bağlı property varsa silinemez, `on delete restrict` zaten engelliyor)
+- "Brand sil" → property'leri taşımayı şart koş (UI engelleme - bağlı property varsa silinemez, `on delete restrict` zaten engelliyor)
 
 **App.tsx:** `brands` resource ekle.
 
-**Commit:** `feat(helm): WES-000 brands — edit sayfası + property listesi`
+**Commit:** `feat(helm): WES-000 brands - edit sayfası + property listesi`
 
 ---
 
-## Faz 7 — Sidebar refactor (1 commit)
+## Faz 7 - Sidebar refactor (1 commit)
 
 **Dosya:** `src/components/layout/index.tsx` (NAV_GROUPS'u dinamik yap)
 
@@ -327,11 +327,11 @@ const visibleGroups = NAV_GROUPS.map(g => ({
 
 **Saved context Quick Win #3 burada karşılanıyor:** 6 grup → 7 grup (İçerik ayrı çıktı), ama modül-aware filter sayesinde **görünür grup sayısı** çoğu property için 4-5'e düşüyor.
 
-**Commit:** `feat(helm): WES-000 sidebar — modül-aware nav (requires + filter)`
+**Commit:** `feat(helm): WES-000 sidebar - modül-aware nav (requires + filter)`
 
 ---
 
-## Faz 8 — Scope switcher refactor (1 commit)
+## Faz 8 - Scope switcher refactor (1 commit)
 
 **Dosya:** `src/components/layout/project-switcher.tsx` (rename + refactor)
 
@@ -347,11 +347,11 @@ Davranış:
 - Brand=All ise Property select disabled + "Hepsi" göster
 - localStorage'a `helm-scope-v2` JSON olarak yaz
 
-**Commit:** `feat(helm): WES-000 scope switcher — brand + property 2-level select`
+**Commit:** `feat(helm): WES-000 scope switcher - brand + property 2-level select`
 
 ---
 
-## Faz 9 — Dashboard cockpit modül filtresi (1 commit)
+## Faz 9 - Dashboard cockpit modül filtresi (1 commit)
 
 **Dosya:** `src/pages/dashboard/index.tsx`
 
@@ -366,15 +366,15 @@ const enabled = useEnabledModules();
 )}
 ```
 
-`KpiPlaceholder` yeni component — KpiCell ile aynı boyutta, ghost iskelet + "Modülü aç →" link.
+`KpiPlaceholder` yeni component - KpiCell ile aynı boyutta, ghost iskelet + "Modülü aç →" link.
 
 **Aurora drift, pulse markers, map glass dokunulmaz.** Sadece KPI cell içeriği koşullu.
 
-**Commit:** `feat(helm): WES-000 dashboard — modül-aware KPI cell + placeholder`
+**Commit:** `feat(helm): WES-000 dashboard - modül-aware KPI cell + placeholder`
 
 ---
 
-## Faz 10 — Eski URL'ler için redirect + temizlik (1 commit)
+## Faz 10 - Eski URL'ler için redirect + temizlik (1 commit)
 
 - `/projects` → `/properties` 301
 - `/projects/create` → `/properties/create`
@@ -388,23 +388,23 @@ const enabled = useEnabledModules();
 
 ## Sıra dışı: paralel/blocked iş
 
-- **CMS untracked dosyaları:** Saved context'te `src/components/cms/`, `src/pages/cms/`, `src/types/cms.ts` untracked. Bu PR'la **karışmasın** — ayrı commit'te önce CMS'i landed yap, sonra modül mimarisi PR'ı (CMS modülü = `content`, sidebar'da zaten yer ayrılıyor).
-- **Phase 3 (saved context Quick Win 1 + 2):** Status strip pill gruplama + ZONE C chart label tipografi — modül PR'ından bağımsız, paralel yapılabilir.
+- **CMS untracked dosyaları:** Saved context'te `src/components/cms/`, `src/pages/cms/`, `src/types/cms.ts` untracked. Bu PR'la **karışmasın** - ayrı commit'te önce CMS'i landed yap, sonra modül mimarisi PR'ı (CMS modülü = `content`, sidebar'da zaten yer ayrılıyor).
+- **Phase 3 (saved context Quick Win 1 + 2):** Status strip pill gruplama + ZONE C chart label tipografi - modül PR'ından bağımsız, paralel yapılabilir.
 
 ---
 
 ## Commit zinciri (özet)
 
 ```
-1. feat(helm): WES-000 0019 — brands tablosu + projects→properties rename + enabled_modules
-2. feat(helm): WES-000 modules — modül kataloğu + property type
-3. feat(helm): WES-000 scope — brand/property scope context + useEnabledModules hook
-4. feat(helm): WES-000 properties — create wizard (brand + type + modules)
-5. feat(helm): WES-000 properties — settings sayfasında modül toggle
-6. feat(helm): WES-000 brands — edit sayfası + property listesi
-7. feat(helm): WES-000 sidebar — modül-aware nav (requires + filter)
-8. feat(helm): WES-000 scope switcher — brand + property 2-level select
-9. feat(helm): WES-000 dashboard — modül-aware KPI cell + placeholder
+1. feat(helm): WES-000 0019 - brands tablosu + projects→properties rename + enabled_modules
+2. feat(helm): WES-000 modules - modül kataloğu + property type
+3. feat(helm): WES-000 scope - brand/property scope context + useEnabledModules hook
+4. feat(helm): WES-000 properties - create wizard (brand + type + modules)
+5. feat(helm): WES-000 properties - settings sayfasında modül toggle
+6. feat(helm): WES-000 brands - edit sayfası + property listesi
+7. feat(helm): WES-000 sidebar - modül-aware nav (requires + filter)
+8. feat(helm): WES-000 scope switcher - brand + property 2-level select
+9. feat(helm): WES-000 dashboard - modül-aware KPI cell + placeholder
 10. chore(helm): WES-000 projects route'ları properties'e taşı (redirect + resource cleanup)
 ```
 

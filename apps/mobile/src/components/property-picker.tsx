@@ -252,7 +252,7 @@ export function PropertyPicker() {
                     >
                       {isAll
                         ? "AGGREGATE TOPLAM"
-                        : (item.brandName ?? "—").toUpperCase()}
+                        : (item.brandName ?? "-").toUpperCase()}
                     </Text>
                   </View>
                   {active ? (

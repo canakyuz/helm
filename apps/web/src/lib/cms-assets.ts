@@ -1,4 +1,4 @@
-// helm — CMS medya yükleme + public URL üretimi.
+// helm - CMS medya yükleme + public URL üretimi.
 // Bucket: 'cms-assets' (migration 0017). Path: <projectId>/<uuid>.<ext>.
 
 import type { SupabaseClient } from "@supabase/supabase-js";

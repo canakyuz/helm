@@ -1,4 +1,4 @@
-# helm — Mimari ve Mühendislik Rehberi
+# helm - Mimari ve Mühendislik Rehberi
 
 > Bu belge helm'in **nasıl düşünüldüğünü** anlatır: katmanlar, desenler,
 > ilkeler ve "yeni bir şey eklerken nereye, nasıl" kuralları. Her ekleme
@@ -14,7 +14,7 @@ metriklerini tek panelde** topladığı bir iç araçtır (founder cockpit).
 - **Sahiplik:** Açık kaynak (Refine) üzerine kurulu, tamamen sahip olunan kod.
 - **Kapsam:** Salt-okunur metrik toplama + görselleştirme. Müdahale (CRM
   aksiyonları), form, mail gelecekteki fazlar.
-- **Kullanıcı:** Tek kişi (founder). Multi-tenant değil — bilinçli.
+- **Kullanıcı:** Tek kişi (founder). Multi-tenant değil - bilinçli.
 
 ---
 
@@ -53,11 +53,11 @@ helm üç parçadan oluşur: **panel** (SPA), **hub** (Supabase) ve
 ```
 
 **Neden bu şekil:**
-- **Hub ayrı bir Supabase projesi** — hiçbir ürünün DB'sine karışmaz; bir ürün
+- **Hub ayrı bir Supabase projesi** - hiçbir ürünün DB'sine karışmaz; bir ürün
   kapansa bile helm yaşar. Bağımsız yaşam döngüsü.
-- **Ingestion sunucu tarafında** — sağlayıcı `service_role` / secret'ları
+- **Ingestion sunucu tarafında** - sağlayıcı `service_role` / secret'ları
   tarayıcıya inmez (helm-users örneği). Edge Function = güven sınırı.
-- **Panel tamamen istemci** (SPA) — statik barındırılabilir, sunucu durumu yok.
+- **Panel tamamen istemci** (SPA) - statik barındırılabilir, sunucu durumu yok.
 
 ---
 
@@ -69,11 +69,11 @@ helm üç parçadan oluşur: **panel** (SPA), **hub** (Supabase) ve
 | UI framework | React 19 | Mevcut standart, Refine uyumu |
 | Build | Vite 6 | Hızlı HMR, native ESM, Tailwind v4 plugin'i |
 | Admin framework | Refine v5 (**headless core**) | CRUD/auth/routing soyutlaması; UI'a bağlı değil |
-| UI kütüphanesi | shadcn/ui (Radix + Tailwind) | Kopyalanan bileşen — sahiplik; modern, erişilebilir |
+| UI kütüphanesi | shadcn/ui (Radix + Tailwind) | Kopyalanan bileşen - sahiplik; modern, erişilebilir |
 | Stil | Tailwind CSS v4 | CSS-first config, `@tailwindcss/vite`; design-token uyumu |
 | Grafik | recharts | Hafif, React-yerel; lazy-load edilir |
 | Routing | react-router 7 | Refine react-router adapter |
-| Backend | Supabase | Postgres + Auth + Edge Functions + cron — tek platform |
+| Backend | Supabase | Postgres + Auth + Edge Functions + cron - tek platform |
 | Edge runtime | Deno (Supabase Functions) | Connector'lar; izole, sunucusuz |
 | Zamanlama | pg_cron + pg_net | DB-yerel cron; ek altyapı yok |
 | Form | react-hook-form + zod | Tip-güvenli doğrulama, şema tek kaynak |
@@ -126,14 +126,14 @@ helm/
 │  ├─ App.tsx                 Kök: Refine kurulumu, resources, routing, lazy-load
 │  ├─ index.tsx               Giriş noktası, CSS importu
 │  ├─ components/
-│  │  ├─ ui/                  shadcn primitive'leri — ELLE YAZILMAZ (npx shadcn add)
+│  │  ├─ ui/                  shadcn primitive'leri - ELLE YAZILMAZ (npx shadcn add)
 │  │  ├─ layout/              Uygulama kabuğu: sidebar + header
 │  │  ├─ stat-card/           Paylaşılan: istatistik kartı
 │  │  ├─ trend-chart/         Paylaşılan: zaman serisi grafiği (recharts)
 │  │  ├─ range-select/        Paylaşılan: 7/30/90 gün seçici
 │  │  ├─ integrations-panel/  projects'e özel: entegrasyon yönetimi
 │  │  └─ error/               404 ekranı
-│  ├─ pages/                  Ekranlar — her biri bir route
+│  ├─ pages/                  Ekranlar - her biri bir route
 │  │  ├─ dashboard/           Cockpit
 │  │  ├─ projects/            list / create / edit / show + schema.ts
 │  │  ├─ users/               Kullanıcılar (CRM)
@@ -141,11 +141,11 @@ helm/
 │  ├─ lib/                    Saf mantık: metrics.ts (series/latest/deltaPct), utils.ts
 │  ├─ providers/              Refine: auth, data, notification, supabase-client
 │  ├─ theme/                  presets.ts (5 tema) + ThemeProvider.tsx
-│  ├─ types/                  index.ts — domain tipleri (sözleşmeler)
+│  ├─ types/                  index.ts - domain tipleri (sözleşmeler)
 │  ├─ hooks/                  use-mobile.ts
 │  └─ styles/                 index.css (Tailwind + tema token'ları), glass.css
 └─ supabase/
-   ├─ migrations/             NNNN_ad.sql — sıralı, değişmez
+   ├─ migrations/             NNNN_ad.sql - sıralı, değişmez
    └─ functions/
       ├─ helm-ingest/         index.ts + connectors/ + _shared/
       └─ helm-users/          index.ts
@@ -178,7 +178,7 @@ Metrikler **geniş tablo** (her metrik bir kolon) değil, **uzun format**
 
 - ✅ **Yeni metrik = sıfır migration.** Connector `{metric:"yeni"}` emit eder,
   tablo değişmez. `ad_impressions`, `wau`, `ecpm` böyle eklendi.
-- ✅ Heterojen projeler: web sitesinde DAU yok, oyunda var — sorun değil.
+- ✅ Heterojen projeler: web sitesinde DAU yok, oyunda var - sorun değil.
 - ⚖️ Bedel: gösterimde pivot gerekir (`lib/metrics.ts` bunu yapar).
 
 Bu, **Open/Closed ilkesinin veri tabanındaki karşılığıdır.**
@@ -228,12 +228,12 @@ kodu değişmez. Tema, görünümün değiştirilebilir bir parametresidir.
 
 `providers/` Refine'a "veri nereden gelir / kim giriş yapar / bildirim nasıl"
 sorularını cevaplar. Bileşenler `useList`/`useForm` gibi hook'larla bu
-katmanı tüketir — doğrudan `supabaseClient` çağırmaz (istisna:
+katmanı tüketir - doğrudan `supabaseClient` çağırmaz (istisna:
 `functions.invoke`, çünkü Refine edge function soyutlamaz).
 
 ### 8.4 Kod bölme (code splitting)
 
-Sayfalar `React.lazy` ile route bazlı yüklenir. recharts ağır (~350 KB) —
+Sayfalar `React.lazy` ile route bazlı yüklenir. recharts ağır (~350 KB) -
 yalnızca grafikli sayfa açılınca yüklenir. İlk açılış hafif.
 
 ---
@@ -242,14 +242,14 @@ yalnızca grafikli sayfa açılınca yüklenir. İlk açılış hafif.
 
 - **DRY:** `lib/metrics.ts` ortak (Cockpit + proje detayı + Kullanıcılar);
   `StatCard`/`TrendChart`/`RangeSelect` paylaşılan; connector arayüzü tek.
-  Kural: 3. tekrardan sonra soyutla — erken değil.
+  Kural: 3. tekrardan sonra soyutla - erken değil.
 - **KISS:** Tek hub DB, tip-bazlı klasör, manuel-değil-otomatik. Gereksiz
   soyutlama yok.
-- **YAGNI:** Vault şifreleme ertelendi (lokal — gerek yok); form/mail Tally/
+- **YAGNI:** Vault şifreleme ertelendi (lokal - gerek yok); form/mail Tally/
   Loops'a bırakıldı (yeniden icat etme); feature-folder yok.
 - **Tip güvenliği:** `strict: true`, `any` yasak; `Connector`/`Metric`/
   `HelmTheme` tiplenmiş; form doğrulaması `zod` şemasıyla tek kaynaktan.
-- **Saf fonksiyonlar:** `lib/metrics.ts` yan etkisiz, deterministik —
+- **Saf fonksiyonlar:** `lib/metrics.ts` yan etkisiz, deterministik -
   kolay test edilir, kolay akıl yürütülür.
 - **Erken çıkış:** Connector ve orchestrator guard clause kullanır.
 - **Hata yönetimi:** Fail-soft ingestion; her entegrasyon izole; hata
@@ -260,15 +260,15 @@ yalnızca grafikli sayfa açılınca yüklenir. İlk açılış hafif.
 
 ---
 
-## 10. Konvansiyon — Nereye Ne Eklenir
+## 10. Konvansiyon - Nereye Ne Eklenir
 
 | Eklenen | Yer | Nasıl |
 |---------|-----|-------|
 | Yeni ekran | `pages/<ad>/index.tsx` | + `App.tsx` resources girdisi + `<Route>` (lazy) → sidebar otomatik |
 | Paylaşılan bileşen | `components/<ad>/index.tsx` | ≥2 ekran kullanıyorsa |
 | Ekrana özel bileşen | ilgili `components/` veya page klasörü | tek ekran kullanıyorsa |
-| shadcn primitive | `components/ui/` | `npx shadcn add <ad>` — elle yazma |
-| Yeni metrik | connector `{metric:"ad"}` emit eder | **migration YOK** (long-format) — sadece UI'da göster |
+| shadcn primitive | `components/ui/` | `npx shadcn add <ad>` - elle yazma |
+| Yeni metrik | connector `{metric:"ad"}` emit eder | **migration YOK** (long-format) - sadece UI'da göster |
 | Yeni veri kaynağı | `functions/helm-ingest/connectors/<ad>.ts` | `Connector` uygula + `CONNECTORS` map + `types.ts` provider + entegrasyon formu alanları |
 | Yeni edge function | `functions/<ad>/index.ts` | ayrı klasör; CORS + service_role deseni |
 | Yeni DB tablosu/alanı | `migrations/NNNN_<ad>.sql` | sıralı numara; **eski migration'a asla dokunma**; RLS ekle |
@@ -279,21 +279,21 @@ yalnızca grafikli sayfa açılınca yüklenir. İlk açılış hafif.
 
 ---
 
-## 11. Reçeteler — Adım Adım
+## 11. Reçeteler - Adım Adım
 
 ### Yeni ekran eklemek
-1. `pages/<ad>/index.tsx` — bileşeni yaz (`export const <Ad>Page`).
-2. `App.tsx` — `lazy()` importu ekle.
+1. `pages/<ad>/index.tsx` - bileşeni yaz (`export const <Ad>Page`).
+2. `App.tsx` - `lazy()` importu ekle.
 3. `App.tsx` `resources` dizisine `{ name, list, meta:{label, icon} }` ekle.
 4. `App.tsx` `<Routes>` içine `<Route>` ekle.
 → Sidebar `useMenu()` ile maddeyi otomatik üretir.
 
 ### Yeni veri kaynağı (connector) eklemek
-1. `connectors/<ad>.ts` — `Connector` arayüzünü uygula, `MetricPoint[]` döndür.
+1. `connectors/<ad>.ts` - `Connector` arayüzünü uygula, `MetricPoint[]` döndür.
 2. `helm-ingest/index.ts` `CONNECTORS` map'ine ekle.
 3. `types.ts` (panel) `ProviderName`'e ekle + config tipi.
 4. `integrations-panel` `PROVIDER_FIELDS`'e form alanlarını ekle.
-5. `migrations` — `project_integrations.provider` CHECK kısıtını genişlet.
+5. `migrations` - `project_integrations.provider` CHECK kısıtını genişlet.
 6. `supabase functions deploy helm-ingest`.
 
 ### Yeni metrik eklemek
@@ -302,7 +302,7 @@ yalnızca grafikli sayfa açılınca yüklenir. İlk açılış hafif.
 → Migration gerekmez.
 
 ### Yeni edge function eklemek
-1. `functions/<ad>/index.ts` — `Deno.serve`, CORS preflight, gerekiyorsa
+1. `functions/<ad>/index.ts` - `Deno.serve`, CORS preflight, gerekiyorsa
    `service_role` ile hub client.
 2. `supabase functions deploy <ad>`.
 3. Panel `supabaseClient.functions.invoke("<ad>", { body })` ile çağırır.
@@ -325,12 +325,12 @@ yalnızca grafikli sayfa açılınca yüklenir. İlk açılış hafif.
 
 ## 13. Gözlemlenebilirlik
 
-- `sync_runs` — her ingestion çalışması: zaman, tetikleyici (manuel/cron),
+- `sync_runs` - her ingestion çalışması: zaman, tetikleyici (manuel/cron),
   metrik sayısı, ok/hata sayısı, `details` jsonb.
-- `project_integrations.last_sync_status` / `last_sync_error` — connector
+- `project_integrations.last_sync_status` / `last_sync_error` - connector
   bazlı son durum; panelde tooltip ile gösterilir.
 - Cockpit "Son Senkronlar" kartı bu veriyi okur.
-- Eksik: panel kendi JS hatalarını izlemiyor (BACKLOG P5 — Sentry).
+- Eksik: panel kendi JS hatalarını izlemiyor (BACKLOG P5 - Sentry).
 
 ---
 
@@ -338,7 +338,7 @@ yalnızca grafikli sayfa açılınca yüklenir. İlk açılış hafif.
 
 - **Geliştirme:** `npm run dev` (Refine dev → Vite). `.env.local` gerekir.
 - **Build:** `npm run build` (`tsc` + Vite). Strict TS geçmeli.
-- **Migration:** `supabase db push` — sıralı, geri-uyumlu.
+- **Migration:** `supabase db push` - sıralı, geri-uyumlu.
 - **Edge Function:** `supabase functions deploy <ad>`.
 - **Cron:** `pg_cron` job kayıtlı; Vault secret'ları girilince aktif.
 - **Barındırma:** Şu an lokal. Deploy hedefi Vercel (statik SPA). Deploy =
@@ -354,20 +354,20 @@ yalnızca grafikli sayfa açılınca yüklenir. İlk açılış hafif.
 - Connector dosyası = sağlayıcı adı; `fetch<Provider>` export eder.
 - Yorum NEDEN'i açıklar, NE'yi değil. Türkçe yorum (proje dili).
 - Fonksiyon < ~20 satır, tek sorumluluk; nesting < 3; guard clause tercih.
-- `any` yasak — `unknown` + daraltma.
+- `any` yasak - `unknown` + daraltma.
 
 ---
 
-## 16. YAGNI Sınırları — Bilinçli Yapılmayanlar
+## 16. YAGNI Sınırları - Bilinçli Yapılmayanlar
 
 Aşağıdakiler **kasıtlı olarak yok**; ihtiyaç kanıtlanınca eklenir:
 
 - Feature-folder yapısı (ölçek küçük).
-- Vault şifreleme (lokal — deploy'da gelecek).
-- Form/mail motoru (Tally/Loops kullanılacak — yeniden icat yok).
+- Vault şifreleme (lokal - deploy'da gelecek).
+- Form/mail motoru (Tally/Loops kullanılacak - yeniden icat yok).
 - Çoklu kullanıcı / rol sistemi (tek founder).
 - Manuel metrik girişi (otomasyon ilkesine ters).
 - Test paketi (kritik saf mantık `lib/` ileride; UI testi obsesyonu yok).
 - State yönetimi kütüphanesi (Refine + React Query yeterli).
 
-> Bu sınırlar tartışmaya açıktır — ama varsayılan "ekleme"dir, "ekle" değil.
+> Bu sınırlar tartışmaya açıktır - ama varsayılan "ekleme"dir, "ekle" değil.

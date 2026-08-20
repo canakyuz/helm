@@ -1,4 +1,4 @@
-// helm — CMS publish + rollback yardımcıları.
+// helm - CMS publish + rollback yardımcıları.
 // V1: 2 query (revision insert + entry update). V2'de RPC ile transaction.
 
 import type { SupabaseClient } from "@supabase/supabase-js";

@@ -1,4 +1,4 @@
-// helm — CMS şema tasarımcısı. dnd-kit ile field reorder.
+// helm - CMS şema tasarımcısı. dnd-kit ile field reorder.
 // FieldDef[] üzerinde CRUD; cms_collections.schema'nın editörü.
 
 import {

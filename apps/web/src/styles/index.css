@@ -111,12 +111,12 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   helm tema sistemi — Liquid Glass, iki mod (dark + light).
+   helm tema sistemi - Liquid Glass, iki mod (dark + light).
    Tek tema yapısı, sadece mod değişir. CSS efektleri (blur, bloom)
-   ortak — bkz. src/styles/glass.css ([data-helm-theme^="glass"]).
+   ortak - bkz. src/styles/glass.css ([data-helm-theme^="glass"]).
    ───────────────────────────────────────────────────────────── */
 
-/* glass-dark — varsayılan (Liquid Glass karanlık) */
+/* glass-dark - varsayılan (Liquid Glass karanlık) */
 :root,
 [data-helm-theme="glass-dark"] {
     --background: rgb(var(--bento-bg));
@@ -169,7 +169,7 @@
   --bento-amber: 254 138 62;
 }
 
-/* glass-light — Liquid Glass aydınlık.
+/* glass-light - Liquid Glass aydınlık.
    Card yoğun beyaz (rgba 0.6) → backdrop-blur okunabilirliği korur. */
 [data-helm-theme="glass-light"] {
     --background: rgb(var(--bento-bg));

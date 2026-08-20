@@ -8,7 +8,7 @@
 --
 -- FK'lar: project_integrations, metrics, metrics_country, reviews, alert_rules,
 -- heartbeats, user_segments, app_versions, audit_log, campaigns, cms_collections,
--- cms_entries, cms_assets — hepsi `project_id` kolon adıyla `properties.id`'yi
+-- cms_entries, cms_assets - hepsi `project_id` kolon adıyla `properties.id`'yi
 -- referans alır (kolon adı rename edilmedi; geri-uyumluluk).
 
 begin;
@@ -49,10 +49,10 @@ update public.properties p
 alter table public.properties alter column brand_id set not null;
 create index properties_brand_idx on public.properties(brand_id);
 
--- 6) properties.type — default 'mobile_app' (post-migration manuel düzeltme)
+-- 6) properties.type - default 'mobile_app' (post-migration manuel düzeltme)
 alter table public.properties add column type property_type not null default 'mobile_app';
 
--- 7) properties.enabled_modules — boş array default, app-side preset doldurur
+-- 7) properties.enabled_modules - boş array default, app-side preset doldurur
 alter table public.properties add column enabled_modules text[] not null default '{}';
 
 -- 8) Geri-uyumlu view: eski `projects` adıyla read-only erişim

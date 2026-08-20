@@ -16,7 +16,7 @@ export function formatCurrency(value: number, currency = "USD"): string {
 }
 
 /**
- * Stat kutusu için para — KURUŞSUZ.
+ * Stat kutusu için para - KURUŞSUZ.
  *
  * NEDEN: üç küçük kutunun rakam boyutu en uzun değere göre seçiliyor
  * (statFontSize). "₺2,340.78" 9 karakter ve tüm satırı 18pt'e düşürüyordu;
@@ -31,12 +31,12 @@ export function formatCurrencyCompact(value: number, currency = "USD"): string {
   return `${sign}${symbol}${rounded.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
 }
 
-// Tam sayı metric'ler (DAU, kullanıcı sayısı vb) — binlik separator, ondalık yok.
+// Tam sayı metric'ler (DAU, kullanıcı sayısı vb) - binlik separator, ondalık yok.
 export function formatInteger(value: number): string {
   return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// Hermes'te `Intl.RelativeTimeFormat` yok — manuel TR formatter.
+// Hermes'te `Intl.RelativeTimeFormat` yok - manuel TR formatter.
 const UNITS: Array<readonly [number, string]> = [
   [60, "sn"],
   [60, "dk"],
@@ -47,7 +47,7 @@ const UNITS: Array<readonly [number, string]> = [
 ];
 
 /**
- * Goreli zamanin PARCALARI — bicimlenmis metin degil.
+ * Goreli zamanin PARCALARI - bicimlenmis metin degil.
  *
  * NEDEN AYRI: `formatRelativeTime` hazir Turkce dizgi donuyordu ("8 dk önce"),
  * dolayisiyla Ingilizce arayuzde on ekranda Turkce kaliyordu ve cevrilecek bir
@@ -89,7 +89,7 @@ export function formatRelativeTimeTR(iso: string | Date): string {
 }
 
 /**
- * Saat damgasi — "10:12". Cihazin YEREL saatinde.
+ * Saat damgasi - "10:12". Cihazin YEREL saatinde.
  *
  * Intl'e gidilmiyor: Hermes'te `Intl.DateTimeFormat` var ama hour12 davranisi
  * cihaz bolgesine gore degisiyor; 24 saat sabit olsun (panel Turkce ve
@@ -97,17 +97,17 @@ export function formatRelativeTimeTR(iso: string | Date): string {
  */
 export function formatClock(iso: string | Date): string {
   const date = typeof iso === "string" ? new Date(iso) : iso;
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "-";
   const hh = String(date.getHours()).padStart(2, "0");
   const mm = String(date.getMinutes()).padStart(2, "0");
   return `${hh}:${mm}`;
 }
 
 // ---------------------------------------------------------------------------
-// Yuzde — TEK kural: sayi once, `%` sonek (`98%`). Ekranlarin bir kismi elde
+// Yuzde - TEK kural: sayi once, `%` sonek (`98%`). Ekranlarin bir kismi elde
 // Turkce onek (`%98`) yaziyordu; ayni uygulamada iki kural yasamasin diye
 // hepsi buraya baglandi. Ondalik basamak metrige gore degisir (huni orani 0,
-// crash-free 1) — degisen SADECE hassasiyet, gosterim degil.
+// crash-free 1) - degisen SADECE hassasiyet, gosterim degil.
 // ---------------------------------------------------------------------------
 
 /** Zaten yuzde olan deger (0–100). Isaretsiz. */
@@ -130,7 +130,7 @@ export function isFlatDelta(value: number): boolean {
 }
 
 /**
- * Degisim yuzdesi — isaretli. Negatifte typografik eksi (U+2212) kullanilir:
+ * Degisim yuzdesi - isaretli. Negatifte typografik eksi (U+2212) kullanilir:
  * mono'da rakamlarla ayni genislikte ve tire'den uzun, sutunlar kaymaz.
  */
 export function formatDelta(value: number, decimals = 1): string {

@@ -1,6 +1,6 @@
 import { type Connector, type MetricPoint, today } from "./types.ts";
 
-// RevenueCat v2 — Metrics Overview (anlık snapshot).
+// RevenueCat v2 - Metrics Overview (anlık snapshot).
 // config: { rc_project_id, api_key, mrr_cents? }  (api_key = v2 secret key)
 //   mrr_cents: abonelik fiyatlarının ONDALIK kısmı (örn. "0.99" veya "99").
 //   RC overview MRR'ı kuruşu YUVARLAR (19.99→19, 9.99→9). Fiyat tier'ı değişir

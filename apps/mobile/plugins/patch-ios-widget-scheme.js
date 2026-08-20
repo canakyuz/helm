@@ -44,7 +44,7 @@ function patchScheme(schemeXml, targetId) {
 
 function main() {
   if (!fs.existsSync(PBX) || !fs.existsSync(SCHEME)) {
-    console.warn("[widget-scheme] ios project not found — skip");
+    console.warn("[widget-scheme] ios project not found - skip");
     return;
   }
 

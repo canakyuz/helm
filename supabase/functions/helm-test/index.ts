@@ -10,7 +10,7 @@ import { fetchRest } from "../helm-ingest/connectors/rest.ts";
 import { fetchSentry } from "../helm-ingest/connectors/sentry.ts";
 import { getPlayAccessToken } from "../_shared/play-oauth.ts";
 
-// helm-test — tek bir entegrasyonu çalıştırır, sonucu DB'ye YAZMADAN döner.
+// helm-test - tek bir entegrasyonu çalıştırır, sonucu DB'ye YAZMADAN döner.
 // Panel "Test" butonu için: gelen veriyi gözle inceleyebilmek.
 
 const cors = {
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
 
   const t0 = Date.now();
 
-  // Non-metric provider'lar için özel "ping" testleri — connector mantığı yok,
+  // Non-metric provider'lar için özel "ping" testleri - connector mantığı yok,
   // sadece auth/erişim doğrulanır.
   if (integ.provider === "google_play_developer") {
     const cfg = (integ.config ?? {}) as Record<string, string | undefined>;
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
       provider: integ.provider,
       duration_ms: ms,
       count: points.length,
-      points: points.slice(0, 100), // ilk 100 — UI'da göstermek için
+      points: points.slice(0, 100), // ilk 100 - UI'da göstermek için
     });
   } catch (e) {
     return json({

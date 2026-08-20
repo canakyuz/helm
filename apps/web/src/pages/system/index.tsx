@@ -83,7 +83,7 @@ const INTERVALS = [
 ];
 
 const fmt = (value: string | null) =>
-  value ? new Date(value).toLocaleString("en-US") : "—";
+  value ? new Date(value).toLocaleString("en-US") : "-";
 
 export const SystemPage = () => {
   const since90 = useMemo(
@@ -122,13 +122,13 @@ export const SystemPage = () => {
   const heartbeats = hbResult.data;
   const errors = errorsResult.data;
   const projectName = (id: string) =>
-    projectsResult.data.find((p) => p.id === id)?.name ?? "—";
+    projectsResult.data.find((p) => p.id === id)?.name ?? "-";
 
   const errorSeries = useMemo(() => series(errors, "errors"), [errors]);
   const errorLatest = latest(errors, "errors");
   const errorDelta = deltaPct(errorSeries);
 
-  // Son 7 gün proje kırılımı — Sentry bağlı projelerin toplam hatası.
+  // Son 7 gün proje kırılımı - Sentry bağlı projelerin toplam hatası.
   const errorsByProject = useMemo(() => {
     const since7 = new Date(Date.now() - 7 * 86_400_000)
       .toISOString()
@@ -145,7 +145,7 @@ export const SystemPage = () => {
     (it) => it.provider === "sentry" && it.enabled,
   );
 
-  // Top issues — on-demand çek
+  // Top issues - on-demand çek
   type SentryIssue = {
     id: string;
     short_id: string;
@@ -270,7 +270,7 @@ export const SystemPage = () => {
     toast.success("Ping URL copied");
   };
 
-  // KPI hesapları — operasyon merkezi özeti
+  // KPI hesapları - operasyon merkezi özeti
   const sysStats = useMemo(() => {
     const totalInteg = integrations.length;
     const ok = integrations.filter((i) => i.last_sync_status === "ok").length;
@@ -327,7 +327,7 @@ export const SystemPage = () => {
         Senkron & Sağlık
       </h1>
 
-      {/* KPI cluster — 6'lı operasyon özeti */}
+      {/* KPI cluster - 6'lı operasyon özeti */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <SysKpi
           label="System health"
@@ -364,7 +364,7 @@ export const SystemPage = () => {
           value={
             sysStats.recentCount > 0
               ? `%${sysStats.recentRate}`
-              : "—"
+              : "-"
           }
           icon={<RefreshCw className="size-3.5" />}
           tone={
@@ -395,13 +395,13 @@ export const SystemPage = () => {
         />
       </div>
 
-      {/* Hatalar (Sentry) — sadece bağlı projeler için göster */}
+      {/* Hatalar (Sentry) - sadece bağlı projeler için göster */}
       {hasSentry && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertOctagon className="size-4" />
-              Hatalar — son 90 gün
+              Hatalar - son 90 gün
             </CardTitle>
             <CardAction>
               <div className="text-right text-sm">
@@ -461,7 +461,7 @@ export const SystemPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertOctagon className="size-4" />
-              Açık Hatalar — Top {topIssues.length || "—"} (son 14g)
+              Açık Hatalar - Top {topIssues.length || "-"} (son 14g)
             </CardTitle>
             <CardAction>
               <Button

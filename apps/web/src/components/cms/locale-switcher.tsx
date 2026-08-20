@@ -1,4 +1,4 @@
-// helm — CMS i18n tab switcher. V1: hardcoded ['en','tr'].
+// helm - CMS i18n tab switcher. V1: hardcoded ['en','tr'].
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

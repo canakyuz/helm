@@ -7,10 +7,10 @@ import type { Currency } from "@helm/types";
 // FxRates = USD base; rates[X] = 1 USD kaç X eder.
 export type FxRates = Record<Currency, number>;
 
-// Fallback (online'a ulaşılamazsa — 2026 yaklaşık, canlı API üzerine yazar).
+// Fallback (online'a ulaşılamazsa - 2026 yaklaşık, canlı API üzerine yazar).
 export const FX_FALLBACK: FxRates = { USD: 1, TRY: 40, EUR: 0.92, GBP: 0.79 };
 
-// Kaynak para biriminde saklanan para metrikleri — USD'ye normalize edilir.
+// Kaynak para biriminde saklanan para metrikleri - USD'ye normalize edilir.
 // Diğerleri (dau, active_subs, downloads…) sayıdır, dokunulmaz.
 export const MONEY_METRICS: ReadonlySet<string> = new Set([
   "mrr",
@@ -52,7 +52,7 @@ let fxMemo: { at: number; rates: FxRates } | null = null;
 
 export async function fetchFxRates(): Promise<FxRates> {
   if (fxMemo && Date.now() - fxMemo.at < FX_TTL_MS) return fxMemo.rates;
-  // open.er-api.com (ExchangeRate-API açık uç) — ücretsiz, anahtarsız, CORS açık,
+  // open.er-api.com (ExchangeRate-API açık uç) - ücretsiz, anahtarsız, CORS açık,
   // HER GÜN güncel (TRY hızlı oynadığı için ECB'nin hafta sonu boşluğu yok).
   // Tek çağrı, USD base; rates[X] = 1 USD → X.
   try {

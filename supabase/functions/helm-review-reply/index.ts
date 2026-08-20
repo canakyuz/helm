@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
       const { data } = await hub.auth.getUser(jwt);
       actorEmail = data?.user?.email ?? null;
     } catch {
-      // anon — actor null kalır
+      // anon - actor null kalır
     }
   }
   if (!actorEmail) {
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     .gte("created_at", sixtySecondsAgo);
   if (rlErr) return json({ error: rlErr.message }, 500);
   if ((recentCount ?? 0) >= 10) {
-    return json({ error: "Too fast — wait a minute" }, 429);
+    return json({ error: "Too fast - wait a minute" }, 429);
   }
 
   const { data: revRow, error: revErr } = await hub
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
   if (integErr) return json({ error: integErr.message }, 500);
   if (!integRow) {
     return json(
-      { error: `${provider} entegrasyonu yok — Settings → Integrations` },
+      { error: `${provider} entegrasyonu yok - Settings → Integrations` },
       401,
     );
   }

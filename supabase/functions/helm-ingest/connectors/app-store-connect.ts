@@ -5,7 +5,7 @@ import {
 } from "./types.ts";
 import { makeAscJwt } from "../../_shared/asc-jwt.ts";
 
-// App Store Connect — Sales Reports (daily summary).
+// App Store Connect - Sales Reports (daily summary).
 // JWT ES256 ile auth → günlük satış raporu (gzip TSV).
 // config: { key_id, issuer_id?, private_key, vendor_number, currency?, app_store_id? }
 //   issuer_id: Team Key için Integrations sayfasındaki Issuer ID (UUID).
@@ -14,7 +14,7 @@ import { makeAscJwt } from "../../_shared/asc-jwt.ts";
 //   currency: developer proceeds para birimi (vendor varsayılanı; çoğu hesapta USD).
 //   app_store_id: Apple'ın SAYISAL uygulama kimliği (App Store URL'indeki id######),
 //                 bundle id DEĞİL. Vendor raporu hesaptaki TÜM uygulamaları içerir;
-//                 bu alan verilmezse hepsi toplanıp tek projeye yazılır — birden
+//                 bu alan verilmezse hepsi toplanıp tek projeye yazılır - birden
 //                 fazla uygulaması olan hesaplarda rakamlar birbirine karışır.
 
 const DAYS_BACK = 7;
@@ -42,7 +42,7 @@ async function fetchDailyReport(
     const body = await res.text();
     const [header, payload] = jwt.split(".");
     throw new Error(
-      `AppStoreConnect 401 — JWT reddedildi.\n` +
+      `AppStoreConnect 401 - JWT reddedildi.\n` +
         `JWT (inspect on jwt.io, drop the signature): ${header}.${payload}.SIGNATURE\n` +
         `Common causes: wrong Issuer/Key ID, an old or wrong .p8 key, or the API key'in "Sales and Trends" yetkisi yok (rol: Admin / Finance / Sales gerekli).\n` +
         `Apple responded: ${body}`,
@@ -62,7 +62,7 @@ interface ReportRow {
   units: number;
   proceeds: number;
   countryCode: string; // ISO 3166-1 alpha-2; boş ise ""
-  /** "Apple Identifier" — raporun HANGI uygulamaya ait oldugu. Kolon yoksa "". */
+  /** "Apple Identifier" - raporun HANGI uygulamaya ait oldugu. Kolon yoksa "". */
   appleId: string;
 }
 
@@ -105,7 +105,7 @@ function parseTsv(tsv: string): ParsedReport {
 
 // Apple product type identifiers:
 //   1, 1F, 1T, 1TP = yeni app install (paid/free/universal)
-//   7, 7F          = update (download) — sayma
+//   7, 7F          = update (download) - sayma
 //   IA1, IA9, IAY  = in-app purchase / sub
 //   1A, 1E         = paid app upgrade
 //   F1             = free in-app purchase
@@ -116,7 +116,7 @@ const isDownloadType = (t: string) =>
 //   sub  = auto-renewable: IAY, IAY-M
 //   iap  = IAP + non-renewing sub: IA1, IA1-M, FI1, IA9, IA9-M
 //   skip = re-download/update/restore: 3*, 7*, F7, IA3 (proceeds ~0, sayma)
-//   app  = kalan (paid app sales) — toplam app_revenue'ya girer ama mix'te ayrı tutulmaz
+//   app  = kalan (paid app sales) - toplam app_revenue'ya girer ama mix'te ayrı tutulmaz
 type RevClass = "sub" | "iap" | "skip" | "app";
 function classifyRevenue(productType: string): RevClass {
   const t = productType.toUpperCase();
@@ -148,7 +148,7 @@ export const fetchAppStoreConnect: Connector = async (config) => {
     const parsed = parseTsv(tsv);
     // Vendor raporu hesaptaki TUM uygulamalari icerir. app_store_id verilmisse
     // yalnizca o uygulamanin satirlari sayilir; verilmemisse davranis eskisi
-    // gibi kalir (hepsi toplanir) — mevcut entegrasyonlar kirilmaz.
+    // gibi kalir (hepsi toplanir) - mevcut entegrasyonlar kirilmaz.
     if (appFilter && !parsed.hasAppleId) {
       throw new Error(
         `ASC satis raporunda "Apple Identifier" kolonu yok; app_store_id="${appFilter}" ile ayristirma yapilamaz. Filtresiz devam etmek hesaptaki tum uygulamalari bu projeye yazardi.`,
@@ -161,7 +161,7 @@ export const fetchAppStoreConnect: Connector = async (config) => {
     let revenue = 0;
     let subRev = 0;
     let iapRev = 0;
-    // Ülke bazlı toplam — Country Code yoksa "??" altında topla.
+    // Ülke bazlı toplam - Country Code yoksa "??" altında topla.
     const dlByCountry = new Map<string, number>();
     const revByCountry = new Map<string, number>();
     for (const r of rows) {

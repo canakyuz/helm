@@ -1,4 +1,4 @@
-# Reviews Entegrasyon Onarımı — Implementation Plan
+# Reviews Entegrasyon Onarımı - Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -14,7 +14,7 @@
 
 ## ⚠️ Spec'e göre düzeltmeler (plan tarafından gözlemlendi)
 
-1. **Migration numaraları kaydı**: Spec'te `0024_reviews_v2.sql` yazıyordu — `0024_audit_actor.sql` zaten alınmış. Düzeltme: `0025_reviews_v2.sql`, `0026_reviews_cron.sql`, `0027_audit_actor_composite_idx.sql`.
+1. **Migration numaraları kaydı**: Spec'te `0024_reviews_v2.sql` yazıyordu - `0024_audit_actor.sql` zaten alınmış. Düzeltme: `0025_reviews_v2.sql`, `0026_reviews_cron.sql`, `0027_audit_actor_composite_idx.sql`.
 2. **`cron_runs` tablosu yok**: Spec'te bahsedildi ama mevcut değil. Bunun yerine cron çalışma kayıtları `audit_log`'a `action='system.reviews_ingest'` olarak yazılır (project_id null, target_user null, detail = JSON string).
 3. **audit_log schema ekleme yok**: `target_review_id` ayrı kolon eklenmez; `detail` text alanına JSON string yazılır (`{"review_id": 42, "source": "appstore", "body_length": 200}`).
 
@@ -26,31 +26,31 @@
 - `supabase/migrations/0025_reviews_v2.sql`
 - `supabase/migrations/0026_reviews_cron.sql`
 - `supabase/migrations/0027_audit_actor_composite_idx.sql`
-- `supabase/functions/_shared/asc-jwt.ts` — ASC JWT helper (paylaşılan)
-- `supabase/functions/_shared/cors.ts` — CORS sabit (DRY)
-- `supabase/functions/helm-reviews/asc.ts` — ASC Customer Reviews API
-- `supabase/functions/helm-reviews/rss.ts` — iTunes RSS fallback
-- `supabase/functions/helm-reviews/play.ts` — Google Play Reviews API + token cache
-- `supabase/functions/helm-review-reply/index.ts` — orchestrator
-- `supabase/functions/helm-review-reply/asc-reply.ts` — Apple reply
-- `supabase/functions/helm-review-reply/play-reply.ts` — Google reply
-- `src/pages/reviews/reply-modal.tsx` — web yanıt modal
-- `src/components/integrations-panel/google-play-developer-card.tsx` — web provider kartı
-- `helm-mobile/src/components/review-reply-sheet.tsx` — mobil yanıt sheet
-- `helm-mobile/src/hooks/use-review-reply.ts` — mobil reply mutation
+- `supabase/functions/_shared/asc-jwt.ts` - ASC JWT helper (paylaşılan)
+- `supabase/functions/_shared/cors.ts` - CORS sabit (DRY)
+- `supabase/functions/helm-reviews/asc.ts` - ASC Customer Reviews API
+- `supabase/functions/helm-reviews/rss.ts` - iTunes RSS fallback
+- `supabase/functions/helm-reviews/play.ts` - Google Play Reviews API + token cache
+- `supabase/functions/helm-review-reply/index.ts` - orchestrator
+- `supabase/functions/helm-review-reply/asc-reply.ts` - Apple reply
+- `supabase/functions/helm-review-reply/play-reply.ts` - Google reply
+- `src/pages/reviews/reply-modal.tsx` - web yanıt modal
+- `src/components/integrations-panel/google-play-developer-card.tsx` - web provider kartı
+- `helm-mobile/src/components/review-reply-sheet.tsx` - mobil yanıt sheet
+- `helm-mobile/src/hooks/use-review-reply.ts` - mobil reply mutation
 
 ### Değişen dosyalar
-- `supabase/functions/helm-reviews/index.ts` — orchestrator refactor
-- `supabase/functions/helm-ingest/connectors/app-store-connect.ts` — JWT helper'ı _shared'e taşı
-- `src/pages/reviews/index.tsx` — 5 stat card, platform segment, ReviewRow badge, reply button
-- `src/types/index.ts` veya benzeri — `Review` tipi yeni kolonlar
-- `helm-mobile/app/(cockpit)/(reviews)/index.tsx` — hero avg platform-aware
-- `helm-mobile/src/components/review-row.tsx` — badge'ler + reply button
-- `helm-mobile/src/hooks/use-reviews.ts` — Review tipi güncelleme
+- `supabase/functions/helm-reviews/index.ts` - orchestrator refactor
+- `supabase/functions/helm-ingest/connectors/app-store-connect.ts` - JWT helper'ı _shared'e taşı
+- `src/pages/reviews/index.tsx` - 5 stat card, platform segment, ReviewRow badge, reply button
+- `src/types/index.ts` veya benzeri - `Review` tipi yeni kolonlar
+- `helm-mobile/app/(cockpit)/(reviews)/index.tsx` - hero avg platform-aware
+- `helm-mobile/src/components/review-row.tsx` - badge'ler + reply button
+- `helm-mobile/src/hooks/use-reviews.ts` - Review tipi güncelleme
 
 ---
 
-## Task 1: Migration 0025 — reviews v2 kolonları
+## Task 1: Migration 0025 - reviews v2 kolonları
 
 **Files:**
 - Create: `supabase/migrations/0025_reviews_v2.sql`
@@ -58,7 +58,7 @@
 - [ ] **Step 1: Migration dosyasını yaz**
 
 ```sql
--- helm — reviews v2: yeni kaynak (Google Play), version + territory + yanıt alanları.
+-- helm - reviews v2: yeni kaynak (Google Play), version + territory + yanıt alanları.
 -- ASC Customer Reviews API'ye geçiş için source_method ayrımı.
 
 alter table public.reviews
@@ -68,7 +68,7 @@ alter table public.reviews
   add column if not exists responded_at       timestamptz,
   add column if not exists source_method      text;
 
--- Mevcut row'lar RSS kaynaklı — backfill
+-- Mevcut row'lar RSS kaynaklı - backfill
 update public.reviews
   set source_method = 'rss'
   where source_method is null and source = 'appstore';
@@ -100,12 +100,12 @@ Expected: `total = rss_count` (tüm eski iOS row'lar RSS olarak işaretli)
 
 ```bash
 git add supabase/migrations/0025_reviews_v2.sql
-git commit -m "feat(helm): WES-000 0025 reviews v2 — territory + app_version + developer_response + source_method"
+git commit -m "feat(helm): WES-000 0025 reviews v2 - territory + app_version + developer_response + source_method"
 ```
 
 ---
 
-## Task 2: Migration 0027 — audit_log composite index
+## Task 2: Migration 0027 - audit_log composite index
 
 **Files:**
 - Create: `supabase/migrations/0027_audit_actor_composite_idx.sql`
@@ -115,7 +115,7 @@ git commit -m "feat(helm): WES-000 0025 reviews v2 — territory + app_version +
 - [ ] **Step 1: Migration yaz**
 
 ```sql
--- helm — review.reply rate limit + cron run history query'leri için composite index.
+-- helm - review.reply rate limit + cron run history query'leri için composite index.
 -- "Son 60s içinde actor X kaç yanıt yazdı?" sorgu desteği.
 
 create index if not exists audit_log_actor_created_idx
@@ -143,7 +143,7 @@ Expected: `Index Scan using audit_log_actor_created_idx`
 
 ```bash
 git add supabase/migrations/0027_audit_actor_composite_idx.sql
-git commit -m "feat(helm): WES-000 0027 audit_log composite index — actor_email + created_at desc (rate limit query)"
+git commit -m "feat(helm): WES-000 0027 audit_log composite index - actor_email + created_at desc (rate limit query)"
 ```
 
 ---
@@ -240,7 +240,7 @@ export async function makeAscJwt(config: ASCKeyConfig): Promise<string> {
 }
 ```
 
-- [ ] **Step 3: `app-store-connect.ts`'i refactor et — JWT'yi _shared'den al**
+- [ ] **Step 3: `app-store-connect.ts`'i refactor et - JWT'yi _shared'den al**
 
 `supabase/functions/helm-ingest/connectors/app-store-connect.ts` dosyasının başındaki `b64url`, `pemToDer`, `makeJwt` fonksiyonlarını sil; üst kısma şunu ekle:
 
@@ -262,20 +262,20 @@ Expected: ~80 satır azalış (JWT kodu çıktı). Dosyanın işlevsel kısmı (
 - [ ] **Step 5: Edge Function deploy + smoke test**
 
 Run: `supabase functions deploy helm-ingest`
-Sonra Supabase dashboard'dan veya kod tarafından bir property için helm-ingest'i invoke et (app-store-connect provider'lı). Sales raporu çekiyor mu? (Düne ait rapor olmayabilir, 404 normal — auth başarısı 401 değil 404 dönmeli)
+Sonra Supabase dashboard'dan veya kod tarafından bir property için helm-ingest'i invoke et (app-store-connect provider'lı). Sales raporu çekiyor mu? (Düne ait rapor olmayabilir, 404 normal - auth başarısı 401 değil 404 dönmeli)
 
-Expected: 200 response, sales data veya boş `points` (rapor yoksa) — 401 dönerse JWT helper kırılmış demektir.
+Expected: 200 response, sales data veya boş `points` (rapor yoksa) - 401 dönerse JWT helper kırılmış demektir.
 
 - [ ] **Step 6: Commit**
 
 ```bash
 git add supabase/functions/_shared/cors.ts supabase/functions/_shared/asc-jwt.ts supabase/functions/helm-ingest/connectors/app-store-connect.ts
-git commit -m "refactor(helm): WES-000 _shared/ klasörü — CORS + ASC JWT helper, app-store-connect connector'ı temizlendi"
+git commit -m "refactor(helm): WES-000 _shared/ klasörü - CORS + ASC JWT helper, app-store-connect connector'ı temizlendi"
 ```
 
 ---
 
-## Task 4: `helm-reviews/asc.ts` — App Store Connect Customer Reviews
+## Task 4: `helm-reviews/asc.ts` - App Store Connect Customer Reviews
 
 **Files:**
 - Create: `supabase/functions/helm-reviews/asc.ts`
@@ -406,7 +406,7 @@ export async function fetchAscReviews(
         ok: false,
         shouldFallback: true,
         status: 401,
-        message: "ASC 401 — key invalid veya Customer Reviews scope yok",
+        message: "ASC 401 - key invalid veya Customer Reviews scope yok",
       };
     }
     if (res.status >= 500) {
@@ -420,7 +420,7 @@ export async function fetchAscReviews(
     if (!res.ok) {
       return {
         ok: false,
-        shouldFallback: false, // 4xx (404 vs) — fallback'e dönmeye gerek yok
+        shouldFallback: false, // 4xx (404 vs) - fallback'e dönmeye gerek yok
         status: res.status,
         message: `ASC ${res.status}: ${await res.text()}`,
       };
@@ -485,12 +485,12 @@ Expected: hata yok
 
 ```bash
 git add supabase/functions/helm-reviews/asc.ts
-git commit -m "feat(helm): WES-000 helm-reviews ASC Customer Reviews API fetcher — incremental + response include"
+git commit -m "feat(helm): WES-000 helm-reviews ASC Customer Reviews API fetcher - incremental + response include"
 ```
 
 ---
 
-## Task 5: `helm-reviews/rss.ts` — iTunes RSS fallback
+## Task 5: `helm-reviews/rss.ts` - iTunes RSS fallback
 
 **Files:**
 - Create: `supabase/functions/helm-reviews/rss.ts`
@@ -501,7 +501,7 @@ git commit -m "feat(helm): WES-000 helm-reviews ASC Customer Reviews API fetcher
 
 ```typescript
 // supabase/functions/helm-reviews/rss.ts
-// iTunes RSS — public, auth gerektirmez. ASC fallback'i olarak kalır.
+// iTunes RSS - public, auth gerektirmez. ASC fallback'i olarak kalır.
 
 export interface RssReviewRow {
   project_id: string;
@@ -550,7 +550,7 @@ export async function fetchRssReviews(
         : [];
 
       const countryRows = entries
-        .filter((e) => e["im:rating"]) // ilk entry app meta — atla
+        .filter((e) => e["im:rating"]) // ilk entry app meta - atla
         .map((e): RssReviewRow => ({
           project_id: input.projectId,
           source: "appstore",
@@ -593,12 +593,12 @@ Expected: hata yok
 
 ```bash
 git add supabase/functions/helm-reviews/rss.ts
-git commit -m "feat(helm): WES-000 helm-reviews RSS fallback fetcher modüle çıkarıldı — im:version artık app_version'a düşüyor"
+git commit -m "feat(helm): WES-000 helm-reviews RSS fallback fetcher modüle çıkarıldı - im:version artık app_version'a düşüyor"
 ```
 
 ---
 
-## Task 6: `helm-reviews/play.ts` — Google Play Reviews API
+## Task 6: `helm-reviews/play.ts` - Google Play Reviews API
 
 **Files:**
 - Create: `supabase/functions/helm-reviews/play.ts`
@@ -608,7 +608,7 @@ git commit -m "feat(helm): WES-000 helm-reviews RSS fallback fetcher modüle ç�
 ```typescript
 // supabase/functions/helm-reviews/play.ts
 // Google Play Developer Reviews API.
-// API SADECE son 7 günü döner — cron 30dk ile kayıp olmaz.
+// API SADECE son 7 günü döner - cron 30dk ile kayıp olmaz.
 
 export interface PlayReviewRow {
   project_id: string;
@@ -657,7 +657,7 @@ interface PlayPage {
 }
 
 // In-memory access token cache. Edge Function instance lifetime'ı boyunca yaşar.
-// Multi-instance senaryosunda her instance ayrı token alır — kabul edilebilir.
+// Multi-instance senaryosunda her instance ayrı token alır - kabul edilebilir.
 const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 
 async function getAccessToken(serviceAccountJson: string): Promise<string> {
@@ -809,12 +809,12 @@ Expected: hata yok
 
 ```bash
 git add supabase/functions/helm-reviews/play.ts
-git commit -m "feat(helm): WES-000 helm-reviews Google Play Reviews API fetcher — service account JWT + access token cache + 7g pagination"
+git commit -m "feat(helm): WES-000 helm-reviews Google Play Reviews API fetcher - service account JWT + access token cache + 7g pagination"
 ```
 
 ---
 
-## Task 7: `helm-reviews/index.ts` — orchestrator refactor
+## Task 7: `helm-reviews/index.ts` - orchestrator refactor
 
 **Files:**
 - Modify: `supabase/functions/helm-reviews/index.ts` (komple rewrite)
@@ -860,7 +860,7 @@ const parseCountries = (raw: string | null | undefined): string[] => {
   return list.length > 0 ? list : ["us"];
 };
 
-// Chunked upsert — 100 satırlık batch'ler. Supabase REST tek upsert call'da yüksek hacim kabul etmiyor.
+// Chunked upsert - 100 satırlık batch'ler. Supabase REST tek upsert call'da yüksek hacim kabul etmiyor.
 async function upsertReviews(
   hub: ReturnType<typeof createClient>,
   rows: ReviewRow[],
@@ -1014,7 +1014,7 @@ Deno.serve(async (req) => {
   const upsertResult = await upsertReviews(hub, allRows);
   const elapsedMs = Date.now() - startedAt;
 
-  // Audit log entry — cron run'ı kaydet
+  // Audit log entry - cron run'ı kaydet
   await hub.from("audit_log").insert({
     project_id: null,
     target_user: null,
@@ -1089,12 +1089,12 @@ Expected: en son invoke için bir satır; `detail` JSON parse edilebilir.
 
 ```bash
 git add supabase/functions/helm-reviews/index.ts
-git commit -m "feat(helm): WES-000 helm-reviews orchestrator refactor — ASC+RSS hibrit, Google Play, paralel fetch, audit run log"
+git commit -m "feat(helm): WES-000 helm-reviews orchestrator refactor - ASC+RSS hibrit, Google Play, paralel fetch, audit run log"
 ```
 
 ---
 
-## Task 8: Migration 0026 — pg_cron schedule
+## Task 8: Migration 0026 - pg_cron schedule
 
 **Files:**
 - Create: `supabase/migrations/0026_reviews_cron.sql`
@@ -1167,12 +1167,12 @@ Expected: status = `succeeded`.
 
 ```bash
 git add supabase/migrations/0026_reviews_cron.sql
-git commit -m "feat(helm): WES-000 0026 helm-reviews 30dk pg_cron schedule — manuel Yenile artık opsiyonel"
+git commit -m "feat(helm): WES-000 0026 helm-reviews 30dk pg_cron schedule - manuel Yenile artık opsiyonel"
 ```
 
 ---
 
-## Task 9: `helm-review-reply` Edge Function — orchestrator + ASC reply
+## Task 9: `helm-review-reply` Edge Function - orchestrator + ASC reply
 
 **Files:**
 - Create: `supabase/functions/helm-review-reply/index.ts`
@@ -1183,9 +1183,9 @@ git commit -m "feat(helm): WES-000 0026 helm-reviews 30dk pg_cron schedule — m
 ```typescript
 // supabase/functions/helm-review-reply/asc-reply.ts
 // Apple App Store Connect Customer Review Responses.
-//   POST   /v1/customerReviewResponses             — yeni yanıt
-//   PATCH  /v1/customerReviewResponses/{id}        — mevcut yanıtı güncelle
-//   GET    /v1/customerReviews/{id}/response       — mevcut response_id'yi öğren
+//   POST   /v1/customerReviewResponses             - yeni yanıt
+//   PATCH  /v1/customerReviewResponses/{id}        - mevcut yanıtı güncelle
+//   GET    /v1/customerReviews/{id}/response       - mevcut response_id'yi öğren
 
 import { makeAscJwt, type ASCKeyConfig } from "../_shared/asc-jwt.ts";
 
@@ -1288,7 +1288,7 @@ export async function sendAscReply(
 
 ```typescript
 // supabase/functions/helm-review-reply/play-reply.ts
-// Google Play androidpublisher.reviews.reply — idempotent (üzerine yazar).
+// Google Play androidpublisher.reviews.reply - idempotent (üzerine yazar).
 
 // OAuth helper'ı helm-reviews/play.ts'deki getAccessToken ile aynı.
 // DRY: ileri sürümde _shared/play-oauth.ts'ye taşınabilir. Şimdi inline duplicate.
@@ -1417,7 +1417,7 @@ export async function sendPlayReply(
 // supabase/functions/helm-review-reply/index.ts
 // POST { review_id: number, body: string }
 // → JWT'den actor_email çıkar (helm-action pattern)
-// → rate limit (60s/10 reply per actor) — audit_log query'si
+// → rate limit (60s/10 reply per actor) - audit_log query'si
 // → review row → project_id + source + external_id'den vendor review id çıkar
 // → ASC veya Play reply API
 // → reviews.developer_response + responded_at update
@@ -1492,7 +1492,7 @@ Deno.serve(async (req) => {
       const { data } = await hub.auth.getUser(jwt);
       actorEmail = data?.user?.email ?? null;
     } catch {
-      // anon — actor null kalır
+      // anon - actor null kalır
     }
   }
   if (!actorEmail) {
@@ -1542,7 +1542,7 @@ Deno.serve(async (req) => {
   if (integErr) return json({ error: integErr.message }, 500);
   if (!integRow) {
     return json(
-      { error: `${provider} entegrasyonu yok — Settings → Integrations` },
+      { error: `${provider} entegrasyonu yok - Settings → Integrations` },
       401,
     );
   }
@@ -1660,7 +1660,7 @@ curl -X POST 'https://<PROJECT>.functions.supabase.co/helm-review-reply' \
 ```
 Expected: 404 `{"error":"Review bulunamadı"}`
 
-- [ ] **Step 8: Manuel test (gerçek yanıt — TestFlight veya internal track)**
+- [ ] **Step 8: Manuel test (gerçek yanıt - TestFlight veya internal track)**
 
 Apple TestFlight beta review veya Google internal track review'ına gerçek yanıt yaz:
 
@@ -1685,15 +1685,15 @@ Expected: en az 1 `review.reply` satırı, `detail` JSON parse edilebilir.
 
 ```bash
 git add supabase/functions/helm-review-reply/
-git commit -m "feat(helm): WES-000 helm-review-reply Edge Function — ASC + Play reply, rate limit, audit, RSS reddedilir"
+git commit -m "feat(helm): WES-000 helm-review-reply Edge Function - ASC + Play reply, rate limit, audit, RSS reddedilir"
 ```
 
 ---
 
-## Task 10: Web — Review tipi + ReviewsPage stat cards + segment
+## Task 10: Web - Review tipi + ReviewsPage stat cards + segment
 
 **Files:**
-- Modify: `src/types/index.ts` (veya `src/types/database.ts` — `Review` tipi nerede tanımlıysa)
+- Modify: `src/types/index.ts` (veya `src/types/database.ts` - `Review` tipi nerede tanımlıysa)
 - Modify: `src/pages/reviews/index.tsx`
 
 - [ ] **Step 1: Review tipini güncelle**
@@ -1724,7 +1724,7 @@ export interface Review {
 }
 ```
 
-- [ ] **Step 2: ReviewsPage'i güncelle — stat cards 5'e çık + platform segment**
+- [ ] **Step 2: ReviewsPage'i güncelle - stat cards 5'e çık + platform segment**
 
 `src/pages/reviews/index.tsx` dosyasında üst kısımda (`useList` çağrısından sonra) platform filter state ekle:
 
@@ -1732,7 +1732,7 @@ export interface Review {
 // useEffect'in üstüne
 const [platform, setPlatform] = useState<"all" | "appstore" | "playstore">("all");
 
-// reviews filter — platform da uygulansın
+// reviews filter - platform da uygulansın
 const platformFiltered = useMemo(
   () => (platform === "all" ? reviews : reviews.filter((r) => r.source === platform)),
   [reviews, platform],
@@ -1760,9 +1760,9 @@ Stat satırını `grid-cols-3` → `grid-cols-5` yap:
 
 ```tsx
 <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
-  <StatCard title="Genel Ortalama" value={avg ? `${avg.toFixed(2)} / 5` : "—"} icon={<Star />} loading={query.isLoading} />
-  <StatCard title="iOS Ortalama" value={iosAvg ? `${iosAvg.toFixed(2)}` : "—"} loading={query.isLoading} />
-  <StatCard title="Android Ortalama" value={androidAvg ? `${androidAvg.toFixed(2)}` : "—"} loading={query.isLoading} />
+  <StatCard title="Genel Ortalama" value={avg ? `${avg.toFixed(2)} / 5` : "-"} icon={<Star />} loading={query.isLoading} />
+  <StatCard title="iOS Ortalama" value={iosAvg ? `${iosAvg.toFixed(2)}` : "-"} loading={query.isLoading} />
+  <StatCard title="Android Ortalama" value={androidAvg ? `${androidAvg.toFixed(2)}` : "-"} loading={query.isLoading} />
   <StatCard title="Toplam Yorum" value={platformFiltered.length} loading={query.isLoading} />
   <StatCard title="Negatif (1-2★)" value={distribution[0] + distribution[1]} loading={query.isLoading} />
 </div>
@@ -1815,12 +1815,12 @@ Expected: localhost:5173 → /reviews. 5 stat card görünüyor. Platform segmen
 
 ```bash
 git add src/types/ src/pages/reviews/index.tsx
-git commit -m "feat(helm): WES-000 Web reviews — 5 stat card (iOS/Android avg ayrı) + platform segment (Tümü/iOS/Android)"
+git commit -m "feat(helm): WES-000 Web reviews - 5 stat card (iOS/Android avg ayrı) + platform segment (Tümü/iOS/Android)"
 ```
 
 ---
 
-## Task 11: Web — ReviewRow badge'leri (source/version/territory)
+## Task 11: Web - ReviewRow badge'leri (source/version/territory)
 
 **Files:**
 - Modify: `src/pages/reviews/index.tsx`
@@ -1863,7 +1863,7 @@ git commit -m "feat(helm): WES-000 Web reviews — 5 stat card (iOS/Android avg 
       {r.author ?? "anonim"} ·{" "}
       {r.review_date ? new Date(r.review_date).toLocaleDateString("tr-TR") : ""}
     </p>
-    {/* Reply block — Task 12'de eklenecek */}
+    {/* Reply block - Task 12'de eklenecek */}
   </div>
 ))}
 ```
@@ -1876,12 +1876,12 @@ git commit -m "feat(helm): WES-000 Web reviews — 5 stat card (iOS/Android avg 
 
 ```bash
 git add src/pages/reviews/index.tsx
-git commit -m "feat(helm): WES-000 Web ReviewRow — source (iOS/Android) + version + territory badge'leri"
+git commit -m "feat(helm): WES-000 Web ReviewRow - source (iOS/Android) + version + territory badge'leri"
 ```
 
 ---
 
-## Task 12: Web — Reply modal + button
+## Task 12: Web - Reply modal + button
 
 **Files:**
 - Create: `src/pages/reviews/reply-modal.tsx`
@@ -1913,7 +1913,7 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
   const [sending, setSending] = useState(false);
 
   // review değiştiğinde body'i sıfırla (modal yeniden açıldığında)
-  // Tek seferlik effect istenirse useEffect; KISS — controlled durumdan kaçınmıyoruz
+  // Tek seferlik effect istenirse useEffect; KISS - controlled durumdan kaçınmıyoruz
   if (review && open && body === "" && (review.developer_response ?? "") !== "") {
     setBody(review.developer_response ?? "");
   }
@@ -1962,8 +1962,8 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
         {review && (
           <div className="space-y-3">
             <div className="rounded-md border bg-muted/30 p-3 text-sm">
-              <div className="font-medium">{review.title ?? "—"}</div>
-              <div className="mt-1 text-muted-foreground">{review.body ?? "—"}</div>
+              <div className="font-medium">{review.title ?? "-"}</div>
+              <div className="mt-1 text-muted-foreground">{review.body ?? "-"}</div>
             </div>
             <Textarea
               value={body}
@@ -2067,12 +2067,12 @@ Bir test review için (TestFlight beta veya internal track) yanıt gönder. Toas
 
 ```bash
 git add src/pages/reviews/reply-modal.tsx src/pages/reviews/index.tsx
-git commit -m "feat(helm): WES-000 Web Yanıtla modal — 350 char + senkron submit + toast + RSS satırlarına disable"
+git commit -m "feat(helm): WES-000 Web Yanıtla modal - 350 char + senkron submit + toast + RSS satırlarına disable"
 ```
 
 ---
 
-## Task 13: Web — Settings → Google Play Developer kartı
+## Task 13: Web - Settings → Google Play Developer kartı
 
 **Files:**
 - Create: `src/components/integrations-panel/google-play-developer-card.tsx`
@@ -2082,7 +2082,7 @@ git commit -m "feat(helm): WES-000 Web Yanıtla modal — 350 char + senkron sub
 
 Run: `ls src/components/integrations-panel/`
 
-Mevcut bir kart komponentine (örn: `app-store-connect-card.tsx`) bak — yeni kartın aynı patterni izlemesi için.
+Mevcut bir kart komponentine (örn: `app-store-connect-card.tsx`) bak - yeni kartın aynı patterni izlemesi için.
 
 - [ ] **Step 2: Google Play kartını yaz**
 
@@ -2181,7 +2181,7 @@ export function GooglePlayDeveloperCard({ projectId, existing, onSaved }: Props)
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="gp-pkg">Package Name (opsiyonel — boşsa property'den okunur)</Label>
+          <Label htmlFor="gp-pkg">Package Name (opsiyonel - boşsa property'den okunur)</Label>
           <Input
             id="gp-pkg"
             placeholder="com.example.app"
@@ -2219,12 +2219,12 @@ where provider = 'google_play_developer';
 
 ```bash
 git add src/components/integrations-panel/google-play-developer-card.tsx src/pages/settings/
-git commit -m "feat(helm): WES-000 Web Settings — Google Play Developer entegrasyon kartı (service account JSON + package + languages)"
+git commit -m "feat(helm): WES-000 Web Settings - Google Play Developer entegrasyon kartı (service account JSON + package + languages)"
 ```
 
 ---
 
-## Task 14: Mobil — Review tipi + ReviewRow badge'leri
+## Task 14: Mobil - Review tipi + ReviewRow badge'leri
 
 **Files:**
 - Modify: `helm-mobile/src/hooks/use-reviews.ts` (Review tipi)
@@ -2308,12 +2308,12 @@ Simulator'da Reviews sekmesini aç. Yorumlarda iOS/ANDROID/version/territory bad
 ```bash
 cd /Users/canakyuz/Desktop/Projects/priv/helm-mobile
 git add src/hooks/use-reviews.ts src/components/review-row.tsx
-git commit -m "feat(mobile): WES-000 ReviewRow badges — source (iOS/ANDROID) + version + territory + yeni Review alanları"
+git commit -m "feat(mobile): WES-000 ReviewRow badges - source (iOS/ANDROID) + version + territory + yeni Review alanları"
 ```
 
 ---
 
-## Task 15: Mobil — Reply sheet + mutation
+## Task 15: Mobil - Reply sheet + mutation
 
 **Files:**
 - Create: `helm-mobile/src/components/review-reply-sheet.tsx`
@@ -2416,10 +2416,10 @@ export function ReviewReplySheet({ review, visible, onClose }: Props) {
             {review && (
               <View style={{ backgroundColor: colors.bgHigher, padding: 10, borderRadius: 8 }}>
                 <Text style={{ fontFamily: "Geist-500", color: colors.fgPrimary, fontSize: 13 }}>
-                  {review.title ?? "—"}
+                  {review.title ?? "-"}
                 </Text>
                 <Text style={{ color: colors.fgMuted, fontSize: 12, marginTop: 4 }} numberOfLines={3}>
-                  {review.body ?? "—"}
+                  {review.body ?? "-"}
                 </Text>
               </View>
             )}
@@ -2555,11 +2555,11 @@ const [replyTarget, setReplyTarget] = useState<Review | null>(null);
 
 - [ ] **Step 5: Hero card platform-aware avg**
 
-Mevcut hero card `data.average` kullanıyor. `useReviews` hook'u zaten `platform` filter'ı alıyor — sadece hero'daki ortalama platform'a göre değişecek. Mevcut platform state ile zaten bu çalışmalı; doğrula:
+Mevcut hero card `data.average` kullanıyor. `useReviews` hook'u zaten `platform` filter'ı alıyor - sadece hero'daki ortalama platform'a göre değişecek. Mevcut platform state ile zaten bu çalışmalı; doğrula:
 
 `useReviews(platform, rating)` çağrısı varsa `data.average` zaten platform-filtered olmalı. Eğer hook'ta global avg dönüyorsa düzelt: platform filter'ı applikasyonu içine al.
 
-`helm-mobile/src/hooks/use-reviews.ts` içine bak — eğer avg hook içinde hesaplanıyorsa source filter'ı uygula. Bu zaten doğru olabilir; doğrulamak için Reviews ekranını aç, segment'i iOS → Android olarak değiştir → "ORTALAMA" sayısı değişiyor mu?
+`helm-mobile/src/hooks/use-reviews.ts` içine bak - eğer avg hook içinde hesaplanıyorsa source filter'ı uygula. Bu zaten doğru olabilir; doğrulamak için Reviews ekranını aç, segment'i iOS → Android olarak değiştir → "ORTALAMA" sayısı değişiyor mu?
 
 - [ ] **Step 6: End-to-end test**
 
@@ -2570,7 +2570,7 @@ Simulator'da → Reviews → bir yorumda "Yanıtla" tıkla → sheet aç → tex
 ```bash
 cd /Users/canakyuz/Desktop/Projects/priv/helm-mobile
 git add src/components/review-reply-sheet.tsx src/components/review-row.tsx src/hooks/use-review-reply.ts app/\(cockpit\)/\(reviews\)/index.tsx src/hooks/use-reviews.ts
-git commit -m "feat(mobile): WES-000 Reviews — Yanıtla sheet + reply mutation + yanıt block + RSS reddedilir"
+git commit -m "feat(mobile): WES-000 Reviews - Yanıtla sheet + reply mutation + yanıt block + RSS reddedilir"
 ```
 
 ---
@@ -2602,7 +2602,7 @@ Eğer README veya CHANGELOG güncellemesi gerekirse:
 cd /Users/canakyuz/Desktop/Projects/priv/helm
 # Eğer BACKLOG.md'de "Reviews entegrasyon" entry'si varsa "done" işaretle veya kaldır
 git add BACKLOG.md
-git commit -m "docs(helm): WES-000 Reviews entegrasyon onarımı tamamlandı — backlog güncellendi"
+git commit -m "docs(helm): WES-000 Reviews entegrasyon onarımı tamamlandı - backlog güncellendi"
 ```
 
 ---
@@ -2611,10 +2611,10 @@ git commit -m "docs(helm): WES-000 Reviews entegrasyon onarımı tamamlandı —
 
 | Spec bölümü | Karşılayan task(lar) |
 |---|---|
-| 2. Karar Özeti — Hibrit ASC+RSS | Task 4, 5, 7 |
-| 2. Karar Özeti — Google Play API | Task 6, 7 |
-| 2. Karar Özeti — 30dk cron | Task 8 |
-| 2. Karar Özeti — Web+mobil yanıtlama | Task 9, 12, 15 |
+| 2. Karar Özeti - Hibrit ASC+RSS | Task 4, 5, 7 |
+| 2. Karar Özeti - Google Play API | Task 6, 7 |
+| 2. Karar Özeti - 30dk cron | Task 8 |
+| 2. Karar Özeti - Web+mobil yanıtlama | Task 9, 12, 15 |
 | 3. Mimari | Task 4-9 |
 | 4.1 Schema değişiklikleri | Task 1 |
 | 4.2 Google Play provider | Task 13 |
@@ -2628,7 +2628,7 @@ git commit -m "docs(helm): WES-000 Reviews entegrasyon onarımı tamamlandı —
 | 10. Test stratejisi | Her task'in verify step'leri + Task 16 |
 | 12. Risk önlemleri | Task 7 (fallback), Task 9 (rate limit) |
 | 13. Scope dışı | Yanıt silme & B/C/D plan dışı |
-| 14. Açık sorular | (1) modal — Task 12; (2) Modal RN — Task 15; (3) ["en","tr"] default — Task 6 |
+| 14. Açık sorular | (1) modal - Task 12; (2) Modal RN - Task 15; (3) ["en","tr"] default - Task 6 |
 
 **Eksik / dikkat:** Spec'te bahsedilen `cron_runs` tablosu hiç oluşturulmuyor; yerine `audit_log`'a yazılıyor (plan ⚠️ bölümünde açıklandı).
 

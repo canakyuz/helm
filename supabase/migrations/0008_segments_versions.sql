@@ -1,4 +1,4 @@
--- helm — kullanıcı segmentleri + uygulama sürüm takibi.
+-- helm - kullanıcı segmentleri + uygulama sürüm takibi.
 
 -- Kayıtlı kullanıcı segmentleri (CRM → Segmentler).
 create table if not exists public.user_segments (

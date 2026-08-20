@@ -121,7 +121,7 @@ export async function fetchAscReviews(
         ok: false,
         shouldFallback: true,
         status: 401,
-        message: "ASC 401 — key invalid veya Customer Reviews scope yok",
+        message: "ASC 401 - key invalid veya Customer Reviews scope yok",
       };
     }
     if (res.status >= 500) {
@@ -156,7 +156,7 @@ export async function fetchAscReviews(
     // Neden degisti: eskiden ilk kez gorulen "eski" yorumda dongu kirilirdi, yani
     // bir yorum bir kez kaydedildikten sonra BIR DAHA hic okunmazdi. Gelistirici
     // yaniti (developer_response) yoruma sonradan yazildigi icin o yanit
-    // veritabanina asla dusmezdi — istek `include=response` ile dogru sorsa bile.
+    // veritabanina asla dusmezdi - istek `include=response` ile dogru sorsa bile.
     // Ilk sayfa (200 yorum, en yeniden eskiye) zaten cekiliyor; onu tam islemenin
     // ek API maliyeti yok. Derin sayfalamaya devam etmemek icin bayrak korunur.
     let reachedSince = false;

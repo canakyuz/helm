@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SelectedPropertyId } from "@helm/types";
 import { fetchFxRates, metricValueUsd } from "./fx-rates";
 
-// Gelir mix'i — bu ay subscription_revenue + iap_revenue + ad_revenue toplamları.
+// Gelir mix'i - bu ay subscription_revenue + iap_revenue + ad_revenue toplamları.
 // Renk UI concern → burada YOK; mobil/web hook'u metric'e göre renk ekler.
 export type MixSegment = { metric: string; label: string; value: number; pct: number };
 export type RevenueMix = { segments: MixSegment[]; total: number };

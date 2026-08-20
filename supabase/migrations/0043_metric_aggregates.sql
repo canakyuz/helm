@@ -1,10 +1,10 @@
--- Panel toplamalarini VERITABANINDA yap — ham satir tarayiciya inmesin.
+-- Panel toplamalarini VERITABANINDA yap - ham satir tarayiciya inmesin.
 --
 -- SORUN: dashboard `metrics` tablosunu `date >= 90 gun` filtresiyle, SIRALAMASIZ
 -- ve LIMITSIZ cekiyordu. Refine'in `pagination: { mode: "off" }` ayari `.range()`
 -- gondermedigi icin PostgREST kendi max-rows tavanini uyguluyor. Satir sayisi
 -- tavani asinca:
---   · gelen 1000 satir ARBITRARY (order by yok) — hangi gunler geldigi belirsiz,
+--   · gelen 1000 satir ARBITRARY (order by yok) - hangi gunler geldigi belirsiz,
 --   · en guncel gunler disarida kalabiliyor → aylik gelir / anlik reklam geliri
 --     ekranda hic gorunmuyor.
 -- Yani sorun yavaslik degil, SESSIZ VERI KAYBI. Limit koymak yetmez; toplama

@@ -11,7 +11,7 @@ interface RangeSelectProps {
   onChange: (days: number) => void;
 }
 
-// Grafik/metrik tarih aralığı seçici — 7 / 30 / 90 gün.
+// Grafik/metrik tarih aralığı seçici - 7 / 30 / 90 gün.
 export const RangeSelect = ({ value, onChange }: RangeSelectProps) => (
   <div className="inline-flex gap-0.5 rounded-md border p-0.5">
     {RANGES.map((r) => (

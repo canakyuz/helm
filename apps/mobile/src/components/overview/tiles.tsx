@@ -19,7 +19,7 @@ function SEVERITY_COLOR(theme: Theme, severity: AlertSeverity): string {
  *
  * NEDEN GEREKLI: her kutu kendi basina `adjustsFontSizeToFit` ile kuculuyordu.
  * Tile ic genisligi ~97pt; "₺2,340.78" 28pt'e sigmadigi icin ~18pt'e dusuyor,
- * "405" ise 28pt kaliyordu — ayni satirda 1.6 kat boy farki. Uc esit kutu
+ * "405" ise 28pt kaliyordu - ayni satirda 1.6 kat boy farki. Uc esit kutu
  * birbirinden farkli tipografiyle okununca satirin ritmi bozuluyor.
  *
  * Boyut EN UZUN degere gore secilir ve ucune de verilir. Esik degerleri
@@ -35,7 +35,7 @@ export function statFontSize(values: readonly string[]): number {
   return 18;
 }
 
-/** Ozet'in uc kucuk stat kutusu — delta isaretiyle. */
+/** Ozet'in uc kucuk stat kutusu - delta isaretiyle. */
 export function StatTile({
   index,
   replayKey,
@@ -50,7 +50,7 @@ export function StatTile({
   label: string;
   value: string;
   delta: number | null | undefined;
-  /** Satirdaki uc kutunun ORTAK boyutu — statFontSize() ile hesaplanir. */
+  /** Satirdaki uc kutunun ORTAK boyutu - statFontSize() ile hesaplanir. */
   fontSize?: number;
   /** Delta yerine gosterilecek kisa aciklama (olcum yoksa). Kutu bos kalmasin:
    *  delta yuvasi seffaf birakilinca kutu bozuk gorunuyordu, veri yok demiyordu. */
@@ -58,7 +58,7 @@ export function StatTile({
 }) {
   const { theme } = useTheme();
   const hasDelta = delta != null && Number.isFinite(delta);
-  // Yuvarlandiginda sifira dusen degisim "degismedi" demektir — "+0.0%" yazmak
+  // Yuvarlandiginda sifira dusen degisim "degismedi" demektir - "+0.0%" yazmak
   // yanlis bir yon ima eder. Notr renkte, isaretsiz gosterilir. Esik
   // formatDelta ile ORTAK (isFlatDelta): renk ve metin ayrisamaz.
   const flat = hasDelta && isFlatDelta(delta);
@@ -66,7 +66,7 @@ export function StatTile({
 
   return (
     <Rise index={index} replayKey={replayKey} style={{ flex: 1 }}>
-      {/* `flex: 1` — tile ESNETILMIS kapsayicisini doldursun diye. Rise satir
+      {/* `flex: 1` - tile ESNETILMIS kapsayicisini doldursun diye. Rise satir
           icinde en uzun kardese gore uzuyordu ama tile kendi icerik
           yuksekliginde kaliyordu: uzun bir deger (₺2,338.66) adjustsFontSizeToFit
           ile kuculunce o kartin govdesi de kisaliyor, uc kartin ALT kenari
@@ -116,7 +116,7 @@ export function StatTile({
   );
 }
 
-/** Kucuk aksiyon butonu — accent veya notr dolgu. */
+/** Kucuk aksiyon butonu - accent veya notr dolgu. */
 export function Pill({
   label,
   background,

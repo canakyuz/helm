@@ -1,4 +1,4 @@
--- helm — heartbeat izleyiciler. Beklenen periyodik ping gelmezse iş ölmüş
+-- helm - heartbeat izleyiciler. Beklenen periyodik ping gelmezse iş ölmüş
 -- demektir (cron job, push-scheduler vb.). helm-heartbeat fonksiyonu
 -- ping'leri kaydeder; panel son ping'e bakıp sağlık hesaplar.
 
