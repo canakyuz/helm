@@ -118,6 +118,9 @@ export const BarTrendCard = ({
           <ResponsiveContainer width="100%" height={230}>
             <BarChart
               data={chartData}
+              // Klavye focus katmanı svg'ye tabindex veriyordu; tıklamada
+              // global outline-ring çerçevesi çiziliyordu - kapat.
+              accessibilityLayer={false}
               margin={{ top: 8, right: 0, bottom: 0, left: 0 }}
               onMouseMove={(s) =>
                 setHovered(
@@ -145,6 +148,10 @@ export const BarTrendCard = ({
               />
               <Tooltip
                 cursor={false}
+                // Plot kenarında kırpılmasın - tooltip viewBox dışına taşabilir.
+                allowEscapeViewBox={{ x: true, y: true }}
+                wrapperStyle={{ zIndex: 30, pointerEvents: "none" }}
+                offset={14}
                 content={<DarkTip format={format} />}
               />
               <Bar

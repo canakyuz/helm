@@ -68,6 +68,17 @@
   line-height: 1;
 }
 
+/* Recharts focus çerçevesi - bar tıklamasında svg/wrapper focus alınca
+   global outline-ring kuralı gri çerçeve basıyordu. Grafikte outline yok;
+   klavye erişimi kart seviyesinde kalır. */
+[data-helm-theme^="glass"] .recharts-wrapper,
+[data-helm-theme^="glass"] .recharts-wrapper svg,
+[data-helm-theme^="glass"] .recharts-wrapper :focus,
+[data-helm-theme^="glass"] .recharts-wrapper:focus,
+[data-helm-theme^="glass"] .recharts-wrapper:focus-visible {
+  outline: none !important;
+}
+
 /* Table row hover - hafif nötr vurgu. */
 [data-helm-theme="glass-dark"] [data-slot="table"] tbody tr:hover {
   background: rgba(255, 255, 255, 0.03);
