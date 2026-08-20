@@ -33,5 +33,6 @@ create index if not exists campaigns_sent_idx
   on public.campaigns (sent_at desc);
 
 alter table public.campaigns enable row level security;
+drop policy if exists "authenticated full access" on public.campaigns;
 create policy "authenticated full access" on public.campaigns
   for all to authenticated using (true) with check (true);

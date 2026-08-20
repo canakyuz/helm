@@ -35,6 +35,7 @@ create index if not exists idx_revenue_events_project_time
 
 alter table public.revenue_events enable row level security;
 
+drop policy if exists "authenticated read revenue_events" on public.revenue_events;
 create policy "authenticated read revenue_events" on public.revenue_events
   for select to authenticated using (true);
 

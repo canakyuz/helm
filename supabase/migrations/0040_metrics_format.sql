@@ -39,6 +39,7 @@ create index if not exists metrics_format_metric_idx
 
 alter table public.metrics_format enable row level security;
 
+drop policy if exists "authenticated full access" on public.metrics_format;
 create policy "authenticated full access" on public.metrics_format
   for all to authenticated using (true) with check (true);
 

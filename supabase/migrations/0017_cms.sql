@@ -128,25 +128,32 @@ alter table public.cms_entries     enable row level security;
 alter table public.cms_revisions   enable row level security;
 alter table public.cms_assets      enable row level security;
 
+drop policy if exists "authenticated full access" on public.cms_collections;
 create policy "authenticated full access" on public.cms_collections
   for all to authenticated using (true) with check (true);
 
+drop policy if exists "authenticated full access" on public.cms_entries;
 create policy "authenticated full access" on public.cms_entries
   for all to authenticated using (true) with check (true);
 
+drop policy if exists "authenticated full access" on public.cms_revisions;
 create policy "authenticated full access" on public.cms_revisions
   for all to authenticated using (true) with check (true);
 
+drop policy if exists "authenticated full access" on public.cms_assets;
 create policy "authenticated full access" on public.cms_assets
   for all to authenticated using (true) with check (true);
 
 -- Anon public read (Friday vb. public siteler için)
+drop policy if exists "anon read published entries" on public.cms_entries;
 create policy "anon read published entries" on public.cms_entries
   for select to anon using (status = 'published');
 
+drop policy if exists "anon read collection schemas" on public.cms_collections;
 create policy "anon read collection schemas" on public.cms_collections
   for select to anon using (true);
 
+drop policy if exists "anon read assets" on public.cms_assets;
 create policy "anon read assets" on public.cms_assets
   for select to anon using (true);
 
@@ -157,18 +164,22 @@ insert into storage.buckets (id, name, public)
 values ('cms-assets', 'cms-assets', true)
 on conflict (id) do nothing;
 
+drop policy if exists "cms-assets auth upload" on storage.objects;
 create policy "cms-assets auth upload" on storage.objects
   for insert to authenticated
   with check (bucket_id = 'cms-assets');
 
+drop policy if exists "cms-assets auth update" on storage.objects;
 create policy "cms-assets auth update" on storage.objects
   for update to authenticated
   using (bucket_id = 'cms-assets');
 
+drop policy if exists "cms-assets auth delete" on storage.objects;
 create policy "cms-assets auth delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'cms-assets');
 
+drop policy if exists "cms-assets public read" on storage.objects;
 create policy "cms-assets public read" on storage.objects
   for select to anon
   using (bucket_id = 'cms-assets');

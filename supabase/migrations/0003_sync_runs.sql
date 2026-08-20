@@ -19,5 +19,6 @@ create index if not exists sync_runs_started_idx
 alter table public.sync_runs enable row level security;
 
 -- Panel (authenticated) okur; Edge Function (service_role) yazar.
+drop policy if exists "authenticated read" on public.sync_runs;
 create policy "authenticated read" on public.sync_runs
   for select to authenticated using (true);

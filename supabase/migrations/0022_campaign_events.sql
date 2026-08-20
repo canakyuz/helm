@@ -22,5 +22,6 @@ create index if not exists campaign_events_email_idx
   on public.campaign_events (email_id);
 
 alter table public.campaign_events enable row level security;
+drop policy if exists "authenticated full access" on public.campaign_events;
 create policy "authenticated full access" on public.campaign_events
   for all to authenticated using (true) with check (true);

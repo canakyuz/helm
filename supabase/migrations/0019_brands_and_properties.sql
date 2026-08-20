@@ -25,6 +25,7 @@ create table public.brands (
 );
 
 alter table public.brands enable row level security;
+drop policy if exists brands_authenticated_all on public.brands;
 create policy brands_authenticated_all on public.brands
   for all to authenticated using (true) with check (true);
 

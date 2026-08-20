@@ -13,5 +13,6 @@ create table if not exists public.heartbeats (
 
 alter table public.heartbeats enable row level security;
 
+drop policy if exists "authenticated full access" on public.heartbeats;
 create policy "authenticated full access" on public.heartbeats
   for all to authenticated using (true) with check (true);

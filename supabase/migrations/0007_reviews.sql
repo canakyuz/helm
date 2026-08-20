@@ -25,5 +25,6 @@ create index if not exists reviews_project_date_idx
 
 alter table public.reviews enable row level security;
 
+drop policy if exists "authenticated read" on public.reviews;
 create policy "authenticated read" on public.reviews
   for select to authenticated using (true);

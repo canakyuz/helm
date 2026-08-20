@@ -21,6 +21,7 @@ create unique index if not exists revenue_goals_scope_month_idx
 
 alter table public.revenue_goals enable row level security;
 
+drop policy if exists "authenticated full access" on public.revenue_goals;
 create policy "authenticated full access" on public.revenue_goals
   for all to authenticated using (true) with check (true);
 

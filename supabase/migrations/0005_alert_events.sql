@@ -16,5 +16,6 @@ create index if not exists alert_events_triggered_idx
 
 alter table public.alert_events enable row level security;
 
+drop policy if exists "authenticated read" on public.alert_events;
 create policy "authenticated read" on public.alert_events
   for select to authenticated using (true);

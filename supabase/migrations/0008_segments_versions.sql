@@ -11,6 +11,7 @@ create table if not exists public.user_segments (
 );
 
 alter table public.user_segments enable row level security;
+drop policy if exists "authenticated full access" on public.user_segments;
 create policy "authenticated full access" on public.user_segments
   for all to authenticated using (true) with check (true);
 
@@ -29,5 +30,6 @@ create index if not exists app_versions_project_idx
   on public.app_versions (project_id, release_date desc);
 
 alter table public.app_versions enable row level security;
+drop policy if exists "authenticated read" on public.app_versions;
 create policy "authenticated read" on public.app_versions
   for select to authenticated using (true);
