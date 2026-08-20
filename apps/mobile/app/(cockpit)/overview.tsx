@@ -409,7 +409,7 @@ export default function Overview() {
                       {/* Proje bazli delta kaynagi yok - uydurmak yerine
                           yalnizca gelir gosteriliyor (design.md §10). */}
                       <Text className="font-semibold text-emph tracking-tighter text-fg">
-                        {pm != null ? fmt(pm.adRevenue) : "-"}
+                        {pm != null ? fmt(pm.revenue) : "-"}
                       </Text>
                     </View>
                   );

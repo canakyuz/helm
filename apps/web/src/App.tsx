@@ -246,6 +246,30 @@ function App() {
               options={{
                 syncWithLocation: true,
                 warnWhenUnsavedChanges: true,
+                // Refine kendi QueryClient'ini kuruyordu ve TanStack varsayilani
+                // staleTime: 0. Yani her sayfa gecisinde, her mount'ta, sekmeye
+                // her donuste 60+ sorgunun HEPSI yeniden agdan cekiliyordu —
+                // veri saniyeler oncesine ait olsa bile. Kullanicinin gordugu:
+                // her girisde bos ekran + spinner.
+                //
+                // 60 sn: cron saatlik calisiyor, metrikler gun bazli. Bir dakika
+                // once cekilen veriyi tekrar istemek bilgi kazandirmiyor. Tazelik
+                // gerektiginde ekranlardaki senkron butonu zaten invalidate ediyor.
+                reactQuery: {
+                  clientConfig: {
+                    defaultOptions: {
+                      queries: {
+                        staleTime: 60_000,
+                        gcTime: 5 * 60_000,
+                        // Sekme degistirip donmek "yeni veri" demek degil.
+                        refetchOnWindowFocus: false,
+                        // Ag koptugunda tekrar bagliniyorsa taze veri MANTIKLI.
+                        refetchOnReconnect: true,
+                        retry: 1,
+                      },
+                    },
+                  },
+                },
               }}
             >
               <ScopeProvider>

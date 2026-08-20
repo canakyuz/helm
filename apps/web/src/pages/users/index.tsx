@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import {
   Ban,
@@ -127,9 +128,38 @@ const tabIcon = (t: Tab) => {
 
 export const UsersPage = () => {
   const { scope, isAll } = useScope();
-  const [users, setUsers] = useState<ProjectUser[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  // Bu sayfa TanStack Query'yi HIC kullanmiyordu: ham useEffect + useState ile
+  // edge function'a gidiyordu. Sonucu cache'lenmedigi icin sayfaya her donusde
+  // — menuden gecis, geri tusu, sekme degisimi — helm-users bastan calisiyor,
+  // ekran bosaliyor ve kullanici spinner bekliyordu. Uygulamanin geri kalani
+  // Refine/TanStack cache'i kullandigi icin sorun yalnizca burada gorunuyordu.
+  //
+  // 2 dakika: kullanici listesi metrikler kadar hizli degismiyor ve helm-users
+  // pahali bir cagri (Supabase auth admin listesi + profil birlestirme).
+  const {
+    data: users = [],
+    isFetching: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: ["helm-users", scope],
+    enabled: !isAll,
+    staleTime: 2 * 60_000,
+    queryFn: async () => {
+      const { data, error: fnError } = await supabaseClient.functions.invoke(
+        "helm-users",
+        { body: { project_id: scope } },
+      );
+      if (fnError) throw fnError;
+      if (data?.error) throw new Error(data.error);
+      return (data?.users ?? []) as ProjectUser[];
+    },
+  });
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : String(queryError)
+    : null;
 
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<Tab>("all");
@@ -138,38 +168,6 @@ export const UsersPage = () => {
   const [page, setPage] = useState(0);
   const [preview, setPreview] = useState<ProjectUser | null>(null);
 
-  useEffect(() => {
-    if (isAll) {
-      setUsers([]);
-      setError(null);
-      return;
-    }
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    setPage(0);
-    setPreview(null);
-    supabaseClient.functions
-      .invoke("helm-users", { body: { project_id: scope } })
-      .then(({ data, error: fnError }) => {
-        if (cancelled) return;
-        if (fnError) throw fnError;
-        if (data?.error) throw new Error(data.error);
-        setUsers(data?.users ?? []);
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : String(e));
-          setUsers([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [scope, isAll]);
 
   // KPI hesapları
   const stats = useMemo(() => {
@@ -286,36 +284,42 @@ export const UsersPage = () => {
           label="Total"
           value={stats.total}
           icon={<UsersIcon className="size-3.5" />}
+        pending={loading && users.length === 0}
         />
         <KpiPill
           label={`New (${NEW_DAYS}g)`}
           value={stats.new}
           icon={<CalendarPlus className="size-3.5" />}
           tone="emerald"
+        pending={loading && users.length === 0}
         />
         <KpiPill
           label={`Aktif (${ACTIVE_DAYS}g)`}
           value={stats.active}
           icon={<UserCheck className="size-3.5" />}
           tone="emerald"
+        pending={loading && users.length === 0}
         />
         <KpiPill
           label={`Pasif (>${INACTIVE_DAYS}g)`}
           value={stats.inactive}
           icon={<UserX className="size-3.5" />}
           tone="amber"
+        pending={loading && users.length === 0}
         />
         <KpiPill
           label="Banned"
           value={stats.banned}
           icon={<Ban className="size-3.5" />}
           tone={stats.banned > 0 ? "destructive" : undefined}
+        pending={loading && users.length === 0}
         />
         <KpiPill
           label="Premium"
           value={stats.premium}
           icon={<Sparkles className="size-3.5" />}
           tone="primary"
+        pending={loading && users.length === 0}
         />
       </div>
 
@@ -576,11 +580,14 @@ const KpiPill = ({
   value,
   icon,
   tone,
+  pending,
 }: {
   label: string;
   value: number;
   icon: React.ReactNode;
   tone?: "emerald" | "amber" | "destructive" | "primary";
+  /** Veri henuz gelmedi. "0" DEGIL "-" gosterilir. */
+  pending?: boolean;
 }) => {
   const toneCls =
     tone === "emerald"
@@ -598,8 +605,15 @@ const KpiPill = ({
         {icon}
         {label}
       </div>
-      <div className={cn("mt-1 font-mono text-2xl tabular-nums", toneCls)}>
-        {value}
+      {/* Yuklenirken "0" yazmak "hic kullanici yok" diye okunur — oysa dogru
+          cevap "henuz bilmiyoruz". Ayni ayrimi mobilde de yapiyoruz. */}
+      <div
+        className={cn(
+          "mt-1 font-mono text-2xl tabular-nums",
+          pending ? "text-muted-foreground/40" : toneCls,
+        )}
+      >
+        {pending ? "—" : value}
       </div>
     </div>
   );
