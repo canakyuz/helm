@@ -32,11 +32,19 @@ type Row = {
 export async function fetchPropertyMetrics(
   client: SupabaseClient,
 ): Promise<PropertyMetricsMap> {
+  // 90 gunluk pencere: sorgu SADECE her projenin en guncel degerini kullaniyor
+  // ama tarih filtresi olmadan tum gecmisi cekiyordu (bugun 381 satir, her gun
+  // buyuyor). PostgREST 1.000'de sessizce keser; o gun geldiginde ekran hata
+  // vermez, sadece eksik proje gosterir. Pencere gorunur davranisi degistirmez:
+  // 90 gundur veri gondermeyen bir projenin "guncel" degeri zaten yoktur.
+  const sinceIso = new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10);
+
   const [{ data, error }, rates] = await Promise.all([
     client
       .from("metrics")
       .select("project_id, metric, date, value, currency")
       .in("metric", ["ad_revenue", "mrr", "dau"])
+      .gte("date", sinceIso)
       .order("date", { ascending: false }),
     fetchFxRates(),
   ]);
