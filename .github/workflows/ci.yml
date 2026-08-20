@@ -24,7 +24,7 @@ jobs:
     name: Secret scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Yalnızca tracked dosyalar. History taraması (`audit-secrets`) bilerek
       # burada değil: eski commit'lerdeki rotate edilmiş değerler her koşuda
@@ -36,7 +36,7 @@ jobs:
     name: Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -64,7 +64,7 @@ jobs:
     # temizlenince continue-on-error kaldırılacak ve kapı sertleşecek.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         with:
