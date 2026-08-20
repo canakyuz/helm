@@ -30,12 +30,26 @@ const ALL_NAMES = CARDS.map((c) => c.metric);
 export const FunnelHealth = () => {
   const { scope, isAll } = useScope();
 
-  const filters: CrudFilter[] = [{ field: "metric", operator: "in", value: ALL_NAMES }];
+  // Metrik filtresi vardi ama TARIH filtresi yoktu: sorgu her calistiginda tum
+  // gecmisi istiyordu. Bugun 480 satir, yani sorun gorunmuyor — ama satir sayisi
+  // her gun buyuyor ve PostgREST 1.000'de sessizce kesiyor. O gun geldiginde
+  // kartlar hata vermez, sadece yanlis sayi gosterir; bulunmasi en zor ariza tipi.
+  // 90 gun bu kartlar (son deger + delta + trend) icin fazlasiyla yeterli.
+  const since = useMemo(
+    () => new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10),
+    [],
+  );
+
+  const filters: CrudFilter[] = [
+    { field: "metric", operator: "in", value: ALL_NAMES },
+    { field: "date", operator: "gte", value: since },
+  ];
   if (!isAll) filters.push({ field: "project_id", operator: "eq", value: scope });
 
   const { result, query } = useList<Metric>({
     resource: "metrics",
     filters,
+    sorters: [{ field: "date", order: "desc" }],
     pagination: { mode: "off" },
   });
   const metrics = result.data;

@@ -51,8 +51,16 @@ export const RevenuePage = () => {
     [range],
   );
 
+  // Bu sayfanin okudugu metrikler. Metrik filtresi OLMADAN bu sorgu 90 gunluk
+  // pencerede 3.102 satir istiyor; PostgREST 1.000'de sessizce kesiyor ve
+  // hangi 1.000'in gelecegi ORDER BY olmadan belirsiz kaliyor. Sonuc yavaslik
+  // degil, veri kaybi: kartlar sifir gorunurken veri veritabaninda duruyor.
+  // Yeni metrik eklersen bu listeye de ekle.
+  const REVENUE_METRICS = ["ad_revenue", "ad_ecpm", "ad_impressions", "app_revenue", "app_downloads", "mrr", "active_subs"];
+
   const filters: CrudFilter[] = [
     { field: "date", operator: "gte", value: since },
+    { field: "metric", operator: "in", value: REVENUE_METRICS },
   ];
   if (!isAll) {
     filters.push({ field: "project_id", operator: "eq", value: scope });
@@ -60,6 +68,9 @@ export const RevenuePage = () => {
   const { result, query } = useList<Metric>({
     resource: "metrics",
     filters,
+    // Tavan yine de asilirsa kaybedilen EN ESKI gunler olsun, rastgele gunler
+    // degil: grafik kisalir ama bugunun rakami dogru kalir.
+    sorters: [{ field: "date", order: "desc" }],
     pagination: { mode: "off" },
   });
   const metrics = result.data;
