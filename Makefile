@@ -89,11 +89,17 @@ ios-release: ## yerel IPA + TestFlight (apps/mobile/Makefile'a delege)
 clean: ## node_modules + build çıktıları temizle
 	rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/web/dist
 
-# CHANNEL varsayilani preview: ios-local-release de preview profiliyle build
-# aliyor (apps/mobile/Makefile: EAS_PROFILE ?= preview) ve o build preview
-# kanalini dinliyor. Sabit "production" yazilirsa guncelleme TestFlight'taki
-# cihaza hic ulasmaz — sessizce bosa gider.
-CHANNEL ?= preview
+# CHANNEL varsayilani production: EAS'teki TUM bitmis iOS build'leri
+# `production` profiliyle uretilmis ve `production` kanalini dinliyor
+# (dogrulama: eas build:list --platform ios).
+#
+# NEDEN NOT DUSULDU: bir ara varsayilan `preview` yapilmisti, cunku
+# apps/mobile/Makefile'da `EAS_PROFILE ?= preview` yaziyor. O degisken yerel
+# build komutunun varsayilani; cihazdaki build'in hangi kanali dinledigini
+# SOYLEMEZ. Sonuc: `make ota` preview'a yayinladi, telefon production'i
+# dinledigi icin guncelleme hic ulasmadi ve widget eski rakamda kaldi.
+# Kanal sorusunun tek dogru kaynagi `eas build:list`.
+CHANNEL ?= production
 
 ota: ## OTA update (CHANNEL=production ile prod kanalina)
 	cd apps/mobile && eas update --channel $(CHANNEL) --environment $(CHANNEL) --message "$$(git log -1 --pretty=%s)"
