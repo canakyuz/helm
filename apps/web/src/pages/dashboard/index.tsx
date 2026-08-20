@@ -10,7 +10,10 @@ import { Link } from "react-router";
 import {
   Activity,
   AlertOctagon,
+  ArrowDown,
+  ArrowUp,
   Bell,
+  ChevronsUpDown,
   CreditCard,
   Loader2,
   Pencil,
@@ -93,7 +96,9 @@ const timeAgo = (iso: string | null) => {
 };
 
 /** Bir projenin connector sağlığı: ok / error / pending. */
-const projectHealth = (integrations: ProjectIntegration[]) => {
+const projectHealth = (
+  integrations: ProjectIntegration[],
+): "ok" | "error" | "pending" => {
   if (integrations.length === 0) return "pending";
   if (integrations.some((i) => i.last_sync_status === "error")) return "error";
   if (integrations.every((i) => i.last_sync_status === "ok")) return "ok";
@@ -391,6 +396,47 @@ export const DashboardPage = () => {
     return prev > 0 ? ((curr - prev) / prev) * 100 : null;
   }, [barData]);
 
+  // Projects tablosu: satırlar önceden hesap + sıralanabilir başlıklar.
+  // latestByProject artık satır başına değil, tablo başına 1 kez çağrılır:
+  // O(projects × metrics) → O(metrics + projects log projects).
+  type SortKey = "name" | "mrr" | "ad" | "dau";
+  const [sortKey, setSortKey] = useState<SortKey>("ad");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+  const projectRows = useMemo(() => {
+    const mrrMap = latestByProject(metrics, "mrr");
+    const adMap = latestByProject(metrics, "ad_revenue");
+    const dauMap = latestByProject(metrics, "dau");
+    const rows = projects.map((p) => ({
+      project: p,
+      mrr:
+        withMrrCents(mrrMap.get(p.id as string)?.value ?? 0, mrrCents) *
+        rateOf(rcCurrency),
+      ad:
+        (adMap.get(p.id as string)?.value ?? 0) *
+        rateOf(projAdCurrency(p.id as string)),
+      dau: dauMap.get(p.id as string)?.value ?? 0,
+      health: projectHealth(
+        integrations.filter((i) => i.project_id === p.id),
+      ),
+    }));
+    const dir = sortDir === "asc" ? 1 : -1;
+    return rows.sort((a, b) =>
+      sortKey === "name"
+        ? a.project.name.localeCompare(b.project.name) * dir
+        : (a[sortKey] - b[sortKey]) * dir,
+    );
+  }, [projects, metrics, integrations, mrrCents, fxRates, rcCurrency, sortKey, sortDir]);
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir(key === "name" ? "asc" : "desc");
+    }
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-4">
       {/* ════════ GREETING + KONTROLLER (Kravio üst blok) ════════ */}
@@ -494,8 +540,17 @@ export const DashboardPage = () => {
             delta={barDelta}
             deltaLabel="vs önceki 7 gün"
             format={(v) => formatMoney(v, displayCcy)}
-            className="flex-1"
           />
+
+          <Suspense
+            fallback={
+              <Card className="grid h-[380px] place-items-center py-0 text-muted-foreground">
+                <Loader2 className="size-6 animate-spin" />
+              </Card>
+            }
+          >
+            <UsersGeoMap scope={scope} isAll={isAll} days={range} mapHeight={300} />
+          </Suspense>
         </div>
 
         <LatestUpdates
@@ -505,115 +560,118 @@ export const DashboardPage = () => {
         />
       </div>
 
-      {/* ════════ PROJELER TABLOSU (Kravio SLA Monitoring karşılığı) ════════ */}
-      <Card className="py-0">
-        <CardHeader className="flex flex-row items-center justify-between px-5 pt-5 pb-0">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Projects
-          </CardTitle>
-          <span className="text-xs text-muted-foreground">
-            {projects.length} proje
-          </span>
-        </CardHeader>
-        <CardContent className="px-2 pb-3 pt-2">
-          {projects.length === 0 ? (
-            <div className="grid place-items-center py-10 text-xs text-muted-foreground">
-              Henüz proje yok
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="h-9 w-8 px-3" />
-                  <TableHead className="h-9 px-3 text-xs">Project</TableHead>
-                  <TableHead className="h-9 px-3 text-xs">Sağlık</TableHead>
-                  <TableHead className="h-9 px-3 text-right text-xs">
-                    MRR
-                  </TableHead>
-                  <TableHead className="h-9 px-3 text-right text-xs">
-                    Reklam
-                  </TableHead>
-                  <TableHead className="h-9 px-3 text-right text-xs">
-                    DAU
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projects.map((p) => {
-                  const mrrMap = latestByProject(metrics, "mrr");
-                  const ad = latestByProject(metrics, "ad_revenue");
-                  const dau = latestByProject(metrics, "dau");
-                  const mrrConverted =
-                    withMrrCents(mrrMap.get(p.id as string)?.value ?? 0, mrrCents) *
-                    rateOf(rcCurrency);
-                  const adConverted =
-                    (ad.get(p.id as string)?.value ?? 0) *
-                    rateOf(projAdCurrency(p.id as string));
-                  const health = projectHealth(
-                    integrations.filter((i) => i.project_id === p.id),
-                  );
-                  const isCurrent = !isAll && p.id === scope;
-                  return (
-                    <TableRow
-                      key={p.id}
-                      className={cn(
-                        "h-11 cursor-pointer",
-                        isCurrent && "bg-muted/60",
-                      )}
-                      onClick={() => setScope(p.id as string)}
-                    >
-                      <TableCell className="px-3">
-                        <span
-                          className={cn(
-                            "block size-2 rounded-full",
-                            health === "ok" && "bg-emerald-500",
-                            health === "error" && "bg-red-500",
-                            health === "pending" && "bg-muted-foreground/40",
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell
-                        className={cn(
-                          "truncate px-3 text-[13px]",
-                          isCurrent ? "font-semibold" : "font-medium",
-                        )}
-                      >
-                        {p.name}
-                      </TableCell>
-                      <TableCell className="px-3">
-                        <HealthBadge health={health} />
-                      </TableCell>
-                      <TableCell className="px-3 text-right text-[13px] tabular-nums">
-                        {formatMoney(mrrConverted, displayCcy)}
-                      </TableCell>
-                      <TableCell className="px-3 text-right text-[13px] tabular-nums">
-                        {formatMoney(adConverted, displayCcy)}
-                      </TableCell>
-                      <TableCell className="px-3 text-right text-[13px] tabular-nums">
-                        {compact(dau.get(p.id as string)?.value ?? 0)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* ════════ HARİTA + HATALAR (Helm'e özgü - referans dışı, altta) ════════ */}
-      <div className="grid min-h-[340px] gap-4 pb-4 lg:grid-cols-12">
-        <Card className="relative overflow-hidden py-0 lg:col-span-8">
-          <Suspense
-            fallback={
-              <div className="absolute inset-0 grid place-items-center text-muted-foreground">
-                <Loader2 className="size-6 animate-spin" />
+      {/* ════ PROJELER TABLOSU (Kravio SLA Monitoring karşılığı) + HATALAR ════ */}
+      <div className="grid gap-4 pb-4 lg:grid-cols-12">
+        <Card className="py-0 lg:col-span-8">
+          <CardHeader className="flex flex-row items-center justify-between px-5 pt-5 pb-0">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Projects
+            </CardTitle>
+            <span className="text-xs text-muted-foreground">
+              {projects.length} proje
+            </span>
+          </CardHeader>
+          <CardContent className="px-2 pb-3 pt-2">
+            {projectRows.length === 0 ? (
+              <div className="grid place-items-center py-10 text-xs text-muted-foreground">
+                Henüz proje yok
               </div>
-            }
-          >
-            <UsersGeoMap scope={scope} isAll={isAll} days={range} fullCanvas />
-          </Suspense>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="h-9 w-8 px-3" />
+                    <TableHead className="h-9 px-3">
+                      <SortHead
+                        label="Project"
+                        active={sortKey === "name"}
+                        dir={sortDir}
+                        onClick={() => toggleSort("name")}
+                      />
+                    </TableHead>
+                    <TableHead className="h-9 px-3 text-xs">Sağlık</TableHead>
+                    <TableHead className="h-9 px-3">
+                      <SortHead
+                        label="MRR"
+                        align="right"
+                        active={sortKey === "mrr"}
+                        dir={sortDir}
+                        onClick={() => toggleSort("mrr")}
+                      />
+                    </TableHead>
+                    <TableHead className="h-9 px-3">
+                      <SortHead
+                        label="Reklam"
+                        align="right"
+                        active={sortKey === "ad"}
+                        dir={sortDir}
+                        onClick={() => toggleSort("ad")}
+                      />
+                    </TableHead>
+                    <TableHead className="h-9 px-3">
+                      <SortHead
+                        label="DAU"
+                        align="right"
+                        active={sortKey === "dau"}
+                        dir={sortDir}
+                        onClick={() => toggleSort("dau")}
+                      />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {projectRows.map((row) => {
+                    const p = row.project;
+                    const isCurrent = !isAll && p.id === scope;
+                    return (
+                      <TableRow
+                        key={p.id}
+                        className={cn(
+                          "h-11 cursor-pointer",
+                          isCurrent && "bg-muted/60",
+                        )}
+                        onClick={() => setScope(p.id as string)}
+                      >
+                        <TableCell className="px-3">
+                          <span
+                            className={cn(
+                              "block size-2 rounded-full",
+                              row.health === "ok" && "bg-emerald-500",
+                              row.health === "error" && "bg-red-500",
+                              row.health === "pending" &&
+                                "bg-muted-foreground/40",
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell
+                          className={cn(
+                            "truncate px-3 text-[13px]",
+                            isCurrent ? "font-semibold" : "font-medium",
+                          )}
+                        >
+                          {p.name}
+                        </TableCell>
+                        <TableCell className="px-3">
+                          <HealthBadge health={row.health} />
+                        </TableCell>
+                        <TableCell className="px-3 text-right text-[13px] tabular-nums">
+                          {formatMoney(row.mrr, displayCcy)}
+                        </TableCell>
+                        <TableCell className="px-3 text-right text-[13px] tabular-nums">
+                          {formatMoney(row.ad, displayCcy)}
+                        </TableCell>
+                        <TableCell className="px-3 text-right text-[13px] tabular-nums">
+                          {compact(row.dau)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
         </Card>
+
         <ErrorsPanel
           hasSentry={hasSentry}
           projectName={(id) =>
@@ -625,6 +683,42 @@ export const DashboardPage = () => {
     </div>
   );
 };
+
+/** Sıralanabilir tablo başlığı - tıkla → sırala, tekrar tıkla → yön değiştir. */
+const SortHead = ({
+  label,
+  active,
+  dir,
+  align,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: "asc" | "desc";
+  align?: "right";
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={cn(
+      "inline-flex w-full items-center gap-1 text-xs transition-colors hover:text-foreground",
+      align === "right" && "justify-end",
+      active ? "font-semibold text-foreground" : "text-muted-foreground",
+    )}
+  >
+    {label}
+    {active ? (
+      dir === "asc" ? (
+        <ArrowUp className="size-3" />
+      ) : (
+        <ArrowDown className="size-3" />
+      )
+    ) : (
+      <ChevronsUpDown className="size-3 opacity-40" />
+    )}
+  </button>
+);
 
 /** Sağlık pill'leri - eski status strip'in kompakt hali. */
 const StatusStrip = ({

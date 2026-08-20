@@ -52,8 +52,8 @@ const DarkTip = ({
 };
 
 /** Kravio "Ticket Volume Trend" karşılığı: açık gri barlar, seçili/son gün
- *  koyu lacivert. Hover'daki bar vurgulanır; hover yoksa son gün.
- *  Time: O(n) render, n = gün sayısı. */
+ *  koyu lacivert. Hover önizler, tıklama sabitler (tekrar tıkla → bırak);
+ *  ikisi de yoksa son gün vurgulu. Time: O(n) render, n = gün sayısı. */
 export const BarTrendCard = ({
   title,
   data,
@@ -64,7 +64,8 @@ export const BarTrendCard = ({
   className,
 }: BarTrendCardProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
-  const activeIndex = hovered ?? data.length - 1;
+  const [pinned, setPinned] = useState<number | null>(null);
+  const activeIndex = hovered ?? pinned ?? data.length - 1;
 
   // Gün etiketi: "08-14" yerine kısa gün adı + gün (Kravio: Sun/Mon/Tue).
   const chartData = useMemo(
@@ -146,7 +147,15 @@ export const BarTrendCard = ({
                 cursor={false}
                 content={<DarkTip format={format} />}
               />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={36}>
+              <Bar
+                dataKey="value"
+                radius={[6, 6, 0, 0]}
+                maxBarSize={36}
+                className="cursor-pointer"
+                onClick={(_, index) =>
+                  setPinned((p) => (p === index ? null : index))
+                }
+              >
                 {chartData.map((p, i) => (
                   <Cell
                     key={p.date}
