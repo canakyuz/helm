@@ -1,4 +1,4 @@
-// helm tema sistemi - Liquid Glass, iki mod (dark + light).
+// helm tema sistemi - Flat (Kravio referansı), iki mod (light default + dark).
 // Tek toggle ile geçiş. Yeni mod eklemek için: HELM_THEMES'e bir girdi +
 // src/styles/index.css'e bir [data-helm-theme="..."] bloğu.
 
@@ -19,30 +19,30 @@ export interface HelmTheme {
 
 export const HELM_THEMES: HelmTheme[] = [
   {
+    key: "glass-light",
+    label: "Light",
+    mode: "light",
+    chart: {
+      grid: "rgba(0,0,0,0.05)",
+      axis: "#9a9ca3",
+      revenue: "#16a34a",
+      users: "#2563eb",
+    },
+  },
+  {
     key: "glass-dark",
     label: "Dark",
     mode: "dark",
     chart: {
       grid: "rgba(255,255,255,0.07)",
       axis: "#6b7280",
-      revenue: "#a3e635",
-      users: "#38bdf8",
-    },
-  },
-  {
-    key: "glass-light",
-    label: "Light",
-    mode: "light",
-    chart: {
-      grid: "rgba(0,0,0,0.06)",
-      axis: "#71717a",
-      revenue: "#65a30d",
-      users: "#0284c7",
+      revenue: "#4ade80",
+      users: "#60a5fa",
     },
   },
 ];
 
-export const DEFAULT_THEME_KEY: string = "glass-dark";
+export const DEFAULT_THEME_KEY: string = "glass-light";
 
 export const getTheme = (key: string): HelmTheme =>
   HELM_THEMES.find((t) => t.key === key) ?? HELM_THEMES[0];

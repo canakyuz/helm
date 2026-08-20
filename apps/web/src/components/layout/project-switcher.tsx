@@ -87,9 +87,9 @@ export const ProjectSwitcher = () => {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent"
+              className="h-12 rounded-xl border border-border bg-card px-2.5 shadow-[0_1px_2px_rgba(16,17,20,0.04)] data-[state=open]:bg-card"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-accent text-sidebar-foreground ring-1 ring-foreground/10">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted text-foreground">
                 <Boxes className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">

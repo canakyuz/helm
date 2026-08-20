@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import {
   type CrudFilter,
+  useGetIdentity,
   useInvalidate,
   useList,
   useNavigation,
@@ -10,10 +11,12 @@ import {
   Activity,
   AlertOctagon,
   Bell,
-  Globe2,
+  CreditCard,
   Loader2,
   Pencil,
   RefreshCw,
+  TrendingUp,
+  Users as UsersIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -27,10 +30,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RangeSelect } from "@/components/range-select";
-import { TrendChart, type TrendPoint } from "@/components/trend-chart";
-import { HeroGhost } from "@/components/hero-ghost";
+import { type TrendPoint } from "@/components/trend-chart";
 import { ErrorsPanel } from "@/components/cockpit/errors-panel";
-import { KpiCell, KpiPlaceholder } from "@/components/kpi-cell";
+import { KpiCard } from "@/components/cockpit/kpi-card";
+import { BarTrendCard } from "@/components/cockpit/bar-trend";
+import { LatestUpdates } from "@/components/cockpit/latest-updates";
+import { KpiPlaceholder } from "@/components/kpi-cell";
 import { useIsModuleEnabled } from "@/hooks/use-enabled-modules";
 // Leaflet ağır (~150KB gzip); ayrı chunk'a koy, ilk dashboard renderı bloklamasın.
 const UsersGeoMap = lazy(() =>
@@ -173,18 +178,25 @@ export const DashboardPage = () => {
     !lastRun?.started_at ||
     Date.now() - new Date(lastRun.started_at).getTime() > 36 * 3_600_000;
 
-  const since48h = useMemo(
-    () => new Date(Date.now() - 48 * 3_600_000).toISOString(),
+  // 7 gün: Latest Updates panelinin "Bu hafta" sekmesi için yeterli pencere.
+  const since7d = useMemo(
+    () => new Date(Date.now() - 7 * 86_400_000).toISOString(),
     [],
   );
   const { result: alertsResult } = useList<AlertEvent>({
     resource: "alert_events",
     filters: [
-      { field: "triggered_at", operator: "gte", value: since48h },
+      { field: "triggered_at", operator: "gte", value: since7d },
     ],
     pagination: { mode: "off" },
   });
-  const openAlerts = alertsResult.data.length;
+  // Üst şerit rozetinde eski davranış korunur: son 48 saatteki alertler.
+  const openAlerts = useMemo(() => {
+    const cutoff = Date.now() - 48 * 3_600_000;
+    return alertsResult.data.filter(
+      (a) => new Date(a.triggered_at).getTime() >= cutoff,
+    ).length;
+  }, [alertsResult.data]);
 
   const okCount = integrations.filter(
     (i) => i.last_sync_status === "ok",
@@ -353,234 +365,245 @@ export const DashboardPage = () => {
       .map(([date, value]) => ({ date, value: withMrrCents(value, mrrCents) * rate }));
   }, [metrics, fxRates, rcCurrency, mrrCents]);
 
+  const { data: identity } = useGetIdentity<{ name?: string }>();
+  const firstName = identity?.name?.split(" ")[0] ?? "Kaptan";
+
+  // Bugünün reklam geliri delta'sı - düne göre (Kravio "vs last week" satırı).
+  const adTodayDelta =
+    adTotals.yesterday > 0
+      ? ((adTotals.today - adTotals.yesterday) / adTotals.yesterday) * 100
+      : null;
+
+  // Bar chart penceresi: son 14 gün. Delta: son 7 gün vs önceki 7 gün.
+  const barData = useMemo(
+    () => adRevenueSeriesDisplay.slice(-14),
+    [adRevenueSeriesDisplay],
+  );
+  const barTotal = useMemo(
+    () => barData.reduce((s, p) => s + p.value, 0),
+    [barData],
+  );
+  const barDelta = useMemo(() => {
+    if (barData.length < 4) return null;
+    const half = Math.floor(barData.length / 2);
+    const prev = barData.slice(0, half).reduce((s, p) => s + p.value, 0);
+    const curr = barData.slice(half).reduce((s, p) => s + p.value, 0);
+    return prev > 0 ? ((curr - prev) / prev) * 100 : null;
+  }, [barData]);
+
   return (
-    <div className="absolute inset-0 grid grid-rows-[36px_112px_minmax(0,1fr)_220px] gap-3 overflow-hidden p-3">
-      {/* ════════ STATUS STRIP - 36px ════════ */}
-      <div className="flex items-center gap-2 px-1 text-[11px]">
-        <div className="flex flex-1 items-center gap-3">
-          <div>
-            <span className="text-muted-foreground">
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-              })}{" "}
-              ·{" "}
-            </span>
-            <span className="font-semibold">
-              {isAll ? "Cockpit" : (activeProject?.name ?? "Project")}
-            </span>
-          </div>
+    <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-4">
+      {/* ════════ GREETING + KONTROLLER (Kravio üst blok) ════════ */}
+      <div className="flex flex-wrap items-end justify-between gap-3 pt-1">
+        <div>
+          <h1 className="text-[26px] font-semibold tracking-tight">
+            Hello, {firstName} 👋
+          </h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {isAll
+              ? "Tüm projelerinden son metrikler ve içgörüler."
+              : `${activeProject?.name ?? "Proje"} için son metrikler.`}
+          </p>
         </div>
-        <Link
-          to="/system"
-          className={cn(
-            "flex items-center gap-1 rounded-full border border-foreground/10 px-2 py-0.5 transition-colors hover:bg-accent",
-            errCount > 0 && "text-destructive",
-            okCount === integrations.length &&
-              integrations.length > 0 &&
-              "text-emerald-400",
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusStrip
+            okCount={okCount}
+            total={integrations.length}
+            errCount={errCount}
+            syncStale={syncStale}
+            lastRunAt={lastRun?.started_at ?? null}
+            openAlerts={openAlerts}
+            errorLatest={hasSentry ? errorLatest : null}
+          />
+          <RangeSelect value={range} onChange={setRange} />
+          {!isAll && activeProject && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => edit("projects", scope)}
+            >
+              <Pencil className="size-3" /> Düzenle
+            </Button>
           )}
-        >
-          <Activity className="size-3" />
-          <span className="font-mono tabular-nums">
-            {okCount}/{integrations.length}
-          </span>
-        </Link>
-        <Link
-          to="/system"
-          className={cn(
-            "flex items-center gap-1 rounded-full border border-foreground/10 px-2 py-0.5 transition-colors hover:bg-accent",
-            syncStale && "text-destructive",
-          )}
-          title={
-            syncStale
-              ? "The nightly cron may not be running - check the Vault secrets"
-              : undefined
-          }
-        >
-          <RefreshCw className="size-3" />
-          <span className="font-mono tabular-nums">
-            {timeAgo(lastRun?.started_at ?? null)}
-          </span>
-        </Link>
-        <Link
-          to="/alerts"
-          className={cn(
-            "flex items-center gap-1 rounded-full border border-foreground/10 px-2 py-0.5 transition-colors hover:bg-accent",
-            openAlerts > 0 && "text-destructive",
-          )}
-        >
-          <Bell className="size-3" />
-          <span className="font-mono tabular-nums">{openAlerts}</span>
-        </Link>
-        {hasSentry && (
-          <Link
-            to="/system"
-            className={cn(
-              "flex items-center gap-1 rounded-full border border-foreground/10 px-2 py-0.5 transition-colors hover:bg-accent",
-              errorLatest > 0 && "text-destructive",
-            )}
-          >
-            <AlertOctagon className="size-3" />
-            <span className="font-mono tabular-nums">
-              {compact(errorLatest)}
-            </span>
-          </Link>
-        )}
-        <span className="h-3 w-px bg-foreground/10" />
-        <RangeSelect value={range} onChange={setRange} />
-        {!isAll && activeProject && (
           <Button
-            variant="outline"
             size="sm"
-            className="h-7 text-xs"
-            onClick={() => edit("projects", scope)}
+            className="h-8 text-xs"
+            onClick={handleSync}
+            disabled={syncing}
           >
-            <Pencil className="size-3" /> Düzenle
+            <RefreshCw
+              className={syncing ? "size-3 animate-spin" : "size-3"}
+            />
+            Senkronize et
           </Button>
-        )}
-        <Button
-          size="sm"
-          className="h-7 text-xs"
-          onClick={handleSync}
-          disabled={syncing}
-        >
-          <RefreshCw
-            className={syncing ? "size-3 animate-spin" : "size-3"}
-          />
-          Senkronize et
-        </Button>
+        </div>
       </div>
 
-      {/* ════════ ZONE A - KPI Cluster (220px) ════════ */}
-      <div
-        className={cn(
-          "grid gap-3 min-h-0",
-          isAll
-            ? "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr]"
-            : "grid-cols-2 md:grid-cols-4 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr]",
-        )}
-      >
-        {/* Cell 1: Hero ₺ (col-span-2 for prominence) - yatay layout */}
-        <Card className="relative xl:col-span-1 col-span-2 overflow-hidden mt-0 pt-0">
-          <HeroSpark
-            data={adRevenueSeriesDisplay}
-            color={theme.chart.revenue}
-          />
-          <CardContent className="relative px-4 mt-0 py-4">
-            <div className="flex flex-wrap justify-between">
-              <div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                  Now ·{" "} Reklam
-                </div>
-                <div className="mt-1 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
-                  <div className="helm-hero-number text-[clamp(1.875rem,4cqw,2.5rem)] leading-none">
-                    {formatMoney(adTotals.today, displayCcy)}
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-3 pt-0 mt-0 flex-wrap align-top">
-                <SubStat
-                    label="Yesterday"
-                    value={formatMoney(adTotals.yesterday, displayCcy)}
-                />
-                <SubStat
-                    label="Bu ay"
-                    value={formatMoney(adTotals.thisMonth, displayCcy)}
-                />
-                <SubStat
-                    label="Last month"
-                    value={formatMoney(adTotals.prevMonth, displayCcy)}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Cell 2: MRR - subscriptions */}
-        {subsEnabled ? (
-          <KpiCell
-            label={isAll ? "Total MRR" : "MRR"}
-            value={formatMoney(mrrDisplay, displayCcy)}
-            hint="Monthly recurring revenue"
-            loading={loading}
-          />
-        ) : (
-          <KpiPlaceholder label={isAll ? "Total MRR" : "MRR"} module="Abonelik" />
-        )}
-
-        {/* Cell 3: DAU - analytics */}
-        {analyticsEnabled ? (
-          <KpiCell
-            label={isAll ? "Total DAU" : "DAU"}
-            value={compact(latest(metrics, "dau"))}
-            delta={deltaPct(dauSeries)}
-            hint="Daily active"
-            loading={loading}
-          />
-        ) : (
-          <KpiPlaceholder label={isAll ? "Total DAU" : "DAU"} module="Analitik" />
-        )}
-
-        {/* Cell 4: isAll → Aktif Abone (subscriptions) | proje → eCPM (ads) */}
-        {isAll ? (
-          subsEnabled ? (
-            <KpiCell
-              label="Aktif Abone"
-              value={compact(latest(metrics, "active_subs"))}
-              hint="RevenueCat"
+      {/* ════════ KPI + BAR CHART (sol) · LATEST UPDATES (sağ ray) ════════ */}
+      <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <KpiCard
+              title="Reklam · Bugün"
+              icon={<TrendingUp />}
+              value={formatMoney(adTotals.today, displayCcy)}
+              delta={adTodayDelta}
+              deltaLabel="vs dün"
+              spark={barData}
               loading={loading}
             />
-          ) : (
-            <KpiPlaceholder label="Aktif Abone" module="Abonelik" />
-          )
-        ) : adsEnabled ? (
-          <KpiCell
-            label="eCPM"
-            value={formatMoney2(
-              latest(metrics, "ad_ecpm") * rateOf(adCurrency),
-              displayCcy,
+            {subsEnabled ? (
+              <KpiCard
+                title={isAll ? "Total MRR" : "MRR"}
+                icon={<CreditCard />}
+                value={formatMoney(mrrDisplay, displayCcy)}
+                delta={deltaPct(mrrSpark)}
+                deltaLabel="vs 7 gün"
+                spark={mrrSpark.slice(-14)}
+                loading={loading}
+              />
+            ) : (
+              <KpiPlaceholder
+                label={isAll ? "Total MRR" : "MRR"}
+                module="Abonelik"
+              />
             )}
-            hint="Etkili CPM"
-            loading={loading}
-          />
-        ) : (
-          <KpiPlaceholder label="eCPM" module="Reklam" />
-        )}
+            {analyticsEnabled ? (
+              <KpiCard
+                title={isAll ? "Total DAU" : "DAU"}
+                icon={<UsersIcon />}
+                value={compact(latest(metrics, "dau"))}
+                delta={deltaPct(dauSeries)}
+                deltaLabel="vs 7 gün"
+                spark={dauSeries.slice(-14)}
+                loading={loading}
+              />
+            ) : (
+              <KpiPlaceholder
+                label={isAll ? "Total DAU" : "DAU"}
+                module="Analitik"
+              />
+            )}
+          </div>
 
-        {/* Cell 5: isAll → Toplam Kullanıcı | proje → WAU (users) */}
-        {usersEnabled ? (
-          isAll ? (
-            <KpiCell
-              label="Total users"
-              value={compact(latest(metrics, "total_users"))}
-              delta={deltaPct(series(metrics, "total_users"))}
-              hint="Supabase"
-              loading={loading}
-            />
-          ) : (
-            <KpiCell
-              label="WAU"
-              value={compact(latest(metrics, "wau"))}
-              hint="Weekly active"
-              loading={loading}
-            />
-          )
-        ) : (
-          <KpiPlaceholder
-            label={isAll ? "Total users" : "WAU"}
-            module="Customers"
+          <BarTrendCard
+            title="Reklam Geliri Trend"
+            data={barData}
+            total={formatMoney(barTotal, displayCcy)}
+            delta={barDelta}
+            deltaLabel="vs önceki 7 gün"
+            format={(v) => formatMoney(v, displayCcy)}
+            className="flex-1"
           />
-        )}
+        </div>
 
+        <LatestUpdates
+          alerts={alertsResult.data}
+          runs={runsResult.data.slice(0, 20)}
+          className="flex min-h-0 flex-col"
+        />
       </div>
 
-      {/* ════════ ZONE B - Living Canvas (map full) ════════ */}
-      {/* ZONE B grid: map 8 col + Projeler tablo 4 col yan */}
-      <div className="grid min-h-0 gap-3 lg:grid-cols-12">
-        {/* Map - 8 col */}
-        <Card className="relative overflow-hidden lg:col-span-8">
+      {/* ════════ PROJELER TABLOSU (Kravio SLA Monitoring karşılığı) ════════ */}
+      <Card className="py-0">
+        <CardHeader className="flex flex-row items-center justify-between px-5 pt-5 pb-0">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Projects
+          </CardTitle>
+          <span className="text-xs text-muted-foreground">
+            {projects.length} proje
+          </span>
+        </CardHeader>
+        <CardContent className="px-2 pb-3 pt-2">
+          {projects.length === 0 ? (
+            <div className="grid place-items-center py-10 text-xs text-muted-foreground">
+              Henüz proje yok
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="h-9 w-8 px-3" />
+                  <TableHead className="h-9 px-3 text-xs">Project</TableHead>
+                  <TableHead className="h-9 px-3 text-xs">Sağlık</TableHead>
+                  <TableHead className="h-9 px-3 text-right text-xs">
+                    MRR
+                  </TableHead>
+                  <TableHead className="h-9 px-3 text-right text-xs">
+                    Reklam
+                  </TableHead>
+                  <TableHead className="h-9 px-3 text-right text-xs">
+                    DAU
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {projects.map((p) => {
+                  const mrrMap = latestByProject(metrics, "mrr");
+                  const ad = latestByProject(metrics, "ad_revenue");
+                  const dau = latestByProject(metrics, "dau");
+                  const mrrConverted =
+                    withMrrCents(mrrMap.get(p.id as string)?.value ?? 0, mrrCents) *
+                    rateOf(rcCurrency);
+                  const adConverted =
+                    (ad.get(p.id as string)?.value ?? 0) *
+                    rateOf(projAdCurrency(p.id as string));
+                  const health = projectHealth(
+                    integrations.filter((i) => i.project_id === p.id),
+                  );
+                  const isCurrent = !isAll && p.id === scope;
+                  return (
+                    <TableRow
+                      key={p.id}
+                      className={cn(
+                        "h-11 cursor-pointer",
+                        isCurrent && "bg-muted/60",
+                      )}
+                      onClick={() => setScope(p.id as string)}
+                    >
+                      <TableCell className="px-3">
+                        <span
+                          className={cn(
+                            "block size-2 rounded-full",
+                            health === "ok" && "bg-emerald-500",
+                            health === "error" && "bg-red-500",
+                            health === "pending" && "bg-muted-foreground/40",
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "truncate px-3 text-[13px]",
+                          isCurrent ? "font-semibold" : "font-medium",
+                        )}
+                      >
+                        {p.name}
+                      </TableCell>
+                      <TableCell className="px-3">
+                        <HealthBadge health={health} />
+                      </TableCell>
+                      <TableCell className="px-3 text-right text-[13px] tabular-nums">
+                        {formatMoney(mrrConverted, displayCcy)}
+                      </TableCell>
+                      <TableCell className="px-3 text-right text-[13px] tabular-nums">
+                        {formatMoney(adConverted, displayCcy)}
+                      </TableCell>
+                      <TableCell className="px-3 text-right text-[13px] tabular-nums">
+                        {compact(dau.get(p.id as string)?.value ?? 0)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ════════ HARİTA + HATALAR (Helm'e özgü - referans dışı, altta) ════════ */}
+      <div className="grid min-h-[340px] gap-4 pb-4 lg:grid-cols-12">
+        <Card className="relative overflow-hidden py-0 lg:col-span-8">
           <Suspense
             fallback={
               <div className="absolute inset-0 grid place-items-center text-muted-foreground">
@@ -588,15 +611,9 @@ export const DashboardPage = () => {
               </div>
             }
           >
-            <UsersGeoMap
-              scope={scope}
-              isAll={isAll}
-              days={range}
-              fullCanvas
-            />
+            <UsersGeoMap scope={scope} isAll={isAll} days={range} fullCanvas />
           </Suspense>
         </Card>
-        {/* Side panel - 4 col: Hatalar tablo (tıklayınca detay dialog) */}
         <ErrorsPanel
           hasSentry={hasSentry}
           projectName={(id) =>
@@ -605,191 +622,101 @@ export const DashboardPage = () => {
           isAll={isAll}
         />
       </div>
-
-      {/* ════════ ZONE C - 3 trend chart (Projeler ZONE B yan'a taşındı) ════════ */}
-      <div className="grid min-h-0 grid-cols-1 gap-3 md:grid-cols-3">
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">
-              Reklam Geliri · {range}g
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[calc(100%-2.5rem)] p-2">
-            <TrendChart
-              data={adRevenueSeriesDisplay}
-              color={theme.chart.revenue}
-              height={150}
-              format={(v) => formatMoney(v, displayCcy)}
-            />
-          </CardContent>
-        </Card>
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">DAU · {range}g</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[calc(100%-2.5rem)] p-2">
-            <TrendChart
-              data={dauSeries}
-              color={theme.chart.users}
-              height={150}
-              format={compact}
-            />
-          </CardContent>
-        </Card>
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between text-sm">
-              <span>Projects</span>
-              <span className="text-[10px] font-normal text-muted-foreground">
-                {projects.length}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[calc(100%-2.5rem)] overflow-y-auto p-0">
-            {projects.length === 0 ? (
-              <div className="grid h-full place-items-center text-xs text-muted-foreground">
-                Henüz proje yok
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="h-7 w-6 px-2" />
-                    <TableHead className="h-7 px-2 text-xs">Project</TableHead>
-                    <TableHead className="h-7 px-2 text-right text-xs">
-                      MRR
-                    </TableHead>
-                    <TableHead className="h-7 px-2 text-right text-xs">
-                      Reklam
-                    </TableHead>
-                    <TableHead className="h-7 px-2 text-right text-xs">
-                      DAU
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {projects.map((p) => {
-                    const mrrMap = latestByProject(metrics, "mrr");
-                    const ad = latestByProject(metrics, "ad_revenue");
-                    const dau = latestByProject(metrics, "dau");
-                    const mrrConverted =
-                      withMrrCents(mrrMap.get(p.id as string)?.value ?? 0, mrrCents) *
-                      rateOf(rcCurrency);
-                    const adConverted =
-                      (ad.get(p.id as string)?.value ?? 0) *
-                      rateOf(projAdCurrency(p.id as string));
-                    const health = projectHealth(
-                      integrations.filter((i) => i.project_id === p.id),
-                    );
-                    const isCurrent = !isAll && p.id === scope;
-                    return (
-                      <TableRow
-                        key={p.id}
-                        className={cn(
-                          "cursor-pointer",
-                          isCurrent && "bg-primary/10",
-                        )}
-                        onClick={() => setScope(p.id as string)}
-                      >
-                        <TableCell className="px-2 py-1.5">
-                          <span
-                            className={cn(
-                              "block size-1.5 rounded-full",
-                              health === "ok" &&
-                                "bg-emerald-500 shadow-[0_0_6px_-1px_rgb(16,185,129)]",
-                              health === "error" &&
-                                "bg-red-500 shadow-[0_0_6px_-1px_rgb(239,68,68)]",
-                              health === "pending" &&
-                                "bg-muted-foreground/40",
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell
-                          className={cn(
-                            "truncate px-2 py-1.5 text-xs",
-                            isCurrent ? "font-semibold" : "font-medium",
-                          )}
-                        >
-                          {p.name}
-                        </TableCell>
-                        <TableCell className="px-2 py-1.5 text-right font-mono text-xs tabular-nums">
-                          {formatMoney(mrrConverted, displayCcy)}
-                        </TableCell>
-                        <TableCell className="px-2 py-1.5 text-right font-mono text-xs tabular-nums">
-                          {formatMoney(adConverted, displayCcy)}
-                        </TableCell>
-                        <TableCell className="px-2 py-1.5 text-right font-mono text-xs tabular-nums">
-                          {compact(dau.get(p.id as string)?.value ?? 0)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
 
-const SubStat = ({ label, value }: { label: string; value: string }) => (
-  <div className="min-w-0">
-    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-      {label}
-    </div>
-    <div className="truncate font-mono text-sm font-medium tabular-nums text-foreground">
-      {value}
-    </div>
+/** Sağlık pill'leri - eski status strip'in kompakt hali. */
+const StatusStrip = ({
+  okCount,
+  total,
+  errCount,
+  syncStale,
+  lastRunAt,
+  openAlerts,
+  errorLatest,
+}: {
+  okCount: number;
+  total: number;
+  errCount: number;
+  syncStale: boolean;
+  lastRunAt: string | null;
+  openAlerts: number;
+  errorLatest: number | null;
+}) => (
+  <div className="flex items-center gap-1.5 text-[11px]">
+    <Link
+      to="/system"
+      className={cn(
+        "flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:text-foreground",
+        errCount > 0
+          ? "text-red-600"
+          : okCount === total && total > 0
+            ? "text-emerald-600"
+            : "text-muted-foreground",
+      )}
+    >
+      <Activity className="size-3" />
+      <span className="tabular-nums">
+        {okCount}/{total}
+      </span>
+    </Link>
+    <Link
+      to="/system"
+      className={cn(
+        "flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:text-foreground",
+        syncStale ? "text-red-600" : "text-muted-foreground",
+      )}
+      title={
+        syncStale
+          ? "The nightly cron may not be running - check the Vault secrets"
+          : undefined
+      }
+    >
+      <RefreshCw className="size-3" />
+      <span className="tabular-nums">{timeAgo(lastRunAt)}</span>
+    </Link>
+    <Link
+      to="/alerts"
+      className={cn(
+        "flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:text-foreground",
+        openAlerts > 0 ? "text-red-600" : "text-muted-foreground",
+      )}
+    >
+      <Bell className="size-3" />
+      <span className="tabular-nums">{openAlerts}</span>
+    </Link>
+    {errorLatest !== null && (
+      <Link
+        to="/system"
+        className={cn(
+          "flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:text-foreground",
+          errorLatest > 0 ? "text-red-600" : "text-muted-foreground",
+        )}
+      >
+        <AlertOctagon className="size-3" />
+        <span className="tabular-nums">{compact(errorLatest)}</span>
+      </Link>
+    )}
   </div>
 );
 
-/** Hero kart arka planında ghost sparkline. */
-const HeroSpark = ({
-  data,
-  color,
+/** Kravio Status kolonu karşılığı - connector sağlığı rozeti. */
+const HealthBadge = ({
+  health,
 }: {
-  data: { date: string; value: number }[];
-  color: string;
+  health: "ok" | "error" | "pending";
 }) => {
-  if (!data || data.length < 2) return null;
-  const W = 100;
-  const H = 30;
-  const values = data.map((p) => p.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = max - min || 1;
-  const dx = W / (data.length - 1);
-  const pts = data
-    .map((p, i) => {
-      const x = i * dx;
-      const y = H - ((p.value - min) / span) * H;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
-    })
-    .join(" ");
-  const area = `${pts} L${W},${H} L0,${H} Z`;
+  const map = {
+    ok: { label: "Sağlıklı", cls: "text-emerald-600" },
+    error: { label: "Hata", cls: "text-red-600" },
+    pending: { label: "Bekliyor", cls: "text-amber-600" },
+  } as const;
+  const { label, cls } = map[health];
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 100 30"
-      preserveAspectRatio="none"
-      className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] w-full opacity-[0.25]"
-    >
-      <defs>
-        <linearGradient id="hero-spark-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={0.7} />
-          <stop offset="100%" stopColor={color} stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#hero-spark-grad)" />
-      <path
-        d={pts}
-        stroke={color}
-        strokeWidth={1.5}
-        fill="none"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
+    <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", cls)}>
+      <span className="size-1.5 rounded-full bg-current" />
+      {label}
+    </span>
   );
 };
