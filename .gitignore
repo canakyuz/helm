@@ -15,6 +15,7 @@ dist/
 .zed
 .idea
 .claude
+.superpowers/
 
 # Tek seferlik codemod / debug artiklari. Oturum icinde uretilip diskte kalan
 # bu dosyalar `git add -A` ile sessizce commit'e giriyordu - public repo'da
