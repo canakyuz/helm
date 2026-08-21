@@ -58,11 +58,11 @@ interface ErrorsPanelProps {
   isAll: boolean;
 }
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("en-US");
+const fmt = (iso: string) => new Date(iso).toLocaleString("tr-TR");
 
 const levelColor = (level: string) => {
   if (level === "fatal" || level === "error") return "text-destructive";
-  if (level === "warning") return "text-amber-500";
+  if (level === "warning") return "text-amber-600 dark:text-amber-400";
   return "text-muted-foreground";
 };
 
@@ -150,7 +150,7 @@ export const ErrorsPanel = ({
               onClick={load}
               disabled={loading}
               className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-50"
-              aria-label="Refresh"
+              aria-label="Yenile"
             >
               <RefreshCw
                 className={cn("size-3.5", loading && "animate-spin")}
@@ -173,9 +173,9 @@ export const ErrorsPanel = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="h-7 px-2 text-xs">Errors</TableHead>
+                  <TableHead className="h-7 px-2 text-xs">Hata</TableHead>
                   {isAll && (
-                    <TableHead className="h-7 px-2 text-xs">Project</TableHead>
+                    <TableHead className="h-7 px-2 text-xs">Proje</TableHead>
                   )}
                   <TableHead className="h-7 px-2 text-right text-xs">
                     Olay
@@ -254,24 +254,24 @@ export const ErrorsPanel = ({
                     <div className="text-xs uppercase tracking-wide text-muted-foreground">
                       Kaynak
                     </div>
-                    <code className="block break-all rounded-md border bg-muted/50 p-2 text-xs">
+                    <code className="block break-all rounded-md border bg-muted p-2 text-xs">
                       {selected.culprit}
                     </code>
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <KV label="Events" value={compact(selected.count)} />
+                  <KV label="Olaylar" value={compact(selected.count)} />
                   <KV
                     label="Etkilenen"
-                    value={`${compact(selected.user_count)} people`}
+                    value={`${compact(selected.user_count)} kişi`}
                     icon={<UsersIcon className="size-3" />}
                   />
                   <KV label="Short ID" value={selected.short_id} mono />
-                  <KV label="Status" value={selected.status} />
-                  <KV label="First seen" value={fmt(selected.first_seen)} />
-                  <KV label="Last seen" value={fmt(selected.last_seen)} />
+                  <KV label="Durum" value={selected.status} />
+                  <KV label="İlk görülme" value={fmt(selected.first_seen)} />
+                  <KV label="Son görülme" value={fmt(selected.last_seen)} />
                   <KV
-                    label="Project"
+                    label="Proje"
                     value={projectName(selected.project_id)}
                   />
                   {selected.type && <KV label="Tip" value={selected.type} mono />}
@@ -281,7 +281,7 @@ export const ErrorsPanel = ({
                     <div className="text-xs uppercase tracking-wide text-muted-foreground">
                       Mesaj
                     </div>
-                    <pre className="max-h-48 overflow-auto rounded-md border bg-muted/50 p-2 text-xs">
+                    <pre className="max-h-48 overflow-auto rounded-md border bg-muted p-2 text-xs">
                       {selected.value}
                     </pre>
                   </div>
@@ -294,7 +294,7 @@ export const ErrorsPanel = ({
                       rel="noreferrer"
                     >
                       <ExternalLink className="size-4" />
-                      <span className="ml-2">Open in Sentry</span>
+                      <span className="ml-2">Sentry'de aç</span>
                     </a>
                   </Button>
                 </div>

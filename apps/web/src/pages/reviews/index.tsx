@@ -37,8 +37,8 @@ const stars = (rating: number | null) => {
 const starColor = (r: number | null) => {
   if (!r) return "text-muted-foreground";
   if (r <= 2) return "text-destructive";
-  if (r <= 3) return "text-amber-500";
-  return "text-emerald-500";
+  if (r <= 3) return "text-amber-600 dark:text-amber-400";
+  return "text-emerald-600 dark:text-emerald-400";
 };
 
 export const ReviewsPage = () => {
@@ -136,12 +136,12 @@ export const ReviewsPage = () => {
         { body: {} },
       );
       if (error) throw error;
-      toast.success("Reviews updated", {
-        description: `${data?.reviews ?? 0} reviews fetched.`,
+      toast.success("Yorumlar güncellendi", {
+        description: `${data?.reviews ?? 0} yorum çekildi.`,
       });
       invalidate({ resource: "reviews", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Update failed", {
+      toast.error("Güncelleme başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -180,7 +180,7 @@ export const ReviewsPage = () => {
           loading={query.isLoading}
         />
         <StatCard
-          title="Total reviews"
+          title="Toplam yorum"
           value={platformFiltered.length}
           loading={query.isLoading}
         />
@@ -192,7 +192,7 @@ export const ReviewsPage = () => {
       </div>
 
       {/* E) Platform segmented control */}
-      <div className="flex gap-1 rounded-md border bg-muted/30 p-1 w-fit">
+      <div className="flex gap-1 rounded-md border bg-muted p-1 w-fit">
         {(["all", "appstore", "playstore"] as const).map((p) => (
           <Button
             key={p}
@@ -200,7 +200,7 @@ export const ReviewsPage = () => {
             size="sm"
             onClick={() => setPlatform(p)}
           >
-            {p === "all" ? "All" : p === "appstore" ? "iOS" : "Android"}
+            {p === "all" ? "Tümü" : p === "appstore" ? "iOS" : "Android"}
             <span className="ml-2 text-xs opacity-70">
               {p === "all" ? reviews.length : reviews.filter((r) => r.source === p).length}
             </span>
@@ -210,7 +210,7 @@ export const ReviewsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Rating distribution</CardTitle>
+          <CardTitle>Puan dağılımı</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {[5, 4, 3, 2, 1].map((r) => {
@@ -236,7 +236,7 @@ export const ReviewsPage = () => {
                     style={{ width: `${Math.max(widthPct, 1)}%` }}
                   />
                 </div>
-                <span className="w-24 text-right font-mono text-xs tabular-nums text-muted-foreground">
+                <span className="w-24 text-right text-xs tabular-nums text-muted-foreground">
                   {count} · %{pct.toFixed(1)}
                 </span>
               </div>
@@ -255,7 +255,7 @@ export const ReviewsPage = () => {
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search title, content, author…"
+                placeholder="Başlık, içerik, yazar ara…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="pl-8"
@@ -266,7 +266,7 @@ export const ReviewsPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All ratings</SelectItem>
+                <SelectItem value="all">Tüm puanlar</SelectItem>
                 <SelectItem value="5">5 ★</SelectItem>
                 <SelectItem value="4">4 ★</SelectItem>
                 <SelectItem value="3">3 ★</SelectItem>
@@ -281,13 +281,13 @@ export const ReviewsPage = () => {
               icon={<MessageSquare className="size-6" />}
               title={
                 reviews.length === 0
-                  ? "Yorum yok"
-                  : "No reviews match the filter"
+                  ? "Henüz yorum yok"
+                  : "Filtreye uyan kayıt yok"
               }
               description={
                 reviews.length === 0
-                  ? "Property → Edit → enter the App Store ID / Package ID, then Settings → Integrations → connect App Store Connect or Google Play Developer. The cron pulls every 30 min; use Refresh if you want it now."
-                  : "Loosen the filter or search."
+                  ? "Property → Düzenle → App Store ID / Package ID gir, sonra Ayarlar → Entegrasyonlar → App Store Connect veya Google Play Developer bağla. Cron 30 dakikada bir çeker; hemen istiyorsan Yenile'yi kullan."
+                  : "Filtreyi gevşet veya aramayı değiştir."
               }
               compact
             />
@@ -302,7 +302,7 @@ export const ReviewsPage = () => {
                         <span className="font-medium">{r.title ?? ""}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Badge variant="outline" className="text-[10px] uppercase">
+                        <Badge variant="outline" className="text-[10px]">
                           {r.source === "appstore" ? "iOS" : "Android"}
                         </Badge>
                         {r.app_version && (
@@ -311,7 +311,7 @@ export const ReviewsPage = () => {
                           </Badge>
                         )}
                         {r.territory && (
-                          <Badge variant="secondary" className="text-[10px] uppercase">
+                          <Badge variant="secondary" className="text-[10px]">
                             {r.territory}
                           </Badge>
                         )}
@@ -362,7 +362,7 @@ export const ReviewsPage = () => {
                           size="sm"
                           onClick={() => setReplyTarget(r)}
                           disabled={r.source_method === "rss"}
-                          title={r.source_method === "rss" ? "RSS reviews cannot be replied to" : undefined}
+                          title={r.source_method === "rss" ? "RSS yorumlarına yanıt verilemez" : undefined}
                         >
                           Yanıtla
                         </Button>

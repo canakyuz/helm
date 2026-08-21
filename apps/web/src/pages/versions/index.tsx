@@ -58,17 +58,17 @@ export const VersionsPage = () => {
         { body: {} },
       );
       if (error) throw error;
-      toast.success("Versions updated", {
+      toast.success("Sürümler güncellendi", {
         description: `${data?.ios ?? 0} iOS, ${data?.android ?? 0} Android - toplam ${data?.versions ?? 0}`,
       });
       if (data?.errors?.length) {
-        toast.warning("Some versions could not be fetched", {
+        toast.warning("Bazı sürümler çekilemedi", {
           description: data.errors.slice(0, 2).join("\n"),
         });
       }
       invalidate({ resource: "app_versions", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Update failed", {
+      toast.error("Güncelleme başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -109,8 +109,8 @@ export const VersionsPage = () => {
   const lastUpdateRel = lastUpdate
     ? (() => {
         const days = Math.floor((Date.now() - lastUpdate) / 86_400_000);
-        if (days === 0) return "today";
-        if (days === 1) return "yesterday";
+        if (days === 0) return "bugün";
+        if (days === 1) return "dün";
         if (days < 30) return `${days} g`;
         return `${Math.floor(days / 30)} ay`;
       })()
@@ -119,7 +119,7 @@ export const VersionsPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Versions</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Sürümler</h1>
         <Button onClick={handleRefresh} disabled={refreshing}>
           <RefreshCw
             className={refreshing ? "size-4 animate-spin" : "size-4"}
@@ -131,23 +131,23 @@ export const VersionsPage = () => {
       {/* KPI cluster */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <VerKpi
-          label="iOS total"
+          label="iOS toplam"
           value={iosCount}
           icon={<Apple className="size-3.5" />}
         />
         <VerKpi
-          label="Android total"
+          label="Android toplam"
           value={androidCount}
           icon={<Smartphone className="size-3.5" />}
           tone="emerald"
         />
         <VerKpi
-          label="Latest iOS"
+          label="Son iOS"
           value={latestIos?.version ? `v${latestIos.version}` : "-"}
           icon={<Package className="size-3.5" />}
         />
         <VerKpi
-          label={`Last updated (${lastUpdateRel})`}
+          label={`Son güncelleme (${lastUpdateRel})`}
           value={latestAndroid?.version ? `v${latestAndroid.version}` : "-"}
           icon={<Package className="size-3.5" />}
           tone="primary"
@@ -160,7 +160,7 @@ export const VersionsPage = () => {
             <Globe className="size-4" />
             <span className="ml-2">
               Tümü
-              <span className="ml-1 font-mono text-xs text-muted-foreground tabular-nums">
+              <span className="ml-1 text-xs text-muted-foreground tabular-nums">
                 {versions.length}
               </span>
             </span>
@@ -169,7 +169,7 @@ export const VersionsPage = () => {
             <Apple className="size-4" />
             <span className="ml-2">
               iOS
-              <span className="ml-1 font-mono text-xs text-muted-foreground tabular-nums">
+              <span className="ml-1 text-xs text-muted-foreground tabular-nums">
                 {iosCount}
               </span>
             </span>
@@ -178,7 +178,7 @@ export const VersionsPage = () => {
             <Smartphone className="size-4" />
             <span className="ml-2">
               Android
-              <span className="ml-1 font-mono text-xs text-muted-foreground tabular-nums">
+              <span className="ml-1 text-xs text-muted-foreground tabular-nums">
                 {androidCount}
               </span>
             </span>
@@ -190,10 +190,10 @@ export const VersionsPage = () => {
             <CardHeader>
               <CardTitle className="text-base">
                 {tab === "ios"
-                  ? "App Store versions"
+                  ? "App Store sürümleri"
                   : tab === "android"
-                    ? "Play Store versions"
-                    : "All versions"}
+                    ? "Play Store sürümleri"
+                    : "Tüm sürümler"}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -202,22 +202,22 @@ export const VersionsPage = () => {
                   icon={<Package className="size-6" />}
                   title={
                     versions.length === 0
-                      ? "No versions"
-                      : `${tab === "ios" ? "iOS" : "Android"} has no versions`
+                      ? "Henüz sürüm yok"
+                      : `${tab === "ios" ? "iOS" : "Android"} için sürüm yok`
                   }
                   description={
                     versions.length === 0 ? (
                       <>
-                        <strong>Settings → Integrations</strong> → App Store
+                        <strong>Ayarlar → Entegrasyonlar</strong> → App Store
                         Connect veya Google Play Developer bağla, ya da Property
-                        → <strong>Edit</strong> ile{" "}
+                        → <strong>Düzenle</strong> ile{" "}
                         <code>app_store_id</code> /{" "}
                         <code>google_play_id</code> gir. Sonra{" "}
-                        <strong>Refresh</strong> - iOS iTunes lookup, Android
+                        <strong>Yenile</strong> - iOS iTunes lookup, Android
                         Play Store scrape.
                       </>
                     ) : (
-                      "It may be on the other tab, or there is no connection for this store."
+                      "Diğer sekmede olabilir ya da bu mağaza için bağlantı yok."
                     )
                   }
                   compact
@@ -253,7 +253,7 @@ export const VersionsPage = () => {
                               : ""}
                           </span>
                           {expiresInDays !== null && expiresInDays > 0 && (
-                            <span className="text-xs text-amber-500">
+                            <span className="text-xs text-amber-600 dark:text-amber-400">
                               {expiresInDays}g sonra dolar
                             </span>
                           )}
@@ -279,14 +279,14 @@ export const VersionsPage = () => {
 const StatusBadge = ({ status }: { status: AppVersion["status"] }) => {
   if (!status) return null;
   const config: Record<string, { label: string; cls: string }> = {
-    live: { label: "CANLI", cls: "border-emerald-500/30 bg-emerald-500/15 text-emerald-500" },
-    in_review: { label: "IN REVIEW", cls: "border-amber-500/30 bg-amber-500/15 text-amber-500" },
-    ready: { label: "HAZIR", cls: "border-blue-500/30 bg-blue-500/15 text-blue-500" },
-    testflight: { label: "TESTFLIGHT", cls: "border-violet-500/30 bg-violet-500/15 text-violet-500" },
+    live: { label: "CANLI", cls: "border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" },
+    in_review: { label: "İNCELEMEDE", cls: "border-amber-600/25 bg-amber-500/10 text-amber-700 dark:text-amber-400" },
+    ready: { label: "HAZIR", cls: "border-blue-600/25 bg-blue-500/10 text-blue-700 dark:text-blue-400" },
+    testflight: { label: "TESTFLIGHT", cls: "border-violet-600/25 bg-violet-500/10 text-violet-700 dark:text-violet-400" },
     rejected: { label: "RED", cls: "border-destructive/30 bg-destructive/15 text-destructive" },
-    expired: { label: "EXPIRED", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
-    removed: { label: "KALDIRILDI", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
-    unknown: { label: "-", cls: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" },
+    expired: { label: "SÜRESİ DOLDU", cls: "border-muted-foreground/30 bg-muted text-muted-foreground" },
+    removed: { label: "KALDIRILDI", cls: "border-muted-foreground/30 bg-muted text-muted-foreground" },
+    unknown: { label: "-", cls: "border-muted-foreground/30 bg-muted text-muted-foreground" },
   };
   const c = config[status] ?? config.unknown;
   return <Badge className={`${c.cls} text-[10px]`}>{c.label}</Badge>;
@@ -295,14 +295,14 @@ const StatusBadge = ({ status }: { status: AppVersion["status"] }) => {
 const SourceBadge = ({ source }: { source: "ios" | "android" }) => {
   if (source === "ios") {
     return (
-      <Badge className="border-foreground/20 bg-foreground/5">
+      <Badge className="border-border bg-muted">
         <Apple className="size-3" />
         <span className="ml-1">iOS</span>
       </Badge>
     );
   }
   return (
-    <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+    <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
       <Smartphone className="size-3" />
       <span className="ml-1">Android</span>
     </Badge>
@@ -322,17 +322,17 @@ const VerKpi = ({
 }) => {
   const toneCls =
     tone === "emerald"
-      ? "text-emerald-500"
+      ? "text-emerald-600 dark:text-emerald-400"
       : tone === "primary"
         ? "text-primary"
         : "text-foreground";
   return (
-    <div className="rounded-lg border bg-card/40 p-3">
+    <div className="rounded-lg border bg-card p-3">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
         {icon}
         {label}
       </div>
-      <div className={`mt-1 font-mono text-2xl tabular-nums ${toneCls}`}>
+      <div className={`mt-1 text-2xl tabular-nums ${toneCls}`}>
         {value}
       </div>
     </div>

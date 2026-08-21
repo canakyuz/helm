@@ -250,13 +250,13 @@ export const UsersPage = () => {
   if (isAll) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Kullanıcılar</h1>
         <Card>
           <CardContent>
             <EmptyState
               icon={<UsersIcon className="size-6" />}
-              title="Pick a project"
-              description="Users are per-property. Use the switcher at the top of the sidebar to pick which one to load the list for."
+              title="Bir proje seç"
+              description="Kullanıcılar property bazlıdır. Listeyi hangi proje için yükleyeceğini kenar çubuğunun üstündeki seçiciden belirle."
             />
           </CardContent>
         </Card>
@@ -267,11 +267,11 @@ export const UsersPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Kullanıcılar</h1>
         <div className="text-xs text-muted-foreground">
           {stats.total > 0 && (
             <>
-              <span className="font-mono tabular-nums">{stats.total}</span>{" "}
+              <span className="tabular-nums">{stats.total}</span>{" "}
               toplam
             </>
           )}
@@ -281,13 +281,13 @@ export const UsersPage = () => {
       {/* KPI cluster */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <KpiPill
-          label="Total"
+          label="Toplam"
           value={stats.total}
           icon={<UsersIcon className="size-3.5" />}
         pending={loading && users.length === 0}
         />
         <KpiPill
-          label={`New (${NEW_DAYS}g)`}
+          label={`Yeni (${NEW_DAYS}g)`}
           value={stats.new}
           icon={<CalendarPlus className="size-3.5" />}
           tone="emerald"
@@ -308,7 +308,7 @@ export const UsersPage = () => {
         pending={loading && users.length === 0}
         />
         <KpiPill
-          label="Banned"
+          label="Banlı"
           value={stats.banned}
           icon={<Ban className="size-3.5" />}
           tone={stats.banned > 0 ? "destructive" : undefined}
@@ -336,15 +336,15 @@ export const UsersPage = () => {
                     {tabIcon(t)}
                     <span className="ml-1.5">
                       {t === "all"
-                        ? "All"
+                        ? "Tümü"
                         : t === "new"
-                          ? "New"
+                          ? "Yeni"
                           : t === "active"
                             ? "Aktif"
                             : t === "inactive"
                               ? "Pasif"
                               : t === "banned"
-                                ? "Banned"
+                                ? "Banlı"
                                 : "Premium"}
                     </span>
                   </TabsTrigger>
@@ -357,7 +357,7 @@ export const UsersPage = () => {
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by email or UUID…"
+                  placeholder="E-posta veya UUID ile ara…"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   className="pl-8"
@@ -371,9 +371,9 @@ export const UsersPage = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="created_at">Signup date</SelectItem>
-                  <SelectItem value="last_sign_in_at">Last sign-in</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="created_at">Kayıt tarihi</SelectItem>
+                  <SelectItem value="last_sign_in_at">Son giriş</SelectItem>
+                  <SelectItem value="email">E-posta</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -402,13 +402,13 @@ export const UsersPage = () => {
                 icon={<UsersIcon className="size-6" />}
                 title={
                   users.length === 0
-                    ? "No users"
-                    : "Nothing matches this filter"
+                    ? "Henüz kullanıcı yok"
+                    : "Filtreye uyan kayıt yok"
                 }
                 description={
                   users.length === 0
-                    ? "Property → no Supabase integration, or Auth is empty."
-                    : "Change the tab or the search."
+                    ? "Property'de Supabase entegrasyonu yok ya da Auth boş."
+                    : "Filtreyi gevşet veya aramayı değiştir."
                 }
                 compact
               />
@@ -419,11 +419,11 @@ export const UsersPage = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-10" />
-                        <TableHead>User</TableHead>
+                        <TableHead>Kullanıcı</TableHead>
                         <TableHead>Konum</TableHead>
                         <TableHead>Etiketler</TableHead>
-                        <TableHead className="text-right">Signup</TableHead>
-                        <TableHead className="text-right">Last sign-in</TableHead>
+                        <TableHead className="text-right">Kayıt</TableHead>
+                        <TableHead className="text-right">Son giriş</TableHead>
                         <TableHead className="w-16" />
                       </TableRow>
                     </TableHeader>
@@ -491,7 +491,7 @@ export const UsersPage = () => {
                             </TableCell>
                             <TableCell className="whitespace-nowrap py-2 text-right text-xs text-muted-foreground">
                               <div>{fmt(u.created_at)}</div>
-                              <div className="font-mono text-[10px]">
+                              <div className="text-[10px] tabular-nums">
                                 {fmtRelative(u.created_at)}
                               </div>
                             </TableCell>
@@ -499,7 +499,7 @@ export const UsersPage = () => {
                               {u.last_sign_in_at ? (
                                 <>
                                   <div>{fmt(u.last_sign_in_at)}</div>
-                                  <div className="font-mono text-[10px]">
+                                  <div className="text-[10px] tabular-nums">
                                     {fmtRelative(u.last_sign_in_at)}
                                   </div>
                                 </>
@@ -517,7 +517,7 @@ export const UsersPage = () => {
                                 asChild
                                 variant="ghost"
                                 size="icon-sm"
-                                aria-label="Detail"
+                                aria-label="Detay"
                               >
                                 <Link to={`/users/${u.id}`}>
                                   <ExternalLink className="size-4" />
@@ -591,16 +591,16 @@ const KpiPill = ({
 }) => {
   const toneCls =
     tone === "emerald"
-      ? "text-emerald-500"
+      ? "text-emerald-600 dark:text-emerald-400"
       : tone === "amber"
-        ? "text-amber-500"
+        ? "text-amber-600 dark:text-amber-400"
         : tone === "destructive"
           ? "text-destructive"
           : tone === "primary"
             ? "text-primary"
             : "text-foreground";
   return (
-    <div className="rounded-lg border bg-card/40 p-3">
+    <div className="rounded-lg border bg-card p-3">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
         {icon}
         {label}
@@ -609,7 +609,7 @@ const KpiPill = ({
           cevap "henuz bilmiyoruz". Ayni ayrimi mobilde de yapiyoruz. */}
       <div
         className={cn(
-          "mt-1 font-mono text-2xl tabular-nums",
+          "mt-1 text-2xl tabular-nums",
           pending ? "text-muted-foreground/40" : toneCls,
         )}
       >
@@ -628,12 +628,12 @@ const Avatar = ({ user }: { user: ProjectUser }) => {
   return (
     <div
       className={cn(
-        "flex size-8 items-center justify-center rounded-full font-mono text-xs font-medium ring-1 ring-foreground/10",
+        "flex size-8 items-center justify-center rounded-full font-mono text-xs font-medium ring-1 ring-border",
         user.banned && "ring-destructive/40 opacity-50",
       )}
       style={{
-        background: `hsl(${hue} 60% 25% / 0.8)`,
-        color: `hsl(${hue} 80% 75%)`,
+        background: `hsl(${hue} 60% 92%)`,
+        color: `hsl(${hue} 55% 32%)`,
       }}
     >
       {initial(user)}
@@ -652,7 +652,7 @@ const UserBadges = ({ user }: { user: ProjectUser }) => (
       </Badge>
     )}
     {user.premium && (
-      <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500 text-[10px]">
+      <Badge className="border-amber-600/25 bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px]">
         <Sparkles className="mr-1 size-2.5" />
         premium{user.premium_tier ? ` T${user.premium_tier}` : ""}
       </Badge>
@@ -680,8 +680,8 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
         <CardContent>
           <EmptyState
             icon={<UserCog className="size-6" />}
-            title="Pick a user"
-            description="Click a row in the left list - summary, labels and quick actions open here. Use the ➜ icon for the detail page."
+            title="Bir kullanıcı seç"
+            description="Soldaki listeden bir satıra tıkla - özet, etiketler ve hızlı aksiyonlar burada açılır. Detay sayfası için ➜ ikonunu kullan."
             compact
           />
         </CardContent>
@@ -709,7 +709,7 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
         <UserBadges user={user} />
 
         <dl className="grid grid-cols-[110px_1fr] gap-y-2 text-xs">
-          <dt className="text-muted-foreground">Signup</dt>
+          <dt className="text-muted-foreground">Kayıt</dt>
           <dd>
             {new Date(user.created_at).toLocaleString("en-US")}{" "}
             <span className="text-muted-foreground">
@@ -717,7 +717,7 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
             </span>
           </dd>
 
-          <dt className="text-muted-foreground">Last sign-in</dt>
+          <dt className="text-muted-foreground">Son giriş</dt>
           <dd>
             {user.last_sign_in_at ? (
               <>
@@ -727,11 +727,11 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
                 </span>
               </>
             ) : (
-              <span className="text-muted-foreground">never</span>
+              <span className="text-muted-foreground">hiç</span>
             )}
           </dd>
 
-          <dt className="text-muted-foreground">Email confirmed</dt>
+          <dt className="text-muted-foreground">E-posta onayı</dt>
           <dd>
             {user.email_confirmed_at
               ? new Date(user.email_confirmed_at).toLocaleDateString("en-US")
@@ -754,8 +754,8 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
               <dd>
                 {user.premium_tier ? `Tier ${user.premium_tier}` : "aktif"}
                 {user.premium_expires_at
-                  ? ` · ${new Date(user.premium_expires_at).toLocaleDateString("en-US")} end`
-                  : " · permanent"}
+                  ? ` · ${new Date(user.premium_expires_at).toLocaleDateString("en-US")} bitiş`
+                  : " · süresiz"}
               </dd>
             </>
           )}
@@ -769,7 +769,7 @@ const PreviewPanel = ({ user }: { user: ProjectUser | null }) => {
         <Button asChild className="w-full" size="sm">
           <Link to={`/users/${user.id}`}>
             <Shield className="size-4" />
-            <span className="ml-2">Detail & actions</span>
+            <span className="ml-2">Detay & aksiyonlar</span>
           </Link>
         </Button>
       </CardContent>

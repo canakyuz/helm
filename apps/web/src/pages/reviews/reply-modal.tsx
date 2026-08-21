@@ -29,11 +29,11 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
     if (!review) return;
     const trimmed = body.trim();
     if (trimmed.length === 0) {
-      toast.error("The reply cannot be empty");
+      toast.error("Yanıt boş olamaz");
       return;
     }
     if (trimmed.length > MAX) {
-      toast.error(`The reply must be at most ${MAX} characters`);
+      toast.error(`Yanıt en fazla ${MAX} karakter olabilir`);
       return;
     }
     setSending(true);
@@ -46,13 +46,13 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
       if ((data as { ok?: boolean })?.ok !== true) {
         throw new Error((data as { error?: string })?.error ?? "Bilinmeyen hata");
       }
-      toast.success("Reply sent");
+      toast.success("Yanıt gönderildi");
       onReplied();
       onOpenChange(false);
       setBody("");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      toast.error("Could not send the reply", { description: msg });
+      toast.error("Yanıt gönderilemedi", { description: msg });
     } finally {
       setSending(false);
     }
@@ -63,19 +63,19 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {review?.developer_response ? "Edit reply" : "Write a reply"}
+            {review?.developer_response ? "Yanıtı düzenle" : "Yanıt yaz"}
           </DialogTitle>
         </DialogHeader>
         {review && (
           <div className="space-y-3">
-            <div className="rounded-md border bg-muted/30 p-3 text-sm">
+            <div className="rounded-md border bg-muted p-3 text-sm">
               <div className="font-medium">{review.title ?? "-"}</div>
               <div className="mt-1 text-muted-foreground">{review.body ?? "-"}</div>
             </div>
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Your reply…"
+              placeholder="Yanıtın…"
               rows={4}
               maxLength={MAX}
             />
@@ -89,7 +89,7 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
             İptal
           </Button>
           <Button onClick={handleSubmit} disabled={sending}>
-            {sending ? "Sending…" : "Send"}
+            {sending ? "Gönderiliyor…" : "Gönder"}
           </Button>
         </DialogFooter>
       </DialogContent>

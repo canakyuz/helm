@@ -152,7 +152,7 @@ export const GrowthPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Growth</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Büyüme</h1>
         <RangeSelect value={range} onChange={setRange} />
       </div>
 
@@ -187,7 +187,7 @@ export const GrowthPage = () => {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{`Daily active users - last ${range} days`}</CardTitle>
+            <CardTitle>{`Günlük aktif kullanıcı - son ${range} gün`}</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart
@@ -199,7 +199,7 @@ export const GrowthPage = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{`New users - last ${range} days`}</CardTitle>
+            <CardTitle>{`Yeni kullanıcılar - son ${range} gün`}</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart
@@ -213,7 +213,7 @@ export const GrowthPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>{`Total user growth - last ${range} days`}</CardTitle>
+          <CardTitle>{`Toplam kullanıcı büyümesi - son ${range} gün`}</CardTitle>
         </CardHeader>
         <CardContent>
           <TrendChart
@@ -244,8 +244,8 @@ export const GrowthPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="app_downloads">Downloads</SelectItem>
-                <SelectItem value="app_revenue">Store revenue</SelectItem>
+                <SelectItem value="app_downloads">İndirme</SelectItem>
+                <SelectItem value="app_revenue">Mağaza geliri</SelectItem>
               </SelectContent>
             </Select>
           </CardAction>
@@ -271,8 +271,8 @@ export const GrowthPage = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Country</TableHead>
-                      <TableHead className="text-right">Value</TableHead>
+                      <TableHead>Ülke</TableHead>
+                      <TableHead className="text-right">Değer</TableHead>
                       <TableHead className="text-right">Pay</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -287,10 +287,10 @@ export const GrowthPage = () => {
                             {getCountryGeo(code)?.name ?? code}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right font-mono tabular-nums">
+                        <TableCell className="text-right tabular-nums">
                           {compact(value)}
                         </TableCell>
-                        <TableCell className="text-right font-mono tabular-nums text-xs text-muted-foreground">
+                        <TableCell className="text-right tabular-nums text-xs text-muted-foreground">
                           {grandTotal > 0
                             ? `${((value / grandTotal) * 100).toFixed(1)}%`
                             : "-"}
@@ -448,8 +448,8 @@ const PostHogGeoCard = ({
           <div className="space-y-1">
             <div className="grid grid-cols-[24px_1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
               <span />
-              <span>Country</span>
-              <span className="text-right">User</span>
+              <span>Ülke</span>
+              <span className="text-right">Kullanıcı</span>
               <span className="text-right">Pay</span>
             </div>
             {countries.slice(0, 30).map((c) => {
@@ -461,7 +461,7 @@ const PostHogGeoCard = ({
                   <button
                     type="button"
                     onClick={() => toggleCountry(c.country)}
-                    className="grid w-full grid-cols-[24px_1fr_80px_60px] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted/50"
+                    className="grid w-full grid-cols-[24px_1fr_80px_60px] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
                   >
                     {isOpen ? (
                       <ChevronDown className="size-3.5 text-muted-foreground" />
@@ -476,17 +476,17 @@ const PostHogGeoCard = ({
                         {c.country_name ?? c.country}
                       </span>
                     </span>
-                    <span className="text-right font-mono text-sm tabular-nums">
+                    <span className="text-right text-sm tabular-nums">
                       {compact(c.users)}
                     </span>
-                    <span className="text-right font-mono text-xs tabular-nums text-muted-foreground">
+                    <span className="text-right text-xs tabular-nums text-muted-foreground">
                       %{pct.toFixed(1)}
                     </span>
                   </button>
 
                   {/* Drill-down: eyalet + şehir */}
                   {isOpen && (
-                    <div className="ml-6 mb-2 mt-1 rounded-md border bg-muted/20 p-2">
+                    <div className="ml-6 mb-2 mt-1 rounded-md border bg-muted p-2">
                       {regionLoading === c.country ? (
                         <div className="py-2 text-center text-xs text-muted-foreground">
                           Yükleniyor…
@@ -499,8 +499,8 @@ const PostHogGeoCard = ({
                         <div className="space-y-0.5">
                           <div className="grid grid-cols-[1fr_1fr_70px] gap-2 px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                             <span>Eyalet</span>
-                            <span>City</span>
-                            <span className="text-right">User</span>
+                            <span>Şehir</span>
+                            <span className="text-right">Kullanıcı</span>
                           </div>
                           {sub.slice(0, 20).map((r, i) => (
                             <div
@@ -513,7 +513,7 @@ const PostHogGeoCard = ({
                               <span className="truncate text-muted-foreground">
                                 {r.city}
                               </span>
-                              <span className="text-right font-mono tabular-nums">
+                              <span className="text-right tabular-nums">
                                 {compact(r.users)}
                               </span>
                             </div>
@@ -551,19 +551,19 @@ interface AcqRow {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  direct: "Direct",
-  search: "Search",
+  direct: "Doğrudan",
+  search: "Arama",
   social: "Sosyal",
-  store: "Store",
+  store: "Mağaza",
   referral: "Referans",
 };
 
 const TYPE_COLORS: Record<string, string> = {
   direct: "bg-muted text-foreground",
-  search: "bg-blue-500/15 text-blue-500",
-  social: "bg-purple-500/15 text-purple-500",
-  store: "bg-emerald-500/15 text-emerald-500",
-  referral: "bg-amber-500/15 text-amber-500",
+  search: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
+  social: "bg-purple-500/10 text-purple-700 dark:text-purple-400",
+  store: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+  referral: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
 };
 
 const AcquisitionCard = ({
@@ -680,7 +680,7 @@ const AcquisitionCard = ({
                   <span
                     key={type}
                     className={cn(
-                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono",
+                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 tabular-nums",
                       TYPE_COLORS[type] ?? "bg-muted",
                     )}
                   >
@@ -693,8 +693,8 @@ const AcquisitionCard = ({
             {/* Top 20 referrer */}
             <div className="space-y-1">
               <div className="grid grid-cols-[1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                <span>Source</span>
-                <span className="text-right">User</span>
+                <span>Kaynak</span>
+                <span className="text-right">Kullanıcı</span>
                 <span className="text-right">Pay</span>
               </div>
               {rows.slice(0, 20).map((r) => {
@@ -702,12 +702,12 @@ const AcquisitionCard = ({
                 return (
                   <div
                     key={r.source}
-                    className="grid grid-cols-[1fr_80px_60px] items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted/50"
+                    className="grid grid-cols-[1fr_80px_60px] items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
                   >
                     <div className="flex items-center gap-2 truncate">
                       <span
                         className={cn(
-                          "rounded px-1.5 py-0.5 text-[10px] font-mono",
+                          "rounded px-1.5 py-0.5 text-[10px]",
                           TYPE_COLORS[r.type] ?? "bg-muted",
                         )}
                       >
@@ -715,10 +715,10 @@ const AcquisitionCard = ({
                       </span>
                       <span className="truncate font-medium">{r.source}</span>
                     </div>
-                    <span className="text-right font-mono text-sm tabular-nums">
+                    <span className="text-right text-sm tabular-nums">
                       {compact(r.users)}
                     </span>
-                    <span className="text-right font-mono text-xs tabular-nums text-muted-foreground">
+                    <span className="text-right text-xs tabular-nums text-muted-foreground">
                       %{pct.toFixed(1)}
                     </span>
                   </div>

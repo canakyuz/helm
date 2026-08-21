@@ -111,16 +111,16 @@ export const LogsPage = () => {
       <h1 className="text-2xl font-semibold tracking-tight">Loglar</h1>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard title="Run" value={runs.length} />
+        <StatCard title="Çalıştırma" value={runs.length} />
         <StatCard
-          title="Total metrics"
-          value={totalIngested.toLocaleString("en-US")}
+          title="Toplam metrik"
+          value={totalIngested.toLocaleString("tr-TR")}
         />
         <StatCard
-          title="Average duration"
+          title="Ortalama süre"
           value={`${(avgDuration / 1000).toFixed(1)} sn`}
         />
-        <StatCard title="Error rate" value={`%${errorRate.toFixed(1)}`} />
+        <StatCard title="Hata oranı" value={`%${errorRate.toFixed(1)}`} />
       </div>
 
       <Card>
@@ -132,7 +132,7 @@ export const LogsPage = () => {
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search provider or error message…"
+                placeholder="Sağlayıcı veya hata mesajı ara…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="pl-8"
@@ -143,7 +143,7 @@ export const LogsPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All triggers</SelectItem>
+                <SelectItem value="all">Tüm tetikleyiciler</SelectItem>
                 <SelectItem value="cron">Otomatik (cron)</SelectItem>
                 <SelectItem value="manual">Manuel</SelectItem>
               </SelectContent>
@@ -153,9 +153,9 @@ export const LogsPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="ok">Successful only</SelectItem>
-                <SelectItem value="error">Failing only</SelectItem>
+                <SelectItem value="all">Tüm durumlar</SelectItem>
+                <SelectItem value="ok">Sadece başarılı</SelectItem>
+                <SelectItem value="error">Sadece hatalı</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -165,13 +165,13 @@ export const LogsPage = () => {
               icon={<History className="size-6" />}
               title={
                 runs.length === 0
-                  ? "No sync has run yet"
-                  : "No records match the filter"
+                  ? "Henüz sync çalışmadı"
+                  : "Filtreye uyan kayıt yok"
               }
               description={
                 runs.length === 0
-                  ? "Trigger it manually with Sync from the cockpit, or wait for the hourly cron. Every run is collected here."
-                  : "Loosen the filter or pick All statuses."
+                  ? "Kokpitten Sync ile elle tetikle veya saatlik cron'u bekle. Her çalıştırma burada birikir."
+                  : "Filtreyi gevşet veya Tüm durumlar seç."
               }
               compact
             />
@@ -182,9 +182,9 @@ export const LogsPage = () => {
                   <TableRow>
                     <TableHead>Zaman</TableHead>
                     <TableHead>Tetikleyici</TableHead>
-                    <TableHead className="text-right">Duration</TableHead>
-                    <TableHead className="text-right">Metric</TableHead>
-                    <TableHead className="text-right">OK / errors</TableHead>
+                    <TableHead className="text-right">Süre</TableHead>
+                    <TableHead className="text-right">Metrik</TableHead>
+                    <TableHead className="text-right">OK / hata</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -195,17 +195,17 @@ export const LogsPage = () => {
                       onClick={() => setSelected(r)}
                     >
                       <TableCell className="whitespace-nowrap text-xs">
-                        {new Date(r.started_at).toLocaleString("en-US")}
+                        {new Date(r.started_at).toLocaleString("tr-TR")}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
                           {r.trigger === "cron" ? "otomatik" : "manuel"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right font-mono text-xs">
+                      <TableCell className="text-right text-xs tabular-nums">
                         {duration(r)}
                       </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
+                      <TableCell className="text-right tabular-nums">
                         {r.ingested}
                       </TableCell>
                       <TableCell className="text-right">
@@ -214,7 +214,7 @@ export const LogsPage = () => {
                             {r.ok_count}/{r.error_count + r.ok_count}
                           </Badge>
                         ) : (
-                          <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                          <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                             {r.ok_count} ok
                           </Badge>
                         )}
@@ -268,21 +268,21 @@ export const LogsPage = () => {
             <DialogTitle>
               Senkron detayı -{" "}
               {selected &&
-                new Date(selected.started_at).toLocaleString("en-US")}
+                new Date(selected.started_at).toLocaleString("tr-TR")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
             {details.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No detail.</p>
+              <p className="text-sm text-muted-foreground">Detay yok.</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Provider</TableHead>
-                    <TableHead>Project</TableHead>
-                    <TableHead className="text-right">Metric</TableHead>
-                    <TableHead className="text-right">Country</TableHead>
-                    <TableHead>Result</TableHead>
+                    <TableHead>Sağlayıcı</TableHead>
+                    <TableHead>Proje</TableHead>
+                    <TableHead className="text-right">Metrik</TableHead>
+                    <TableHead className="text-right">Ülke</TableHead>
+                    <TableHead>Sonuç</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -294,10 +294,10 @@ export const LogsPage = () => {
                       <TableCell className="text-xs">
                         {d.project_id ? projectName(d.project_id) : "-"}
                       </TableCell>
-                      <TableCell className="text-right font-mono">
+                      <TableCell className="text-right tabular-nums">
                         {d.points ?? 0}
                       </TableCell>
-                      <TableCell className="text-right font-mono">
+                      <TableCell className="text-right tabular-nums">
                         {d.country_points ?? 0}
                       </TableCell>
                       <TableCell>
@@ -306,7 +306,7 @@ export const LogsPage = () => {
                             {d.error}
                           </span>
                         ) : (
-                          <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                          <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                             ok
                           </Badge>
                         )}

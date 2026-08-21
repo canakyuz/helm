@@ -34,7 +34,7 @@ interface Campaign {
   sent_at: string;
 }
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("en-US");
+const fmt = (iso: string) => new Date(iso).toLocaleString("tr-TR");
 
 const ChannelBadge = ({ channel }: { channel: "mail" | "push" }) => {
   if (channel === "mail") {
@@ -144,26 +144,26 @@ export const CampaignsPage = () => {
       {campaigns.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <SummaryCard label="Kampanya" value={campaigns.length} />
-          <SummaryCard label="Total recipients" value={totals.recipients} />
+          <SummaryCard label="Toplam alıcı" value={totals.recipients} />
           <SummaryCard
-            label="Sent"
+            label="Gönderildi"
             value={totals.sent}
             tone="emerald"
           />
           <SummaryCard
-            label="Open rate"
+            label="Açılma oranı"
             value={`${totals.opened} · %${openRate.toFixed(1)}`}
             tone="primary"
             icon={<Eye className="size-3" />}
           />
           <SummaryCard
-            label="Clicks"
+            label="Tıklama"
             value={`${totals.clicked} · %${clickRate.toFixed(1)}`}
             tone="primary"
             icon={<MousePointerClick className="size-3" />}
           />
           <SummaryCard
-            label="Errors"
+            label="Hatalar"
             value={totals.failed}
             tone="destructive"
           />
@@ -172,7 +172,7 @@ export const CampaignsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Sends</CardTitle>
+          <CardTitle>Gönderimler</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Select
@@ -183,7 +183,7 @@ export const CampaignsPage = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All channels</SelectItem>
+              <SelectItem value="all">Tüm kanallar</SelectItem>
               <SelectItem value="mail">Mail</SelectItem>
               <SelectItem value="push">Push</SelectItem>
             </SelectContent>
@@ -200,12 +200,12 @@ export const CampaignsPage = () => {
                 <TableRow>
                   <TableHead>Zaman</TableHead>
                   <TableHead>Kanal</TableHead>
-                  {isAll && <TableHead>Project</TableHead>}
+                  {isAll && <TableHead>Proje</TableHead>}
                   <TableHead>Konu</TableHead>
-                  <TableHead className="text-right">Sent</TableHead>
-                  <TableHead className="text-right">Open rate</TableHead>
-                  <TableHead className="text-right">Clicks</TableHead>
-                  <TableHead className="text-right">Errors</TableHead>
+                  <TableHead className="text-right">Gönderildi</TableHead>
+                  <TableHead className="text-right">Açılma oranı</TableHead>
+                  <TableHead className="text-right">Tıklama</TableHead>
+                  <TableHead className="text-right">Hatalar</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -233,12 +233,12 @@ export const CampaignsPage = () => {
                       <TableCell className="font-medium">
                         {c.subject ?? "-"}
                       </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
-                        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                      <TableCell className="text-right tabular-nums">
+                        <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                           {c.sent} / {c.recipients}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
+                      <TableCell className="text-right tabular-nums">
                         {c.channel === "mail" ? (
                           opens > 0 ? (
                             <span className="text-foreground">
@@ -258,7 +258,7 @@ export const CampaignsPage = () => {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
+                      <TableCell className="text-right tabular-nums">
                         {c.channel === "mail" ? (
                           clicks > 0 ? (
                             <span className="text-foreground">
@@ -278,7 +278,7 @@ export const CampaignsPage = () => {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
+                      <TableCell className="text-right tabular-nums">
                         {c.failed > 0 ? (
                           <Badge variant="destructive">{c.failed}</Badge>
                         ) : (
@@ -312,7 +312,7 @@ const SummaryCard = ({
 }) => {
   const toneCls =
     tone === "emerald"
-      ? "text-emerald-500"
+      ? "text-emerald-600 dark:text-emerald-400"
       : tone === "destructive"
         ? "text-destructive"
         : tone === "primary"
@@ -325,7 +325,7 @@ const SummaryCard = ({
         {label}
       </div>
       <div
-        className={`mt-1 font-mono text-2xl tabular-nums ${toneCls}`}
+        className={`mt-1 text-2xl tabular-nums ${toneCls}`}
       >
         {value}
       </div>

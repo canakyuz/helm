@@ -51,9 +51,9 @@ import {
 import type { Project, UserSegment } from "@/types";
 
 const RULE_LABELS: Record<UserSegment["rule_type"], string> = {
-  new: "New - signed up within the last N days",
-  active: "Active - last sign-in within the last N days",
-  inactive: "Dormant - last sign-in older than N days",
+  new: "Yeni - son N günde kayıt oldu",
+  active: "Aktif - son N günde giriş yaptı",
+  inactive: "Pasif - son girişi N günden eski",
 };
 
 interface CountResult {
@@ -97,11 +97,11 @@ export const SegmentsPage = () => {
           warning: data.warning,
         },
       }));
-      toast.success(`${data.count} users matched`, {
-        description: data.warning ?? `${data.projects} projects scanned`,
+      toast.success(`${data.count} kullanıcı eşleşti`, {
+        description: data.warning ?? `${data.projects} proje tarandı`,
       });
     } catch (e) {
-      toast.error("Calculation failed", {
+      toast.error("Hesaplama başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -125,7 +125,7 @@ export const SegmentsPage = () => {
   const { mutate: remove } = useDelete();
 
   const projectName = (id: string | null) =>
-    id ? (projects.find((p) => p.id === id)?.name ?? "-") : "All projects";
+    id ? (projects.find((p) => p.id === id)?.name ?? "-") : "Tüm projeler";
 
   const reset = () => {
     setName("");
@@ -189,9 +189,9 @@ export const SegmentsPage = () => {
         <div className="text-xs text-muted-foreground">
           {stats.total > 0 && (
             <>
-              <span className="font-mono tabular-nums">{stats.total}</span>{" "}
+              <span className="tabular-nums">{stats.total}</span>{" "}
               segment ·{" "}
-              <span className="font-mono tabular-nums">
+              <span className="tabular-nums">
                 {stats.computed}
               </span>{" "}
               hesaplandı
@@ -202,15 +202,15 @@ export const SegmentsPage = () => {
 
       {/* KPI cluster */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <SegKpi label="Total segments" value={stats.total} icon={<Layers />} />
+        <SegKpi label="Toplam segment" value={stats.total} icon={<Layers />} />
         <SegKpi
-          label="Calculated"
+          label="Hesaplanan"
           value={`${stats.computed} / ${stats.total}`}
           icon={<UserCheck />}
           tone={stats.computed === stats.total ? "emerald" : undefined}
         />
         <SegKpi
-          label="Total matched"
+          label="Toplam eşleşen"
           value={stats.matchedSum}
           icon={<Users />}
           tone="primary"
@@ -230,7 +230,7 @@ export const SegmentsPage = () => {
       {segments.length < 4 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Quick start</CardTitle>
+            <CardTitle className="text-base">Hızlı başlangıç</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -246,14 +246,14 @@ export const SegmentsPage = () => {
                     type="button"
                     disabled={exists}
                     onClick={() => handleCreateFromTemplate(t)}
-                    className="rounded-md border bg-card/40 p-3 text-left text-xs hover:bg-card/80 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md border bg-card p-3 text-left text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <div className="font-medium text-sm">{t.name}</div>
                     <div className="mt-1 text-[11px] text-muted-foreground">
                       {t.description}
                     </div>
                     {exists && (
-                      <div className="mt-2 text-[10px] text-emerald-500">
+                      <div className="mt-2 text-[10px] text-emerald-600 dark:text-emerald-400">
                         ✓ tanımlı
                       </div>
                     )}
@@ -267,7 +267,7 @@ export const SegmentsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>User segments</CardTitle>
+          <CardTitle>Kullanıcı segmentleri</CardTitle>
           <CardAction>
             <Dialog
               open={open}
@@ -281,25 +281,25 @@ export const SegmentsPage = () => {
               </Button>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>User segment</DialogTitle>
+                  <DialogTitle>Kullanıcı segmenti</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                   <div className="space-y-2">
-                    <Label>Segment name</Label>
+                    <Label>Segment adı</Label>
                     <Input
-                      placeholder="New players"
+                      placeholder="Yeni oyuncular"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Project</Label>
+                    <Label>Proje</Label>
                     <Select value={projectId} onValueChange={setProjectId}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All projects</SelectItem>
+                        <SelectItem value="all">Tüm projeler</SelectItem>
                         {projects.map((p) => (
                           <SelectItem key={p.id} value={p.id as string}>
                             {p.name}
@@ -310,7 +310,7 @@ export const SegmentsPage = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label>Rule</Label>
+                      <Label>Kural</Label>
                       <Select
                         value={ruleType}
                         onValueChange={(v) =>
@@ -321,14 +321,14 @@ export const SegmentsPage = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="new">New</SelectItem>
+                          <SelectItem value="new">Yeni</SelectItem>
                           <SelectItem value="active">Aktif</SelectItem>
                           <SelectItem value="inactive">Pasif</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Day</Label>
+                      <Label>Gün</Label>
                       <Input
                         type="number"
                         value={ruleDays}
@@ -339,7 +339,7 @@ export const SegmentsPage = () => {
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setOpen(false)}>
-                    Vazgeç
+                    İptal
                   </Button>
                   <Button
                     onClick={handleCreate}
@@ -356,8 +356,8 @@ export const SegmentsPage = () => {
           {segments.length === 0 && !query.isLoading ? (
             <EmptyState
               icon={<Layers className="size-6" />}
-              title="No segments yet"
-              description="A segment is a rule-defined group of users. It becomes a target for Mail and Push. Start with + above - e.g. Active users (signed in within 7d)."
+              title="Henüz segment yok"
+              description="Segment, kuralla tanımlanan kullanıcı grubudur. Mail ve Push için hedef olur. Yukarıdaki + ile başla - örn. Aktif kullanıcılar (7 günde giriş yapan)."
               compact
             />
           ) : (
@@ -365,10 +365,10 @@ export const SegmentsPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Segment</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Rule</TableHead>
-                  <TableHead className="text-right">Matched</TableHead>
-                  <TableHead className="w-32 text-right">Action</TableHead>
+                  <TableHead>Proje</TableHead>
+                  <TableHead>Kural</TableHead>
+                  <TableHead className="text-right">Eşleşen</TableHead>
+                  <TableHead className="w-32 text-right">İşlem</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -388,7 +388,7 @@ export const SegmentsPage = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         {c ? (
-                          <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                          <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                             {c.count} kullanıcı
                           </Badge>
                         ) : (
@@ -412,7 +412,7 @@ export const SegmentsPage = () => {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              aria-label="Sample users"
+                              aria-label="Örnek kullanıcılar"
                               onClick={() => setSampleOpen(s.id)}
                             >
                               <Users className="size-4" />
@@ -423,7 +423,7 @@ export const SegmentsPage = () => {
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
-                                aria-label="Delete"
+                                aria-label="Sil"
                               >
                                 <Trash2 className="size-4 text-destructive" />
                               </Button>
@@ -435,7 +435,7 @@ export const SegmentsPage = () => {
                                 </AlertDialogTitle>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>İptal</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() =>
                                     remove({
@@ -474,7 +474,7 @@ export const SegmentsPage = () => {
           <DialogHeader>
             <DialogTitle>
               {sampleOpen
-                ? `${segments.find((s) => s.id === sampleOpen)?.name} - sample users (ilk 10)`
+                ? `${segments.find((s) => s.id === sampleOpen)?.name} - örnek kullanıcılar (ilk 10)`
                 : ""}
             </DialogTitle>
           </DialogHeader>
@@ -482,9 +482,9 @@ export const SegmentsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Last sign-in</TableHead>
+                  <TableHead>E-posta</TableHead>
+                  <TableHead>Proje</TableHead>
+                  <TableHead>Son giriş</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>
@@ -501,7 +501,7 @@ export const SegmentsPage = () => {
                         <TableCell className="text-xs text-muted-foreground">
                           {u.last_sign_in_at
                             ? new Date(u.last_sign_in_at).toLocaleString(
-                                "en-US",
+                                "tr-TR",
                               )
                             : "-"}
                         </TableCell>
@@ -510,7 +510,7 @@ export const SegmentsPage = () => {
                             asChild
                             variant="ghost"
                             size="icon-sm"
-                            aria-label="Go to user"
+                            aria-label="Kullanıcıya git"
                           >
                             <Link to={`/users/${u.id}`}>
                               <ExternalLink className="size-4" />
@@ -536,26 +536,26 @@ const SEGMENT_TEMPLATES: Array<{
   rule_days: number;
 }> = [
   {
-    name: "New users (7d)",
-    description: "Signed up within 7 days - optimise onboarding",
+    name: "Yeni kullanıcılar (7g)",
+    description: "Son 7 günde kayıt oldu - onboarding'i optimize et",
     rule_type: "new",
     rule_days: 7,
   },
   {
-    name: "Active users (30d)",
-    description: "Signed in within 30 days - campaign target",
+    name: "Aktif kullanıcılar (30g)",
+    description: "Son 30 günde giriş yaptı - kampanya hedefi",
     rule_type: "active",
     rule_days: 30,
   },
   {
-    name: "At risk (14d)",
-    description: "Inactive for 14 days - win-back email",
+    name: "Risk altında (14g)",
+    description: "14 gündür pasif - geri kazanım maili",
     rule_type: "inactive",
     rule_days: 14,
   },
   {
-    name: "Lost users (60d)",
-    description: "Gone for 60 days - last-chance campaign",
+    name: "Kayıp kullanıcılar (60g)",
+    description: "60 gündür yok - son şans kampanyası",
     rule_type: "inactive",
     rule_days: 60,
   },
@@ -574,17 +574,17 @@ const SegKpi = ({
 }) => {
   const toneCls =
     tone === "emerald"
-      ? "text-emerald-500"
+      ? "text-emerald-600 dark:text-emerald-400"
       : tone === "primary"
         ? "text-primary"
         : "text-foreground";
   return (
-    <div className="rounded-lg border bg-card/40 p-3">
+    <div className="rounded-lg border bg-card p-3">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
         <span className="[&>svg]:size-3.5">{icon}</span>
         {label}
       </div>
-      <div className={`mt-1 font-mono text-2xl tabular-nums ${toneCls}`}>
+      <div className={`mt-1 text-2xl tabular-nums ${toneCls}`}>
         {value}
       </div>
     </div>

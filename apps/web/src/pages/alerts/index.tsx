@@ -81,17 +81,17 @@ const METRICS: Record<string, string> = {
   mau: "MAU",
   ad_revenue: "Reklam Geliri",
   mrr: "MRR",
-  total_users: "Total users",
-  new_users: "New user",
-  errors: "Error count",
-  app_revenue: "Store revenue",
+  total_users: "Toplam kullanıcı",
+  new_users: "Yeni kullanıcı",
+  errors: "Hata sayısı",
+  app_revenue: "Mağaza geliri",
 };
 
 const CONDITIONS: Record<AlertCondition, string> = {
-  drop_pct: "% down",
-  rise_pct: "% up",
-  below: "dropped below the value",
-  above: "rose above the value",
+  drop_pct: "% düştü",
+  rise_pct: "% yükseldi",
+  below: "değerin altına indi",
+  above: "değerin üstüne çıktı",
 };
 
 const EVENT_PAGE = 20;
@@ -184,14 +184,14 @@ export const AlertsPage = () => {
         { body: {} },
       );
       if (error) throw error;
-      toast.success("Evaluation complete", {
+      toast.success("Değerlendirme tamamlandı", {
         description: `${data?.evaluated ?? 0} kural kontrol edildi, ${
           data?.triggered ?? 0
         } uyarı tetiklendi.`,
       });
       invalidate({ resource: "alert_events", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Evaluation failed", {
+      toast.error("Değerlendirme başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -209,17 +209,17 @@ export const AlertsPage = () => {
       if (error) throw error;
       const rule = rules.find((r) => r.id === ruleId);
       if (data?.triggered > 0) {
-        toast.warning(`Rule triggered: ${rule?.name}`, {
-          description: "Details are in the events table.",
+        toast.warning(`Kural tetiklendi: ${rule?.name}`, {
+          description: "Detaylar olay tablosunda.",
         });
       } else {
-        toast.success(`Rule evaluated: ${rule?.name}`, {
-          description: "Threshold not exceeded, nothing triggered.",
+        toast.success(`Kural değerlendirildi: ${rule?.name}`, {
+          description: "Eşik aşılmadı, tetiklenme olmadı.",
         });
       }
       invalidate({ resource: "alert_events", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Test failed", {
+      toast.error("Test başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -232,7 +232,7 @@ export const AlertsPage = () => {
   const { mutate: remove } = useDelete();
 
   const projectName = (id: string | null) =>
-    id ? (projects.find((p) => p.id === id)?.name ?? "-") : "All projects";
+    id ? (projects.find((p) => p.id === id)?.name ?? "-") : "Tüm projeler";
   const ruleName = (id: string) =>
     rules.find((r) => r.id === id)?.name ?? id.slice(0, 8);
 
@@ -272,7 +272,7 @@ export const AlertsPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Alerts</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Uyarılar</h1>
         <Button
           variant="outline"
           onClick={handleEvaluate}
@@ -288,7 +288,7 @@ export const AlertsPage = () => {
       {/* Summary */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
-          title="Active rules"
+          title="Aktif kurallar"
           value={`${stats.enabled} / ${stats.total}`}
           icon={<Activity />}
         />
@@ -298,12 +298,12 @@ export const AlertsPage = () => {
           icon={<Bell />}
         />
         <StatCard
-          title="Total events"
+          title="Toplam olay"
           value={events.length}
           icon={<Bell />}
         />
         <StatCard
-          title="Delivery rate"
+          title="Teslim oranı"
           value={`%${stats.deliveryRate}`}
           icon={<CheckCircle2 />}
         />
@@ -311,7 +311,7 @@ export const AlertsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Alert rules</CardTitle>
+          <CardTitle>Uyarı kuralları</CardTitle>
           <CardAction>
             <Dialog
               open={open}
@@ -325,25 +325,25 @@ export const AlertsPage = () => {
               </Button>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>New alert rule</DialogTitle>
+                  <DialogTitle>Yeni uyarı kuralı</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                   <div className="space-y-2">
-                    <Label>Rule name</Label>
+                    <Label>Kural adı</Label>
                     <Input
-                      placeholder="DAU drop alert"
+                      placeholder="DAU düşüş uyarısı"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Project</Label>
+                    <Label>Proje</Label>
                     <Select value={projectId} onValueChange={setProjectId}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All projects</SelectItem>
+                        <SelectItem value="all">Tüm projeler</SelectItem>
                         {projects.map((p) => (
                           <SelectItem key={p.id} value={p.id as string}>
                             {p.name}
@@ -354,7 +354,7 @@ export const AlertsPage = () => {
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-2">
-                      <Label>Metric</Label>
+                      <Label>Metrik</Label>
                       <Select value={metric} onValueChange={setMetric}>
                         <SelectTrigger className="w-full">
                           <SelectValue />
@@ -369,7 +369,7 @@ export const AlertsPage = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Condition</Label>
+                      <Label>Koşul</Label>
                       <Select
                         value={condition}
                         onValueChange={(v) =>
@@ -389,7 +389,7 @@ export const AlertsPage = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Threshold</Label>
+                      <Label>Eşik</Label>
                       <Input
                         type="number"
                         value={threshold}
@@ -410,14 +410,14 @@ export const AlertsPage = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="telegram">Telegram</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="email">E-posta</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setOpen(false)}>
-                    Vazgeç
+                    İptal
                   </Button>
                   <Button
                     onClick={handleCreate}
@@ -434,12 +434,12 @@ export const AlertsPage = () => {
           {rules.length === 0 && !query.isLoading ? (
             <EmptyState
               icon={<Zap className="size-6" />}
-              title="No alert rules yet"
+              title="Henüz uyarı kuralı yok"
               description={
                 <>
                   Kural ekle ile başla - örn.{" "}
-                  <strong>"DAU down 20% over 7d → Telegram"</strong> veya{" "}
-                  <strong>"Error count went above 100 → email"</strong>.
+                  <strong>"DAU 7 günde %20 düştü → Telegram"</strong> veya{" "}
+                  <strong>"Hata sayısı 100'ü aştı → e-posta"</strong>.
                 </>
               }
               compact
@@ -448,13 +448,13 @@ export const AlertsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Rule</TableHead>
+                  <TableHead>Kural</TableHead>
                   <TableHead>Kapsam</TableHead>
-                  <TableHead>Condition</TableHead>
+                  <TableHead>Koşul</TableHead>
                   <TableHead>Kanal</TableHead>
                   <TableHead className="text-right">7g</TableHead>
                   <TableHead>Aktif</TableHead>
-                  <TableHead className="w-24 text-right">Action</TableHead>
+                  <TableHead className="w-24 text-right">İşlem</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -477,13 +477,13 @@ export const AlertsPage = () => {
                       {r.condition.endsWith("_pct") ? "%" : ""}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {r.channel === "telegram" ? "Telegram" : "Email"}
+                      {r.channel === "telegram" ? "Telegram" : "E-posta"}
                     </TableCell>
                     <TableCell className="text-right">
                       {lastWeek.length > 0 ? (
                         <Badge
                           variant="secondary"
-                          className="font-mono tabular-nums"
+                          className="tabular-nums"
                         >
                           {lastWeek.length}×
                         </Badge>
@@ -511,7 +511,7 @@ export const AlertsPage = () => {
                           aria-label="Test et"
                           disabled={testingRule === r.id}
                           onClick={() => handleTestRule(r.id as string)}
-                          title="Evaluate this rule now"
+                          title="Bu kuralı şimdi değerlendir"
                         >
                           <Zap
                             className={cn(
@@ -525,7 +525,7 @@ export const AlertsPage = () => {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              aria-label="Delete"
+                              aria-label="Sil"
                             >
                               <Trash2 className="size-4 text-destructive" />
                             </Button>
@@ -540,7 +540,7 @@ export const AlertsPage = () => {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>İptal</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   remove({
@@ -567,7 +567,7 @@ export const AlertsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Triggered alerts</CardTitle>
+          <CardTitle>Tetiklenen uyarılar</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -585,7 +585,7 @@ export const AlertsPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All rules</SelectItem>
+                <SelectItem value="all">Tüm kurallar</SelectItem>
                 {rules.map((r) => (
                   <SelectItem key={r.id} value={r.id as string}>
                     {r.name}
@@ -598,9 +598,9 @@ export const AlertsPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="delivered">Sent</SelectItem>
-                <SelectItem value="pending">In-panel</SelectItem>
+                <SelectItem value="all">Tüm durumlar</SelectItem>
+                <SelectItem value="delivered">Gönderildi</SelectItem>
+                <SelectItem value="pending">Panel içi</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -610,13 +610,13 @@ export const AlertsPage = () => {
               icon={<BellRing className="size-6" />}
               title={
                 events.length === 0
-                  ? "No alerts triggered yet"
-                  : "No events match the filter"
+                  ? "Henüz uyarı tetiklenmedi"
+                  : "Filtreye uyan kayıt yok"
               }
               description={
                 events.length === 0
-                  ? "The cron checks the rules hourly; anything over threshold is listed here. Use Evaluate now to trigger it manually."
-                  : "Loosen the filter or pick All rules / All statuses."
+                  ? "Cron kuralları saat başı kontrol eder; eşiği aşan her şey burada listelenir. Elle tetiklemek için Şimdi değerlendir'i kullan."
+                  : "Filtreyi gevşet veya Tüm kurallar / Tüm durumlar seç."
               }
               compact
             />
@@ -626,10 +626,10 @@ export const AlertsPage = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Zaman</TableHead>
-                    <TableHead>Rule</TableHead>
-                    <TableHead>Metric</TableHead>
+                    <TableHead>Kural</TableHead>
+                    <TableHead>Metrik</TableHead>
                     <TableHead>Mesaj</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Durum</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -640,7 +640,7 @@ export const AlertsPage = () => {
                       onClick={() => setSelected(e)}
                     >
                       <TableCell className="whitespace-nowrap text-xs">
-                        {new Date(e.triggered_at).toLocaleString("en-US")}
+                        {new Date(e.triggered_at).toLocaleString("tr-TR")}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {ruleName(e.rule_id)}
@@ -655,11 +655,11 @@ export const AlertsPage = () => {
                       </TableCell>
                       <TableCell>
                         {e.delivered ? (
-                          <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                          <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                             gönderildi
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">in-panel</Badge>
+                          <Badge variant="secondary">panel içi</Badge>
                         )}
                       </TableCell>
                     </TableRow>
@@ -724,16 +724,16 @@ export const AlertsPage = () => {
                   <KV
                     label="Zaman"
                     value={new Date(selected.triggered_at).toLocaleString(
-                      "en-US",
+                      "tr-TR",
                     )}
                   />
                   <KV
-                    label="Metric"
+                    label="Metrik"
                     value={METRICS[selected.metric] ?? selected.metric}
                   />
                   <KV
-                    label="Status"
-                    value={selected.delivered ? "sent" : "in-panel"}
+                    label="Durum"
+                    value={selected.delivered ? "gönderildi" : "panel içi"}
                   />
                   <KV label="ID" value={String(selected.id)} mono />
                 </div>
@@ -741,7 +741,7 @@ export const AlertsPage = () => {
                   <div className="text-xs uppercase tracking-wide text-muted-foreground">
                     Mesaj
                   </div>
-                  <div className="mt-1 rounded-md border bg-muted/50 p-3 text-sm">
+                  <div className="mt-1 rounded-md border bg-muted p-3 text-sm">
                     {selected.message}
                   </div>
                 </div>

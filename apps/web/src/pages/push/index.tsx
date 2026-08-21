@@ -47,7 +47,7 @@ interface Campaign {
   sent_at: string;
 }
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("en-US");
+const fmt = (iso: string) => new Date(iso).toLocaleString("tr-TR");
 
 export const PushPage = () => {
   const { scope, isAll } = useScope();
@@ -138,18 +138,18 @@ export const PushPage = () => {
           sample: data.sample ?? [],
         });
       } else {
-        toast.success(`${data.sent} notifications sent`, {
+        toast.success(`${data.sent} bildirim gönderildi`, {
           description:
             data.failed > 0
-              ? `${data.failed} failed (the token may be invalid)`
-              : `${data.recipients} devices reached`,
+              ? `${data.failed} başarısız (token geçersiz olabilir)`
+              : `${data.recipients} cihaza ulaşıldı`,
         });
         setTitle("");
         setBody("");
         setSegmentId("");
       }
     } catch (e) {
-      toast.error("Send failed", {
+      toast.error("Gönderim başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -178,34 +178,34 @@ export const PushPage = () => {
       )}
 
       {!isAll && supaIntg && !supaCfg.push_token_table && (
-        <ErrorBanner variant="info" title="Default token config">
+        <ErrorBanner variant="info" title="Varsayılan token config">
           Push token tablosu config'i tanımlı değil. Varsayılanlar
           kullanılacak: <code>profiles.expo_push_token</code> (user_col:{" "}
           <code>id</code>). Farklıysa Supabase entegrasyonunu{" "}
-          <strong>Edit</strong>.
+          <strong>Düzenle</strong>.
         </ErrorBanner>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>New notification</CardTitle>
+          <CardTitle>Yeni bildirim</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
           <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Target segment</Label>
+            <Label>Hedef segment</Label>
             <Select
               value={segmentId}
               onValueChange={setSegmentId}
               disabled={!pushReady || isAll}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pick a segment" />
+                <SelectValue placeholder="Segment seç" />
               </SelectTrigger>
               <SelectContent>
                 {segments.length === 0 ? (
                   <SelectItem value="__none" disabled>
-                    Segment yok - Segments sayfasından oluştur
+                    Segment yok - Segmentler sayfasından oluştur
                   </SelectItem>
                 ) : (
                   segments.map((s) => (
@@ -218,9 +218,9 @@ export const PushPage = () => {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Title</Label>
+            <Label>Başlık</Label>
             <Input
-              placeholder="New season!"
+              placeholder="Yeni sezon!"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={!pushReady}
@@ -230,7 +230,7 @@ export const PushPage = () => {
             <Label>Mesaj</Label>
             <textarea
               className="min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-              placeholder="Notification text…"
+              placeholder="Bildirim metni…"
               value={body}
               onChange={(e) => setBody(e.target.value)}
               disabled={!pushReady}
@@ -286,7 +286,7 @@ export const PushPage = () => {
                     setTitle(t.title);
                     setBody(t.body);
                   }}
-                  className="rounded-md border bg-card/40 px-3 py-2 text-left text-xs hover:bg-card/80"
+                  className="rounded-md border bg-card px-3 py-2 text-left text-xs hover:bg-accent"
                 >
                   <div className="font-medium">{t.label}</div>
                   <div className="truncate text-[10px] text-muted-foreground">
@@ -305,7 +305,7 @@ export const PushPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Past notifications</CardTitle>
+          <CardTitle>Geçmiş bildirimler</CardTitle>
           <CardAction>
             <Badge variant="secondary">
               <Bell className="size-3" />
@@ -317,8 +317,8 @@ export const PushPage = () => {
           {campaigns.length === 0 && !campQuery.isLoading ? (
             <EmptyState
               icon={<Bell className="size-6" />}
-              title="No notifications sent yet"
-              description="Use the form above to push to a segment. History and delivery rate collect here."
+              title="Henüz bildirim gönderilmedi"
+              description="Yukarıdaki formla bir segmente push gönder. Geçmiş ve teslim oranı burada birikir."
               compact
             />
           ) : (
@@ -326,10 +326,10 @@ export const PushPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Zaman</TableHead>
-                  <TableHead>Title</TableHead>
+                  <TableHead>Başlık</TableHead>
                   <TableHead className="text-right">Cihaz</TableHead>
-                  <TableHead className="text-right">Sent</TableHead>
-                  <TableHead className="text-right">Errors</TableHead>
+                  <TableHead className="text-right">Gönderildi</TableHead>
+                  <TableHead className="text-right">Hatalar</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -339,15 +339,15 @@ export const PushPage = () => {
                     <TableCell className="font-medium">
                       {c.subject ?? "-"}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right tabular-nums">
                       {c.recipients}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
-                      <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                    <TableCell className="text-right tabular-nums">
+                      <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                         {c.sent}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right tabular-nums">
                       {c.failed > 0 ? (
                         <Badge variant="destructive">{c.failed}</Badge>
                       ) : (
@@ -367,30 +367,30 @@ export const PushPage = () => {
 
 const PUSH_TEMPLATES = [
   {
-    label: "New content",
-    title: "A new season has started! 🎮",
-    body: "We added new content for your favourite characters. Come explore!",
+    label: "Yeni içerik",
+    title: "Yeni sezon başladı! 🎮",
+    body: "Favori karakterlerin için yeni içerikler ekledik. Gel, keşfet!",
   },
   {
-    label: "Win-back",
-    title: "We miss you 👋",
-    body: "You have not been around for a while. We have a surprise gift for you - come get it!",
+    label: "Geri kazanım",
+    title: "Seni özledik 👋",
+    body: "Bir süredir uğramıyorsun. Sana sürpriz bir hediyemiz var - gel, al!",
   },
   {
-    label: "Daily reward",
-    title: "Your daily reward is ready 🎁",
-    body: "Do not forget today's gift. Keep your streak alive!",
+    label: "Günlük ödül",
+    title: "Günlük ödülün hazır 🎁",
+    body: "Bugünkü hediyeni unutma. Serini canlı tut!",
   },
   {
-    label: "Discount",
-    title: "Today only - 50% off",
-    body: "50% off for everyone who starts a premium subscription today.",
+    label: "İndirim",
+    title: "Sadece bugün - %50 indirim",
+    body: "Bugün premium aboneliğe başlayan herkese %50 indirim.",
   },
 ];
 
 const PhonePreview = ({ title, body }: { title: string; body: string }) => {
   const now = new Date();
-  const time = now.toLocaleTimeString("en-US", {
+  const time = now.toLocaleTimeString("tr-TR", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -401,33 +401,35 @@ const PhonePreview = ({ title, body }: { title: string; body: string }) => {
           Telefonda nasıl görünür
         </div>
         {/* Telefon çerçevesi */}
-        <div className="rounded-[2rem] border-4 border-foreground/20 bg-gradient-to-b from-slate-900 to-slate-800 p-3 shadow-2xl">
+        <div className="rounded-[2.2rem] border border-border bg-card p-3 shadow-sm">
           {/* Status bar */}
-          <div className="mb-3 flex items-center justify-between text-[9px] text-white/80">
+          <div className="mb-3 flex items-center justify-between text-[9px] text-muted-foreground">
             <span className="font-medium">{time}</span>
             <span>●●● 5G ▮</span>
           </div>
           {/* Bildirim kartı */}
-          <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-sm">
+          <div className="rounded-2xl bg-muted p-3">
             <div className="flex items-start gap-2">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/80">
-                <Smartphone className="size-3.5 text-white" />
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary">
+                <Smartphone className="size-3.5 text-primary-foreground" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[10px] font-semibold uppercase text-white/90">
+                  <span className="text-[10px] font-semibold uppercase text-muted-foreground">
                     Uygulamanız
                   </span>
-                  <span className="text-[9px] text-white/60">now</span>
+                  <span className="text-[9px] text-muted-foreground">şimdi</span>
                 </div>
-                <div className="mt-0.5 text-[11px] font-semibold leading-tight text-white">
+                <div className="mt-0.5 text-[11px] font-semibold leading-tight text-foreground">
                   {title || (
-                    <span className="text-white/40">Title preview</span>
+                    <span className="text-muted-foreground">
+                      Başlık önizlemesi
+                    </span>
                   )}
                 </div>
-                <div className="mt-0.5 text-[11px] leading-tight text-white/80 line-clamp-3">
+                <div className="mt-0.5 text-[11px] leading-tight text-muted-foreground line-clamp-3">
                   {body || (
-                    <span className="text-white/40">
+                    <span className="text-muted-foreground">
                       Mesaj burada görünür…
                     </span>
                   )}
@@ -437,7 +439,7 @@ const PhonePreview = ({ title, body }: { title: string; body: string }) => {
           </div>
           {/* Boş alan + home indicator */}
           <div className="mt-12 flex justify-center">
-            <div className="h-1 w-12 rounded-full bg-white/30" />
+            <div className="h-1 w-12 rounded-full bg-foreground/20" />
           </div>
         </div>
       </div>

@@ -260,12 +260,12 @@ export const RevenuePage = () => {
       {/* Üst KPI cluster - 3 kanal birleşik gelir özeti */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <RevKpi
-          label="Today (combined)"
+          label="Bugün (birleşik)"
           value={formatMoney(combinedTotals.today, displayCcy)}
           tone="emerald"
         />
         <RevKpi
-          label="Yesterday"
+          label="Dün"
           value={formatMoney(combinedTotals.yesterday, displayCcy)}
         />
         <RevKpi
@@ -274,7 +274,7 @@ export const RevenuePage = () => {
           tone="primary"
         />
         <RevKpi
-          label={`Last month · largest: ${topChannel}`}
+          label={`Geçen ay · en büyük: ${topChannel}`}
           value={formatMoney(combinedTotals.prevMonth, displayCcy)}
         />
       </div>
@@ -296,7 +296,7 @@ export const RevenuePage = () => {
 
         <TabsContent value="subscription" className="space-y-4">
           {!hasRevenueCat && (
-            <ErrorBanner variant="warning" title="RevenueCat is not connected">
+            <ErrorBanner variant="warning" title="RevenueCat bağlı değil">
               Abonelik geliri akmıyor - Entegrasyonlar → <strong>+</strong> →
               RevenueCat (v2 secret key + project_id).
             </ErrorBanner>
@@ -315,7 +315,7 @@ export const RevenuePage = () => {
               loading={loading}
             />
             <StatCard
-              title="Revenue (28 days)"
+              title="Gelir (28 gün)"
               value={formatMoney(revenue28d, displayCcy)}
               icon={<Wallet />}
               loading={loading}
@@ -323,7 +323,7 @@ export const RevenuePage = () => {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>{`MRR - last ${range} days`}</CardTitle>
+              <CardTitle>{`MRR - son ${range} gün`}</CardTitle>
             </CardHeader>
             <CardContent>
               <TrendChart
@@ -341,31 +341,31 @@ export const RevenuePage = () => {
         <TabsContent value="ads" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Total estimated earnings (AdMob)</CardTitle>
+              <CardTitle>Toplam tahmini kazanç (AdMob)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div>
-                  <div className="text-xs text-muted-foreground">Today so far</div>
-                  <div className="mt-1 font-mono text-2xl">
+                  <div className="text-xs text-muted-foreground">Bugün</div>
+                  <div className="mt-1 text-2xl tabular-nums">
                     {formatMoney(adTotals.today, displayCcy)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Yesterday</div>
-                  <div className="mt-1 font-mono text-2xl">
+                  <div className="text-xs text-muted-foreground">Dün</div>
+                  <div className="mt-1 text-2xl tabular-nums">
                     {formatMoney(adTotals.yesterday, displayCcy)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Month to date</div>
-                  <div className="mt-1 font-mono text-2xl">
+                  <div className="text-xs text-muted-foreground">Bu ay</div>
+                  <div className="mt-1 text-2xl tabular-nums">
                     {formatMoney(adTotals.thisMonth, displayCcy)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Last month</div>
-                  <div className="mt-1 font-mono text-2xl">
+                  <div className="text-xs text-muted-foreground">Geçen ay</div>
+                  <div className="mt-1 text-2xl tabular-nums">
                     {formatMoney(adTotals.prevMonth, displayCcy)}
                   </div>
                 </div>
@@ -374,14 +374,14 @@ export const RevenuePage = () => {
           </Card>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
-              title="Ad revenue (last day)"
+              title="Reklam geliri (son gün)"
               value={formatMoney(adRevenueDisplay, displayCcy)}
               icon={<Wallet />}
               delta={deltaPct(adSeries)}
               loading={loading}
             />
             <StatCard
-              title="Impressions (last day)"
+              title="Gösterim (son gün)"
               value={compact(latest(metrics, "ad_impressions"))}
               icon={<Eye />}
               delta={deltaPct(impSeries)}
@@ -400,7 +400,7 @@ export const RevenuePage = () => {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{`Ad revenue - last ${range} days`}</CardTitle>
+                <CardTitle>{`Reklam geliri - son ${range} gün`}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TrendChart
@@ -412,7 +412,7 @@ export const RevenuePage = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>{`Impressions - last ${range} days`}</CardTitle>
+                <CardTitle>{`Gösterim - son ${range} gün`}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TrendChart
@@ -429,31 +429,31 @@ export const RevenuePage = () => {
           <TabsContent value="store" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Total store proceeds</CardTitle>
+                <CardTitle>Toplam mağaza geliri</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                   <div>
-                    <div className="text-xs text-muted-foreground">Today so far</div>
-                    <div className="mt-1 font-mono text-2xl">
+                    <div className="text-xs text-muted-foreground">Bugün</div>
+                    <div className="mt-1 text-2xl tabular-nums">
                       {formatMoney(appTotals.today, displayCcy)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Yesterday</div>
-                    <div className="mt-1 font-mono text-2xl">
+                    <div className="text-xs text-muted-foreground">Dün</div>
+                    <div className="mt-1 text-2xl tabular-nums">
                       {formatMoney(appTotals.yesterday, displayCcy)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Month to date</div>
-                    <div className="mt-1 font-mono text-2xl">
+                    <div className="text-xs text-muted-foreground">Bu ay</div>
+                    <div className="mt-1 text-2xl tabular-nums">
                       {formatMoney(appTotals.thisMonth, displayCcy)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Last month</div>
-                    <div className="mt-1 font-mono text-2xl">
+                    <div className="text-xs text-muted-foreground">Geçen ay</div>
+                    <div className="mt-1 text-2xl tabular-nums">
                       {formatMoney(appTotals.prevMonth, displayCcy)}
                     </div>
                   </div>
@@ -462,21 +462,21 @@ export const RevenuePage = () => {
             </Card>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <StatCard
-                title="Store revenue (last day)"
+                title="Mağaza geliri (son gün)"
                 value={formatMoney(appRevDisplay, displayCcy)}
                 icon={<DollarSign />}
                 delta={deltaPct(appRevSeries)}
                 loading={loading}
               />
               <StatCard
-                title="Downloads (last day)"
+                title="İndirme (son gün)"
                 value={compact(downloadsLatest)}
                 icon={<Download />}
                 delta={deltaPct(downloadsSeries)}
                 loading={loading}
               />
               <StatCard
-                title="Revenue / download"
+                title="Gelir / indirme"
                 value={
                   downloadsLatest > 0
                     ? formatMoney2(appRevDisplay / downloadsLatest, displayCcy)
@@ -489,7 +489,7 @@ export const RevenuePage = () => {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>{`Store revenue - last ${range} days`}</CardTitle>
+                  <CardTitle>{`Mağaza geliri - son ${range} gün`}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <TrendChart
@@ -501,7 +501,7 @@ export const RevenuePage = () => {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>{`Downloads - last ${range} days`}</CardTitle>
+                  <CardTitle>{`İndirme - son ${range} gün`}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <TrendChart
@@ -530,16 +530,16 @@ const RevKpi = ({
 }) => {
   const toneCls =
     tone === "emerald"
-      ? "text-emerald-500"
+      ? "text-emerald-600 dark:text-emerald-400"
       : tone === "primary"
         ? "text-primary"
         : "text-foreground";
   return (
-    <div className="rounded-lg border bg-card/40 p-3">
+    <div className="rounded-lg border bg-card p-3">
       <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
         {label}
       </div>
-      <div className={cn("mt-1 font-mono text-2xl tabular-nums", toneCls)}>
+      <div className={cn("mt-1 text-2xl tabular-nums", toneCls)}>
         {value}
       </div>
     </div>

@@ -39,10 +39,10 @@ const fmt = (iso: string | null) => {
   if (!iso) return "-";
   const d = new Date(iso);
   const diffMin = (Date.now() - d.getTime()) / 60_000;
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${Math.round(diffMin)}m ago`;
-  if (diffMin < 1440) return `${Math.round(diffMin / 60)}h ago`;
-  return d.toLocaleString("en-US");
+  if (diffMin < 1) return "az önce";
+  if (diffMin < 60) return `${Math.round(diffMin)}dk önce`;
+  if (diffMin < 1440) return `${Math.round(diffMin / 60)}sa önce`;
+  return d.toLocaleString("tr-TR");
 };
 
 export const CronHealthCard = () => {
@@ -87,11 +87,12 @@ export const CronHealthCard = () => {
           Cron dispatch
         </CardTitle>
         <CardDescription>
-          Whether pg_cron fired the job - not whether the ingest worked.{" "}
-          <code className="font-mono">net.http_post</code> is asynchronous, so a
-          run is marked succeeded the moment the request is queued (note the
-          ~40&nbsp;ms durations). The real outcome lives in{" "}
-          <code className="font-mono">sync_runs</code>, shown above.
+          pg_cron job'ı tetikledi mi onu gösterir - ingest'in çalışıp
+          çalışmadığını değil.{" "}
+          <code className="font-mono">net.http_post</code> asenkron olduğundan
+          istek kuyruğa girdiği anda run "succeeded" sayılır (~40&nbsp;ms
+          sürelere dikkat). Gerçek sonuç yukarıda gösterilen{" "}
+          <code className="font-mono">sync_runs</code> tablosunda.
         </CardDescription>
         <CardAction>
           <Button
@@ -103,7 +104,7 @@ export const CronHealthCard = () => {
             <RefreshCw
               className={loading ? "size-4 animate-spin" : "size-4"}
             />
-            <span className="ml-2">Refresh</span>
+            <span className="ml-2">Yenile</span>
           </Button>
         </CardAction>
       </CardHeader>
@@ -121,14 +122,15 @@ export const CronHealthCard = () => {
           </div>
         ) : loading && jobs.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
-            Loading…
+            Yükleniyor…
           </div>
         ) : jobs.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
-            No cron job with a <code>helm-*</code> prefix.
+            <code>helm-*</code> önekli cron job yok.
             <br />
-            Install <code>helm-ingest-hourly</code> with{" "}
-            <code className="text-xs">scripts/p0-cron-bootstrap.sql</code>.
+            <code>helm-ingest-hourly</code>'yi{" "}
+            <code className="text-xs">scripts/p0-cron-bootstrap.sql</code> ile
+            kur.
           </div>
         ) : (
           <div className="space-y-2">
@@ -138,12 +140,12 @@ export const CronHealthCard = () => {
               return (
                 <div
                   key={j.jobname}
-                  className="rounded-md border bg-card/40"
+                  className="rounded-md border bg-card"
                 >
                   <button
                     type="button"
                     onClick={() => setExpanded(isOpen ? null : j.jobname)}
-                    className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-muted/40"
+                    className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-accent"
                   >
                     <div className="flex items-center gap-2">
                       {isOpen ? (
@@ -158,12 +160,12 @@ export const CronHealthCard = () => {
                         {j.schedule}
                       </Badge>
                       {j.active ? (
-                        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500 text-[10px]">
-                          active
+                        <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px]">
+                          aktif
                         </Badge>
                       ) : (
                         <Badge variant="secondary" className="text-[10px]">
-                          inactive
+                          pasif
                         </Badge>
                       )}
                     </div>
@@ -171,7 +173,7 @@ export const CronHealthCard = () => {
                       {last ? (
                         <>
                           {last.status === "succeeded" ? (
-                            <CheckCircle2 className="size-3.5 text-emerald-500" />
+                            <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                           ) : (
                             <AlertCircle className="size-3.5 text-destructive" />
                           )}
@@ -188,7 +190,7 @@ export const CronHealthCard = () => {
                   </button>
 
                   {isOpen && (
-                    <div className="border-t bg-muted/20 px-3 py-2">
+                    <div className="border-t bg-muted px-3 py-2">
                       {j.last_runs.length === 0 ? (
                         <div className="py-2 text-center text-xs text-muted-foreground">
                           Henüz çalışmadı
@@ -196,10 +198,10 @@ export const CronHealthCard = () => {
                       ) : (
                         <div className="space-y-1">
                           <div className="grid grid-cols-[100px_1fr_70px_60px] gap-2 px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                            <span>Start</span>
-                            <span>Result</span>
-                            <span className="text-right">Duration</span>
-                            <span className="text-right">Status</span>
+                            <span>Başlangıç</span>
+                            <span>Sonuç</span>
+                            <span className="text-right">Süre</span>
+                            <span className="text-right">Durum</span>
                           </div>
                           {j.last_runs.map((r) => {
                             const dur =
@@ -215,7 +217,7 @@ export const CronHealthCard = () => {
                               >
                                 <span className="font-mono text-[10px] text-muted-foreground">
                                   {new Date(r.start_time).toLocaleString(
-                                    "en-US",
+                                    "tr-TR",
                                   )}
                                 </span>
                                 <span className="truncate text-xs text-muted-foreground">
@@ -226,7 +228,7 @@ export const CronHealthCard = () => {
                                 </span>
                                 <span className="text-right">
                                   {r.status === "succeeded" ? (
-                                    <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500 text-[10px]">
+                                    <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px]">
                                       ✓
                                     </Badge>
                                   ) : r.status === "failed" ? (

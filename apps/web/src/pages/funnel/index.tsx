@@ -136,7 +136,7 @@ export const FunnelPage = () => {
         if (res?.error) throw new Error(res.error);
         setEvents((res?.events as PHEvent[]) ?? []);
       } catch (e) {
-        toast.error("Could not load the event list", {
+        toast.error("Event listesi yüklenemedi", {
           description: e instanceof Error ? e.message : String(e),
         });
       } finally {
@@ -176,7 +176,7 @@ export const FunnelPage = () => {
   const saveFunnelSteps = () => {
     if (!phIntg) return;
     if (pickedEvents.length < 2) {
-      toast.error("Pick at least 2 steps");
+      toast.error("En az 2 adım seç");
       return;
     }
     const newConfig = {
@@ -191,7 +191,7 @@ export const FunnelPage = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Funnel steps saved");
+          toast.success("Huni adımları kaydedildi");
           setEditing(false);
           invalidate({
             resource: "project_integrations",
@@ -221,7 +221,7 @@ export const FunnelPage = () => {
             <RefreshCw
               className={`size-4 ${loading ? "animate-spin" : ""}`}
             />
-            <span className="ml-2">Refresh</span>
+            <span className="ml-2">Yenile</span>
           </Button>
         </div>
       </div>
@@ -236,7 +236,7 @@ export const FunnelPage = () => {
       )}
 
       {!isAll && !phIntg && (
-        <ErrorBanner variant="warning" title="PostHog is not connected">
+        <ErrorBanner variant="warning" title="PostHog bağlı değil">
           Entegrasyonlar → <strong>+</strong> → PostHog → Project ID + Personal
           API Key.
         </ErrorBanner>
@@ -265,7 +265,7 @@ export const FunnelPage = () => {
                       );
                     }}
                   >
-                    Vazgeç
+                    İptal
                   </Button>
                 )}
                 <Button
@@ -277,13 +277,13 @@ export const FunnelPage = () => {
                   <RefreshCw
                     className={`size-4 ${eventsLoading ? "animate-spin" : ""}`}
                   />
-                  <span className="ml-2">Refresh</span>
+                  <span className="ml-2">Yenile</span>
                 </Button>
               </div>
             </CardAction>
           </CardHeader>
           <CardContent className="space-y-3">
-            <ErrorBanner variant="warning" title="Ideal: 3–5 steps">
+            <ErrorBanner variant="warning" title="İdeal: 3–5 adım">
               <div className="space-y-1">
                 <div>
                   6+ adımda her drop küçük görünür, conversion neredeyse hep %0
@@ -335,7 +335,7 @@ export const FunnelPage = () => {
                             <code className="font-mono text-xs">{e.name}</code>
                           </span>
                           {e.volume_30_day !== null && (
-                            <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                            <span className="text-xs text-muted-foreground tabular-nums">
                               {compact(e.volume_30_day)} / 30g
                             </span>
                           )}
@@ -358,7 +358,7 @@ export const FunnelPage = () => {
                       variant="secondary"
                       className="cursor-pointer"
                       onClick={() => toggleEvent(e)}
-                      title="Click to remove"
+                      title="Kaldırmak için tıkla"
                     >
                       <span className="mr-1 font-mono">{i + 1}.</span>
                       <code>{e}</code>
@@ -426,13 +426,13 @@ export const FunnelPage = () => {
               loading={loading}
             />
             <StatCard
-              title="Reached the end"
+              title="Sona ulaşanlar"
               value={compact(data.total_converted)}
               icon={<Users />}
               loading={loading}
             />
             <StatCard
-              title="Total conversion"
+              title="Toplam dönüşüm"
               value={`%${data.overall_conversion.toFixed(1)}`}
               icon={
                 data.overall_conversion >= 50 ? (
@@ -457,7 +457,7 @@ export const FunnelPage = () => {
           {/* Önceki periyot karşılaştırma şeridi */}
           {data.prev_total_entered !== undefined &&
             data.prev_total_entered > 0 && (
-              <div className="rounded-lg border bg-card/40 p-3 text-xs">
+              <div className="rounded-lg border bg-card p-3 text-xs">
                 <div className="flex flex-wrap items-center gap-4">
                   <span className="text-muted-foreground">
                     Önceki {data.days}g ile karşılaştırma:
@@ -470,14 +470,14 @@ export const FunnelPage = () => {
                     />
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="text-muted-foreground">Reached the end</span>
+                    <span className="text-muted-foreground">Sona ulaşanlar</span>
                     <ChangeBadge
                       current={data.total_converted}
                       prev={data.prev_total_converted ?? 0}
                     />
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="text-muted-foreground">Conversion %</span>
+                    <span className="text-muted-foreground">Dönüşüm %</span>
                     <ChangeBadge
                       current={data.overall_conversion}
                       prev={data.prev_overall_conversion ?? 0}
@@ -492,7 +492,7 @@ export const FunnelPage = () => {
             <ErrorBanner variant="warning">
               <strong>{data.steps.length} adım çok fazla</strong> - her küçük
               adım toplam conversion'u baltalar. Sağ üstteki{" "}
-              <strong>Edit steps</strong> ile 3-5 ana kilometre taşına
+              <strong>Adımları düzenle</strong> ile 3-5 ana kilometre taşına
               indir.
             </ErrorBanner>
           )}
@@ -515,7 +515,7 @@ export const FunnelPage = () => {
                   }}
                 >
                   <Pencil className="size-4" />
-                  <span className="ml-2">Edit steps</span>
+                  <span className="ml-2">Adımları düzenle</span>
                 </Button>
               </CardAction>
             </CardHeader>
@@ -531,8 +531,8 @@ export const FunnelPage = () => {
           <CardContent>
             <EmptyState
               icon={<TrendingDown className="size-6" />}
-              title="No data"
-              description="PostHog returned an empty funnel. Check that the event names in the steps are correct (they are case-sensitive) - use Edit steps."
+              title="Veri yok"
+              description="PostHog boş bir huni döndürdü. Adımlardaki event adlarının doğru olduğunu kontrol et (büyük/küçük harfe duyarlı) - Adımları düzenle'yi kullan."
             />
           </CardContent>
         </Card>
@@ -557,8 +557,8 @@ const barFill = (stepPct: number, isFirst: boolean) => {
 
 const barTextClass = (stepPct: number, isFirst: boolean) => {
   if (isFirst) return "text-indigo-500";
-  if (stepPct >= 80) return "text-emerald-500";
-  if (stepPct >= 40) return "text-amber-500";
+  if (stepPct >= 80) return "text-emerald-600 dark:text-emerald-400";
+  if (stepPct >= 40) return "text-amber-600 dark:text-amber-400";
   return "text-destructive";
 };
 
@@ -584,11 +584,11 @@ const FunnelBars = ({ steps }: { steps: FunnelStep[] }) => {
                 </div>
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono tabular-nums",
+                    "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 tabular-nums",
                     s.step_pct >= 80
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                      ? "border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
                       : s.step_pct >= 40
-                        ? "border-amber-500/30 bg-amber-500/10 text-amber-500"
+                        ? "border-amber-600/25 bg-amber-500/10 text-amber-700 dark:text-amber-400"
                         : "border-destructive/30 bg-destructive/10 text-destructive",
                   )}
                 >
@@ -606,10 +606,10 @@ const FunnelBars = ({ steps }: { steps: FunnelStep[] }) => {
                       className={cn(
                         "ml-1 border-l border-current/20 pl-2",
                         s.delta_pct >= 0
-                          ? "text-emerald-500"
+                          ? "text-emerald-600 dark:text-emerald-400"
                           : "text-destructive",
                       )}
-                      title={`Previous period: ${s.prev_count ?? 0}`}
+                      title={`Önceki periyot: ${s.prev_count ?? 0}`}
                     >
                       {s.delta_pct >= 0 ? "▲" : "▼"}{" "}
                       {Math.abs(s.delta_pct).toFixed(0)}%
@@ -621,11 +621,11 @@ const FunnelBars = ({ steps }: { steps: FunnelStep[] }) => {
             )}
 
             {/* Adım satırı */}
-            <div className="rounded-lg border bg-card/30 p-3">
+            <div className="rounded-lg border bg-card p-3">
               {/* Üst satır: # + event + count + toplam% */}
               <div className="mb-2 flex items-baseline justify-between gap-3">
                 <div className="flex min-w-0 items-baseline gap-2.5">
-                  <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     #{i + 1}
                   </span>
                   <code className="truncate font-mono text-sm font-medium">
@@ -633,12 +633,12 @@ const FunnelBars = ({ steps }: { steps: FunnelStep[] }) => {
                   </code>
                 </div>
                 <div className="flex shrink-0 items-baseline gap-3">
-                  <span className="font-mono text-2xl font-semibold tabular-nums">
+                  <span className="text-2xl font-semibold tabular-nums">
                     {compact(s.count)}
                   </span>
                   <span
                     className={cn(
-                      "w-16 text-right font-mono text-sm font-medium tabular-nums",
+                      "w-16 text-right text-sm font-medium tabular-nums",
                       textClass,
                     )}
                   >
@@ -648,7 +648,7 @@ const FunnelBars = ({ steps }: { steps: FunnelStep[] }) => {
               </div>
 
               {/* Yatay bar (kademeli daralan) */}
-              <div className="relative h-3 overflow-hidden rounded-full bg-muted/60">
+              <div className="relative h-3 overflow-hidden rounded-full bg-muted">
                 <div
                   className={cn(
                     "absolute inset-y-0 left-0 rounded-full transition-all",
@@ -676,7 +676,7 @@ const ChangeBadge = ({
 }) => {
   if (prev === 0) {
     return (
-      <span className="font-mono text-xs text-muted-foreground">
+      <span className="text-xs text-muted-foreground tabular-nums">
         {compact(current)} (önceki: 0)
       </span>
     );
@@ -687,8 +687,8 @@ const ChangeBadge = ({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 font-mono text-xs tabular-nums",
-        positive ? "text-emerald-500" : "text-destructive",
+        "inline-flex items-center gap-1 text-xs tabular-nums",
+        positive ? "text-emerald-600 dark:text-emerald-400" : "text-destructive",
       )}
     >
       <span>

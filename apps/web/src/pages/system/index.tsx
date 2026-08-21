@@ -77,9 +77,9 @@ const HEARTBEAT_BASE = `${
 
 const INTERVALS = [
   { value: "15", label: "15 dakika" },
-  { value: "60", label: "Hourly" },
+  { value: "60", label: "Saatlik" },
   { value: "360", label: "6 saat" },
-  { value: "1440", label: "Daily" },
+  { value: "1440", label: "Günlük" },
 ];
 
 const fmt = (value: string | null) =>
@@ -254,7 +254,7 @@ export const SystemPage = () => {
   const statusBadge = (it: ProjectIntegration) => {
     if (it.last_sync_status === "ok") {
       return (
-        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+        <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
           sağlıklı
         </Badge>
       );
@@ -267,7 +267,7 @@ export const SystemPage = () => {
 
   const copyUrl = (id: string) => {
     navigator.clipboard.writeText(`${HEARTBEAT_BASE}${id}`);
-    toast.success("Ping URL copied");
+    toast.success("Ping URL kopyalandı");
   };
 
   // KPI hesapları - operasyon merkezi özeti
@@ -287,12 +287,12 @@ export const SystemPage = () => {
     const lastRunRel = lastRun?.started_at
       ? (() => {
           const m = (Date.now() - new Date(lastRun.started_at).getTime()) / 60_000;
-          if (m < 1) return "just now";
+          if (m < 1) return "az önce";
           if (m < 60) return `${Math.round(m)} dk`;
           if (m < 1440) return `${Math.round(m / 60)} sa`;
           return `${Math.round(m / 1440)} g`;
         })()
-      : "never";
+      : "hiç";
 
     const last24h = Date.now() - 24 * 3_600_000;
     const recent = runs.filter(
@@ -330,7 +330,7 @@ export const SystemPage = () => {
       {/* KPI cluster - 6'lı operasyon özeti */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <SysKpi
-          label="System health"
+          label="Sistem sağlığı"
           value={`%${sysStats.healthPct}`}
           icon={
             sysStats.healthPct >= 80 ? (
@@ -348,7 +348,7 @@ export const SystemPage = () => {
           }
         />
         <SysKpi
-          label="Sources OK"
+          label="Kaynaklar OK"
           value={`${sysStats.ok} / ${sysStats.totalInteg}`}
           icon={<Activity className="size-3.5" />}
           tone={sysStats.err > 0 ? "amber" : "emerald"}
@@ -360,7 +360,7 @@ export const SystemPage = () => {
           tone={sysStats.cronStale ? "destructive" : "emerald"}
         />
         <SysKpi
-          label="Sync success (24h)"
+          label="Sync başarısı (24s)"
           value={
             sysStats.recentCount > 0
               ? `%${sysStats.recentRate}`
@@ -388,7 +388,7 @@ export const SystemPage = () => {
           }
         />
         <SysKpi
-          label="Errors (last day)"
+          label="Hatalar (son gün)"
           value={compact(sysStats.sentryCount)}
           icon={<AlertOctagon className="size-3.5" />}
           tone={sysStats.sentryCount > 0 ? "destructive" : "emerald"}
@@ -405,18 +405,18 @@ export const SystemPage = () => {
             </CardTitle>
             <CardAction>
               <div className="text-right text-sm">
-                <div className="font-mono text-lg">{compact(errorLatest)}</div>
+                <div className="text-lg tabular-nums">{compact(errorLatest)}</div>
                 <div
                   className={
                     errorDelta === null
                       ? "text-xs text-muted-foreground"
                       : errorDelta > 0
                         ? "text-xs text-destructive"
-                        : "text-xs text-emerald-500"
+                        : "text-xs text-emerald-600 dark:text-emerald-400"
                   }
                 >
                   {errorDelta === null
-                    ? "last day"
+                    ? "son gün"
                     : `${errorDelta > 0 ? "+" : ""}${errorDelta.toFixed(1)}% / 7g`}
                 </div>
               </div>
@@ -425,7 +425,7 @@ export const SystemPage = () => {
           <CardContent className="space-y-4">
             <TrendChart
               data={errorSeries}
-              color="#ef4444"
+              color="rgb(var(--bento-neg))"
               format={compact}
               height={180}
             />
@@ -433,7 +433,7 @@ export const SystemPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Project</TableHead>
+                    <TableHead>Proje</TableHead>
                     <TableHead className="text-right">Son 7g hata</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -443,7 +443,7 @@ export const SystemPage = () => {
                       <TableCell className="font-medium">
                         {projectName(pid)}
                       </TableCell>
-                      <TableCell className="text-right font-mono">
+                      <TableCell className="text-right tabular-nums">
                         {compact(total)}
                       </TableCell>
                     </TableRow>
@@ -473,7 +473,7 @@ export const SystemPage = () => {
                 <RefreshCw
                   className={`size-4 ${issuesLoading ? "animate-spin" : ""}`}
                 />
-                <span className="ml-2">Refresh</span>
+                <span className="ml-2">Yenile</span>
               </Button>
             </CardAction>
           </CardHeader>
@@ -484,7 +484,7 @@ export const SystemPage = () => {
               </div>
             )}
             {issueErrors.length > 0 && (
-              <div className="mb-3 space-y-1 text-xs text-amber-500">
+              <div className="mb-3 space-y-1 text-xs text-amber-600 dark:text-amber-400">
                 {issueErrors.map((p, i) => (
                   <div key={i}>
                     <span className="font-medium">
@@ -507,14 +507,14 @@ export const SystemPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Lvl</TableHead>
-                    <TableHead>Errors</TableHead>
+                    <TableHead>Seviye</TableHead>
+                    <TableHead>Hata</TableHead>
                     {projectsResult.data.length > 1 && (
-                      <TableHead>Project</TableHead>
+                      <TableHead>Proje</TableHead>
                     )}
-                    <TableHead className="text-right">Events</TableHead>
-                    <TableHead className="text-right">User</TableHead>
-                    <TableHead>Last seen</TableHead>
+                    <TableHead className="text-right">Olaylar</TableHead>
+                    <TableHead className="text-right">Kullanıcı</TableHead>
+                    <TableHead>Son görülme</TableHead>
                     <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
@@ -546,10 +546,10 @@ export const SystemPage = () => {
                           {projectName(i.project_id)}
                         </TableCell>
                       )}
-                      <TableCell className="text-right font-mono">
+                      <TableCell className="text-right tabular-nums">
                         {compact(i.count)}
                       </TableCell>
-                      <TableCell className="text-right font-mono">
+                      <TableCell className="text-right tabular-nums">
                         <span className="inline-flex items-center gap-1">
                           <UsersIcon className="size-3" />
                           {compact(i.user_count)}
@@ -563,7 +563,7 @@ export const SystemPage = () => {
                           asChild
                           variant="ghost"
                           size="icon-sm"
-                          aria-label="Open in Sentry"
+                          aria-label="Sentry'de aç"
                         >
                           <a
                             href={i.permalink}
@@ -603,15 +603,15 @@ export const SystemPage = () => {
                     <div className="text-xs uppercase tracking-wide text-muted-foreground">
                       Kaynak
                     </div>
-                    <code className="block break-all rounded-md border bg-muted/50 p-2 text-xs">
+                    <code className="block break-all rounded-md border bg-muted p-2 text-xs">
                       {selectedIssue.culprit}
                     </code>
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <div>
-                    <div className="text-xs text-muted-foreground">Events</div>
-                    <div className="mt-0.5 font-mono">
+                    <div className="text-xs text-muted-foreground">Olaylar</div>
+                    <div className="mt-0.5 tabular-nums">
                       {compact(selectedIssue.count)}
                     </div>
                   </div>
@@ -619,7 +619,7 @@ export const SystemPage = () => {
                     <div className="text-xs text-muted-foreground">
                       Etkilenen
                     </div>
-                    <div className="mt-0.5 font-mono">
+                    <div className="mt-0.5 tabular-nums">
                       {compact(selectedIssue.user_count)} kişi
                     </div>
                   </div>
@@ -632,14 +632,14 @@ export const SystemPage = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Status</div>
+                    <div className="text-xs text-muted-foreground">Durum</div>
                     <div className="mt-0.5 text-xs">
                       {selectedIssue.status}
                     </div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">
-                      İlk görüldü
+                      İlk görülme
                     </div>
                     <div className="mt-0.5 text-xs">
                       {new Date(selectedIssue.first_seen).toLocaleString(
@@ -649,7 +649,7 @@ export const SystemPage = () => {
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">
-                      Son görüldü
+                      Son görülme
                     </div>
                     <div className="mt-0.5 text-xs">
                       {new Date(selectedIssue.last_seen).toLocaleString(
@@ -658,7 +658,7 @@ export const SystemPage = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Project</div>
+                    <div className="text-xs text-muted-foreground">Proje</div>
                     <div className="mt-0.5 text-xs">
                       {projectName(selectedIssue.project_id)}
                     </div>
@@ -677,7 +677,7 @@ export const SystemPage = () => {
                     <div className="text-xs uppercase tracking-wide text-muted-foreground">
                       Mesaj
                     </div>
-                    <pre className="max-h-48 overflow-auto rounded-md border bg-muted/50 p-2 text-xs">
+                    <pre className="max-h-48 overflow-auto rounded-md border bg-muted p-2 text-xs">
                       {selectedIssue.value}
                     </pre>
                   </div>
@@ -691,7 +691,7 @@ export const SystemPage = () => {
                     rel="noreferrer"
                   >
                     <ExternalLink className="size-4" />
-                    <span className="ml-2">Open in Sentry</span>
+                    <span className="ml-2">Sentry'de aç</span>
                   </a>
                 </Button>
               </DialogFooter>
@@ -703,7 +703,7 @@ export const SystemPage = () => {
       {/* Veri Kaynağı Sağlığı */}
       <Card>
         <CardHeader>
-          <CardTitle>Data source health</CardTitle>
+          <CardTitle>Veri kaynağı sağlığı</CardTitle>
         </CardHeader>
         <CardContent>
           {integrations.length === 0 ? (
@@ -714,11 +714,11 @@ export const SystemPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Proje</TableHead>
+                  <TableHead>Kaynak</TableHead>
+                  <TableHead>Durum</TableHead>
                   <TableHead>Son senkron</TableHead>
-                  <TableHead>Errors</TableHead>
+                  <TableHead>Hatalar</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -746,7 +746,7 @@ export const SystemPage = () => {
       {/* Heartbeat İzleyiciler */}
       <Card>
         <CardHeader>
-          <CardTitle>Heartbeat monitors</CardTitle>
+          <CardTitle>Heartbeat izleyiciler</CardTitle>
           <CardAction>
             <Dialog open={open} onOpenChange={setOpen}>
               <Button size="sm" onClick={() => setOpen(true)}>
@@ -766,7 +766,7 @@ export const SystemPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Expected range</Label>
+                    <Label>Beklenen aralık</Label>
                     <Select
                       value={hbInterval}
                       onValueChange={setHbInterval}
@@ -786,7 +786,7 @@ export const SystemPage = () => {
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setOpen(false)}>
-                    Vazgeç
+                    İptal
                   </Button>
                   <Button
                     onClick={handleCreate}
@@ -809,8 +809,8 @@ export const SystemPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Monitor</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>İzleyici</TableHead>
+                  <TableHead>Durum</TableHead>
                   <TableHead>Son ping</TableHead>
                   <TableHead>Ping URL</TableHead>
                   <TableHead className="w-12" />
@@ -826,7 +826,7 @@ export const SystemPage = () => {
                       </TableCell>
                       <TableCell>
                         {status === "ok" && (
-                          <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                          <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                             canlı
                           </Badge>
                         )}
@@ -855,7 +855,7 @@ export const SystemPage = () => {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              aria-label="Delete"
+                              aria-label="Sil"
                             >
                               <Trash2 className="size-4 text-destructive" />
                             </Button>
@@ -867,7 +867,7 @@ export const SystemPage = () => {
                               </AlertDialogTitle>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>İptal</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   remove({
@@ -898,7 +898,7 @@ export const SystemPage = () => {
       {/* Senkron Geçmişi */}
       <Card>
         <CardHeader>
-          <CardTitle>Sync history</CardTitle>
+          <CardTitle>Senkron geçmişi</CardTitle>
         </CardHeader>
         <CardContent>
           {runs.length === 0 ? (
@@ -911,8 +911,8 @@ export const SystemPage = () => {
                 <TableRow>
                   <TableHead>Zaman</TableHead>
                   <TableHead>Tetikleyici</TableHead>
-                  <TableHead>Metric</TableHead>
-                  <TableHead>Result</TableHead>
+                  <TableHead>Metrik</TableHead>
+                  <TableHead>Sonuç</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -933,7 +933,7 @@ export const SystemPage = () => {
                           {r.error_count} hata
                         </Badge>
                       ) : (
-                        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                        <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                           {r.ok_count} ok
                         </Badge>
                       )}
@@ -962,19 +962,19 @@ const SysKpi = ({
 }) => {
   const toneCls =
     tone === "emerald"
-      ? "text-emerald-500"
+      ? "text-emerald-600 dark:text-emerald-400"
       : tone === "amber"
-        ? "text-amber-500"
+        ? "text-amber-600 dark:text-amber-400"
         : tone === "destructive"
           ? "text-destructive"
           : "text-foreground";
   return (
-    <div className="rounded-lg border bg-card/40 p-3">
+    <div className="rounded-lg border bg-card p-3">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
         {icon}
         {label}
       </div>
-      <div className={cn("mt-1 font-mono text-2xl tabular-nums", toneCls)}>
+      <div className={cn("mt-1 text-2xl tabular-nums", toneCls)}>
         {value}
       </div>
     </div>
@@ -987,7 +987,7 @@ const LevelBadge = ({ level }: { level: string }) => {
   }
   if (level === "warning") {
     return (
-      <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500">
+      <Badge className="border-amber-600/25 bg-amber-500/10 text-amber-700 dark:text-amber-400">
         {level}
       </Badge>
     );

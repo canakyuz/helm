@@ -145,7 +145,7 @@ export const UserDetailPage = () => {
         setReloadKey((k) => k + 1);
       }
     } catch (e) {
-      toast.error("Action failed", {
+      toast.error("İşlem başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -240,12 +240,12 @@ export const UserDetailPage = () => {
                     <Ban className="mr-1 size-3" /> banlı
                   </Badge>
                 ) : (
-                  <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                  <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     <CheckCircle2 className="mr-1 size-3" /> aktif
                   </Badge>
                 )}
                 {isPremium && (
-                  <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500">
+                  <Badge className="border-amber-600/25 bg-amber-500/10 text-amber-700 dark:text-amber-400">
                     <Sparkles className="mr-1 size-3" /> premium
                   </Badge>
                 )}
@@ -269,12 +269,12 @@ export const UserDetailPage = () => {
                   disabled={busy}
                   onClick={() =>
                     runAction("unban", undefined, {
-                      successMsg: "Unbanned",
+                      successMsg: "Ban kaldırıldı",
                     })
                   }
                 >
                   <ShieldOff className="size-4" />
-                  <span className="ml-2">Unban</span>
+                  <span className="ml-2">Banı kaldır</span>
                 </Button>
               ) : (
                 <AlertDialog>
@@ -295,11 +295,11 @@ export const UserDetailPage = () => {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>İptal</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() =>
                           runAction("ban", undefined, {
-                            successMsg: "Banned",
+                            successMsg: "Banlandı",
                           })
                         }
                       >
@@ -319,15 +319,15 @@ export const UserDetailPage = () => {
                     { scope: "app", patch: { premium: !isPremium } },
                     {
                       successMsg: isPremium
-                        ? "Premium disabled"
-                        : "Premium enabled",
+                        ? "Premium kapatıldı"
+                        : "Premium açıldı",
                     },
                   )
                 }
               >
                 <Sparkles className="size-4" />
                 <span className="ml-2">
-                  {isPremium ? "Premium kapat" : "Enable premium"}
+                  {isPremium ? "Premium kapat" : "Premium aç"}
                 </span>
               </Button>
               <Button
@@ -336,13 +336,13 @@ export const UserDetailPage = () => {
                 disabled={busy || !user.email}
                 onClick={() =>
                   runAction("send_password_reset", undefined, {
-                    successMsg: "Password reset link sent",
+                    successMsg: "Şifre sıfırlama bağlantısı gönderildi",
                   })
                 }
-                title={!user.email ? "This user has no email" : undefined}
+                title={!user.email ? "Bu kullanıcının e-postası yok" : undefined}
               >
                 <KeyRound className="size-4" />
-                <span className="ml-2">Reset password</span>
+                <span className="ml-2">Şifreyi sıfırla</span>
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -353,7 +353,7 @@ export const UserDetailPage = () => {
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="size-4" />
-                    <span className="ml-2">Delete</span>
+                    <span className="ml-2">Sil</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -368,11 +368,11 @@ export const UserDetailPage = () => {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>İptal</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() =>
                         runAction("delete_user", undefined, {
-                          successMsg: "User deleted",
+                          successMsg: "Kullanıcı silindi",
                           afterDelete: true,
                         })
                       }
@@ -395,31 +395,31 @@ export const UserDetailPage = () => {
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
-              <dt className="text-muted-foreground">Email</dt>
+              <dt className="text-muted-foreground">E-posta</dt>
               <dd className="font-mono">{user.email ?? "-"}</dd>
 
-              <dt className="text-muted-foreground">Phone</dt>
+              <dt className="text-muted-foreground">Telefon</dt>
               <dd className="font-mono">{user.phone ?? "-"}</dd>
 
-              <dt className="text-muted-foreground">Signup</dt>
+              <dt className="text-muted-foreground">Kayıt</dt>
               <dd>{fmt(user.created_at)}</dd>
 
-              <dt className="text-muted-foreground">Last updated</dt>
+              <dt className="text-muted-foreground">Son güncelleme</dt>
               <dd>{fmt(user.updated_at)}</dd>
 
-              <dt className="text-muted-foreground">Last sign-in</dt>
+              <dt className="text-muted-foreground">Son giriş</dt>
               <dd>{fmt(user.last_sign_in_at)}</dd>
 
-              <dt className="text-muted-foreground">Email confirmed</dt>
+              <dt className="text-muted-foreground">E-posta onayı</dt>
               <dd>{fmt(user.email_confirmed_at)}</dd>
 
-              <dt className="text-muted-foreground">Phone confirmed</dt>
+              <dt className="text-muted-foreground">Telefon onayı</dt>
               <dd>{fmt(user.phone_confirmed_at)}</dd>
 
-              <dt className="text-muted-foreground">Ban ends</dt>
+              <dt className="text-muted-foreground">Ban bitişi</dt>
               <dd>{fmt(user.banned_until)}</dd>
 
-              <dt className="text-muted-foreground">Providers</dt>
+              <dt className="text-muted-foreground">Provider'lar</dt>
               <dd className="space-x-1">
                 {user.identities.length === 0 ? (
                   <span className="text-muted-foreground">-</span>
@@ -438,7 +438,7 @@ export const UserDetailPage = () => {
         {/* Müdahale geçmişi */}
         <Card>
           <CardHeader>
-            <CardTitle>Intervention history</CardTitle>
+            <CardTitle>Müdahale geçmişi</CardTitle>
           </CardHeader>
           <CardContent>
             {auditLogs.length === 0 ? (
@@ -450,8 +450,8 @@ export const UserDetailPage = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Zaman</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Detail</TableHead>
+                    <TableHead>İşlem</TableHead>
+                    <TableHead>Detay</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -480,7 +480,7 @@ export const UserDetailPage = () => {
             <CardTitle className="text-base">user_metadata</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="max-h-72 overflow-auto rounded-md border bg-muted/50 p-3 text-xs">
+            <pre className="max-h-72 overflow-auto rounded-md border bg-muted p-3 text-xs">
               {JSON.stringify(user.user_metadata, null, 2)}
             </pre>
           </CardContent>
@@ -490,7 +490,7 @@ export const UserDetailPage = () => {
             <CardTitle className="text-base">app_metadata</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="max-h-72 overflow-auto rounded-md border bg-muted/50 p-3 text-xs">
+            <pre className="max-h-72 overflow-auto rounded-md border bg-muted p-3 text-xs">
               {JSON.stringify(user.app_metadata, null, 2)}
             </pre>
           </CardContent>

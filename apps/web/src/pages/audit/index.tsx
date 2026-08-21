@@ -27,10 +27,10 @@ import type { AuditLog, Project } from "@/types";
 
 const ACTION_LABELS: Record<string, string> = {
   ban: "Banla",
-  unban: "Unban",
-  set_metadata: "Change metadata",
-  send_password_reset: "Reset password",
-  delete_user: "Delete user",
+  unban: "Ban kaldır",
+  set_metadata: "Metadata değiştir",
+  send_password_reset: "Şifre sıfırla",
+  delete_user: "Kullanıcı sil",
 };
 
 const actionBadge = (action: string) => {
@@ -40,7 +40,7 @@ const actionBadge = (action: string) => {
   }
   if (action === "unban") {
     return (
-      <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+      <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
         {label}
       </Badge>
     );
@@ -131,7 +131,7 @@ export const AuditPage = () => {
       {/* KPI cluster */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <AuditKpi
-          label="Total actions"
+          label="Toplam işlem"
           value={stats.total}
         />
         <AuditKpi
@@ -140,7 +140,7 @@ export const AuditPage = () => {
           tone="primary"
         />
         <AuditKpi
-          label={`Most frequent: ${stats.topActionLabel}`}
+          label={`En sık: ${stats.topActionLabel}`}
           value={stats.topActionCount}
         />
         <AuditKpi
@@ -151,14 +151,14 @@ export const AuditPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>User interventions</CardTitle>
+          <CardTitle>Kullanıcı müdahaleleri</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search by user UUID or detail…"
+                placeholder="Kullanıcı UUID veya detay ara…"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className="pl-8"
@@ -169,7 +169,7 @@ export const AuditPage = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All actions</SelectItem>
+                <SelectItem value="all">Tüm işlemler</SelectItem>
                 {Object.entries(ACTION_LABELS).map(([k, v]) => (
                   <SelectItem key={k} value={k}>
                     {v}
@@ -184,13 +184,13 @@ export const AuditPage = () => {
               icon={<ClipboardList className="size-6" />}
               title={
                 logs.length === 0
-                  ? "No interventions recorded yet"
-                  : "No records match the filter"
+                  ? "Henüz müdahale kaydı yok"
+                  : "Filtreye uyan kayıt yok"
               }
               description={
                 logs.length === 0
-                  ? "Users → open any user's detail → ban / premium / reset password / delete. Every action is collected here (who, when, on whom, what)."
-                  : "Loosen the filter or search, or set the action type to All actions."
+                  ? "Kullanıcılar → herhangi bir kullanıcının detayını aç → ban / premium / şifre sıfırla / sil. Her işlem burada birikir (kim, ne zaman, kime, ne)."
+                  : "Filtreyi gevşet, aramayı temizle veya işlem türünü Tüm işlemler yap."
               }
               compact
             />
@@ -199,11 +199,11 @@ export const AuditPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Zaman</TableHead>
-                  {isAll && <TableHead>Project</TableHead>}
+                  {isAll && <TableHead>Proje</TableHead>}
                   <TableHead>Yapan</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Detail</TableHead>
+                  <TableHead>İşlem</TableHead>
+                  <TableHead>Kullanıcı</TableHead>
+                  <TableHead>Detay</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>
@@ -211,7 +211,7 @@ export const AuditPage = () => {
                 {filtered.map((l) => (
                   <TableRow key={l.id}>
                     <TableCell className="whitespace-nowrap text-xs">
-                      {new Date(l.created_at).toLocaleString("en-US")}
+                      {new Date(l.created_at).toLocaleString("tr-TR")}
                     </TableCell>
                     {isAll && (
                       <TableCell className="text-xs">
@@ -236,7 +236,7 @@ export const AuditPage = () => {
                           asChild
                           variant="ghost"
                           size="icon-sm"
-                          aria-label="Go to user"
+                          aria-label="Kullanıcıya git"
                         >
                           <Link to={`/users/${l.target_user}`}>
                             <ExternalLink className="size-4" />
@@ -264,12 +264,12 @@ const AuditKpi = ({
   value: number | string;
   tone?: "primary";
 }) => (
-  <div className="rounded-lg border bg-card/40 p-3">
+  <div className="rounded-lg border bg-card p-3">
     <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
       {label}
     </div>
     <div
-      className={`mt-1 font-mono text-2xl tabular-nums ${tone === "primary" ? "text-primary" : "text-foreground"}`}
+      className={`mt-1 text-2xl tabular-nums ${tone === "primary" ? "text-primary" : "text-foreground"}`}
     >
       {value}
     </div>

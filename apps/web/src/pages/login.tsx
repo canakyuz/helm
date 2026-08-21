@@ -20,12 +20,12 @@ export const LoginPage = () => {
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <div className="text-2xl font-semibold text-primary">helm</div>
-          <p className="text-sm text-muted-foreground">Founder cockpit</p>
+          <p className="text-sm text-muted-foreground">Kurucu kokpiti</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-posta</Label>
               <Input
                 id="email"
                 type="email"
@@ -35,7 +35,7 @@ export const LoginPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Şifre</Label>
               <Input
                 id="password"
                 type="password"
@@ -49,7 +49,7 @@ export const LoginPage = () => {
               className="w-full"
               disabled={isPending}
             >
-              Sign in
+              Giriş yap
             </Button>
           </form>
         </CardContent>
