@@ -25,7 +25,7 @@ export function LoginPage() {
             <section className="auth-panel" aria-labelledby="auth-title">
               <header className="auth-header">
                 <div className="auth-brand" role="img" aria-label={t("auth.brand.label")}>
-                  <span aria-hidden="true">h</span>
+                  <img src="/helm-mark.svg" alt="" aria-hidden="true" />
                   <b aria-hidden="true">helm</b>
                 </div>
                 <LanguageToggle />

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="blade-blue" x1="44" y1="44" x2="88" y2="190" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6478FF" />
+      <stop offset="1" stop-color="#16A6F0" />
+    </linearGradient>
+    <linearGradient id="blade-pink" x1="220" y1="26" x2="78" y2="172" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF4FB0" />
+      <stop offset="1" stop-color="#D95AA6" />
+    </linearGradient>
+    <linearGradient id="blade-cyan" x1="211" y1="112" x2="60" y2="205" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17D8EF" />
+      <stop offset="1" stop-color="#079FE0" />
+    </linearGradient>
+    <linearGradient id="blade-turquoise" x1="172" y1="170" x2="54" y2="219" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#31DCCF" />
+      <stop offset="1" stop-color="#10B8BD" />
+    </linearGradient>
+    <linearGradient id="blade-lime" x1="118" y1="208" x2="40" y2="228" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B9ED4B" />
+      <stop offset="1" stop-color="#57CE75" />
+    </linearGradient>
+  </defs>
+  <path
+    fill="url(#blade-blue)"
+    d="M28 230C48 201 66 166 70 138C74 113 61 96 48 76C43 68 44 62 50 56L72 35C89 55 104 72 105 90C106 116 80 172 28 230Z"
+  />
+  <path
+    fill="url(#blade-pink)"
+    d="M28 230C54 192 76 164 100 145C132 121 157 111 183 103C210 94 224 77 224 57V16C203 38 175 48 143 66C116 81 104 102 96 127C84 158 61 193 28 230Z"
+  />
+  <path
+    fill="url(#blade-cyan)"
+    d="M28 230C70 190 108 158 146 133C177 113 202 108 226 114C208 130 194 149 176 162C160 174 141 174 122 179C86 188 53 209 28 230Z"
+  />
+  <path
+    fill="url(#blade-turquoise)"
+    d="M28 230C68 201 111 178 178 167C166 185 156 198 143 205C127 214 111 210 96 207C68 201 48 214 28 230Z"
+  />
+  <path
+    fill="url(#blade-lime)"
+    d="M28 230C58 209 88 202 124 208C114 223 104 231 91 231C80 231 67 223 56 223C45 223 36 227 28 230Z"
+  />
+</svg>

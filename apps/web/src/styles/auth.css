@@ -110,17 +110,11 @@
   user-select: none;
 }
 
-.auth-brand span {
-  display: grid;
+.auth-brand img {
+  display: block;
   width: 34px;
   height: 34px;
-  place-items: center;
-  border-radius: 11px;
-  background: var(--auth-lime);
-  color: #142010;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 19px;
-  font-weight: 800;
+  object-fit: contain;
 }
 
 .auth-brand b {
@@ -397,11 +391,13 @@
   width: 30px;
   height: 30px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--auth-cyan) 55%, transparent);
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--auth-shell) 48%, transparent);
-  font: 700 15px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-  box-shadow: inset 0 0 18px color-mix(in srgb, var(--auth-cyan) 9%, transparent);
+}
+
+.auth-hud-chip img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .auth-hud-horizon {
