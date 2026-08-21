@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const publishTargetSchema = z.object({
   name: z.string().min(1, "Ad zorunlu"),
-  url: z.string().url("A valid URL is required"),
+  url: z.string().url("Geçerli bir URL gerekli"),
   secret: z.string().min(1, "Secret zorunlu"),
   locales: z.array(z.string()).optional(),
 });
