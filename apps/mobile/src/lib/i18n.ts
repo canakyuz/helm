@@ -119,6 +119,9 @@ const EN: Record<string, string> = {
   "E-posta ve en az 6 karakter şifre gir.":
     "Enter your email and a password of at least 6 characters.",
   "E-posta veya şifre hatalı.": "Incorrect email or password.",
+  "Giriş şu anda kullanılamıyor. Tekrar dene.": "Sign-in is unavailable right now. Try again.",
+  "Şifreyi gizle": "Hide password",
+  "Şifreyi göster": "Show password",
   "E-POSTA": "EMAIL",
   "GİRİŞ YAP": "SIGN IN",
   "Cockpit'in cep yoldaşı. Portföyün, kuruşuna kadar.":
