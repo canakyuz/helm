@@ -60,7 +60,7 @@ export const ProjectEdit = () => {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold tracking-tight">
-        Projeyi Düzenle
+        Projeyi düzenle
       </h1>
       <Card>
         <CardContent>
@@ -71,7 +71,7 @@ export const ProjectEdit = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project name</FormLabel>
+                    <FormLabel>Proje adı</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -100,7 +100,7 @@ export const ProjectEdit = () => {
                     <FormLabel>App Store ID</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="6451234567 (for reviews)"
+                        placeholder="6451234567 (yorumlar için)"
                         {...field}
                         value={field.value ?? ""}
                       />
@@ -114,7 +114,7 @@ export const ProjectEdit = () => {
                 name="app_store_country"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>App Store country</FormLabel>
+                    <FormLabel>App Store ülkesi</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="us"
@@ -126,7 +126,7 @@ export const ProjectEdit = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Save</Button>
+              <Button type="submit">Kaydet</Button>
             </form>
           </Form>
         </CardContent>
@@ -135,7 +135,7 @@ export const ProjectEdit = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Send className="size-4" /> CMS Publish Hedefleri
+            <Send className="size-4" /> CMS yayın hedefleri
           </CardTitle>
           <CardAction>
             <Button
@@ -151,7 +151,7 @@ export const ProjectEdit = () => {
                 })
               }
             >
-              <Plus className="size-4" /> Hedef Ekle
+              <Plus className="size-4" /> Hedef ekle
             </Button>
           </CardAction>
         </CardHeader>
@@ -164,7 +164,7 @@ export const ProjectEdit = () => {
 
           {targets.fields.length === 0 ? (
             <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-              Henüz hedef yok. "Add target" ile başla.
+              Henüz hedef yok. "Hedef ekle" ile başla.
             </p>
           ) : (
             <Form {...form}>
@@ -226,11 +226,11 @@ export const ProjectEdit = () => {
                       render={({ field }) => (
                         <FormItem className="md:col-span-2">
                           <FormLabel className="text-xs">
-                            Locales (virgül)
+                            Diller (virgül)
                           </FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="en,tr (empty = all)"
+                              placeholder="en,tr (boş = tümü)"
                               value={(field.value ?? []).join(",")}
                               onChange={(e) =>
                                 field.onChange(

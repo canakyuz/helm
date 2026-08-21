@@ -105,7 +105,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "mrr_cents",
-      label: "Price decimal (if prices always end in .99 - restores the cents RevenueCat rounds off)",
+      label: "Fiyat ondalığı (fiyatlar hep .99 ile bitiyorsa - RevenueCat'in yuvarladığı kuruşları geri ekler)",
       placeholder: "0.99",
       optional: true,
     },
@@ -132,7 +132,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "host", label: "Host", placeholder: "https://eu.posthog.com" },
     {
       key: "funnel_steps",
-      label: "Funnel steps (comma-separated event names)",
+      label: "Huni adımları (virgülle ayrılmış event adları)",
       placeholder: "app_opened, signup, onboarding_complete, purchase",
       optional: true,
     },
@@ -146,7 +146,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "service_role_key", label: "Service Role Key", secret: true },
     {
       key: "crm_tables",
-      label: "CRM tables (comma-separated, optional `table:column`)",
+      label: "CRM tabloları (virgülle ayrılmış, opsiyonel `tablo:kolon`)",
       placeholder: "profiles:id, gems, subscriptions",
       optional: true,
     },
@@ -194,7 +194,7 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     { key: "auth_token", label: "Auth Token", secret: true },
     {
       key: "host",
-      label: "Host (for self-hosted)",
+      label: "Host (self-hosted için)",
       placeholder: "https://sentry.io",
       optional: true,
     },
@@ -208,12 +208,12 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "from_email",
-      label: "Sender email (must be a domain verified in Resend)",
+      label: "Gönderen e-posta (Resend'de doğrulanmış bir domain olmalı)",
       placeholder: "no-reply@helm.app",
     },
     {
       key: "from_name",
-      label: "Sender name",
+      label: "Gönderen adı",
       placeholder: "Helm",
       optional: true,
     },
@@ -221,19 +221,19 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   app_store_connect: [
     {
       key: "app_store_id",
-      label: "App Store ID (the number after `id` in the App Store URL - used for reviews)",
+      label: "App Store ID (App Store URL'sinde `id` sonrası sayı - yorumlar için kullanılır)",
       placeholder: "6451234567",
       optional: true,
     },
     {
       key: "app_store_country",
-      label: "App Store country codes (comma-separated - used for reviews)",
+      label: "App Store ülke kodları (virgülle ayrılmış - yorumlar için kullanılır)",
       placeholder: "tr,us,gb,de",
       optional: true,
     },
     {
       key: "issuer_id",
-      label: "Issuer ID (for a Team Key - leave EMPTY for an Individual API Key)",
+      label: "Issuer ID (Team Key için - Individual API Key'de BOŞ bırak)",
       placeholder: "57246542-96fe-1a63-e053-0824d011072a",
       optional: true,
     },
@@ -244,14 +244,14 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
     },
     {
       key: "private_key",
-      label: "Private key (.p8 contents - including BEGIN/END)",
+      label: "Private key (.p8 içeriği - BEGIN/END dahil)",
       secret: true,
       multiline: true,
       placeholder: "-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY-----",
     },
     {
       key: "vendor_number",
-      label: "Vendor Number (Payments and Financial Reports)",
+      label: "Vendor Number (Payments and Financial Reports bölümünden)",
       placeholder: "85123456",
     },
     {
@@ -264,20 +264,20 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
   google_play_developer: [
     {
       key: "service_account_json",
-      label: "Service account JSON (Google Cloud → IAM → Service Accounts → Keys → CREATE → JSON; paste the WHOLE file)",
+      label: "Service account JSON (Google Cloud → IAM → Service Accounts → Keys → CREATE → JSON; dosyanın TAMAMINI yapıştır)",
       placeholder: '{\n  "type": "service_account",\n  "project_id": "...",\n  "private_key_id": "...",\n  "private_key": "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n",\n  "client_email": "helm@your-project.iam.gserviceaccount.com",\n  ...\n}',
       secret: true,
       multiline: true,
     },
     {
       key: "package_name",
-      label: "Package name (optional - falls back to properties.google_play_id)",
+      label: "Package name (opsiyonel - boşsa properties.google_play_id kullanılır)",
       placeholder: "com.example.app",
       optional: true,
     },
     {
       key: "language_codes",
-      label: "Review translation languages (comma-separated, optional - affects reviews, not versions)",
+      label: "Yorum çeviri dilleri (virgülle ayrılmış, opsiyonel - yorumları etkiler, sürümleri değil)",
       placeholder: "en,tr",
       optional: true,
     },
@@ -289,7 +289,7 @@ const PROVIDERS = Object.keys(PROVIDER_LABELS) as ProviderName[];
 const SyncBadge = ({ record }: { record: ProjectIntegration }) => {
   if (record.last_sync_status === "ok") {
     return (
-      <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+      <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
         senkron
       </Badge>
     );
@@ -308,7 +308,7 @@ const SyncBadge = ({ record }: { record: ProjectIntegration }) => {
       </Tooltip>
     );
   }
-  return <Badge variant="secondary">has not run yet</Badge>;
+  return <Badge variant="secondary">henüz çalışmadı</Badge>;
 };
 
 interface TestResult {
@@ -358,7 +358,7 @@ const fmtNum = (n: number | null) =>
 const StatusCell = ({ status }: { status: DiffStatus }) => {
   if (status === "match") {
     return (
-      <span className="inline-flex items-center gap-1 text-emerald-500">
+      <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
         <Check className="size-3.5" />
       </span>
     );
@@ -372,13 +372,13 @@ const StatusCell = ({ status }: { status: DiffStatus }) => {
   }
   if (status === "missing_stored") {
     return (
-      <span className="inline-flex items-center gap-1 text-amber-500">
+      <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
         <AlertTriangle className="size-3.5" /> DB'de yok
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-amber-500">
+    <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
       <AlertTriangle className="size-3.5" /> upstream'de yok
     </span>
   );
@@ -416,7 +416,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
         ok: false,
         error: e instanceof Error ? e.message : String(e),
       });
-      toast.error("Test failed");
+      toast.error("Test başarısız");
     } finally {
       setTesting(null);
     }
@@ -438,7 +438,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
         ok: false,
         error: e instanceof Error ? e.message : String(e),
       });
-      toast.error("Verification failed");
+      toast.error("Doğrulama başarısız");
     } finally {
       setVerifying(null);
     }
@@ -516,7 +516,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Data sources</CardTitle>
+        <CardTitle>Veri kaynakları</CardTitle>
         <CardAction>
           <Dialog
             open={open}
@@ -532,14 +532,14 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
               <DialogHeader>
                 <DialogTitle>
                   {editingId
-                    ? `${PROVIDER_LABELS[provider as ProviderName]} - edit`
-                    : "Connect a data source"}
+                    ? `${PROVIDER_LABELS[provider as ProviderName]} - düzenle`
+                    : "Veri kaynağı bağla"}
                 </DialogTitle>
               </DialogHeader>
 
               <div className="flex-1 space-y-4 overflow-y-auto py-2 pr-1">
                 <div className="space-y-2">
-                  <Label>Provider</Label>
+                  <Label>Sağlayıcı</Label>
                   <Select
                     value={provider}
                     disabled={!!editingId}
@@ -559,7 +559,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                           disabled={usedProviders.has(p) && !editingId}
                         >
                           {PROVIDER_LABELS[p]}
-                          {usedProviders.has(p) && !editingId ? " (connected)" : ""}
+                          {usedProviders.has(p) && !editingId ? " (bağlı)" : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -600,7 +600,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                           onClick={() =>
                             setRevealed((r) => ({ ...r, [f.key]: !r[f.key] }))
                           }
-                          aria-label={revealed[f.key] ? "Gizle" : "Show"}
+                          aria-label={revealed[f.key] ? "Gizle" : "Göster"}
                           className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground hover:text-foreground"
                         >
                           {revealed[f.key] ? (
@@ -632,7 +632,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                     resetForm();
                   }}
                 >
-                  Vazgeç
+                  İptal
                 </Button>
                 <Button
                   onClick={handleSave}
@@ -663,7 +663,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
             <div key={cat} className="space-y-2">
               <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
                 <span className="font-medium">{CATEGORY_LABELS[cat]}</span>
-                <span className="font-mono tabular-nums">
+                <span className="tabular-nums">
                   {connectedCount} / {providersInCat.length}
                 </span>
               </div>
@@ -717,7 +717,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
         {integrations.length === 0 && !query.isLoading && (
           <div className="rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground">
             Henüz hiçbir veri kaynağı bağlanmadı. Yukarıdaki kartlardan
-            <strong> Connect</strong> ile başla.
+            <strong> Bağlan</strong> ile başla.
           </div>
         )}
       </CardContent>
@@ -736,7 +736,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
             {testResult && testResult.ok && (
               <>
                 <div className="flex items-center gap-2 text-sm">
-                  <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                  <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     başarılı
                   </Badge>
                   <span className="text-muted-foreground">
@@ -747,9 +747,9 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Metric</TableHead>
-                        <TableHead className="text-right">Value</TableHead>
+                        <TableHead>Tarih</TableHead>
+                        <TableHead>Metrik</TableHead>
+                        <TableHead className="text-right">Değer</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -761,7 +761,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                           <TableCell className="font-mono text-xs">
                             {p.metric}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-xs">
+                          <TableCell className="text-right text-xs tabular-nums">
                             {p.value}
                           </TableCell>
                         </TableRow>
@@ -791,7 +791,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
       <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Verification - upstream vs DB</DialogTitle>
+            <DialogTitle>Doğrulama - upstream vs DB</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             {!verifyResult && (
@@ -802,7 +802,7 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
             {verifyResult && verifyResult.ok && verifyResult.summary && (
               <>
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-500">
+                  <Badge className="border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     {verifyResult.summary.match} eşleşme
                   </Badge>
                   {verifyResult.summary.mismatch > 0 && (
@@ -811,12 +811,12 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                     </Badge>
                   )}
                   {verifyResult.summary.missing_stored > 0 && (
-                    <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500">
+                    <Badge className="border-amber-600/25 bg-amber-500/10 text-amber-700 dark:text-amber-400">
                       {verifyResult.summary.missing_stored} DB'de yok
                     </Badge>
                   )}
                   {verifyResult.summary.missing_upstream > 0 && (
-                    <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-500">
+                    <Badge className="border-amber-600/25 bg-amber-500/10 text-amber-700 dark:text-amber-400">
                       {verifyResult.summary.missing_upstream} upstream'de yok
                     </Badge>
                   )}
@@ -831,12 +831,12 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Metric</TableHead>
+                        <TableHead>Tarih</TableHead>
+                        <TableHead>Metrik</TableHead>
                         <TableHead className="text-right">Upstream</TableHead>
                         <TableHead className="text-right">DB</TableHead>
                         <TableHead className="text-right">Δ%</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>Durum</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -858,13 +858,13 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
                           <TableCell className="font-mono text-xs">
                             {d.metric}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-xs">
+                          <TableCell className="text-right text-xs tabular-nums">
                             {fmtNum(d.upstream)}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-xs">
+                          <TableCell className="text-right text-xs tabular-nums">
                             {fmtNum(d.stored)}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-xs">
+                          <TableCell className="text-right text-xs tabular-nums">
                             {d.delta_pct === null
                               ? "-"
                               : `${d.delta_pct > 0 ? "+" : ""}${d.delta_pct.toFixed(1)}%`}
@@ -942,8 +942,8 @@ const ProviderCard = ({
   return (
     <div
       className={cn(
-        "group flex flex-col gap-2 rounded-lg border bg-card/40 p-3 transition-colors",
-        connected ? "hover:bg-card/80" : "opacity-60 hover:opacity-100",
+        "group flex flex-col gap-2 rounded-lg border bg-card p-3 transition-colors",
+        connected ? "hover:bg-accent" : "opacity-60 hover:opacity-100",
       )}
     >
       {/* Header: ikon + ad + sync badge */}
@@ -951,14 +951,14 @@ const ProviderCard = ({
         <div className="flex items-start gap-2 min-w-0">
           <div
             className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-md ring-1 ring-foreground/10",
+              "flex size-8 shrink-0 items-center justify-center rounded-md ring-1 ring-border",
               status === "ok"
-                ? "bg-emerald-500/10 text-emerald-500"
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                 : status === "error"
                   ? "bg-destructive/10 text-destructive"
                   : connected
                     ? "bg-muted text-foreground"
-                    : "bg-muted/50 text-muted-foreground",
+                    : "bg-muted text-muted-foreground",
             )}
           >
             <ProviderIcon name={meta?.icon ?? "Box"} />
@@ -1002,7 +1002,7 @@ const ProviderCard = ({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Test"
+                aria-label="Test et"
                 disabled={testing}
                 onClick={onTest}
               >
@@ -1011,7 +1011,7 @@ const ProviderCard = ({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Verify"
+                aria-label="Doğrula"
                 disabled={verifying}
                 onClick={onVerify}
               >
@@ -1020,7 +1020,7 @@ const ProviderCard = ({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Edit"
+                aria-label="Düzenle"
                 onClick={onEdit}
               >
                 <Pencil className="size-3.5" />
@@ -1030,21 +1030,21 @@ const ProviderCard = ({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="Delete"
+                    aria-label="Sil"
                   >
                     <Trash2 className="size-3.5 text-destructive" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Remove this connection?</AlertDialogTitle>
+                    <AlertDialogTitle>Bu bağlantı kaldırılsın mı?</AlertDialogTitle>
                     <AlertDialogDescription>
                       {PROVIDER_LABELS[provider]} entegrasyonu silinir. Geri
                       alınamaz.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>İptal</AlertDialogCancel>
                     <AlertDialogAction onClick={onDelete}>
                       Sil
                     </AlertDialogAction>
@@ -1061,7 +1061,7 @@ const ProviderCard = ({
             onClick={onConnect}
           >
             <Plus className="size-3.5" />
-            <span className="ml-1">Connect</span>
+            <span className="ml-1">Bağlan</span>
           </Button>
         )}
       </div>

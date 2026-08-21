@@ -144,9 +144,9 @@ export const PropertyCreate = () => {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">New property</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Yeni property</h1>
         <p className="text-sm text-muted-foreground">
-          Bir property = bir platform (site, mobil uygulama, masaüstü uygulaması). Önce bir brand seç, sonra
+          Bir property = bir platform (site, mobil uygulama, masaüstü uygulaması). Önce bir marka seç, sonra
           property tipini ve modülleri belirle.
         </p>
       </div>
@@ -156,7 +156,7 @@ export const PropertyCreate = () => {
           {/* 1) Brand */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">1. Brand</CardTitle>
+              <CardTitle className="text-base">1. Marka</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <FormField
@@ -164,7 +164,7 @@ export const PropertyCreate = () => {
                 name="brand_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mevcut brand</FormLabel>
+                    <FormLabel>Mevcut marka</FormLabel>
                     <Select
                       value={field.value ?? ""}
                       onValueChange={(v) => {
@@ -174,7 +174,7 @@ export const PropertyCreate = () => {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Pick a brand (or create one)" />
+                          <SelectValue placeholder="Bir marka seç (veya yeni oluştur)" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -201,7 +201,7 @@ export const PropertyCreate = () => {
                 name="new_brand_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New brand</FormLabel>
+                    <FormLabel>Yeni marka</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Dante"
@@ -231,7 +231,7 @@ export const PropertyCreate = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Property name</FormLabel>
+                    <FormLabel>Property adı</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Dante Mobile"
@@ -303,7 +303,7 @@ export const PropertyCreate = () => {
           {/* 3) Modüller */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">3. Modules</CardTitle>
+              <CardTitle className="text-base">3. Modüller</CardTitle>
               <p className="text-xs text-muted-foreground">
                 Tipe göre önerilen modüller otomatik seçildi. Sonra ayarlardan değiştirebilirsin.
               </p>
@@ -375,7 +375,7 @@ export const PropertyCreate = () => {
                   name="app_store_country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>App Store country</FormLabel>
+                      <FormLabel>App Store ülkesi</FormLabel>
                       <FormControl>
                         <Input placeholder="us" {...field} value={field.value ?? ""} />
                       </FormControl>
@@ -398,13 +398,13 @@ export const PropertyCreate = () => {
               İptal
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Kaydediliyor..." : "Create property"}
+              {submitting ? "Oluşturuluyor…" : "Property oluştur"}
             </Button>
           </div>
 
           {!brandId && (form.watch("new_brand_name") ?? "").trim().length === 0 && (
             <p className="text-xs text-muted-foreground">
-              İpucu: önce bir brand seç veya yeni brand adı gir.
+              İpucu: önce bir marka seç veya yeni marka adı gir.
             </p>
           )}
         </form>

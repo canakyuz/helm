@@ -54,7 +54,7 @@ export const CollectionEditPage = () => {
         values: { label, slug, kind, schema },
       },
       {
-        onSuccess: () => toast.success("Schema updated"),
+        onSuccess: () => toast.success("Şema güncellendi"),
         onError: (e) =>
           toast.error("Kaydedilemedi", {
             description: e instanceof Error ? e.message : String(e),
@@ -63,8 +63,8 @@ export const CollectionEditPage = () => {
     );
   };
 
-  if (query.isLoading) return <p className="text-muted-foreground">Loading…</p>;
-  if (!collection) return <p className="text-muted-foreground">Schema not found.</p>;
+  if (query.isLoading) return <p className="text-muted-foreground">Yükleniyor…</p>;
+  if (!collection) return <p className="text-muted-foreground">Şema bulunamadı.</p>;
 
   return (
     <div className="flex flex-col gap-4">
@@ -74,7 +74,7 @@ export const CollectionEditPage = () => {
         </Button>
         <Button size="sm" onClick={handleSave} disabled={mutation.isPending}>
           <Save className="size-4" />
-          {mutation.isPending ? "Kaydediliyor…" : "Save"}
+          {mutation.isPending ? "Kaydediliyor…" : "Kaydet"}
         </Button>
       </div>
 
@@ -93,14 +93,14 @@ export const CollectionEditPage = () => {
               <Input value={slug} onChange={(e) => setSlug(slugify(e.target.value))} />
             </div>
             <div className="grid gap-1.5">
-              <Label>Type</Label>
+              <Label>Tip</Label>
               <Select value={kind} onValueChange={(v) => setKind(v as CollectionKind)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="collection">Collection</SelectItem>
-                  <SelectItem value="singleton">Singleton</SelectItem>
+                  <SelectItem value="collection">Koleksiyon</SelectItem>
+                  <SelectItem value="singleton">Tekil</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -110,7 +110,7 @@ export const CollectionEditPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Fields</CardTitle>
+          <CardTitle>Alanlar</CardTitle>
         </CardHeader>
         <CardContent>
           <SchemaDesigner value={schema} onChange={setSchema} />

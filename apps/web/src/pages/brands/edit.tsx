@@ -41,11 +41,11 @@ import { supabaseClient } from "@/providers/supabase-client";
 import type { Brand, Property } from "@/types";
 
 const brandSchema = z.object({
-  name: z.string().min(1, "Brand name is required"),
+  name: z.string().min(1, "Marka adı zorunlu"),
   slug: z
     .string()
-    .min(1, "Slug is required")
-    .regex(/^[a-z0-9-]+$/, "Lowercase letters, digits and hyphens only"),
+    .min(1, "Slug zorunlu")
+    .regex(/^[a-z0-9-]+$/, "Sadece küçük harf, rakam ve tire"),
 });
 
 type BrandFormValues = z.infer<typeof brandSchema>;
@@ -90,7 +90,7 @@ export const BrandEdit = () => {
       // FK kısıtı (ON DELETE RESTRICT) yakalanıyorsa kullanıcıya net mesaj.
       setDeleteError(
         error.message.includes("violates foreign key")
-          ? "Properties are still linked to this brand. Move or delete them first."
+          ? "Bu markaya bağlı property'ler var. Önce taşı veya sil."
           : error.message,
       );
       return;
@@ -100,7 +100,7 @@ export const BrandEdit = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Brand settings</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Marka ayarları</h1>
 
       <Card>
         <CardHeader>
@@ -114,7 +114,7 @@ export const BrandEdit = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand name</FormLabel>
+                    <FormLabel>Marka adı</FormLabel>
                     <FormControl>
                       <Input placeholder="Dante" {...field} />
                     </FormControl>
@@ -136,7 +136,7 @@ export const BrandEdit = () => {
                 )}
               />
               <div>
-                <Button type="submit">Save</Button>
+                <Button type="submit">Kaydet</Button>
               </div>
             </form>
           </Form>
@@ -164,7 +164,7 @@ export const BrandEdit = () => {
         <CardContent>
           {properties.length === 0 ? (
             <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-              Bu brand altında henüz property yok.
+              Bu marka altında henüz property yok.
             </p>
           ) : (
             <Table>
@@ -173,8 +173,8 @@ export const BrandEdit = () => {
                   <TableHead>Ad</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead>Tip</TableHead>
-                  <TableHead className="text-right">Module</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="text-right">Modül</TableHead>
+                  <TableHead className="text-right">İşlem</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -187,12 +187,12 @@ export const BrandEdit = () => {
                         {PROPERTY_TYPE_LABELS[p.type] ?? p.type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-xs text-muted-foreground">
+                    <TableCell className="text-right text-xs tabular-nums text-muted-foreground">
                       {(p.enabled_modules ?? []).length}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button asChild size="sm" variant="ghost">
-                        <Link to={`/properties/edit/${p.id}`}>Edit</Link>
+                        <Link to={`/properties/edit/${p.id}`}>Düzenle</Link>
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -205,26 +205,26 @@ export const BrandEdit = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base text-destructive">Danger zone</CardTitle>
+          <CardTitle className="text-base text-destructive">Tehlikeli bölge</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              Brand'i sil. Bu brand altında property yoksa kalıcı olarak silinir.
+              Markayı sil. Bu marka altında property yoksa kalıcı olarak silinir.
             </p>
             <AlertDialog>
               <Button asChild variant="destructive" size="sm">
                 <span>
-                  <Trash2 className="size-4" /> Brand'i sil
+                  <Trash2 className="size-4" /> Markayı sil
                 </span>
               </Button>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Brand silinsin mi?</AlertDialogTitle>
+                  <AlertDialogTitle>Marka silinsin mi?</AlertDialogTitle>
                   <AlertDialogDescription>
                     {properties.length > 0
-                      ? "This brand still has properties. Move them to another brand or delete them first."
-                      : "This cannot be undone."}
+                      ? "Bu markaya bağlı property'ler var. Önce taşı veya sil."
+                      : "Bu işlem geri alınamaz."}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 {deleteError && (
@@ -233,12 +233,12 @@ export const BrandEdit = () => {
                   </div>
                 )}
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>İptal</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={deleteBrand}
                     disabled={deleting || properties.length > 0}
                   >
-                    {deleting ? "Deleting…" : "Delete"}
+                    {deleting ? "Siliniyor…" : "Sil"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

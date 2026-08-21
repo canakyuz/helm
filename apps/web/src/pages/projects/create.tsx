@@ -30,7 +30,7 @@ export const ProjectCreate = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">New project</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Yeni proje</h1>
       <Card>
         <CardContent>
           <Form {...form}>
@@ -40,7 +40,7 @@ export const ProjectCreate = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project name</FormLabel>
+                    <FormLabel>Proje adı</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Empire Inc"
@@ -70,7 +70,7 @@ export const ProjectCreate = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Save</Button>
+              <Button type="submit">Kaydet</Button>
             </form>
           </Form>
         </CardContent>

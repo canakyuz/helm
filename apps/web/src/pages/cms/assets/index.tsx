@@ -64,16 +64,16 @@ export const AssetsPage = () => {
   const handleFile = async (file: File) => {
     const targetProject = uploadProjectId || (isAll ? "" : scope);
     if (!targetProject) {
-      toast.error("Pick a project", { description: "Pick a project before uploading." });
+      toast.error("Bir proje seç", { description: "Yüklemeden önce bir proje seç." });
       return;
     }
     setUploading(true);
     try {
       await uploadAsset(supabaseClient, targetProject, file);
-      toast.success("Uploaded", { description: file.name });
+      toast.success("Yüklendi", { description: file.name });
       invalidate({ resource: "cms_assets", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Upload failed", {
+      toast.error("Yükleme başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -84,16 +84,16 @@ export const AssetsPage = () => {
   const handleCopyUrl = (asset: CmsAsset) => {
     const url = assetPublicUrl(supabaseClient, asset.storage_path);
     navigator.clipboard.writeText(url);
-    toast.success("URL copied");
+    toast.success("URL kopyalandı");
   };
 
   const handleDelete = async (asset: CmsAsset) => {
     try {
       await deleteAsset(supabaseClient, asset);
-      toast.success("Deleted");
+      toast.success("Medya silindi");
       invalidate({ resource: "cms_assets", invalidates: ["list"] });
     } catch (e) {
-      toast.error("Could not delete", {
+      toast.error("Silme başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     }
@@ -109,7 +109,7 @@ export const AssetsPage = () => {
           {isAll && (
             <Select value={uploadProjectId} onValueChange={setUploadProjectId}>
               <SelectTrigger className="w-44">
-                <SelectValue placeholder="Project" />
+                <SelectValue placeholder="Proje" />
               </SelectTrigger>
               <SelectContent>
                 {projects.map((p) => (
@@ -160,11 +160,11 @@ export const AssetsPage = () => {
               </div>
               <div className="truncate text-xs font-medium">{asset.filename}</div>
               {asset.width && asset.height && (
-                <div className="text-[10px] text-muted-foreground">
+                <div className="text-[10px] tabular-nums text-muted-foreground">
                   {asset.width}×{asset.height}
                 </div>
               )}
-              <Label className="text-[10px] text-muted-foreground">Alt text</Label>
+              <Label className="text-[10px] text-muted-foreground">Alt metin</Label>
               <Input
                 defaultValue={asset.alt ?? ""}
                 className="h-7 text-xs"
@@ -172,9 +172,9 @@ export const AssetsPage = () => {
                   updateAlt(
                     { resource: "cms_assets", id: asset.id, values: { alt: e.target.value } },
                     {
-                      onSuccess: () => toast.success("Subtitle updated"),
+                      onSuccess: () => toast.success("Alt metin güncellendi"),
                       onError: (err) =>
-                        toast.error("Could not update", {
+                        toast.error("Güncelleme başarısız", {
                           description:
                             err instanceof Error ? err.message : String(err),
                         }),
@@ -193,16 +193,16 @@ export const AssetsPage = () => {
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-7" aria-label="Delete">
+                    <Button variant="ghost" size="icon" className="size-7" aria-label="Sil">
                       <Trash2 className="size-3" />
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete this media?</AlertDialogTitle>
+                      <AlertDialogTitle>Bu medya silinsin mi?</AlertDialogTitle>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>İptal</AlertDialogCancel>
                       <AlertDialogAction onClick={() => handleDelete(asset)}>
                         Sil
                       </AlertDialogAction>

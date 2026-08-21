@@ -94,8 +94,8 @@ export const EntriesListPage = () => {
 
   const handleCreate = () => {
     if (collectionId === "all") {
-      toast.error("Pick a collection", {
-        description: "Filter by a collection first to create new content.",
+      toast.error("Bir koleksiyon seç", {
+        description: "Yeni içerik oluşturmak için önce bir koleksiyona göre filtrele.",
       });
       return;
     }
@@ -111,7 +111,7 @@ export const EntriesListPage = () => {
         </CardTitle>
         <CardAction>
           <Button size="sm" onClick={handleCreate}>
-            <Plus className="size-4" /> Yeni İçerik
+            <Plus className="size-4" /> Yeni içerik
           </Button>
         </CardAction>
       </CardHeader>
@@ -119,10 +119,10 @@ export const EntriesListPage = () => {
         <div className="grid gap-3 md:grid-cols-3">
           <Select value={collectionId} onValueChange={setCollectionId}>
             <SelectTrigger>
-              <SelectValue placeholder="Collection" />
+              <SelectValue placeholder="Koleksiyon" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All collections</SelectItem>
+              <SelectItem value="all">Tüm koleksiyonlar</SelectItem>
               {collections.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.label}
@@ -132,12 +132,12 @@ export const EntriesListPage = () => {
           </Select>
           <Select value={status} onValueChange={(v) => setStatus(v as EntryStatus | "all")}>
             <SelectTrigger>
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Durum" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="published">Live</SelectItem>
+              <SelectItem value="all">Tüm durumlar</SelectItem>
+              <SelectItem value="draft">Taslak</SelectItem>
+              <SelectItem value="published">Yayında</SelectItem>
             </SelectContent>
           </Select>
           <Select value={locale} onValueChange={setLocale}>
@@ -145,7 +145,7 @@ export const EntriesListPage = () => {
               <SelectValue placeholder="Dil" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All languages</SelectItem>
+              <SelectItem value="all">Tüm diller</SelectItem>
               {DEFAULT_LOCALES.map((l) => (
                 <SelectItem key={l} value={l}>
                   {l.toUpperCase()}
@@ -158,13 +158,13 @@ export const EntriesListPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Collection</TableHead>
+              <TableHead>Başlık</TableHead>
+              <TableHead>Koleksiyon</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>Dil</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Update</TableHead>
-              <TableHead className="w-24">Action</TableHead>
+              <TableHead>Durum</TableHead>
+              <TableHead>Güncelleme</TableHead>
+              <TableHead className="w-24">İşlem</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -191,7 +191,7 @@ export const EntriesListPage = () => {
                   <Badge
                     variant={entry.status === "published" ? "default" : "secondary"}
                   >
-                    {entry.status}
+                    {entry.status === "published" ? "Yayında" : "Taslak"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
@@ -200,27 +200,27 @@ export const EntriesListPage = () => {
                 <TableCell>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="Delete">
+                      <Button variant="ghost" size="icon" aria-label="Sil">
                         <Trash2 className="size-4" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this content?</AlertDialogTitle>
+                        <AlertDialogTitle>Bu içerik silinsin mi?</AlertDialogTitle>
                         <AlertDialogDescription>
                           {entryTitle(entry)} ({entry.locale}) silinecek.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>İptal</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
                             remove(
                               { resource: "cms_entries", id: entry.id },
                               {
-                                onSuccess: () => toast.success("Deleted"),
+                                onSuccess: () => toast.success("İçerik silindi"),
                                 onError: (e) =>
-                                  toast.error("Could not delete", {
+                                  toast.error("Silme başarısız", {
                                     description:
                                       e instanceof Error ? e.message : String(e),
                                   }),
@@ -239,7 +239,7 @@ export const EntriesListPage = () => {
             {entries.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
-                  Filtreye uyan içerik yok.
+                  Filtreye uyan kayıt yok.
                 </TableCell>
               </TableRow>
             )}

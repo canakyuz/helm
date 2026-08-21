@@ -36,13 +36,13 @@ const KIND_LABELS: Record<FieldDef["kind"], string> = {
   text: "Metin (text)",
   textarea: "Uzun metin (textarea)",
   slug: "Slug",
-  number: "Number",
-  boolean: "Key (boolean)",
-  date: "Date",
-  select: "Choice list",
+  number: "Sayı",
+  boolean: "Anahtar (boolean)",
+  date: "Tarih",
+  select: "Seçenek listesi",
   asset: "Medya",
-  image: "Image (with preview)",
-  list: "List (repeatable)",
+  image: "Görsel (önizlemeli)",
+  list: "Liste (tekrarlı)",
   object: "Grup (nested)",
   ref: "Referans",
   richtext: "Zengin metin (Plate)",
@@ -52,12 +52,12 @@ const KIND_LABELS: Record<FieldDef["kind"], string> = {
 const KIND_OPTIONS = Object.entries(KIND_LABELS) as [FieldDef["kind"], string][];
 
 const makeField = (kind: FieldDef["kind"]): FieldDef => {
-  const base = { name: "yeni_alan", label: "New field", required: false };
+  const base = { name: "yeni_alan", label: "Yeni alan", required: false };
   switch (kind) {
     case "select":
       return { ...base, kind, options: [{ value: "a", label: "A" }] };
     case "list":
-      return { ...base, kind, of: { kind: "text", name: "item", label: "Item" } };
+      return { ...base, kind, of: { kind: "text", name: "item", label: "Öğe" } };
     case "object":
       return { ...base, kind, fields: [] };
     case "ref":
@@ -170,7 +170,7 @@ const SortableFieldRow = ({ field, onChange, onRemove }: RowProps) => {
         className="mt-2 cursor-grab text-muted-foreground hover:text-foreground"
         {...attributes}
         {...listeners}
-        aria-label="Drag"
+        aria-label="Sürükle"
       >
         <GripVertical className="size-4" />
       </button>
@@ -196,7 +196,7 @@ const SortableFieldRow = ({ field, onChange, onRemove }: RowProps) => {
         </div>
 
         <div className="sm:col-span-3">
-          <Label className="text-xs text-muted-foreground">Key (name)</Label>
+          <Label className="text-xs text-muted-foreground">Anahtar (ad)</Label>
           <Input
             value={field.name}
             onChange={(e) => onChange({ ...field, name: e.target.value })}
@@ -224,11 +224,11 @@ const SortableFieldRow = ({ field, onChange, onRemove }: RowProps) => {
 
         {field.kind === "ref" && (
           <div className="sm:col-span-12">
-            <Label className="text-xs text-muted-foreground">Referans collection slug</Label>
+            <Label className="text-xs text-muted-foreground">Referans koleksiyon slug</Label>
             <Input
               value={field.collection}
               onChange={(e) => onChange({ ...field, collection: e.target.value })}
-              placeholder="e.g. authors"
+              placeholder="örn. authors"
             />
           </div>
         )}
@@ -239,7 +239,7 @@ const SortableFieldRow = ({ field, onChange, onRemove }: RowProps) => {
         variant="ghost"
         size="icon"
         onClick={onRemove}
-        aria-label="Delete"
+        aria-label="Sil"
       >
         <Trash2 className="size-4" />
       </Button>

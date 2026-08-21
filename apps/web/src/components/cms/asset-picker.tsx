@@ -52,12 +52,12 @@ export const AssetPicker = ({ projectId, value, onChange }: Props) => {
     setUploading(true);
     try {
       const asset = await uploadAsset(supabaseClient, projectId, file);
-      toast.success("Uploaded", { description: file.name });
+      toast.success("Yüklendi", { description: file.name });
       invalidate({ resource: "cms_assets", invalidates: ["list"] });
       onChange(asset.id);
       setOpen(false);
     } catch (e) {
-      toast.error("Upload failed", {
+      toast.error("Yükleme başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -77,7 +77,7 @@ export const AssetPicker = ({ projectId, value, onChange }: Props) => {
           <div className="text-sm">
             <div className="font-medium truncate max-w-[160px]">{current.filename}</div>
             {current.width && current.height && (
-              <div className="text-muted-foreground text-xs">
+              <div className="text-muted-foreground text-xs tabular-nums">
                 {current.width}×{current.height}
               </div>
             )}
@@ -86,13 +86,13 @@ export const AssetPicker = ({ projectId, value, onChange }: Props) => {
             variant="ghost"
             size="icon"
             onClick={() => onChange(null)}
-            aria-label="Clear"
+            aria-label="Temizle"
           >
             <X className="size-4" />
           </Button>
         </div>
       ) : (
-        <div className="flex size-14 items-center justify-center rounded-md border bg-muted/30 text-muted-foreground">
+        <div className="flex size-14 items-center justify-center rounded-md border bg-muted text-muted-foreground">
           <ImageIcon className="size-5" />
         </div>
       )}
@@ -100,12 +100,12 @@ export const AssetPicker = ({ projectId, value, onChange }: Props) => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" size="sm">
-            {current ? "Change" : "Select"}
+            {current ? "Değiştir" : "Seç…"}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Pick media</DialogTitle>
+            <DialogTitle>Medya seç</DialogTitle>
           </DialogHeader>
 
           <ScrollArea className="h-[420px] pr-2">
@@ -129,7 +129,7 @@ export const AssetPicker = ({ projectId, value, onChange }: Props) => {
                       alt={asset.alt ?? asset.filename}
                       className="aspect-square w-full object-cover"
                     />
-                    <span className="absolute inset-x-0 bottom-0 truncate bg-background/80 px-2 py-1 text-xs">
+                    <span className="absolute inset-x-0 bottom-0 truncate bg-background px-2 py-1 text-xs">
                       {asset.filename}
                     </span>
                   </button>

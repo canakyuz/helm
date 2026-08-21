@@ -46,7 +46,7 @@ export const PropertiesListPage = () => {
       .sort((a, b) => a.brand.name.localeCompare(b.brand.name));
     if (orphans.length > 0) {
       ordered.push({
-        brand: { id: "__orphan__", name: "Brand'siz", slug: "", created_at: "" },
+        brand: { id: "__orphan__", name: "Markasız", slug: "", created_at: "" },
         properties: orphans,
       });
     }
@@ -59,14 +59,14 @@ export const PropertiesListPage = () => {
         <h1 className="text-2xl font-semibold tracking-tight">Property'ler</h1>
         <Button onClick={() => create("properties")}>
           <Plus className="size-4" />
-          Yeni Property
+          Yeni property
         </Button>
       </div>
 
       {groups.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
-            Henüz property yok. <strong>New property</strong> ile başla.
+            Henüz property yok. <strong>Yeni property</strong> ile başla.
           </CardContent>
         </Card>
       ) : (
@@ -77,7 +77,7 @@ export const PropertiesListPage = () => {
                 <span className="flex items-center gap-2">
                   <Boxes className="size-4" />
                   {g.brand.name}
-                  <Badge variant="secondary" className="font-mono text-xs">
+                  <Badge variant="secondary" className="text-xs tabular-nums">
                     {g.properties.length} property
                   </Badge>
                 </span>
@@ -85,7 +85,7 @@ export const PropertiesListPage = () => {
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="Edit brand"
+                    aria-label="Markayı düzenle"
                     onClick={() => edit("brands", g.brand.id)}
                   >
                     <Pencil className="size-4" />
@@ -115,7 +115,7 @@ const PropertyCard = ({ property, onEdit }: PropertyCardProps) => {
     PROPERTY_TYPE_LABELS[property.type] ?? property.type;
   const modules = (property.enabled_modules ?? []) as ModuleKey[];
   return (
-    <div className="group flex flex-col rounded-lg border bg-card/40 p-3 transition-colors hover:bg-card/80">
+    <div className="group flex flex-col rounded-lg border bg-card p-3 transition-colors hover:bg-accent">
       <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0">
           <Link
@@ -131,7 +131,7 @@ const PropertyCard = ({ property, onEdit }: PropertyCardProps) => {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Edit"
+          aria-label="Düzenle"
           onClick={() => onEdit("properties", property.id)}
         >
           <Pencil className="size-4" />

@@ -99,7 +99,7 @@ export const EntryEditPage = () => {
       .eq("locale", next)
       .maybeSingle();
     if (error) {
-      toast.error("Could not change the locale", { description: error.message });
+      toast.error("Dil değiştirilemedi", { description: error.message });
       return;
     }
     if (rows?.id) {
@@ -112,7 +112,7 @@ export const EntryEditPage = () => {
 
   const handleSave = () => {
     if (!collection || !slug) {
-      toast.error("Eksik alan", { description: "Slug is required." });
+      toast.error("Eksik alan", { description: "Slug zorunlu." });
       return;
     }
     const values = {
@@ -128,7 +128,7 @@ export const EntryEditPage = () => {
         { resource: "cms_entries", values },
         {
           onSuccess: (res) => {
-            toast.success("Draft saved");
+            toast.success("Taslak kaydedildi");
             navigate(`/cms/entries/edit/${res.data.id}`);
           },
           onError: (e) =>
@@ -145,7 +145,7 @@ export const EntryEditPage = () => {
           values: { slug, locale, data, status: entry?.status ?? "draft" },
         },
         {
-          onSuccess: () => toast.success("Updated"),
+          onSuccess: () => toast.success("İçerik güncellendi"),
           onError: (e) =>
             toast.error("Kaydedilemedi", {
               description: e instanceof Error ? e.message : String(e),
@@ -159,10 +159,10 @@ export const EntryEditPage = () => {
     if (!id) return;
     try {
       await revertToRevision(supabaseClient, id, rev);
-      toast.success("Undone");
+      toast.success("Geri alındı");
       invalidate({ resource: "cms_entries", invalidates: ["detail"] });
     } catch (e) {
-      toast.error("Could not undo", {
+      toast.error("Geri alma başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
     }
@@ -170,11 +170,11 @@ export const EntryEditPage = () => {
 
   const headerSlug = useMemo(() => {
     const title = (data?.title as unknown) ?? slug;
-    return typeof title === "string" && title ? title : slug || "New content";
+    return typeof title === "string" && title ? title : slug || "Yeni içerik";
   }, [data, slug]);
 
   if (!collection) {
-    return <p className="text-muted-foreground">No collection selected.</p>;
+    return <p className="text-muted-foreground">Koleksiyon seçilmedi.</p>;
   }
 
   return (
@@ -194,7 +194,7 @@ export const EntryEditPage = () => {
               disabled={saving}
             >
               <Save className="size-4" />
-              {saving ? "Kaydediliyor…" : "Save draft"}
+              {saving ? "Kaydediliyor…" : "Taslağı kaydet"}
             </Button>
             {!isCreate && entry && (
               <PublishButton
@@ -221,7 +221,7 @@ export const EntryEditPage = () => {
                 <p className="text-xs text-muted-foreground mt-1">
                   {collection.label}{" "}
                   <Badge variant="secondary" className="ml-1">
-                    {collection.kind}
+                    {collection.kind === "singleton" ? "Tekil" : "Koleksiyon"}
                   </Badge>
                 </p>
               </div>
@@ -258,7 +258,7 @@ export const EntryEditPage = () => {
           </CardHeader>
           <CardContent>
             {revisions.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No revisions yet.</p>
+              <p className="text-xs text-muted-foreground">Henüz revizyon yok.</p>
             ) : (
               <ScrollArea className="max-h-[420px] pr-2">
                 <ul className="flex flex-col gap-2">
@@ -269,7 +269,11 @@ export const EntryEditPage = () => {
                           {new Date(rev.created_at).toLocaleString("en-US")}
                         </span>
                         <Badge variant="outline" className="text-[10px]">
-                          {rev.status_at_snapshot ?? "?"}
+                          {rev.status_at_snapshot === "published"
+                            ? "Yayında"
+                            : rev.status_at_snapshot === "draft"
+                              ? "Taslak"
+                              : (rev.status_at_snapshot ?? "?")}
                         </Badge>
                       </div>
                       <Button

@@ -190,7 +190,7 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
               src={url}
               alt=""
               loading="lazy"
-              className="h-20 w-auto max-w-[180px] rounded-md border object-contain bg-muted/30 p-1"
+              className="h-20 w-auto max-w-[180px] rounded-md border object-contain bg-muted p-1"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
@@ -210,7 +210,7 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
           onValueChange={(v) => onChange(v)}
         >
           <SelectTrigger id={id}>
-            <SelectValue placeholder="Select…" />
+            <SelectValue placeholder="Seç…" />
           </SelectTrigger>
           <SelectContent>
             {field.options.map((opt) => (
@@ -238,7 +238,7 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
           id={id}
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={`${field.collection} entry id`}
+          placeholder={`${field.collection} kayıt ID`}
         />
       );
 
@@ -304,7 +304,7 @@ const FieldInput = ({ id, field, projectId, value, onChange, siblings }: InputPr
             />
           ))}
           {field.fields.length === 0 && (
-            <p className="text-xs italic text-muted-foreground">empty group</p>
+            <p className="text-xs italic text-muted-foreground">boş grup</p>
           )}
         </div>
       );

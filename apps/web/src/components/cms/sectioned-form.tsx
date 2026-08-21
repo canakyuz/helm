@@ -196,7 +196,7 @@ const SectionDetail = ({ projectId, rootLabel, fields, value, onChange }: Detail
       )}
 
       {navChildren.length === 0 && inlineChildren.length === 0 && (
-        <p className="text-sm text-muted-foreground">No fields in this section.</p>
+        <p className="text-sm text-muted-foreground">Bu bölümde alan yok.</p>
       )}
     </div>
   );

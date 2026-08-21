@@ -82,7 +82,7 @@ export const CollectionsListPage = () => {
   const handleCreate = () => {
     const targetProject = projectId || (isAll ? "" : scope);
     if (!label || !slug || !targetProject) {
-      toast.error("Eksik alan", { description: "Project, label and slug are required." });
+      toast.error("Eksik alan", { description: "Proje, etiket ve slug zorunlu." });
       return;
     }
     create(
@@ -98,13 +98,13 @@ export const CollectionsListPage = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Schema created");
+          toast.success("Şema oluşturuldu");
           setOpen(false);
           setLabel("");
           setSlug("");
         },
         onError: (e) =>
-          toast.error("Could not create", {
+          toast.error("Oluşturma başarısız", {
             description: e instanceof Error ? e.message : String(e),
           }),
       },
@@ -118,25 +118,25 @@ export const CollectionsListPage = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Layers className="size-5" /> İçerik Şemaları
+          <Layers className="size-5" /> İçerik şemaları
         </CardTitle>
         <CardAction>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus className="size-4" /> Yeni Şema
+                <Plus className="size-4" /> Yeni şema
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>New schema</DialogTitle>
+                <DialogTitle>Yeni şema</DialogTitle>
               </DialogHeader>
               <div className="grid gap-3">
                 <div className="grid gap-1.5">
-                  <Label>Project</Label>
+                  <Label>Proje</Label>
                   <Select value={projectId} onValueChange={setProjectId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select…" />
+                      <SelectValue placeholder="Seç…" />
                     </SelectTrigger>
                     <SelectContent>
                       {projects.map((p) => (
@@ -155,7 +155,7 @@ export const CollectionsListPage = () => {
                       setLabel(e.target.value);
                       if (!slug) setSlug(slugify(e.target.value));
                     }}
-                    placeholder="e.g. Blog posts"
+                    placeholder="örn. Blog yazıları"
                   />
                 </div>
                 <div className="grid gap-1.5">
@@ -167,17 +167,17 @@ export const CollectionsListPage = () => {
                   />
                 </div>
                 <div className="grid gap-1.5">
-                  <Label>Type</Label>
+                  <Label>Tip</Label>
                   <Select value={kind} onValueChange={(v) => setKind(v as CollectionKind)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="collection">
-                        Collection (çoklu kayıt)
+                        Koleksiyon (çoklu kayıt)
                       </SelectItem>
                       <SelectItem value="singleton">
-                        Singleton (tek kayıt - sayfa içeriği gibi)
+                        Tekil (tek kayıt - sayfa içeriği gibi)
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -192,7 +192,7 @@ export const CollectionsListPage = () => {
                   İptal
                 </Button>
                 <Button onClick={handleCreate} disabled={mutation.isPending}>
-                  {mutation.isPending ? "Creating…" : "Create"}
+                  {mutation.isPending ? "Oluşturuluyor…" : "Oluştur"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -205,10 +205,10 @@ export const CollectionsListPage = () => {
             <TableRow>
               <TableHead>Etiket</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Field count</TableHead>
-              <TableHead className="w-24">Action</TableHead>
+              <TableHead>Tip</TableHead>
+              <TableHead>Proje</TableHead>
+              <TableHead>Alan sayısı</TableHead>
+              <TableHead className="w-24">İşlem</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -224,37 +224,37 @@ export const CollectionsListPage = () => {
                 </TableCell>
                 <TableCell>
                   <Badge variant={c.kind === "singleton" ? "secondary" : "outline"}>
-                    {c.kind}
+                    {c.kind === "singleton" ? "Tekil" : "Koleksiyon"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {projectName(c.project_id)}
                 </TableCell>
-                <TableCell>{c.schema?.fields?.length ?? 0}</TableCell>
+                <TableCell className="tabular-nums">{c.schema?.fields?.length ?? 0}</TableCell>
                 <TableCell>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="Delete">
+                      <Button variant="ghost" size="icon" aria-label="Sil">
                         <Trash2 className="size-4" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this schema?</AlertDialogTitle>
+                        <AlertDialogTitle>Bu şema silinsin mi?</AlertDialogTitle>
                         <AlertDialogDescription>
                           {c.label} ve bağlı tüm içerikler silinecek (cascade).
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>İptal</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
                             remove(
                               { resource: "cms_collections", id: c.id },
                               {
-                                onSuccess: () => toast.success("Deleted"),
+                                onSuccess: () => toast.success("Şema silindi"),
                                 onError: (e) =>
-                                  toast.error("Could not delete", {
+                                  toast.error("Silme başarısız", {
                                     description:
                                       e instanceof Error ? e.message : String(e),
                                   }),
