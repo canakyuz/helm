@@ -166,6 +166,13 @@
   margin: auto;
 }
 
+.auth-eyebrow {
+  color: var(--auth-cyan);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .auth-form-heading h1 {
   max-width: 10ch;
   margin: 0;
@@ -176,7 +183,7 @@
   letter-spacing: -0.055em;
 }
 
-.auth-form-heading p {
+.auth-form-heading > p:not(.auth-eyebrow) {
   max-width: 38ch;
   margin: 18px 0 0;
   color: var(--auth-muted);

@@ -53,6 +53,7 @@ export function LoginForm({
   return (
     <div className="auth-form-wrap">
       <div className="auth-form-heading">
+        <p className="auth-eyebrow">{t("auth.eyebrow")}</p>
         <h1 id="auth-title">{t("auth.title")}</h1>
         <p>{t("auth.subtitle")}</p>
       </div>
