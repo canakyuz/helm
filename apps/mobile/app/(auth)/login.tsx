@@ -1,15 +1,6 @@
 import { useT } from "~/lib/i18n";
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { supabase } from "~/lib/supabase";
@@ -32,31 +23,26 @@ function FieldLabel({ children }: { children: string }) {
 
 export default function Login() {
   const t = useT();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("canakyuz23@gmail.com");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   async function signIn() {
-    if (status === "signing") return;
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) || password.length < 6) {
+    if (!email.includes("@") || password.length < 6) {
       setErrorMsg(t("E-posta ve en az 6 karakter şifre gir."));
       setStatus("error");
       return;
     }
     setStatus("signing");
     setErrorMsg("");
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
-      if (!error) return;
-      console.warn("[auth] sign-in failed", error.status);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      console.warn("[auth] sign-in error", error.message);
       setErrorMsg(t("E-posta veya şifre hatalı."));
       setStatus("error");
-    } catch {
-      setErrorMsg(t("Giriş şu anda kullanılamıyor. Tekrar dene."));
-      setStatus("error");
+      return;
     }
   }
 
@@ -64,21 +50,12 @@ export default function Login() {
     <View style={{ flex: 1, backgroundColor: colors.bgBase }}>
       <LiquidBackground />
       <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-        >
-          <ScrollView
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 24, paddingVertical: 24 }}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="interactive"
-          >
-        <View style={{ gap: 24 }}>
+        <View style={{ flex: 1, justifyContent: "center", paddingHorizontal: 24, gap: 24 }}>
           {/* Brand */}
           <View style={{ gap: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <View style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: colors.accent }} />
-              <Eyebrow>Founder&apos;s bridge · live</Eyebrow>
+              <Eyebrow>Founder's bridge · live</Eyebrow>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View
@@ -109,19 +86,12 @@ export default function Login() {
                 <FieldLabel>{t("E-POSTA")}</FieldLabel>
                 <TextInput
                   value={email}
-                  onChangeText={(value) => {
-                    setEmail(value);
-                    if (status === "error") setStatus("idle");
-                  }}
+                  onChangeText={setEmail}
                   placeholder="can@example.com"
                   placeholderTextColor={colors.fgSubtle}
                   autoCapitalize="none"
                   autoCorrect={false}
                   keyboardType="email-address"
-                  autoComplete="email"
-                  textContentType="emailAddress"
-                  accessibilityLabel={t("E-POSTA")}
-                  returnKeyType="next"
                   style={{
                     ...FIELD,
                     color: colors.fgPrimary,
@@ -138,10 +108,7 @@ export default function Login() {
                 <View style={{ ...FIELD, flexDirection: "row", alignItems: "center" }}>
                   <TextInput
                     value={password}
-                    onChangeText={(value) => {
-                      setPassword(value);
-                      if (status === "error") setStatus("idle");
-                    }}
+                    onChangeText={setPassword}
                     placeholder="••••••••"
                     placeholderTextColor={colors.fgSubtle}
                     secureTextEntry={!showPassword}
@@ -149,9 +116,6 @@ export default function Login() {
                     autoCorrect={false}
                     onSubmitEditing={signIn}
                     returnKeyType="go"
-                    autoComplete="password"
-                    textContentType="password"
-                    accessibilityLabel={t("ŞİFRE")}
                     style={{
                       flex: 1,
                       color: colors.fgPrimary,
@@ -161,13 +125,7 @@ export default function Login() {
                       fontSize: 15,
                     }}
                   />
-                  <Pressable
-                    onPress={() => setShowPassword((v) => !v)}
-                    hitSlop={10}
-                    accessibilityRole="button"
-                    accessibilityLabel={showPassword ? t("Şifreyi gizle") : t("Şifreyi göster")}
-                    style={{ paddingHorizontal: 14, paddingVertical: 13 }}
-                  >
+                  <Pressable onPress={() => setShowPassword((v) => !v)} hitSlop={10} style={{ paddingHorizontal: 14, paddingVertical: 13 }}>
                     <Icon name={showPassword ? "eyeOff" : "eye"} size={16} color={colors.fgMuted} />
                   </Pressable>
                 </View>
@@ -176,8 +134,6 @@ export default function Login() {
               <Pressable
                 onPress={signIn}
                 disabled={status === "signing"}
-                accessibilityRole="button"
-                accessibilityLabel={t("GİRİŞ YAP")}
                 style={{
                   backgroundColor: colors.accent,
                   borderRadius: 14,
@@ -220,8 +176,6 @@ export default function Login() {
             </Text>
           </View>
         </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );
