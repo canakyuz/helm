@@ -7,11 +7,11 @@ export const propertyCreateSchema = z
     // Brand seçimi: ya mevcut brand_id ya da yeni brand için isim.
     brand_id: z.string().uuid().optional(),
     new_brand_name: z.string().optional(),
-    name: z.string().min(1, "Property name is required"),
+    name: z.string().min(1, "Property adı zorunlu"),
     slug: z
       .string()
-      .min(1, "Slug is required")
-      .regex(/^[a-z0-9-]+$/, "Lowercase letters, digits and hyphens only"),
+      .min(1, "Slug zorunlu")
+      .regex(/^[a-z0-9-]+$/, "Sadece küçük harf, rakam ve tire"),
     type: z.enum(PROPERTY_TYPES),
     enabled_modules: z.array(z.enum(MODULE_KEYS)),
     app_store_id: z.string().optional(),
@@ -19,7 +19,7 @@ export const propertyCreateSchema = z
   })
   .refine((d) => Boolean(d.brand_id) || (d.new_brand_name ?? "").trim().length > 0, {
     path: ["brand_id"],
-    message: "Pick a brand or type a new brand name",
+    message: "Bir marka seç veya yeni marka adı yaz",
   });
 
 export type PropertyCreateValues = z.infer<typeof propertyCreateSchema>;
