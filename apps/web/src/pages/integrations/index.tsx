@@ -66,7 +66,7 @@ export const IntegrationsPage = () => {
           <CardContent>
             <EmptyState
               icon={<Plug className="size-6" />}
-              title="Pick a project"
+              title="Bir proje seç"
               description="Integrations are per-property. Use the switcher at the top of the sidebar to pick one - nothing can be added while All properties is selected."
             />
           </CardContent>
@@ -82,8 +82,8 @@ export const IntegrationsPage = () => {
           Entegrasyonlar
         </h1>
         <div className="text-xs text-muted-foreground">
-          <span className="font-mono tabular-nums">{stats.connected}</span> /{" "}
-          <span className="font-mono tabular-nums">{stats.totalProviders}</span>{" "}
+          <span className="tabular-nums">{stats.connected}</span> /{" "}
+          <span className="tabular-nums">{stats.totalProviders}</span>{" "}
           sağlayıcı bağlı
         </div>
       </div>
@@ -91,7 +91,7 @@ export const IntegrationsPage = () => {
       {/* KPI cluster - 6'lı */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <KpiPill
-          label="Connected"
+          label="Bağlı"
           value={`${stats.connected} / ${stats.totalProviders}`}
           icon={<Plug className="size-3.5" />}
         />
@@ -102,19 +102,19 @@ export const IntegrationsPage = () => {
           tone="emerald"
         />
         <KpiPill
-          label="Healthy"
+          label="Sağlıklı"
           value={stats.ok}
           icon={<Sparkles className="size-3.5" />}
           tone="emerald"
         />
         <KpiPill
-          label="Failing"
+          label="Hatalı"
           value={stats.errored}
           icon={<XCircle className="size-3.5" />}
           tone={stats.errored > 0 ? "destructive" : undefined}
         />
         <KpiPill
-          label="Pending"
+          label="Bekliyor"
           value={stats.pending}
           icon={<RefreshCw className="size-3.5" />}
           tone={stats.pending > 0 ? "amber" : undefined}
@@ -156,19 +156,19 @@ const KpiPill = ({
 }) => {
   const toneCls =
     tone === "emerald"
-      ? "text-emerald-500"
+      ? "text-emerald-600 dark:text-emerald-400"
       : tone === "amber"
-        ? "text-amber-500"
+        ? "text-amber-600 dark:text-amber-400"
         : tone === "destructive"
           ? "text-destructive"
           : "text-foreground";
   return (
-    <div className="rounded-lg border bg-card/40 p-3">
+    <div className="rounded-lg border bg-card p-3">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
         {icon}
         {label}
       </div>
-      <div className={cn("mt-1 font-mono text-2xl tabular-nums", toneCls)}>
+      <div className={cn("mt-1 text-2xl font-semibold tabular-nums", toneCls)}>
         {value}
       </div>
     </div>

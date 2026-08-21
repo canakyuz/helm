@@ -17,11 +17,11 @@ import type { Metric } from "@/types";
 // StatCard delta'sı yükselişi yeşil gösterdiği için bu metriklerde delta gizlenir
 // (yanıltıcı renk olmasın); trend yerine aşağıdaki grafikten okunur.
 const CARDS = [
-  { metric: "players_total", title: "Total players", kind: "count", icon: Users, higherIsBetter: true },
-  { metric: "paying_users", title: "Paying user", kind: "count", icon: CreditCard, higherIsBetter: true },
-  { metric: "pct_ever_prestiged", title: "Prestij Yapan", kind: "pct", icon: Crown, higherIsBetter: true },
-  { metric: "pct_le1_business", title: "≤1 operation", kind: "pct", icon: Building2, higherIsBetter: false },
-  { metric: "pct_level1", title: "Stuck on level 1", kind: "pct", icon: TrendingDown, higherIsBetter: false },
+  { metric: "players_total", title: "Toplam oyuncu", kind: "count", icon: Users, higherIsBetter: true },
+  { metric: "paying_users", title: "Ödeme yapan", kind: "count", icon: CreditCard, higherIsBetter: true },
+  { metric: "pct_ever_prestiged", title: "Prestij yapan", kind: "pct", icon: Crown, higherIsBetter: true },
+  { metric: "pct_le1_business", title: "≤1 işletme", kind: "pct", icon: Building2, higherIsBetter: false },
+  { metric: "pct_level1", title: "Level 1'de takılan", kind: "pct", icon: TrendingDown, higherIsBetter: false },
   { metric: "pct_paused", title: "Vergi/Pause Kilidi", kind: "pct", icon: Pause, higherIsBetter: false },
 ] as const;
 
@@ -66,8 +66,8 @@ export const FunnelHealth = () => {
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-medium text-muted-foreground">Funnel health</h2>
-        <span className="text-xs text-muted-foreground">daily snapshot</span>
+        <h2 className="text-sm font-medium text-muted-foreground">Huni sağlığı</h2>
+        <span className="text-xs text-muted-foreground">günlük anlık görüntü</span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
