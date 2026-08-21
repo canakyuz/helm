@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { useLogin } from "@refinedev/core";
-import { ArrowUpRight, Eye, EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,80 +28,76 @@ export const LoginPage = () => {
   };
 
   const formError = validationError || (error ? t("E-posta veya şifre hatalı. Tekrar dene.") : "");
+  const clearError = () => { setValidationError(""); reset(); };
 
   return (
-    <main className="min-h-screen bg-bento-canvas text-bento-fg">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-12">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="grid size-9 place-items-center rounded-[13px] bg-bento-accent font-mono text-lg font-bold text-bento-accent-ink">h</span>
-            <span className="font-heading text-lg font-semibold tracking-tight">helm</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-bento-fg3">{t("Founder cockpit")}</span>
-            <button type="button" onClick={() => setLocale(locale === "tr" ? "en" : "tr")} className="rounded-full border border-bento-line px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-bento-fg2 transition-colors hover:border-bento-fg3 hover:text-bento-fg" aria-label={locale === "tr" ? "Switch to English" : "Türkçeye geç"}>
-              {locale === "tr" ? "EN" : "TR"}
-            </button>
-          </div>
-        </header>
-
-        <div className="grid flex-1 items-center gap-12 py-14 md:grid-cols-[1fr_420px] md:gap-20 lg:py-20">
-          <section className="hidden max-w-xl md:block" aria-labelledby="welcome-title">
-            <div className="mb-8 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-bento-fg3">
-              <span className="size-2 rounded-full bg-bento-pos" aria-hidden="true" />
-              {t("Control room / secure access")}
-            </div>
-            <h1 id="welcome-title" className="max-w-lg text-5xl font-semibold leading-[1.02] tracking-[-0.04em] lg:text-6xl">{t("Geliri tek bakışta yönet.")}</h1>
-            <p className="mt-6 max-w-md text-base leading-7 text-bento-fg2">{t("Projelerini, kaynaklarını ve günlük hareketi aynı kokpitte takip et. Helm, karar vermen gereken sayıyı öne çıkarır.")}</p>
-            <div className="helm-orb-field mt-10" aria-hidden="true">
-              <span className="helm-orb helm-orb-one" />
-              <span className="helm-orb helm-orb-two" />
-              <span className="helm-orb helm-orb-three" />
-              <span className="helm-orb-grid" />
-            </div>
-            <div className="mt-12 flex items-center gap-8 border-t border-bento-line pt-5 font-mono text-[11px] uppercase tracking-[0.12em] text-bento-fg3">
-              <span className="inline-flex items-center gap-2"><ShieldCheck className="size-4 text-bento-pos" /> {t("Private workspace")}</span>
-              <span className="inline-flex items-center gap-2"><LockKeyhole className="size-4 text-bento-blue" /> {t("Supabase auth")}</span>
-            </div>
-          </section>
-
-          <section className="w-full" aria-labelledby="login-title">
-            <div className="rounded-[22px] bg-bento-tile p-6 ring-1 ring-bento-line sm:p-8">
-              <div className="mb-8">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-bento-fg3">{t("Secure sign in")}</p>
-                <h2 id="login-title" className="mt-3 text-2xl font-semibold tracking-tight">{t("Tekrar hoş geldin.")}</h2>
-                <p className="mt-2 text-sm leading-6 text-bento-fg2">{t("Kokpitine devam etmek için bilgilerini gir.")}</p>
-              </div>
-
-              <form onSubmit={submit} className="space-y-5" noValidate>
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t("E-posta")}</Label>
-                  <Input id="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder="can@example.com" value={email} onChange={(event) => { setEmail(event.target.value); setValidationError(""); reset(); }} aria-invalid={Boolean(formError)} className="h-11 bg-bento-canvas px-3" required />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">{t("Şifre")}</Label>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-bento-fg3">{t("Min. 6 karakter")}</span>
-                  </div>
-                  <div className="relative">
-                    <Input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => { setPassword(event.target.value); setValidationError(""); reset(); }} aria-invalid={Boolean(formError)} className="h-11 bg-bento-canvas px-3 pr-11" required />
-                    <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute inset-y-0 right-0 grid w-11 place-items-center text-bento-fg3 transition-colors hover:text-bento-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bento-accent" aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}>
-                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {formError ? <p role="alert" className="text-sm text-bento-neg">{formError}</p> : null}
-                <Button type="submit" disabled={isPending} className="h-11 w-full gap-2 bg-bento-accent text-bento-accent-ink hover:bg-bento-accent/85">
-                  {isPending ? t("Kontrol ediliyor...") : t("Giriş yap")}
-                  {!isPending ? <ArrowUpRight className="size-4" /> : null}
-                </Button>
-              </form>
-            </div>
-            <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-bento-fg3">{t("helm / private workspace")}</p>
-          </section>
+    <main className="helm-login-shell">
+      <div className="helm-login-grid" aria-hidden="true" />
+      <header className="helm-login-header">
+        <a href="/login" className="helm-login-brand" aria-label="Helm login">
+          <span className="helm-login-mark">h</span>
+          <span>helm</span>
+        </a>
+        <div className="helm-login-header-meta">
+          <span>{t("Founder cockpit")}</span>
+          <button type="button" onClick={() => setLocale(locale === "tr" ? "en" : "tr")} aria-label={locale === "tr" ? "Switch to English" : "Türkçeye geç"}>
+            {locale === "tr" ? "EN" : "TR"}
+          </button>
         </div>
+      </header>
+
+      <div className="helm-login-layout">
+        <section className="helm-login-copy" aria-labelledby="welcome-title">
+          <p className="helm-login-kicker"><span /> {t("Control room / secure access")}</p>
+          <h1 id="welcome-title">{t("Geliri tek bakışta yönet.")}</h1>
+          <p className="helm-login-lede">{t("Projelerini, kaynaklarını ve günlük hareketi aynı kokpitte takip et. Helm, karar vermen gereken sayıyı öne çıkarır.")}</p>
+          <div className="helm-login-facts">
+            <span><b>01</b> Live revenue</span>
+            <span><b>02</b> One cockpit</span>
+            <span><b>03</b> Clear action</span>
+          </div>
+        </section>
+
+        <section className="helm-orbit-stage" aria-label="Helm data orbit visualization">
+          <div className="helm-login-photo" role="img" aria-label="Analytics workspace" />
+          <div className="helm-orbit-glow" />
+          <div className="helm-orbit orbit-one"><i /></div>
+          <div className="helm-orbit orbit-two"><i /></div>
+          <div className="helm-orbit orbit-three"><i /></div>
+          <div className="helm-orbit-core"><span>H</span><small>LIVE</small></div>
+          <div className="helm-orbit-label orbit-label-a">REVENUE <b>+18.4%</b></div>
+          <div className="helm-orbit-label orbit-label-b">PROJECTS <b>04</b></div>
+          <div className="helm-orbit-caption">{t("Private workspace")}</div>
+        </section>
+
+        <section className="helm-login-panel" aria-labelledby="login-title">
+          <div className="helm-login-panel-head">
+            <p>{t("Secure sign in")}</p>
+            <span>01 / 01</span>
+          </div>
+          <h2 id="login-title">{t("Tekrar hoş geldin.")}</h2>
+          <p className="helm-login-panel-subtitle">{t("Kokpitine devam etmek için bilgilerini gir.")}</p>
+
+          <form onSubmit={submit} className="helm-login-form" noValidate>
+            <div className="helm-field">
+              <Label htmlFor="email">{t("E-posta")}</Label>
+              <Input id="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder="can@example.com" value={email} onChange={(event) => { setEmail(event.target.value); clearError(); }} aria-invalid={Boolean(formError)} required />
+            </div>
+            <div className="helm-field">
+              <div className="helm-field-label-row"><Label htmlFor="password">{t("Şifre")}</Label><span>{t("Min. 6 karakter")}</span></div>
+              <div className="helm-password-field">
+                <Input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => { setPassword(event.target.value); clearError(); }} aria-invalid={Boolean(formError)} required />
+                <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}>{showPassword ? <EyeOff /> : <Eye />}</button>
+              </div>
+            </div>
+            {formError ? <p className="helm-login-error" role="alert">{formError}</p> : null}
+            <Button type="submit" disabled={isPending} className="helm-login-submit">
+              {isPending ? t("Kontrol ediliyor...") : t("Giriş yap")}
+              {!isPending ? <ArrowUpRight /> : null}
+            </Button>
+          </form>
+          <p className="helm-login-panel-footer">{t("helm / private workspace")}</p>
+        </section>
       </div>
     </main>
   );
