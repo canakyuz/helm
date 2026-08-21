@@ -383,23 +383,6 @@
     0 0 22px color-mix(in srgb, var(--auth-lime) 70%, transparent);
 }
 
-.auth-hud-chip {
-  position: absolute;
-  top: 9%;
-  right: 8%;
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-}
-
-.auth-hud-chip img {
-  display: block;
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
 .auth-hud-horizon {
   position: absolute;
   right: 13%;

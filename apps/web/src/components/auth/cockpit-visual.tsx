@@ -125,9 +125,6 @@ function CockpitHud({ reduceMotion, x, y }: { reduceMotion: boolean; x: MotionCo
         animate={{ opacity: reduceMotion ? 0.86 : [0.48, 0.9, 0.48] }}
         transition={reduceMotion ? { duration: 0 } : { duration: 2.8, ease: "easeInOut", repeat: Infinity }}
       />
-      <span className="auth-hud-chip auth-hud-secondary">
-        <img src="/helm-mark.svg" alt="" />
-      </span>
       <span className="auth-hud-horizon auth-hud-secondary" />
     </m.div>
   );
