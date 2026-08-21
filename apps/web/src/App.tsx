@@ -22,6 +22,7 @@ import authProvider from "@/providers/auth";
 import { dataProvider } from "@/providers/data";
 import { notificationProvider } from "@/providers/notification";
 import { supabaseClient } from "@/providers/supabase-client";
+import { I18nProvider } from "@/lib/i18n";
 
 // Route bazlı kod bölme - her sayfa kendi chunk'ında.
 const DashboardPage = lazy(() =>
@@ -130,6 +131,7 @@ function App() {
   return (
     <BrowserRouter>
       <RefineKbarProvider>
+        <I18nProvider>
         <ThemeProvider>
           <TooltipProvider>
           <DevtoolsProvider>
@@ -383,6 +385,7 @@ function App() {
           <Toaster />
           </TooltipProvider>
         </ThemeProvider>
+        </I18nProvider>
       </RefineKbarProvider>
     </BrowserRouter>
   );

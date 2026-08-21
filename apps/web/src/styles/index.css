@@ -4,6 +4,50 @@
 @import "@fontsource-variable/geist";
 @import "leaflet/dist/leaflet.css";
 
+/* Login visual: a restrained local interpretation of the Orbs reference.
+   CSS-only keeps the first paint fast and avoids a third-party runtime. */
+.helm-orb-field {
+  position: relative;
+  height: 170px;
+  max-width: 470px;
+  overflow: hidden;
+  border-top: 1px solid rgb(var(--bento-line));
+  border-bottom: 1px solid rgb(var(--bento-line));
+  background: radial-gradient(circle at 30% 50%, rgba(6, 185, 239, 0.08), transparent 34%),
+    radial-gradient(circle at 78% 38%, rgb(var(--bento-violet) / 0.08), transparent 30%);
+}
+
+.helm-orb,
+.helm-orb-grid {
+  position: absolute;
+  display: block;
+}
+
+.helm-orb {
+  width: 82px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(6, 185, 239, 0.35);
+  border-radius: 42% 58% 55% 45%;
+  background: radial-gradient(circle at 32% 28%, rgba(6, 185, 239, 0.8), rgba(6, 185, 239, 0.08) 56%, transparent 70%);
+  box-shadow: 0 0 42px rgba(6, 185, 239, 0.14);
+  filter: saturate(0.9);
+  animation: helm-orb-drift 8s ease-in-out infinite;
+}
+
+.helm-orb-one { left: 14%; top: 34px; }
+.helm-orb-two { left: 42%; top: 64px; width: 52px; animation-delay: -2.6s; border-color: rgb(var(--bento-violet) / 0.4); background: radial-gradient(circle at 30% 25%, rgb(var(--bento-violet) / 0.7), transparent 68%); }
+.helm-orb-three { right: 14%; top: 18px; width: 34px; animation-delay: -5.2s; border-color: rgb(var(--bento-blue) / 0.45); background: radial-gradient(circle at 30% 25%, rgb(var(--bento-blue) / 0.75), transparent 68%); }
+.helm-orb-grid { inset: 0; opacity: 0.3; background-image: linear-gradient(rgb(var(--bento-line) / 0.35) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--bento-line) / 0.35) 1px, transparent 1px); background-size: 34px 34px; mask-image: linear-gradient(90deg, transparent, black 18%, black 82%, transparent); }
+
+@keyframes helm-orb-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+  50% { transform: translate3d(8px, -10px, 0) rotate(10deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .helm-orb { animation: none; }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

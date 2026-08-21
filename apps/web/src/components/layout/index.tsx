@@ -65,6 +65,7 @@ import { ProjectSwitcher } from "./project-switcher";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import { useEnabledModules } from "@/hooks/use-enabled-modules";
 import type { ModuleKey } from "@/lib/modules";
+import { useI18n } from "@/lib/i18n";
 
 type IUser = { id: string; name?: string; email?: string };
 
@@ -177,6 +178,7 @@ const NAV_BUTTON_CLASS = cn(
 /** Sidebar içi arama - kbar'ı tetikler (Kravio: arama sidebar'da, ⌘K). */
 const SidebarSearch = () => {
   const { query } = useKBar();
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -184,7 +186,7 @@ const SidebarSearch = () => {
       className="mx-2 flex h-8 items-center gap-2 rounded-lg border border-border bg-card px-2.5 text-[13px] text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground group-data-[collapsible=icon]:hidden"
     >
       <Search className="size-3.5 shrink-0" />
-      <span className="flex-1 truncate text-left">Hızlı arama</span>
+      <span className="flex-1 truncate text-left">{t("Hızlı arama")}</span>
       <kbd className="rounded border border-border bg-muted px-1.5 py-px font-mono text-[10px] text-muted-foreground">
         ⌘K
       </kbd>
@@ -210,6 +212,7 @@ const NavUser = () => {
   const { data: user } = useGetIdentity<IUser>();
   const { mutate: logout } = useLogout();
   const { theme, toggleMode } = useHelmTheme();
+  const { locale, setLocale, t } = useI18n();
   const isDark = theme.mode === "dark";
 
   const name = user?.name ?? "Misafir";
@@ -246,11 +249,15 @@ const NavUser = () => {
           <DropdownMenuContent side="top" align="start" className="w-56">
             <DropdownMenuItem onClick={toggleMode}>
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-              {isDark ? "Açık mod" : "Koyu mod"}
+              {isDark ? t("Açık mod") : t("Koyu mod")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLocale(locale === "tr" ? "en" : "tr")}>
+              <span className="grid size-4 place-items-center font-mono text-[9px] font-semibold">{locale.toUpperCase()}</span>
+              {locale === "tr" ? t("İngilizce") : t("Türkçe")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()}>
-              <LogOut className="size-4" /> Çıkış yap
+              <LogOut className="size-4" /> {t("Çıkış yap")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -269,6 +276,7 @@ const NavTreeItem = ({
   enabled: ModuleKey[];
   isActive: (url: string) => boolean;
 }) => {
+  const { t } = useI18n();
   const children = (item.children ?? []).filter((c) => itemVisible(c, enabled));
   const childActive = children.some((c) => c.url && isActive(c.url));
   const [open, setOpen] = useState(childActive);
@@ -285,10 +293,10 @@ const NavTreeItem = ({
         onClick={() => setOpen((o) => !o)}
         isActive={childActive && !open}
         className={NAV_BUTTON_CLASS}
-        tooltip={item.title}
+        tooltip={t(item.title)}
       >
         <Icon />
-        <span>{item.title}</span>
+        <span>{t(item.title)}</span>
         <ChevronDown
           className={cn(
             "ml-auto size-4 text-muted-foreground/70 transition-transform",
@@ -306,7 +314,7 @@ const NavTreeItem = ({
                 className="h-8 rounded-lg text-[13px] text-muted-foreground data-[active=true]:bg-card data-[active=true]:font-medium data-[active=true]:text-foreground data-[active=true]:ring-1 data-[active=true]:ring-border"
               >
                 <Link to={child.url ?? "#"}>
-                  <span>{child.title}</span>
+                  <span>{t(child.title)}</span>
                 </Link>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
@@ -322,6 +330,7 @@ const AppSidebar = () => {
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname.startsWith(url);
   const enabledModules = useEnabledModules();
+  const { t } = useI18n();
 
   const visibleGroups = useMemo(
     () =>
@@ -344,7 +353,7 @@ const AppSidebar = () => {
         {visibleGroups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel className="px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
-              {group.label}
+              {t(group.label)}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5">
@@ -365,9 +374,9 @@ const AppSidebar = () => {
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton disabled className="opacity-55">
                           <Icon />
-                          <span>{item.title}</span>
+                          <span>{t(item.title)}</span>
                         </SidebarMenuButton>
-                        <SidebarMenuBadge>yakında</SidebarMenuBadge>
+                        <SidebarMenuBadge>{t("yakında")}</SidebarMenuBadge>
                       </SidebarMenuItem>
                     );
                   }
@@ -376,12 +385,12 @@ const AppSidebar = () => {
                       <SidebarMenuButton
                         asChild
                         isActive={isActive(item.url)}
-                        tooltip={item.title}
+                        tooltip={t(item.title)}
                         className={NAV_BUTTON_CLASS}
                       >
                         <Link to={item.url}>
                           <Icon />
-                          <span>{item.title}</span>
+                          <span>{t(item.title)}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -404,22 +413,23 @@ const AppSidebar = () => {
 /** Aktif route'a göre breadcrumb (grup + sayfa) - NAV_GROUPS'tan. */
 const useBreadcrumb = (): { group: string; page: string } => {
   const { pathname } = useLocation();
+  const { t } = useI18n();
   return useMemo(() => {
-    if (pathname === "/") return { group: "Ana Menü", page: "Cockpit" };
+    if (pathname === "/") return { group: t("Ana Menü"), page: t("Cockpit") };
     for (const g of NAV_GROUPS) {
       for (const it of g.items) {
         if (it.url && it.url !== "/" && pathname.startsWith(it.url)) {
-          return { group: g.label, page: it.title };
+          return { group: t(g.label), page: t(it.title) };
         }
         for (const child of it.children ?? []) {
           if (child.url && pathname.startsWith(child.url)) {
-            return { group: it.title, page: child.title };
+            return { group: t(it.title), page: t(child.title) };
           }
         }
       }
     }
     return { group: "", page: "" };
-  }, [pathname]);
+  }, [pathname, t]);
 };
 
 const HeaderBar = ({ scrolled }: { scrolled: boolean }) => {
