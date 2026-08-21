@@ -39,7 +39,7 @@ export const LoginPage = () => {
           <span>helm</span>
         </a>
         <div className="helm-login-header-meta">
-          <span>{t("Founder cockpit")}</span>
+          <span>{t("Kurucu kokpiti")}</span>
           <button type="button" onClick={() => setLocale(locale === "tr" ? "en" : "tr")} aria-label={locale === "tr" ? "Switch to English" : "Türkçeye geç"}>
             {locale === "tr" ? "EN" : "TR"}
           </button>
@@ -48,7 +48,7 @@ export const LoginPage = () => {
 
       <div className="helm-login-layout">
         <section className="helm-login-copy" aria-labelledby="welcome-title">
-          <p className="helm-login-kicker"><span /> {t("Control room / secure access")}</p>
+          <p className="helm-login-kicker"><span /> {t("Kontrol odası / güvenli erişim")}</p>
           <h1 id="welcome-title">{t("Geliri tek bakışta yönet.")}</h1>
           <p className="helm-login-lede">{t("Projelerini, kaynaklarını ve günlük hareketi aynı kokpitte takip et. Helm, karar vermen gereken sayıyı öne çıkarır.")}</p>
           <div className="helm-login-facts">
@@ -67,12 +67,12 @@ export const LoginPage = () => {
           <div className="helm-orbit-core"><span>H</span><small>LIVE</small></div>
           <div className="helm-orbit-label orbit-label-a">REVENUE <b>+18.4%</b></div>
           <div className="helm-orbit-label orbit-label-b">PROJECTS <b>04</b></div>
-          <div className="helm-orbit-caption">{t("Private workspace")}</div>
+          <div className="helm-orbit-caption">{t("Özel çalışma alanı")}</div>
         </section>
 
         <section className="helm-login-panel" aria-labelledby="login-title">
           <div className="helm-login-panel-head">
-            <p>{t("Secure sign in")}</p>
+            <p>{t("Güvenli giriş")}</p>
             <span>01 / 01</span>
           </div>
           <h2 id="login-title">{t("Tekrar hoş geldin.")}</h2>
@@ -96,7 +96,7 @@ export const LoginPage = () => {
               {!isPending ? <ArrowUpRight /> : null}
             </Button>
           </form>
-          <p className="helm-login-panel-footer">{t("helm / private workspace")}</p>
+          <p className="helm-login-panel-footer">{t("helm / özel çalışma alanı")}</p>
         </section>
       </div>
     </main>
