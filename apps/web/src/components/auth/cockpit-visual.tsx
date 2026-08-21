@@ -1,9 +1,12 @@
-import { type PointerEvent as ReactPointerEvent, useEffect } from "react";
+import {
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useSyncExternalStore,
+} from "react";
 import {
   m,
   type MotionValue,
   useMotionValue,
-  useReducedMotion,
   useSpring,
   useTransform,
 } from "motion/react";
@@ -14,10 +17,31 @@ import { useHelmTheme } from "@/theme/ThemeProvider";
 type AssetTheme = "dark" | "light";
 type MotionCoordinate = MotionValue<number> | number;
 
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const FALLBACK_BACKGROUND: Record<AssetTheme, string> = {
   dark: "radial-gradient(circle at 66% 30%, rgba(85, 222, 245, 0.28), transparent 26%), linear-gradient(145deg, #07101b, #12263a 58%, #19233d)",
   light: "radial-gradient(circle at 66% 30%, rgba(22, 201, 231, 0.3), transparent 26%), linear-gradient(145deg, #eef5fb, #dcdcea 58%, #bacbd8)",
 };
+
+function subscribeReducedMotion(onStoreChange: () => void): () => void {
+  if (typeof window === "undefined" || !window.matchMedia) return () => undefined;
+  const mediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
+  mediaQuery.addEventListener("change", onStoreChange);
+  return () => mediaQuery.removeEventListener("change", onStoreChange);
+}
+
+function getReducedMotionSnapshot(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
+function useReactiveReducedMotion(): boolean {
+  return useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    () => false,
+  );
+}
 
 function projectPointer(position: number, start: number, size: number): number {
   if (size <= 0) return 0;
@@ -25,7 +49,7 @@ function projectPointer(position: number, start: number, size: number): number {
   return Math.max(-6, Math.min(6, projected));
 }
 
-function useCockpitParallax(reduceMotion: boolean | null) {
+function useCockpitParallax(reduceMotion: boolean) {
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
   const x = useSpring(rawX, { stiffness: 110, damping: 24, mass: 0.35 });
@@ -41,9 +65,13 @@ function useCockpitParallax(reduceMotion: boolean | null) {
   };
   useEffect(() => {
     if (!reduceMotion) return;
-    rawX.set(0);
-    rawY.set(0);
-  }, [rawX, rawY, reduceMotion]);
+    rawX.jump(0);
+    rawY.jump(0);
+    x.stop();
+    y.stop();
+    x.jump(0);
+    y.jump(0);
+  }, [rawX, rawY, reduceMotion, x, y]);
   return { x, y, hudX, hudY, move, reset };
 }
 
@@ -77,13 +105,14 @@ function CockpitPicture({ assetBase, assetTheme, x, y }: CockpitPictureProps) {
   );
 }
 
-function CockpitHud({ reduceMotion, x, y }: { reduceMotion: boolean | null; x: MotionCoordinate; y: MotionCoordinate }) {
+function CockpitHud({ reduceMotion, x, y }: { reduceMotion: boolean; x: MotionCoordinate; y: MotionCoordinate }) {
   return (
     <m.div className="auth-hud" style={{ x, y }} aria-hidden="true">
       <svg className="auth-hud-nav auth-hud-secondary" viewBox="0 0 320 84" fill="none">
         <m.path
+          key={reduceMotion ? "nav-static" : "nav-animated"}
           d="M24 70C65 14 255 14 296 70"
-          initial={{ opacity: reduceMotion ? 1 : 0, pathLength: reduceMotion ? 1 : 0 }}
+          initial={reduceMotion ? false : { opacity: 0, pathLength: 0 }}
           animate={{ opacity: 1, pathLength: 1 }}
           transition={{ duration: reduceMotion ? 0 : 0.6, ease: "easeOut" }}
         />
@@ -91,6 +120,7 @@ function CockpitHud({ reduceMotion, x, y }: { reduceMotion: boolean | null; x: M
       <span className="auth-hud-bracket auth-hud-bracket-start" />
       <span className="auth-hud-bracket auth-hud-bracket-end" />
       <m.span
+        key={reduceMotion ? "status-static" : "status-animated"}
         className="auth-status-dot"
         animate={{ opacity: reduceMotion ? 0.86 : [0.48, 0.9, 0.48] }}
         transition={reduceMotion ? { duration: 0 } : { duration: 2.8, ease: "easeInOut", repeat: Infinity }}
@@ -104,7 +134,7 @@ function CockpitHud({ reduceMotion, x, y }: { reduceMotion: boolean | null; x: M
 export function CockpitVisual() {
   const { theme } = useHelmTheme();
   const { t } = useI18n();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReactiveReducedMotion();
   const parallax = useCockpitParallax(reduceMotion);
   const assetTheme: AssetTheme = theme.mode === "dark" ? "dark" : "light";
   const assetBase = `/auth/cockpit-${assetTheme}`;
