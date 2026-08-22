@@ -2,14 +2,24 @@
 # Helm web'i lokal olarak build eder ve yalnız dist/ çıktısını sunucuya gönderir.
 set -euo pipefail
 
-# Sunucu IP'sini veya SSH config host adını tırnakların arasına yaz.
-SERVER_IP=""
-SERVER_USER="canakyuz"
-REMOTE_DIR="/var/www/helm/dist"
+DEPLOY_CONFIG="$(dirname "$0")/.env.deploy"
 SITE_URL="https://helm.wesan.co/login"
 
+if [[ ! -f "$DEPLOY_CONFIG" ]]; then
+  echo "Hata: deploy/.env.deploy dosyası bulunamadı. README'deki yerel ayarı oluştur."
+  exit 1
+fi
+
+# Bu dosya gitignored'dır; sunucu adresi tracked scriptte tutulmaz.
+# shellcheck disable=SC1090
+source "$DEPLOY_CONFIG"
+
+SERVER_IP="${SERVER_IP:-}"
+SERVER_USER="${SERVER_USER:-canakyuz}"
+REMOTE_DIR="${REMOTE_DIR:-/var/www/helm/dist}"
+
 if [[ -z "$SERVER_IP" || "$SERVER_IP" == *[[:space:]]* ]]; then
-  echo "Hata: deploy/deploy.sh içindeki SERVER_IP alanını doldur."
+  echo "Hata: deploy/.env.deploy içindeki SERVER_IP alanını doldur."
   exit 1
 fi
 

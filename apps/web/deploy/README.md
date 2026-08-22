@@ -19,8 +19,17 @@ htpasswd -c /etc/nginx/.htpasswd-helm can
 
 ## 4. Deploy
 
-`deploy/deploy.sh` içindeki `SERVER_IP` alanını sunucu IP'si veya SSH host adıyla
-doldur. Varsayılan kullanıcı `canakyuz`, hedef ise `/var/www/helm/dist`.
+Git tarafından izlenmeyen `deploy/.env.deploy` dosyasını oluştur:
+
+```bash
+cat > deploy/.env.deploy <<'EOF'
+SERVER_IP="SUNUCU_IP_VEYA_SSH_HOST"
+SERVER_USER="canakyuz"
+REMOTE_DIR="/var/www/helm/dist"
+EOF
+```
+
+Bu dosya `.gitignore` kapsamındadır; sunucu adresi commit'e girmez.
 
 ```bash
 ./deploy/deploy.sh

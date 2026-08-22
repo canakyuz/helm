@@ -5,6 +5,8 @@ dist/
 .env
 .env.*
 !.env.example
+# Yerel production hedefi; sunucu IP/host bilgisi repoya girmez.
+apps/web/deploy/.env.deploy
 .DS_Store
 
 # Yayınlanmayan içerik: strateji, pazar analizi, fiyatlandırma
