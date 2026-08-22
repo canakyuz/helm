@@ -39,7 +39,7 @@
 
 .auth-shell {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(400px, 5fr);
+  grid-template-columns: minmax(400px, 5fr) minmax(0, 7fr);
   gap: 10px;
   width: 100%;
   min-height: calc(100svh - 20px);
@@ -403,7 +403,7 @@
 
 @media (max-width: 1023px) {
   .auth-shell {
-    grid-template-columns: minmax(0, 6fr) minmax(360px, 5fr);
+    grid-template-columns: minmax(360px, 5fr) minmax(0, 6fr);
   }
 
   .auth-panel {

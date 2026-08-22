@@ -18,7 +18,6 @@ export function LoginPage() {
   return (
     <main className="auth-page">
       <section className="auth-shell">
-        <GlobeVisual />
         <section className="auth-stack" aria-label={t("auth.brand.label")}>
           <header className="auth-header auth-tile">
             <div className="auth-brand" role="img" aria-label={t("auth.brand.label")}>
@@ -40,6 +39,7 @@ export function LoginPage() {
             <p>{t("auth.security")}</p>
           </footer>
         </section>
+        <GlobeVisual />
       </section>
     </main>
   );
