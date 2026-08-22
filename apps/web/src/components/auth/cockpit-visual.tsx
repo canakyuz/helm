@@ -1,21 +1,14 @@
 import {
   type PointerEvent as ReactPointerEvent,
   useEffect,
+  useRef,
   useSyncExternalStore,
 } from "react";
-import {
-  m,
-  type MotionValue,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "motion/react";
 
 import { useI18n } from "@/lib/i18n";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 
 type AssetTheme = "dark" | "light";
-type MotionCoordinate = MotionValue<number> | number;
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const FALLBACK_BACKGROUND: Record<AssetTheme, string> = {
@@ -49,40 +42,20 @@ function projectPointer(position: number, start: number, size: number): number {
   return Math.max(-6, Math.min(6, projected));
 }
 
-function useCockpitParallax(reduceMotion: boolean) {
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const x = useSpring(rawX, { stiffness: 110, damping: 24, mass: 0.35 });
-  const y = useSpring(rawY, { stiffness: 110, damping: 24, mass: 0.35 });
-  const hudX = useTransform(x, (value) => value * -0.55);
-  const hudY = useTransform(y, (value) => value * -0.55);
-  const reset = () => { rawX.set(0); rawY.set(0); };
-  const move = (event: ReactPointerEvent<HTMLElement>) => {
-    if (reduceMotion || !window.matchMedia("(pointer: fine)").matches) return reset();
-    const bounds = event.currentTarget.getBoundingClientRect();
-    rawX.set(projectPointer(event.clientX, bounds.left, bounds.width));
-    rawY.set(projectPointer(event.clientY, bounds.top, bounds.height));
-  };
-  useEffect(() => {
-    if (!reduceMotion) return;
-    rawX.jump(0);
-    rawY.jump(0);
-    x.stop();
-    y.stop();
-    x.jump(0);
-    y.jump(0);
-  }, [rawX, rawY, reduceMotion, x, y]);
-  return { x, y, hudX, hudY, move, reset };
+function setParallax(element: HTMLElement | null, x = 0, y = 0): void {
+  if (!element) return;
+  element.style.setProperty("--auth-image-x", `${x}px`);
+  element.style.setProperty("--auth-image-y", `${y}px`);
+  element.style.setProperty("--auth-hud-x", `${x * -0.55}px`);
+  element.style.setProperty("--auth-hud-y", `${y * -0.55}px`);
 }
 
 interface CockpitPictureProps {
   assetBase: string;
   assetTheme: AssetTheme;
-  x: MotionCoordinate;
-  y: MotionCoordinate;
 }
 
-function CockpitPicture({ assetBase, assetTheme, x, y }: CockpitPictureProps) {
+function CockpitPicture({ assetBase, assetTheme }: CockpitPictureProps) {
   return (
     <picture
       key={assetTheme}
@@ -91,7 +64,7 @@ function CockpitPicture({ assetBase, assetTheme, x, y }: CockpitPictureProps) {
       aria-hidden="true"
     >
       <source srcSet={`${assetBase}.avif`} type="image/avif" />
-      <m.img
+      <img
         src={`${assetBase}.webp`}
         alt=""
         aria-hidden="true"
@@ -99,34 +72,22 @@ function CockpitPicture({ assetBase, assetTheme, x, y }: CockpitPictureProps) {
         height={1200}
         fetchPriority="high"
         decoding="async"
-        style={{ x, y }}
       />
     </picture>
   );
 }
 
-function CockpitHud({ reduceMotion, x, y }: { reduceMotion: boolean; x: MotionCoordinate; y: MotionCoordinate }) {
+function CockpitHud() {
   return (
-    <m.div className="auth-hud" style={{ x, y }} aria-hidden="true">
+    <div className="auth-hud" aria-hidden="true">
       <svg className="auth-hud-nav auth-hud-secondary" viewBox="0 0 320 84" fill="none">
-        <m.path
-          key={reduceMotion ? "nav-static" : "nav-animated"}
-          d="M24 70C65 14 255 14 296 70"
-          initial={reduceMotion ? false : { opacity: 0, pathLength: 0 }}
-          animate={{ opacity: 1, pathLength: 1 }}
-          transition={{ duration: reduceMotion ? 0 : 0.6, ease: "easeOut" }}
-        />
+        <path d="M24 70C65 14 255 14 296 70" />
       </svg>
       <span className="auth-hud-bracket auth-hud-bracket-start" />
       <span className="auth-hud-bracket auth-hud-bracket-end" />
-      <m.span
-        key={reduceMotion ? "status-static" : "status-animated"}
-        className="auth-status-dot"
-        animate={{ opacity: reduceMotion ? 0.86 : [0.48, 0.9, 0.48] }}
-        transition={reduceMotion ? { duration: 0 } : { duration: 2.8, ease: "easeInOut", repeat: Infinity }}
-      />
+      <span className="auth-status-dot" />
       <span className="auth-hud-horizon auth-hud-secondary" />
-    </m.div>
+    </div>
   );
 }
 
@@ -134,34 +95,37 @@ export function CockpitVisual() {
   const { theme } = useHelmTheme();
   const { t } = useI18n();
   const reduceMotion = useReactiveReducedMotion();
-  const parallax = useCockpitParallax(reduceMotion);
+  const cockpitRef = useRef<HTMLElement>(null);
   const assetTheme: AssetTheme = theme.mode === "dark" ? "dark" : "light";
   const assetBase = `/auth/cockpit-${assetTheme}`;
-  const visualInitial = reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.025 };
+
+  useEffect(() => {
+    if (reduceMotion) setParallax(cockpitRef.current);
+  }, [reduceMotion]);
+
+  const move = (event: ReactPointerEvent<HTMLElement>) => {
+    if (reduceMotion || !window.matchMedia("(pointer: fine)").matches) {
+      setParallax(event.currentTarget);
+      return;
+    }
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = projectPointer(event.clientX, bounds.left, bounds.width);
+    const y = projectPointer(event.clientY, bounds.top, bounds.height);
+    setParallax(event.currentTarget, x, y);
+  };
 
   return (
-    <m.section
+    <section
+      ref={cockpitRef}
       className="auth-cockpit"
       aria-labelledby="cockpit-status"
-      initial={visualInitial}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.42, ease: "easeOut" }}
-      onPointerMove={parallax.move}
-      onPointerLeave={parallax.reset}
-      onPointerCancel={parallax.reset}
+      onPointerMove={move}
+      onPointerLeave={(event) => setParallax(event.currentTarget)}
+      onPointerCancel={(event) => setParallax(event.currentTarget)}
     >
-      <CockpitPicture
-        assetBase={assetBase}
-        assetTheme={assetTheme}
-        x={reduceMotion ? 0 : parallax.x}
-        y={reduceMotion ? 0 : parallax.y}
-      />
-      <CockpitHud
-        reduceMotion={reduceMotion}
-        x={reduceMotion ? 0 : parallax.hudX}
-        y={reduceMotion ? 0 : parallax.hudY}
-      />
+      <CockpitPicture assetBase={assetBase} assetTheme={assetTheme} />
+      <CockpitHud />
       <p id="cockpit-status" className="auth-cockpit-status">{t("auth.visual.status")}</p>
-    </m.section>
+    </section>
   );
 }

@@ -8,6 +8,8 @@
   --auth-field: rgba(255, 255, 255, 0.78);
   --auth-cyan: #16c9e7;
   --auth-cyan-strong: #057d9b;
+  --auth-eyebrow: #057d9b;
+  --auth-focus: #00677e;
   --auth-lime: #b8ef42;
   --auth-error: #b4233d;
   display: grid;
@@ -29,6 +31,8 @@
   --auth-field: rgba(255, 255, 255, 0.055);
   --auth-cyan: #55def5;
   --auth-cyan-strong: #8be9f8;
+  --auth-eyebrow: #8be9f8;
+  --auth-focus: #55def5;
   --auth-lime: #c7f65a;
   --auth-error: #ff8ca0;
 }
@@ -43,14 +47,20 @@
   border-radius: clamp(24px, 3vw, 38px);
   background: var(--auth-shell);
   box-shadow: 0 32px 100px rgba(16, 24, 40, 0.18);
+  animation: auth-shell-enter 240ms ease-out both;
 }
 
 .auth-cockpit {
+  --auth-image-x: 0px;
+  --auth-image-y: 0px;
+  --auth-hud-x: 0px;
+  --auth-hud-y: 0px;
   position: relative;
   min-width: 0;
   overflow: hidden;
   isolation: isolate;
   background-color: var(--auth-shell);
+  animation: auth-cockpit-enter 420ms ease-out both;
 }
 
 .auth-cockpit::after {
@@ -82,6 +92,8 @@
 .auth-cockpit-picture img {
   object-fit: cover;
   object-position: 52% 50%;
+  transform: translate3d(var(--auth-image-x), var(--auth-image-y), 0) scale(1.012);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .auth-panel {
@@ -156,9 +168,8 @@
 .auth-password-toggle:focus-visible,
 .auth-submit:focus-visible,
 .auth-field input:focus-visible {
-  border-color: var(--auth-cyan);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--auth-cyan) 35%, transparent);
-  outline: none;
+  outline: 3px solid var(--auth-focus);
+  outline-offset: 3px;
 }
 
 .auth-form-wrap {
@@ -167,7 +178,7 @@
 }
 
 .auth-eyebrow {
-  color: var(--auth-cyan);
+  color: var(--auth-eyebrow);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -337,6 +348,8 @@
   inset: 0;
   color: var(--auth-cyan);
   pointer-events: none;
+  transform: translate3d(var(--auth-hud-x), var(--auth-hud-y), 0);
+  transition: transform 210ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .auth-hud-nav {
@@ -352,6 +365,7 @@
   stroke: currentColor;
   stroke-width: 1;
   stroke-dasharray: 3 7;
+  animation: auth-hud-reveal 600ms ease-out both;
 }
 
 .auth-hud-bracket {
@@ -388,6 +402,27 @@
   background: var(--auth-lime);
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--auth-lime) 15%, transparent),
     0 0 22px color-mix(in srgb, var(--auth-lime) 70%, transparent);
+  animation: auth-status-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes auth-shell-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes auth-cockpit-enter {
+  from { opacity: 0; transform: scale(1.025); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes auth-hud-reveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes auth-status-pulse {
+  0%, 100% { opacity: 0.48; }
+  50% { opacity: 0.9; }
 }
 
 .auth-hud-horizon {
@@ -524,6 +559,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .auth-shell,
+  .auth-cockpit,
+  .auth-hud-nav path,
   .auth-status-dot,
   .auth-submit {
     animation: none;
@@ -532,6 +570,8 @@
 
   .auth-cockpit-picture img,
   .auth-hud {
+    transform: none;
+    transition: none;
     will-change: auto;
   }
 }
