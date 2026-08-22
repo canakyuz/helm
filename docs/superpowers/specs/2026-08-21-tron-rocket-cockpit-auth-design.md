@@ -226,3 +226,67 @@ Manuel:
 - Auth sonrası dashboard tasarımının değiştirilmesi.
 - Web genelindeki tüm sayfa metinlerinin TR/EN migrasyonu; auth metinleri tamdır,
   global i18n migrasyonu ayrı iş paketidir.
+
+## Uygulama Kabulü
+
+_2026-08-22 · `DONE_WITH_CONCERNS` (yalnızca çalıştırılamayan browser matrisi)_
+
+### Otomatik doğrulama
+
+- `cd apps/web && bun run check:auth-assets` — geçti.
+- `cd apps/web && bun test src/components/auth/credentials.test.ts src/lib/i18n/messages.test.ts` — 6 test geçti, 0 başarısızlık, 46 assertion.
+- `cd apps/web && bun run typecheck` — geçti.
+- `cd apps/web && bunx eslint src/pages/login.tsx src/components/auth src/lib/i18n.tsx src/lib/i18n/messages.ts` — 0 hata, 1 mevcut uyarı: `src/lib/i18n.tsx:36:17` `react-refresh/only-export-components`.
+- `cd apps/web && bun run build` — geçti: `tsc && UPDATE_NOTIFIER_IS_DISABLED=true refine build`, 3.14 sn Vite derlemesi, 3.871 dönüştürülen modül. Notifier yazımı sandbox dışında olduğundan standart build script'i onu devre dışı bırakır; build kabulü geçti.
+- Kaynak taraması (`console.(log|error)`, uzak raster URL, Unsplash ve explicit `any`) auth hedeflerinde sonuç vermedi; eski `login-page`, `login-container`, `login-card`, `auth-container` ve kaldırılmış `cockpit-chip` selector'ları da yok. `git diff --check` temizdi.
+
+### Asset ve bundle kanıtı
+
+| Dosya | Boyut |
+| --- | ---: |
+| `cockpit-light.avif` | 73.553 byte |
+| `cockpit-dark.avif` | 93.100 byte |
+| `cockpit-light.webp` | 100.712 byte |
+| `cockpit-dark.webp` | 136.796 byte |
+
+Tümü AVIF ≤ 280 KB ve WebP ≤ 420 KB hedefindedir. Vite çıktısındaki lazy login artefaktları `login-ClC6uHo4.js` (86,14 kB; `gzip -9`: 30.068 byte) ve `login-DIfOm0Q_.css` (8,44 kB; `gzip -9`: 2.463 byte) oldu. `App.tsx` login sayfasını `lazy(() => import("@/pages/login"))` ile yüklemeye devam ediyor. `dist/assets` taramasında `sharp`, `@img/sharp-*`, `three`, `@react-three/*`, `gsap` veya `lottie` bulunmadı. `dist` gitignore'da ve önceki committe karşılaştırılabilir login artefaktı olmadığından 18 KiB artış farkı ölçülemedi; yalnızca mevcut mutlak chunk değeri kaydedildi.
+
+### Build hata sınırı (systematic-debugging Phase 1)
+
+- `cd apps/web && bunx vite build` — exit 0 (Vite 3,88 sn); bu çağrı Refine wrapper'ını ve notifier'ını kullanmaz.
+- `cd apps/web && bunx refine build` — notifier açık olduğunda exit 1. Vite 3,53 sn'de aynı artefaktları ürettikten sonra hata verdi; bu çıplak wrapper çağrısı artık standart production build komutu değildir.
+- Refine CLI `action6`, `cli.cjs:1616`'da `await updateNotifier()` çağırıp `cli.cjs:1618`'de Vite scriptini çalıştırır. Notifier `projectName: "refine-update-notifier"` ile `Conf` store kurar (`cli.cjs:1079–1087`); `updatePackagesCache` bunun `store.set(...)` çağrılarını yapar (`1117–1127`). `Conf`, `atomically.writeFileSync` kullanır (`conf/dist/source/index.js:375`).
+- İlk Refine wrapper çalışmasındaki özgün hata, sandbox dışındaki `/Users/canakyuz/Library/Preferences/refine-update-notifier-nodejs/config.json.tmp-…` yolunu açmaya çalışan `EPERM` idi. `atomically` `retryifySync` fonksiyonu bu retriable hatayı `attempt()` ile zaman sınırı dolana kadar senkron özyinelemeyle tekrarlar (`retryify.js:29–44`); bu yüzden yeniden üretimde terminalin verdiği tam stack `RangeError` ile biter. Cache temizlenmedi ve kaynak değiştirilmedi.
+- `f96b186` standard build script'ine yalnızca `UPDATE_NOTIFIER_IS_DISABLED=true` ekledi. Taze `bun run build` çalışması bu sandbox-safe notifier ayarıyla exit 0 verdi; notifier'ın paket denetim/yazım yan etkisi derleme çıktısı için gerekli olmadığından production bundle denetimi geçmiştir.
+
+Terminalin verdiği tam `RangeError` stack'i:
+
+```text
+node:fs:557
+    getValidatedPath(path),
+    ^
+
+RangeError: Maximum call stack size exceeded
+    at openSync (node:fs:557:5)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:33:27)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:39:36)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:39:36)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:39:36)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:39:36)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:39:36)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:39:36)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:39:36)
+    at attempt (/Users/canakyuz/Developer/wesan/platform/helm/node_modules/atomically/dist/utils/retryify.js:39:36)
+
+Node.js v26.3.0
+```
+
+### Kaynak ve erişilebilirlik sözleşmeleri
+
+- `auth-title` `LoginForm` içindeki `h1` üzerinde bulunuyor; panel bu başlığı `aria-labelledby` ile bağlıyor.
+- Dil düğmeleri kaynakta ve klavye sırasındaki sırayla `TR`, ardından `EN`; tüm `auth.*` mesaj anahtarları TR ve EN kataloglarında mevcut. Odaklı mesaj testi bunu 6 testlik kontrolün içinde doğruladı.
+- Kod incelemesinde görünür label, `role="alert"`, pending iken disabled submit, `html[lang]` effect'i, `overflow-x: hidden`, 1024 px'te 360 px form minimumu, mobilde 30–34 svh görsel ve reduced-motion/parallax sınırı (`±6px`) doğrulandı. Çalışan tarayıcı olmadığından bunların etkileşimli runtime doğrulaması yapılmadı.
+
+### Görsel matris ve açık kalanlar
+
+Kullanıcı, paylaşılan light-desktop header görselinde Helm markasını kabul etti; son kullanıcı isteğine göre kokpit üzerindeki küçük marka kaldırılmış durumda. Bu kanıt tam viewport ekran görüntüsü değildir. Oturumda kullanılabilir in-app browser keşfi `[]` döndüğü için otomatik screenshot alınamadı; 1440×900 dark/EN, 1024×768 light/EN, 390×844 dark/TR ve tam 1440×900 light/TR matrisi **çalıştırılmadı**. Aynı nedenle klavye akışı, asset-request bloklama, dark-theme kontrastı ve reduced-motion davranışının canlı tarayıcı kabulü beklemededir. Önce bağlı bir tarayıcı oturumunda yalnızca bu görsel/etkileşim matrisi tekrar edilmelidir.
