@@ -39,7 +39,7 @@
 
 .auth-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(400px, 1fr);
+  grid-template-columns: minmax(0, 7fr) minmax(400px, 5fr);
   width: 100%;
   min-height: 100svh;
   overflow: hidden;
@@ -62,6 +62,18 @@
   animation: auth-world-enter 420ms ease-out both;
 }
 
+.auth-world::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(247, 247, 245, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247, 247, 245, 0.055) 1px, transparent 1px);
+  background-size: 32px 32px;
+  content: "";
+  pointer-events: none;
+}
+
 [data-helm-theme="glass-dark"] .auth-world {
   background:
     radial-gradient(circle at 82% 16%, rgba(6, 185, 239, 0.16), transparent 36%),
@@ -70,7 +82,7 @@
 
 .auth-world::after {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   inset: 0;
   background: linear-gradient(180deg, transparent 52%, rgba(10, 13, 18, 0.38) 100%);
   content: "";
@@ -79,17 +91,18 @@
 
 .auth-world-frame {
   position: absolute;
-  top: -8%;
-  left: -12%;
-  width: 124%;
-  height: 116%;
+  z-index: 1;
+  top: -22%;
+  left: -28%;
+  width: 156%;
+  height: 146%;
   border: 0;
   pointer-events: none;
 }
 
 .auth-world-copy {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   right: clamp(30px, 5vw, 78px);
   bottom: clamp(42px, 8vh, 92px);
   left: clamp(30px, 5vw, 78px);
@@ -371,7 +384,7 @@
 
 @media (max-width: 1023px) {
   .auth-shell {
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
+    grid-template-columns: minmax(0, 6fr) minmax(360px, 5fr);
   }
 
   .auth-panel {
