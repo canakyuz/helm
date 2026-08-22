@@ -1,19 +1,47 @@
 #!/usr/bin/env bash
-# helm web → wesan sunucusu. Build edip dist/'i rsync'ler.
-# Kullanım:  HOST=user@1.2.3.4 ./deploy.sh   (ya da ssh config host adı)
+# Helm web'i lokal olarak build eder ve yalnız dist/ çıktısını sunucuya gönderir.
 set -euo pipefail
 
-HOST="${HOST:-wesan}"                        # ssh hedefi (config host ya da user@ip)
-REMOTE_DIR="${REMOTE_DIR:-/var/www/helm/dist}"
+# Sunucu IP'sini veya SSH config host adını tırnakların arasına yaz.
+SERVER_IP=""
+SERVER_USER="canakyuz"
+REMOTE_DIR="/var/www/helm/dist"
+SITE_URL="https://helm.wesan.co/login"
 
-cd "$(dirname "$0")/.."                       # apps/web
+if [[ -z "$SERVER_IP" || "$SERVER_IP" == *[[:space:]]* ]]; then
+  echo "Hata: deploy/deploy.sh içindeki SERVER_IP alanını doldur."
+  exit 1
+fi
+
+if [[ "$REMOTE_DIR" != /* || "$REMOTE_DIR" == "/" ]]; then
+  echo "Hata: REMOTE_DIR güvenli ve mutlak bir dist yolu olmalı."
+  exit 1
+fi
+
+for command_name in bun ssh rsync; do
+  command -v "$command_name" >/dev/null || {
+    echo "Hata: $command_name komutu bulunamadı."
+    exit 1
+  }
+done
+
+cd "$(dirname "$0")/.."
+
+if [[ ! -f .env && ( -z "${VITE_HELM_SUPABASE_URL:-}" || -z "${VITE_HELM_SUPABASE_ANON_KEY:-}" ) ]]; then
+  echo "Hata: apps/web/.env veya gerekli VITE_HELM_SUPABASE_* değişkenleri eksik."
+  exit 1
+fi
+
+SSH_TARGET="${SERVER_USER}@${SERVER_IP}"
 
 echo "→ build (VITE_* anahtarları .env'den gömülür; SERVICE_ROLE gömülmez)"
-bun install
+bun install --frozen-lockfile
 bun run build
 
-echo "→ rsync dist/ → $HOST:$REMOTE_DIR"
-ssh "$HOST" "mkdir -p '$REMOTE_DIR'"
-rsync -avz --delete dist/ "$HOST:$REMOTE_DIR/"
+echo "→ hedef klasör ve yazma izni kontrol ediliyor"
+ssh "$SSH_TARGET" "test -d '$REMOTE_DIR' && test -w '$REMOTE_DIR'"
 
-echo "✓ deploy bitti → https://helm.wesan.co"
+echo "→ rsync dist/ → $SSH_TARGET:$REMOTE_DIR"
+rsync -avz --delete -- dist/ "$SSH_TARGET:$REMOTE_DIR/"
+
+echo "✓ deploy bitti → $SITE_URL"

@@ -18,10 +18,18 @@ htpasswd -c /etc/nginx/.htpasswd-helm can
 - **nginx:** `deploy/nginx.conf` → `/etc/nginx/sites-available/helm`, symlink + `certbot --nginx -d helm.wesan.co`, `nginx -s reload`.
 
 ## 4. Deploy
+
+`deploy/deploy.sh` içindeki `SERVER_IP` alanını sunucu IP'si veya SSH host adıyla
+doldur. Varsayılan kullanıcı `canakyuz`, hedef ise `/var/www/helm/dist`.
+
 ```bash
-HOST=user@<wesan-ip> REMOTE_DIR=/var/www/helm/dist ./deploy/deploy.sh
+./deploy/deploy.sh
 ```
-Build lokal yapılır, `dist/` rsync'lenir. `apps/web/.env`'de `VITE_HELM_SUPABASE_URL` + `VITE_HELM_SUPABASE_ANON_KEY` dolu olmalı (bunlar dist'e gömülür - public anon key, RLS korumalı).
+
+Build lokal yapılır, hedef klasörün varlığı/yazma izni doğrulanır ve `dist/`
+`rsync --delete` ile senkronlanır. `apps/web/.env`'de
+`VITE_HELM_SUPABASE_URL` + `VITE_HELM_SUPABASE_ANON_KEY` dolu olmalı (bunlar
+dist'e gömülür - public anon key, RLS korumalı).
 
 ## 5. Supabase kilidi (kuşak+askı)
 - Supabase Dashboard → Auth → **public signup KAPALI**, sadece kendi email'ine magic link.
