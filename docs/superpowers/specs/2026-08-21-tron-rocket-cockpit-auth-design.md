@@ -48,7 +48,9 @@ oyunu estetiği kullanılmayacak. Sahne şunları içerir:
 - Yuvarlatılmış fiziksel uçuş konsolu, birkaç düğme ve durum ışığı.
 - Koyu kontur yerine hacim veren yumuşak kenar gölgesi.
 - İki veya üç holografik veri paneli; üzerlerinde okunabilir metin bulunmayacak.
-- Helm'in `h` işaretini taşıyan tek bir merkezi kontrol.
+- ~~Helm'in `h` işaretini taşıyan tek bir merkezi kontrol.~~ Son kullanıcı
+  yönlendirmesiyle kokpit üstü işaret kaldırıldı; marka yalnız auth header ve
+  favicon içinde kalır.
 - İnsan, astronot, marka dışı logo veya başka ürün ekranı olmayacak.
 
 Görseller:
@@ -234,10 +236,10 @@ _2026-08-22 · `DONE_WITH_CONCERNS` (yalnızca çalıştırılamayan browser mat
 ### Otomatik doğrulama
 
 - `cd apps/web && bun run check:auth-assets` — geçti.
-- `cd apps/web && bun test src/components/auth/credentials.test.ts src/lib/i18n/messages.test.ts` — 6 test geçti, 0 başarısızlık, 46 assertion.
+- `cd apps/web && bun test src/components/auth/login-form.test.tsx src/components/auth/credentials.test.ts src/lib/i18n/messages.test.ts` — 11 test geçti, 0 başarısızlık, 54 assertion.
 - `cd apps/web && bun run typecheck` — geçti.
 - `cd apps/web && bunx eslint src/pages/login.tsx src/components/auth src/lib/i18n.tsx src/lib/i18n/messages.ts` — 0 hata, 1 mevcut uyarı: `src/lib/i18n.tsx:36:17` `react-refresh/only-export-components`.
-- `cd apps/web && bun run build` — geçti: `tsc && UPDATE_NOTIFIER_IS_DISABLED=true refine build`, 3.14 sn Vite derlemesi, 3.871 dönüştürülen modül. Notifier yazımı sandbox dışında olduğundan standart build script'i onu devre dışı bırakır; build kabulü geçti.
+- `cd apps/web && bun run build` — geçti: `tsc && UPDATE_NOTIFIER_IS_DISABLED=true refine build`, 3.23 sn Vite derlemesi, 3.468 dönüştürülen modül. Notifier yazımı sandbox dışında olduğundan standart build script'i onu devre dışı bırakır; build kabulü geçti.
 - Kaynak taraması (`console.(log|error)`, uzak raster URL, Unsplash ve explicit `any`) auth hedeflerinde sonuç vermedi; eski `login-page`, `login-container`, `login-card`, `auth-container` ve kaldırılmış `cockpit-chip` selector'ları da yok. `git diff --check` temizdi.
 
 ### Asset ve bundle kanıtı
@@ -249,7 +251,7 @@ _2026-08-22 · `DONE_WITH_CONCERNS` (yalnızca çalıştırılamayan browser mat
 | `cockpit-light.webp` | 100.712 byte |
 | `cockpit-dark.webp` | 136.796 byte |
 
-Tümü AVIF ≤ 280 KB ve WebP ≤ 420 KB hedefindedir. Vite çıktısındaki lazy login artefaktları `login-ClC6uHo4.js` (86,14 kB; `gzip -9`: 30.068 byte) ve `login-DIfOm0Q_.css` (8,44 kB; `gzip -9`: 2.463 byte) oldu. `App.tsx` login sayfasını `lazy(() => import("@/pages/login"))` ile yüklemeye devam ediyor. `dist/assets` taramasında `sharp`, `@img/sharp-*`, `three`, `@react-three/*`, `gsap` veya `lottie` bulunmadı. `dist` gitignore'da ve önceki committe karşılaştırılabilir login artefaktı olmadığından 18 KiB artış farkı ölçülemedi; yalnızca mevcut mutlak chunk değeri kaydedildi.
+Tümü AVIF ≤ 280 KB ve WebP ≤ 420 KB hedefindedir. Son incelemede Motion runtime kaldırılıp sabit elemanlı CSS animasyonu ve CSS-variable parallax kullanıldı. Vite çıktısındaki lazy login artefaktları `login-BjNY0t-E.js` (6.050 byte; `gzip -9`: 2.314 byte) ve `login-Bpd0LnlW.css` (9.336 byte; `gzip -9`: 2.731 byte) oldu. Kontrollü `ea55ec1` tabanı 1.689 byte gzip olduğundan login JS artışı 625 byte ve 18 KiB bütçenin içindedir. `App.tsx` login sayfasını `lazy(() => import("@/pages/login"))` ile yüklemeye devam ediyor. `dist/assets` taramasında `motion`, `framer-motion`, `sharp`, `@img/sharp-*`, `three`, `@react-three/*`, `gsap` veya `lottie` bulunmadı.
 
 ### Build hata sınırı (systematic-debugging Phase 1)
 
@@ -284,7 +286,9 @@ Node.js v26.3.0
 ### Kaynak ve erişilebilirlik sözleşmeleri
 
 - `auth-title` `LoginForm` içindeki `h1` üzerinde bulunuyor; panel bu başlığı `aria-labelledby` ile bağlıyor.
-- Dil düğmeleri kaynakta ve klavye sırasındaki sırayla `TR`, ardından `EN`; tüm `auth.*` mesaj anahtarları TR ve EN kataloglarında mevcut. Odaklı mesaj testi bunu 6 testlik kontrolün içinde doğruladı.
+- Dil düğmeleri kaynakta ve klavye sırasındaki sırayla `TR`, ardından `EN`; tüm `auth.*` mesaj anahtarları TR ve EN kataloglarında mevcut. Odaklı mesaj testi bunu doğruladı.
+- DOM tabanlı form testleri pending submit kilidini, genel provider hatasını ve temizleme callback'ini, normalize edilmiş submit payload'unu ve saklanan İngilizce locale'i doğruladı.
+- Açık tema eyebrow kontrastı `4.54:1`, focus rengi `6.19:1`; koyu tema karşılıkları `13.06:1` ve `11.37:1` ölçüldü. Küçük metin için 4.5:1 ve focus indicator için 3:1 hedefleri karşılanır.
 - Kod incelemesinde görünür label, `role="alert"`, pending iken disabled submit, `html[lang]` effect'i, `overflow-x: hidden`, 1024 px'te 360 px form minimumu, mobilde 30–34 svh görsel ve reduced-motion/parallax sınırı (`±6px`) doğrulandı. Çalışan tarayıcı olmadığından bunların etkileşimli runtime doğrulaması yapılmadı.
 
 ### Görsel matris ve açık kalanlar
