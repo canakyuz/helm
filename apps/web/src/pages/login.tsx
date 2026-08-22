@@ -19,20 +19,26 @@ export function LoginPage() {
     <main className="auth-page">
       <section className="auth-shell">
         <GlobeVisual />
-        <section className="auth-panel" aria-labelledby="auth-title">
-          <header className="auth-header">
+        <section className="auth-stack" aria-label={t("auth.brand.label")}>
+          <header className="auth-header auth-tile">
             <div className="auth-brand" role="img" aria-label={t("auth.brand.label")}>
               <img src="/helm-mark.svg" alt="" aria-hidden="true" />
               <b aria-hidden="true">helm</b>
             </div>
             <LanguageToggle />
           </header>
-          <LoginForm
-            hasProviderError={Boolean(error)}
-            isPending={isPending}
-            onClearProviderError={reset}
-            onSubmit={submit}
-          />
+          <section className="auth-panel auth-tile" aria-labelledby="auth-title">
+            <LoginForm
+              hasProviderError={Boolean(error)}
+              isPending={isPending}
+              onClearProviderError={reset}
+              onSubmit={submit}
+            />
+          </section>
+          <footer className="auth-security auth-tile">
+            <span aria-hidden="true" />
+            <p>{t("auth.security")}</p>
+          </footer>
         </section>
       </section>
     </main>

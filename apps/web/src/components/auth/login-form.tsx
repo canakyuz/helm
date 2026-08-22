@@ -115,7 +115,6 @@ export function LoginForm({
         </Button>
       </form>
 
-      <p className="auth-security">{t("auth.security")}</p>
     </div>
   );
 }
