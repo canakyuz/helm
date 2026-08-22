@@ -1,7 +1,7 @@
 import { useLogin } from "@refinedev/core";
 
-import { CockpitVisual } from "@/components/auth/cockpit-visual";
 import { type LoginCredentials } from "@/components/auth/credentials";
+import { GlobeVisual } from "@/components/auth/globe-visual";
 import { LanguageToggle } from "@/components/auth/language-toggle";
 import { LoginForm } from "@/components/auth/login-form";
 import { useI18n } from "@/lib/i18n";
@@ -18,7 +18,7 @@ export function LoginPage() {
   return (
     <main className="auth-page">
       <section className="auth-shell">
-        <CockpitVisual />
+        <GlobeVisual />
         <section className="auth-panel" aria-labelledby="auth-title">
           <header className="auth-header">
             <div className="auth-brand" role="img" aria-label={t("auth.brand.label")}>

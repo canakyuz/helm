@@ -21,6 +21,8 @@ const AUTH_KEYS = [
   "auth.error.provider",
   "auth.security",
   "auth.visual.status",
+  "auth.visual.kicker",
+  "auth.visual.title",
 ] as const;
 
 describe("translate", () => {

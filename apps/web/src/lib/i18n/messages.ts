@@ -20,7 +20,9 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "auth.error.validation": "Geçerli bir e-posta ve en az 6 karakter şifre gir.",
     "auth.error.provider": "E-posta veya şifre hatalı. Tekrar dene.",
     "auth.security": "Özel çalışma alanı · Supabase Auth",
-    "auth.visual.status": "Yörünge bağlantısı hazır",
+    "auth.visual.status": "Dönen piksel dünya",
+    "auth.visual.kicker": "Helm çalışma alanı",
+    "auth.visual.title": "Tüm işin.\nTek yörüngede.",
   },
   en: {
     "Ana Menü": "Main menu",
@@ -94,7 +96,9 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "auth.error.validation": "Enter a valid email and a password of at least 6 characters.",
     "auth.error.provider": "Incorrect email or password. Try again.",
     "auth.security": "Private workspace · Supabase Auth",
-    "auth.visual.status": "Orbital link ready",
+    "auth.visual.status": "Rotating pixel globe",
+    "auth.visual.kicker": "Helm workspace",
+    "auth.visual.title": "Your whole operation.\nOne orbit.",
   },
 };
 

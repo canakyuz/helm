@@ -16,7 +16,7 @@
   min-height: 100svh;
   place-items: center;
   overflow-x: hidden;
-  padding: clamp(18px, 3vw, 44px);
+  padding: 0;
   background: var(--auth-bg);
   color: var(--auth-text);
 }
@@ -39,61 +39,70 @@
 
 .auth-shell {
   display: grid;
-  grid-template-columns: minmax(0, 56fr) minmax(400px, 44fr);
-  width: min(94vw, 1440px);
-  min-height: min(88svh, 860px);
+  grid-template-columns: minmax(0, 1fr) minmax(400px, 1fr);
+  width: 100%;
+  min-height: 100svh;
   overflow: hidden;
-  border: 1px solid var(--auth-line);
-  border-radius: clamp(24px, 3vw, 38px);
+  border: 0;
+  border-radius: 0;
   background: var(--auth-shell);
-  box-shadow: 0 32px 100px rgba(16, 24, 40, 0.18);
+  box-shadow: none;
   animation: auth-shell-enter 240ms ease-out both;
 }
 
-.auth-cockpit {
-  --auth-image-x: 0px;
-  --auth-image-y: 0px;
-  --auth-hud-x: 0px;
-  --auth-hud-y: 0px;
+.auth-world {
   position: relative;
   min-width: 0;
   overflow: hidden;
   isolation: isolate;
-  background-color: var(--auth-shell);
-  animation: auth-cockpit-enter 420ms ease-out both;
+  background: #ff5e1f;
+  color: #11100f;
+  animation: auth-world-enter 420ms ease-out both;
 }
 
-.auth-cockpit::after {
+.auth-world::after {
   position: absolute;
-  z-index: 3;
-  top: 0;
-  right: 0;
-  width: 96px;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, var(--auth-panel));
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 94, 31, 0) 56%, rgba(255, 94, 31, 0.42) 100%);
   content: "";
   pointer-events: none;
 }
 
-.auth-cockpit-picture,
-.auth-cockpit-picture img {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.auth-cockpit-picture {
+.auth-world-frame {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background-color: var(--auth-shell);
+  top: -8%;
+  left: -12%;
+  width: 124%;
+  height: 116%;
+  border: 0;
+  pointer-events: none;
 }
 
-.auth-cockpit-picture img {
-  object-fit: cover;
-  object-position: 52% 50%;
-  transform: translate3d(var(--auth-image-x), var(--auth-image-y), 0) scale(1.012);
-  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+.auth-world-copy {
+  position: absolute;
+  z-index: 2;
+  right: clamp(30px, 5vw, 78px);
+  bottom: clamp(42px, 8vh, 92px);
+  left: clamp(30px, 5vw, 78px);
+}
+
+.auth-world-copy p {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.auth-world-copy h2 {
+  max-width: 16ch;
+  margin: 0;
+  white-space: pre-line;
+  font-size: clamp(32px, 2.7vw, 44px);
+  font-weight: 650;
+  line-height: 0.96;
+  letter-spacing: -0.06em;
 }
 
 .auth-panel {
@@ -342,141 +351,14 @@
   letter-spacing: 0.04em;
 }
 
-.auth-hud {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  color: var(--auth-cyan);
-  pointer-events: none;
-  transform: translate3d(var(--auth-hud-x), var(--auth-hud-y), 0);
-  transition: transform 210ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.auth-hud-nav {
-  position: absolute;
-  top: 8%;
-  left: 50%;
-  width: min(44%, 320px);
-  transform: translateX(-50%);
-  opacity: 0.66;
-}
-
-.auth-hud-nav path {
-  stroke: currentColor;
-  stroke-width: 1;
-  stroke-dasharray: 3 7;
-  animation: auth-hud-reveal 600ms ease-out both;
-}
-
-.auth-hud-bracket {
-  position: absolute;
-  top: 20%;
-  bottom: 20%;
-  width: 34px;
-  opacity: 0.58;
-}
-
-.auth-hud-bracket-start {
-  left: 7%;
-  border-top: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  border-left: 1px solid currentColor;
-  border-radius: 14px 0 0 14px;
-}
-
-.auth-hud-bracket-end {
-  right: 7%;
-  border-top: 1px solid currentColor;
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  border-radius: 0 14px 14px 0;
-}
-
-.auth-status-dot {
-  position: absolute;
-  top: 11%;
-  left: 8%;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--auth-lime);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--auth-lime) 15%, transparent),
-    0 0 22px color-mix(in srgb, var(--auth-lime) 70%, transparent);
-  animation: auth-status-pulse 2.8s ease-in-out infinite;
-}
-
 @keyframes auth-shell-enter {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes auth-cockpit-enter {
+@keyframes auth-world-enter {
   from { opacity: 0; transform: scale(1.025); }
   to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes auth-hud-reveal {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes auth-status-pulse {
-  0%, 100% { opacity: 0.48; }
-  50% { opacity: 0.9; }
-}
-
-.auth-hud-horizon {
-  position: absolute;
-  right: 13%;
-  bottom: 16%;
-  left: 13%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--auth-cyan), transparent);
-  opacity: 0.54;
-}
-
-.auth-hud-horizon::before,
-.auth-hud-horizon::after {
-  position: absolute;
-  top: -3px;
-  width: 7px;
-  height: 7px;
-  border: 1px solid var(--auth-cyan);
-  border-radius: 50%;
-  content: "";
-}
-
-.auth-hud-horizon::before {
-  left: 29%;
-}
-
-.auth-hud-horizon::after {
-  right: 29%;
-}
-
-.auth-cockpit-status {
-  position: absolute;
-  z-index: 4;
-  bottom: 6%;
-  left: 7%;
-  margin: 0;
-  padding: 8px 11px;
-  border: 1px solid color-mix(in srgb, var(--auth-cyan) 36%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--auth-shell) 68%, transparent);
-  color: var(--auth-cyan-strong);
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  backdrop-filter: blur(12px);
-}
-
-@media (pointer: fine) {
-  .auth-cockpit-picture img,
-  .auth-hud {
-    will-change: transform;
-  }
 }
 
 @media (max-width: 1023px) {
@@ -504,21 +386,40 @@
     border-radius: 0;
   }
 
-  .auth-cockpit {
+  .auth-world {
     min-height: 30svh;
     max-height: 34svh;
   }
 
-  .auth-cockpit::after {
+  .auth-world::after {
     top: auto;
     bottom: 0;
     width: 100%;
     height: 72px;
-    background: linear-gradient(180deg, transparent, var(--auth-panel));
+    background: linear-gradient(180deg, transparent, rgba(255, 94, 31, 0.72));
   }
 
-  .auth-cockpit-picture img {
-    object-position: 50% 42%;
+  .auth-world-frame {
+    top: -34%;
+    left: -6%;
+    width: 112%;
+    height: 168%;
+  }
+
+  .auth-world-copy {
+    right: 24px;
+    bottom: 22px;
+    left: 24px;
+  }
+
+  .auth-world-copy p {
+    margin-bottom: 8px;
+    font-size: 9px;
+  }
+
+  .auth-world-copy h2 {
+    max-width: 18ch;
+    font-size: clamp(24px, 7vw, 32px);
   }
 
   .auth-panel {
@@ -534,16 +435,6 @@
     font-size: clamp(36px, 11vw, 48px);
   }
 
-  .auth-cockpit-status {
-    bottom: 12%;
-  }
-}
-
-@media (max-width: 419px) {
-  .auth-hud-secondary,
-  .auth-hud-bracket {
-    display: none;
-  }
 }
 
 @media (max-height: 699px) and (min-width: 768px) {
@@ -560,18 +451,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .auth-shell,
-  .auth-cockpit,
-  .auth-hud-nav path,
-  .auth-status-dot,
+  .auth-world,
   .auth-submit {
     animation: none;
     transition-duration: 0.01ms;
-  }
-
-  .auth-cockpit-picture img,
-  .auth-hud {
-    transform: none;
-    transition: none;
-    will-change: auto;
   }
 }
