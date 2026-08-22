@@ -4,19 +4,19 @@ const GLOBE_CONFIG = {
   version: 1,
   preset: "default",
   selection: "world",
-  background: "#ff5e1f",
-  transparent: false,
+  background: "#232a38",
+  transparent: true,
   backgroundStyle: "solid",
   density: 90,
   dotSize: 7,
-  dotColor: "#fff3bd",
-  dotColorAlpha: 0.82,
+  dotColor: "#06b9ef",
+  dotColorAlpha: 0.88,
   dotsVisible: true,
   shape: "Square",
   sizeVary: false,
   shapeRotationSpeed: 0,
   renderMode: "dots",
-  worldFill: "#ff5e1f",
+  worldFill: "#232a38",
   worldFillAlpha: 0,
   worldFillVisible: false,
   worldStrokeAlpha: 0,
@@ -34,7 +34,7 @@ const GLOBE_CONFIG = {
   animationsEnabled: true,
 };
 
-const GLOBE_SOURCE = `https://globestudio.app/embed?view=globe&autoSpin=1&source=helm-auth&c=${encodeURIComponent(JSON.stringify(GLOBE_CONFIG))}`;
+const GLOBE_SOURCE = `https://globestudio.app/embed?view=globe&autoSpin=1&transparent=1&source=helm-auth&c=${encodeURIComponent(JSON.stringify(GLOBE_CONFIG))}`;
 
 export function GlobeVisual() {
   const { t } = useI18n();

@@ -55,16 +55,24 @@
   min-width: 0;
   overflow: hidden;
   isolation: isolate;
-  background: #ff5e1f;
-  color: #11100f;
+  background:
+    radial-gradient(circle at 82% 16%, rgba(6, 185, 239, 0.2), transparent 36%),
+    linear-gradient(145deg, #232a38 0%, #1b2230 58%, #11151d 100%);
+  color: #f7f7f5;
   animation: auth-world-enter 420ms ease-out both;
+}
+
+[data-helm-theme="glass-dark"] .auth-world {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(6, 185, 239, 0.16), transparent 36%),
+    linear-gradient(145deg, #191920 0%, #131318 58%, #0a0a0c 100%);
 }
 
 .auth-world::after {
   position: absolute;
   z-index: 1;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 94, 31, 0) 56%, rgba(255, 94, 31, 0.42) 100%);
+  background: linear-gradient(180deg, transparent 52%, rgba(10, 13, 18, 0.38) 100%);
   content: "";
   pointer-events: none;
 }
@@ -396,7 +404,7 @@
     bottom: 0;
     width: 100%;
     height: 72px;
-    background: linear-gradient(180deg, transparent, rgba(255, 94, 31, 0.72));
+    background: linear-gradient(180deg, transparent, rgba(17, 21, 29, 0.72));
   }
 
   .auth-world-frame {
