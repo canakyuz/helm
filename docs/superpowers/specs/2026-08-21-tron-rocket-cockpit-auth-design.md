@@ -1,6 +1,6 @@
 # TRON Esintili Roket Kokpiti Auth Tasarımı
 
-_2026-08-21 · WES-000 · Onaylanan yön: optimize edilmiş 3D/cel-shaded illüstrasyon + DOM form + hafif Motion katmanı_
+_2026-08-21 · WES-000 · Onaylanan yön: optimize edilmiş 3D/cel-shaded illüstrasyon + DOM form + hafif CSS hareket katmanı_
 
 ## 1. Amaç
 
@@ -18,7 +18,7 @@ Seçilen yaklaşım:
 
 1. Açık ve koyu tema için iki yerel, optimize edilmiş 3D/cel-shaded kokpit görseli.
 2. Standart HTML form kontrolleri ve mevcut Refine/Supabase auth akışı.
-3. Holografik çizgiler, durum ışıkları ve giriş geçişleri için `motion/react`.
+3. Holografik çizgiler, durum ışıkları ve giriş geçişleri için CSS keyframe/transition.
 4. Görsel optimizasyonu geliştirme aşamasında `sharp`; runtime bağımlılığı değil.
 5. Gerçek zamanlı WebGL/Three.js yok.
 
@@ -91,15 +91,16 @@ route'u mevcut uygulamada tamamlanmadan `Şifremi unuttum` bağlantısı göster
 
 ## 5. Hareket Sistemi
 
-`motion` paketi `motion/react` girişinden kullanılır. Global `MotionConfig`
-`reducedMotion="user"` olur.
+Hareket katmanı CSS keyframe/transition ile çalışır. `prefers-reduced-motion`
+media query animasyonları ve transform geçişlerini kapatır; aynı tercihin runtime
+değişimi JS tarafında dinlenerek mevcut parallax değerleri sıfırlanır.
 
-- Sayfa açılışı: auth panel opacity `0→1`, `y: 12→0`, 260 ms ease-out.
+- Sayfa açılışı: auth shell opacity `0→1`, 240 ms ease-out.
 - Kokpit görseli: opacity `0→1`, scale `1.025→1`, 420 ms ease-out.
-- HUD çizgileri: tek seferlik stroke reveal, 500–700 ms.
+- HUD çizgileri: tek seferlik opacity reveal, 600 ms.
 - Durum ışığı: düşük yoğunluklu opacity pulse, 2.8 sn; yalnızca 1–2 küçük öğe.
 - Pointer parallax: yalnızca `fine` pointer ve reduced-motion kapalıysa, maksimum
-  `±6px`; React state yerine MotionValue kullanılır.
+  `±6px`; React state yerine eleman-scope CSS custom property kullanılır.
 - CTA: hover'da renk değişimi ve `translateY(-1px)`; 140 ms.
 - Hata: yalnızca opacity + renk; shake/bounce yok.
 
@@ -140,8 +141,9 @@ erişmez; sayfa yalnızca bunları compose eder.
 
 ### Eklenecek
 
-- `motion`: React animasyonları, MotionValue parallax ve reduced-motion yönetimi.
 - `sharp` (devDependency): master asset'ten AVIF/WebP üretimi.
+- `@testing-library/react`, `happy-dom`, `@happy-dom/global-registrator`
+  (devDependency): kritik auth form davranışlarının DOM testi.
 
 ### Mevcut ve kullanılacak
 
@@ -188,7 +190,7 @@ erişmez; sayfa yalnızca bunları compose eder.
 - Submit pending iken tekrar gönderim engellenir.
 - Ham Supabase hata nesnesi UI'da ve console'da gösterilmez.
 - Form autocomplete: `email` ve `current-password`.
-- Asset ve Motion için üçüncü parti runtime isteği yapılmaz.
+- Asset ve animasyon katmanı için üçüncü parti runtime isteği yapılmaz.
 
 ## 13. Doğrulama
 
@@ -251,7 +253,7 @@ _2026-08-22 · `DONE_WITH_CONCERNS` (yalnızca çalıştırılamayan browser mat
 | `cockpit-light.webp` | 100.712 byte |
 | `cockpit-dark.webp` | 136.796 byte |
 
-Tümü AVIF ≤ 280 KB ve WebP ≤ 420 KB hedefindedir. Son incelemede Motion runtime kaldırılıp sabit elemanlı CSS animasyonu ve CSS-variable parallax kullanıldı. Vite çıktısındaki lazy login artefaktları `login-BjNY0t-E.js` (6.050 byte; `gzip -9`: 2.314 byte) ve `login-Bpd0LnlW.css` (9.336 byte; `gzip -9`: 2.731 byte) oldu. Kontrollü `ea55ec1` tabanı 1.689 byte gzip olduğundan login JS artışı 625 byte ve 18 KiB bütçenin içindedir. `App.tsx` login sayfasını `lazy(() => import("@/pages/login"))` ile yüklemeye devam ediyor. `dist/assets` taramasında `motion`, `framer-motion`, `sharp`, `@img/sharp-*`, `three`, `@react-three/*`, `gsap` veya `lottie` bulunmadı.
+Tümü AVIF ≤ 280 KB ve WebP ≤ 420 KB hedefindedir. Son incelemede Motion runtime kaldırılıp sabit elemanlı CSS animasyonu ve CSS-variable parallax kullanıldı. Vite çıktısındaki lazy login artefaktları `login-BjNY0t-E.js` (6.050 byte) ve `login-Bpd0LnlW.css` (9.336 byte) oldu. Node `zlib.gzipSync({ level: 9 })` ile aynı kontrollü ölçümde HEAD login JS 2.290 byte, `ea55ec1` tabanı 1.689 byte ve artış 601 byte'tır; 18 KiB bütçenin içindedir. `App.tsx` login sayfasını `lazy(() => import("@/pages/login"))` ile yüklemeye devam ediyor. `dist/assets` taramasında `motion`, `framer-motion`, `sharp`, `@img/sharp-*`, `three`, `@react-three/*`, `gsap` veya `lottie` bulunmadı.
 
 ### Build hata sınırı (systematic-debugging Phase 1)
 
