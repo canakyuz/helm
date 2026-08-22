@@ -75,7 +75,7 @@
   },
   "scripts": {
     "dev": "refine dev",
-    "build": "tsc && refine build",
+    "build": "tsc && UPDATE_NOTIFIER_IS_DISABLED=true refine build",
     "typecheck": "tsc --noEmit",
     "start": "refine start",
     "refine": "refine",
