@@ -43,13 +43,21 @@ Web'de mobile'ın `ScreenStatus` bileşeninin eşdeğeri yok — her sayfa loadi
 başına, tutarsız şekilde çözüyor (bazıları hiç çözmüyor). Önce bunu standardize etmek, sonraki 29
 sayfa incelemesini hem hızlandırır hem tutarlı kılar.
 
-- [ ] `src/components/ui/`: ortak `PageStatus` (loading/error/empty, mobile `ScreenStatus`'un web
-      karşılığı) — tek bileşen, 3 tone
-- [ ] `Card`/`Table` primitiflerinde absolute-ban taraması (side-border, ghost-card, radius)
-- [ ] Buton `:active` press-feedback (scale 0.97) — `button.tsx`'e bir kere eklenir, her yerde çalışır
-- [ ] z-index skalası kontrolü (dropdown → sticky → modal → toast → tooltip) — keyfi 999/9999 var mı?
-- [ ] React Query global config gözden geçir (`App.tsx`: staleTime 60s, retry 1) — mobile'ın 30s/5m
-      ayrımı burada da mantıklı mı, yoksa sabit 60s yeterli mi?
+- [x] `src/components/ui/page-status.tsx`: ortak `PageStatus` (loading/error/empty, mobile
+      `ScreenStatus`'un web karşılığı) — 3 tone, lucide ikon, `role="status"/"alert"` (a11y)
+- [x] `Card`/`Table` primitiflerinde absolute-ban taraması — ghost-card (border+geniş shadow) veya
+      keyfi büyük radius YOK. Tek gerçek bulgu: Card `rounded-xl` (14px), DESIGN.md'nin hedeflediği
+      `bento-tile` (22px) ile uyuşmuyor. **Bilinçli olarak ertelendi** — 29 sayfanın hepsinde Card
+      kullanılıyor, görsel doğrulama yapamadan (auth arkasında, screenshot alamıyorum) sitewide
+      radius değişikliği riskli. Faz 2'de bir sayfada denenip onay alınınca sitewide uygulanacak.
+- [x] Buton `:active` press-feedback zaten VARDI (`translate-y-px`). Gerçek bulgu: `transition-all`
+      kullanılıyordu (emil-design-eng yasağı) → kesin property listesine çevrildi (`button.tsx`)
+- [x] z-index skalası kontrolü — `z-50`/`z-10`/`z-20` tutarlı (shadcn/radix default). 3 adet keyfi
+      değer (`z-[500/600/900]`) var ama `users-geo-map.tsx`/`geo-map.tsx`'te Leaflet'in kendi iç
+      z-index'ini (200-700 aralığı) aşmak için bilinçli — dokunulmadı, gerçek sorun değil.
+- [x] React Query global config gözden geçirildi (`App.tsx`: staleTime 60s, gcTime 5dk, retry 1,
+      refetchOnReconnect true) — makul, sabit kalması yeterli. Mobile'ın 30s/5dk per-hook ayrımı
+      Faz 2'de tekil sayfa ihtiyacına göre (KPI vs audit log gibi) değerlendirilecek, global değil.
 
 ---
 

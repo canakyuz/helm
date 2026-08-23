@@ -131,8 +131,9 @@ dekoratif bir "canlı sinyal" efekti, genel bileşenlere sızdırılmamalı.
   yani 14px kullanıyor — Faz 1'de bento-tile ölçeğine taşınması gündemde), `ring-1
   ring-foreground/10`, iç boşluk `tilePad`.
 - **Button**: `rounded-btn` (12px), varyantlar: default (primary dolgu), outline, secondary,
-  ghost, destructive, link. `:active` basınç geri bildirimi (scale) şu an YOK — emil-design-eng
-  kuralına göre eklenmeli.
+  ghost, destructive, link. `:active` basınç geri bildirimi VAR (`translate-y-px`) — doğru,
+  dokunulmadı. Düzeltilen: `transition-all` yerine kesin property listesi (emil-design-eng:
+  "specify exact properties, avoid all").
 - **Input**: `rounded-field` (14px), şeffaf zemin, `focus-visible` halkası `ring-3 ring-ring/50`.
 - **Badge/rozet**: durum renkleri (`positive`/`negative`/`warning`) `size-1.5`/`size-2` nokta +
   metin ikilisi olarak kullanılıyor (bkz. `HealthBadge`, dashboard tablosu).
