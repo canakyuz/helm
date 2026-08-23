@@ -1,0 +1,111 @@
+# Helm Web - UI/UX İnceleme ve Cila Planı
+
+> Kapsam: `apps/web`'deki 30 route (18 sidebar sayfası + 11 gizli CRUD/detay sayfası + login).
+> Metodoloji kaynağı: `emil-design-eng` (motion/animasyon kararları) + `impeccable` (görsel incelik, kontrast,
+> tipografi, layout, "AI slop" testi). Veri işleyişi referansı: **`apps/mobile`** — CLAUDE.md'sinde tanımlı
+> disiplin (her ekranda loading+error+empty state, 1-3 odaklı query hook, staleTime disiplini, 50+ item'da
+> virtualization). **Mobile'a hiçbir değişiklik yapılmaz, sadece okunur.**
+>
+> Sıralama mantığı: önce paylaşılan altyapı (bir kere düzeltilir, 30 sayfaya birden fayda sağlar),
+> sonra sayfalar sidebar'ın kendi önem sırasına göre (Ana Menü → Analitik → Mesajlaşma → DevOps → Destek),
+> en son gizli CRUD sayfaları. Her faz kendi commit'ine girer.
+
+---
+
+## İnceleme metodolojisi (her sayfada aynı 9 madde)
+
+Her sayfa incelenirken şu checklist uygulanır — sonuç bu dosyaya not düşülür:
+
+1. **Layout & hiyerarşi** (impeccable) — kart yığını mı yoksa gerçek hiyerarşi mi? İç içe kart var mı (yasak)? Grid mi flex mi doğru yerde mi?
+2. **Kontrast & tipografi** (impeccable) — body text ≥4.5:1, `text-muted-foreground` çok soluk mu? Ölçek sıçraması ≥1.25 oranında mı?
+3. **Absolute ban taraması** (impeccable) — side-stripe border, gradient text, ghost-card (border+geniş shadow ikilisi), 32px+ radius, tekdüze eyebrow/numaralı bölüm.
+4. **Boşluk/ritim** — sabit `gap-4` tekrarı mı, yoksa kasıtlı ritim mi?
+5. **Motion kararı** (emil-design-eng) — hangi elemanlar animasyonlu olmalı (modal/drawer/toast), hangileri olmamalı (yüksek frekanslı, klavye tetiklemeli)? Buton `:active` scale(0.97) var mı?
+6. **Loading state** — mobile'daki `ScreenStatus` eşdeğeri var mı, yoksa boş/donuk mu render ediyor?
+7. **Error state** — query `isError` durumunda kullanıcıya ne gösteriliyor? Sessizce mi düşüyor?
+8. **Empty state** — veri yoksa "—" mü basıyor, yoksa anlamlı bir boş durum mu var?
+9. **Veri katmanı disiplini** (mobile referans) — sayfa başına kaç fetch/query var (mobile: 1-3 kuralı)? 50+ satırlık liste varsa virtualization/pagination var mı? Mutation sonrası invalidate doğru mu?
+
+---
+
+## Faz 0 - Hazırlık (kod yok)
+
+- [x] `impeccable init` çalıştır → `PRODUCT.md` + `DESIGN.md` oluştur (kod taramasından çıkarıldı,
+      login'in lime-green sapması ve Card'ın 14px/22px radius tutarsızlığı DESIGN.md'de not edildi)
+- [x] Dev server temiz (cache temizlendi, taze restart)
+- [x] Bu dosya `/goal bütün fazları bitir` ile onaylandı — otonom ilerleniyor
+
+---
+
+## Faz 1 - Paylaşılan altyapı (1-2 commit, 30 sayfaya birden fayda)
+
+Web'de mobile'ın `ScreenStatus` bileşeninin eşdeğeri yok — her sayfa loading/error/empty'i kendi
+başına, tutarsız şekilde çözüyor (bazıları hiç çözmüyor). Önce bunu standardize etmek, sonraki 29
+sayfa incelemesini hem hızlandırır hem tutarlı kılar.
+
+- [ ] `src/components/ui/`: ortak `PageStatus` (loading/error/empty, mobile `ScreenStatus`'un web
+      karşılığı) — tek bileşen, 3 tone
+- [ ] `Card`/`Table` primitiflerinde absolute-ban taraması (side-border, ghost-card, radius)
+- [ ] Buton `:active` press-feedback (scale 0.97) — `button.tsx`'e bir kere eklenir, her yerde çalışır
+- [ ] z-index skalası kontrolü (dropdown → sticky → modal → toast → tooltip) — keyfi 999/9999 var mı?
+- [ ] React Query global config gözden geçir (`App.tsx`: staleTime 60s, retry 1) — mobile'ın 30s/5m
+      ayrımı burada da mantıklı mı, yoksa sabit 60s yeterli mi?
+
+---
+
+## Faz 2 - Sayfa sırası (sidebar önem sırasına göre)
+
+### Ana Menü
+- [ ] `/` — Cockpit (dashboard) — *son aktiviteler paneli bu oturumda düzeltildi, geri kalanı incelenmedi*
+- [ ] `/cms/collections` — CMS · Şemalar
+- [ ] `/cms/entries` — CMS · İçerikler
+- [ ] `/cms/assets` — CMS · Medya
+- [ ] `/users` — Kullanıcılar
+- [ ] `/segments` — Segmentler
+- [ ] `/reviews` — Yorumlar
+- [ ] `/audit` — Müdahale geçmişi
+
+### Analitik & İçgörü
+- [ ] `/revenue` — Gelir & Reklam
+- [ ] `/growth` — Büyüme
+- [ ] `/funnel` — Huni
+- [ ] `/alerts` — Uyarılar
+
+### Mesajlaşma
+- [ ] `/mail` — Mail
+- [ ] `/push` — Push
+- [ ] `/campaigns` — Kampanya geçmişi
+
+### DevOps
+- [ ] `/integrations` — Entegrasyonlar
+- [ ] `/system` — Sync & Sağlık
+- [ ] `/logs` — Loglar
+- [ ] `/versions` — Sürümler
+
+### Destek
+- [ ] `/settings` — Ayarlar
+
+---
+
+## Faz 3 - Gizli CRUD/detay sayfaları
+
+- [ ] `/users/:id` — kullanıcı detayı
+- [ ] `/properties` — liste
+- [ ] `/properties/create` — oluşturma
+- [ ] `/properties/edit/:id` — düzenleme
+- [ ] `/brands/edit/:id` — marka düzenleme
+- [ ] `/projects/edit/:id` — legacy proje düzenleme
+- [ ] `/cms/collections/edit/:id`
+- [ ] `/cms/entries/create`
+- [ ] `/cms/entries/edit/:id`
+
+## Zaten yapıldı (referans, tekrar incelenmeyecek)
+- [x] `/login` — bu oturumda tamamen yeniden tasarlandı (split-panel, orbit görsel, TR/EN)
+
+---
+
+## İşleyiş kuralı
+
+Her sayfa için: checklist uygulanır → bulgular bu dosyaya (madde altına) not düşülür → onay alınır →
+düzeltme yapılır → kendi commit'i → checkbox işaretlenir → sıradaki sayfaya geçilir. Faz 1 bitmeden
+Faz 2'ye geçilmez (paylaşılan bileşenler olgunlaşmadan tek tek sayfa cilası tekrar iş demek).
