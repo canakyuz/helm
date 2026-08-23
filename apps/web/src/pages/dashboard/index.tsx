@@ -556,7 +556,7 @@ export const DashboardPage = () => {
         <LatestUpdates
           alerts={alertsResult.data}
           runs={runsResult.data.slice(0, 20)}
-          className="flex min-h-0 flex-col"
+          className="flex min-h-0 flex-col xl:max-h-[calc(100vh-180px)] xl:self-start"
         />
       </div>
 
