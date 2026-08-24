@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { type CSSProperties, useMemo, useState } from "react";
 import { AlertTriangle, Bell, RefreshCw, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -75,10 +75,16 @@ interface LatestUpdatesProps {
   alerts: AlertEvent[];
   runs: SyncRun[];
   className?: string;
+  style?: CSSProperties;
 }
 
 /** Kravio "Latest Updates" paneli: segmented tab + arama + ikonlu timeline. */
-export const LatestUpdates = ({ alerts, runs, className }: LatestUpdatesProps) => {
+export const LatestUpdates = ({
+  alerts,
+  runs,
+  className,
+  style,
+}: LatestUpdatesProps) => {
   const [tab, setTab] = useState<TabKey>("today");
   const [q, setQ] = useState("");
 
@@ -109,7 +115,7 @@ export const LatestUpdates = ({ alerts, runs, className }: LatestUpdatesProps) =
   }, [all]);
 
   return (
-    <Card className={cn("py-0", className)}>
+    <Card className={cn("py-0", className)} style={style}>
       <CardHeader className="px-5 pt-5 pb-0">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Son Aktiviteler

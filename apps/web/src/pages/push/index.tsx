@@ -1,9 +1,20 @@
 import { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
-import { Bell, Eye, Send, Smartphone } from "lucide-react";
+import { Bell, Eye, Globe, Send, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { ErrorBanner } from "@/components/error-banner";
 import { EmptyState } from "@/components/empty-state";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +63,7 @@ const fmt = (iso: string) => new Date(iso).toLocaleString("tr-TR");
 
 export const PushPage = () => {
   const { scope, isAll } = useScope();
+  const [mode, setMode] = useState<"segment" | "broadcast">("segment");
   const [segmentId, setSegmentId] = useState<string>("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -109,7 +121,7 @@ export const PushPage = () => {
   const canSend =
     !isAll &&
     pushReady &&
-    !!segmentId &&
+    (mode === "broadcast" || !!segmentId) &&
     title.trim().length > 0 &&
     body.trim().length > 0;
 
@@ -123,7 +135,9 @@ export const PushPage = () => {
         {
           body: {
             project_id: scope,
-            segment_id: segmentId,
+            ...(mode === "broadcast"
+              ? { broadcast: true }
+              : { segment_id: segmentId }),
             title,
             body,
             dry_run: dry,
@@ -194,30 +208,56 @@ export const PushPage = () => {
         <CardContent className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
           <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Hedef segment</Label>
+            <Label>Hedef</Label>
             <Select
-              value={segmentId}
-              onValueChange={setSegmentId}
+              value={mode}
+              onValueChange={(v) => setMode(v as "segment" | "broadcast")}
               disabled={!pushReady || isAll}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Segment seç" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {segments.length === 0 ? (
-                  <SelectItem value="__none" disabled>
-                    Segment yok - Segmentler sayfasından oluştur
-                  </SelectItem>
-                ) : (
-                  segments.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name} ({s.rule_type} · {s.rule_days}g)
-                    </SelectItem>
-                  ))
-                )}
+                <SelectItem value="segment">Segment</SelectItem>
+                <SelectItem value="broadcast">
+                  Tüm kullanıcılar (broadcast)
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
+          {mode === "segment" ? (
+            <div className="space-y-2">
+              <Label>Hedef segment</Label>
+              <Select
+                value={segmentId}
+                onValueChange={setSegmentId}
+                disabled={!pushReady || isAll}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Segment seç" />
+                </SelectTrigger>
+                <SelectContent>
+                  {segments.length === 0 ? (
+                    <SelectItem value="__none" disabled>
+                      Segment yok - Segmentler sayfasından oluştur
+                    </SelectItem>
+                  ) : (
+                    segments.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name} ({s.rule_type} · {s.rule_days}g)
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-muted-foreground">
+              <Globe className="size-3.5 shrink-0" />
+              Push token'ı olan HERKESE gider. Göndermeden önce Önizle ile
+              cihaz sayısını gör.
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Başlık</Label>
             <Input

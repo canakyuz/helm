@@ -1,7 +1,11 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-send-push - bir segmentin kullanıcılarına Expo Push bildirimi gönderir.
-// Body: { project_id, segment_id, title, body, data?, dry_run? }
+// helm-send-push - proje kullanıcılarına Expo Push bildirimi gönderir.
+// Body: { project_id, title, body, data?, dry_run?, ...hedef }
+// Hedef, üç moddan TAM BİRİ:
+//   segment_id: string   - segment kuralına uyanlar (new/active/inactive)
+//   user_ids:   string[] - elle seçilmiş kullanıcılar (max 1000, uuid)
+//   broadcast:  true     - token tablosundaki HERKES
 // Push token'ları: project_integrations.supabase.config.push_token_{table,column,user_column}
 //   defaults: profiles / expo_push_token / id
 
@@ -78,6 +82,8 @@ Deno.serve(async (req) => {
   let body: {
     project_id?: string;
     segment_id?: string;
+    user_ids?: string[];
+    broadcast?: boolean;
     title?: string;
     body?: string;
     data?: Record<string, unknown>;
@@ -91,16 +97,39 @@ Deno.serve(async (req) => {
   const {
     project_id,
     segment_id,
+    user_ids,
+    broadcast,
     title,
     body: msgBody,
     data,
     dry_run,
   } = body;
-  if (!project_id || !segment_id || !title || !msgBody) {
+  if (!project_id || !title || !msgBody) {
+    return json({ error: "project_id, title, body gerekli" }, 400);
+  }
+
+  // Hedef modu tam bir tane olmalı — iki mod birden gelirse hangi kitleye
+  // gideceği belirsizleşir, sessizce birini seçmek yanlış kitleye push demek.
+  const modeCount =
+    (segment_id ? 1 : 0) +
+    (user_ids && user_ids.length > 0 ? 1 : 0) +
+    (broadcast ? 1 : 0);
+  if (modeCount !== 1) {
     return json(
-      { error: "project_id, segment_id, title, body gerekli" },
+      { error: "Hedef olarak segment_id, user_ids veya broadcast'ten tam biri verilmeli" },
       400,
     );
+  }
+
+  const UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (user_ids && user_ids.length > 0) {
+    if (user_ids.length > 1000) {
+      return json({ error: "user_ids en fazla 1000 olabilir" }, 400);
+    }
+    if (user_ids.some((id) => typeof id !== "string" || !UUID_RE.test(id))) {
+      return json({ error: "user_ids geçersiz uuid içeriyor" }, 400);
+    }
   }
 
   const hub = createClient(
@@ -108,14 +137,20 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  const { data: seg } = await hub
-    .from("user_segments")
-    .select("rule_type, rule_days, project_id")
-    .eq("id", segment_id)
-    .maybeSingle();
-  if (!seg) return json({ error: "Segment not found" }, 404);
+  let seg:
+    | { rule_type: "new" | "active" | "inactive"; rule_days: number; project_id: string | null }
+    | null = null;
+  if (segment_id) {
+    const { data: segRow } = await hub
+      .from("user_segments")
+      .select("rule_type, rule_days, project_id")
+      .eq("id", segment_id)
+      .maybeSingle();
+    if (!segRow) return json({ error: "Segment not found" }, 404);
+    seg = segRow as typeof seg;
+  }
 
-  const targetProjectId = seg.project_id ?? project_id;
+  const targetProjectId = seg?.project_id ?? project_id;
   const { data: supaIntg } = await hub
     .from("project_integrations")
     .select("config")
@@ -133,7 +168,7 @@ Deno.serve(async (req) => {
       }
     | undefined;
   if (!cfg?.project_url || !cfg?.service_role_key) {
-    return json({ error: "Segment projesinde Supabase entegrasyonu yok" }, 400);
+    return json({ error: "Hedef projede Supabase entegrasyonu yok" }, 400);
   }
 
   // Güvenlik: tablo/kolon adları yalnızca identifier karakterleri.
@@ -164,50 +199,76 @@ Deno.serve(async (req) => {
   const tokenCol = rawTokenCol;
   const userCol = rawUserCol;
 
-  let users: AuthUser[];
-  try {
-    users = await listAllUsers(cfg.project_url, cfg.service_role_key);
-  } catch (e) {
-    return json(
-      { error: e instanceof Error ? e.message : String(e) },
-      500,
-    );
-  }
-  const userIds = users
-    .filter((u) => matches(u, seg.rule_type, seg.rule_days))
-    .map((u) => u.id);
-
-  if (userIds.length === 0) {
-    return json({ recipients: 0, sent: 0, failed: 0, sample: [] });
-  }
-
-  // Push token'larını çek
   const admin = createClient(cfg.project_url, cfg.service_role_key, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // Büyük listede tek seferde `in` query patlayabilir → chunk'la
   const tokens: string[] = [];
-  const TOKEN_CHUNK = 200;
-  for (let i = 0; i < userIds.length; i += TOKEN_CHUNK) {
-    const slice = userIds.slice(i, i + TOKEN_CHUNK);
-    const { data: rows, error: tokErr } = await admin
-      .from(tokenTable)
-      .select(`${userCol}, ${tokenCol}`)
-      .in(userCol, slice);
-    if (tokErr) {
-      return json(
-        {
-          error: `Could not read from the push token table (${tokenTable}.${tokenCol}): ${tokErr.message}`,
-        },
-        500,
-      );
-    }
+  const collect = (rows: Record<string, unknown>[] | null) => {
     for (const r of rows ?? []) {
-      const t = (r as Record<string, unknown>)[tokenCol];
+      const t = r[tokenCol];
       if (typeof t === "string" && t.startsWith("ExponentPushToken[")) {
         tokens.push(t);
       }
+    }
+  };
+  const tokenReadError = (msg: string) =>
+    json(
+      { error: `Could not read from the push token table (${tokenTable}.${tokenCol}): ${msg}` },
+      500,
+    );
+
+  let eligibleCount = 0;
+  if (broadcast) {
+    // Broadcast: kullanıcı listesi gereksiz — token tablosundaki herkes hedef.
+    // 1000'lik sayfalar; 20k satır tavanı runaway koruması (tek kişilik hub).
+    const PAGE = 1000;
+    for (let from = 0; from < 20_000; from += PAGE) {
+      const { data: rows, error: tokErr } = await admin
+        .from(tokenTable)
+        .select(`${userCol}, ${tokenCol}`)
+        .not(tokenCol, "is", null)
+        .range(from, from + PAGE - 1);
+      if (tokErr) return tokenReadError(tokErr.message);
+      collect(rows as Record<string, unknown>[] | null);
+      eligibleCount += rows?.length ?? 0;
+      if ((rows?.length ?? 0) < PAGE) break;
+    }
+  } else {
+    let userIds: string[];
+    if (seg) {
+      let users: AuthUser[];
+      try {
+        users = await listAllUsers(cfg.project_url, cfg.service_role_key);
+      } catch (e) {
+        return json(
+          { error: e instanceof Error ? e.message : String(e) },
+          500,
+        );
+      }
+      const rule = seg;
+      userIds = users
+        .filter((u) => matches(u, rule.rule_type, rule.rule_days))
+        .map((u) => u.id);
+    } else {
+      userIds = user_ids ?? [];
+    }
+    eligibleCount = userIds.length;
+
+    if (userIds.length === 0) {
+      return json({ recipients: 0, sent: 0, failed: 0, sample: [] });
+    }
+
+    // Büyük listede tek seferde `in` query patlayabilir → chunk'la
+    const TOKEN_CHUNK = 200;
+    for (let i = 0; i < userIds.length; i += TOKEN_CHUNK) {
+      const slice = userIds.slice(i, i + TOKEN_CHUNK);
+      const { data: rows, error: tokErr } = await admin
+        .from(tokenTable)
+        .select(`${userCol}, ${tokenCol}`)
+        .in(userCol, slice);
+      if (tokErr) return tokenReadError(tokErr.message);
+      collect(rows as Record<string, unknown>[] | null);
     }
   }
 
@@ -217,7 +278,7 @@ Deno.serve(async (req) => {
   if (dry_run) {
     return json({
       recipients: uniqueTokens.length,
-      eligible_users: userIds.length,
+      eligible_users: eligibleCount,
       sent: 0,
       failed: 0,
       dry_run: true,
@@ -277,7 +338,7 @@ Deno.serve(async (req) => {
     .from("campaigns")
     .insert({
       project_id,
-      segment_id,
+      segment_id: segment_id ?? null,
       channel: "push",
       subject: title,
       body: msgBody.slice(0, 4000),
@@ -291,7 +352,7 @@ Deno.serve(async (req) => {
 
   return json({
     recipients: uniqueTokens.length,
-    eligible_users: userIds.length,
+    eligible_users: eligibleCount,
     sent,
     failed,
     campaign_id: camp?.id ?? null,

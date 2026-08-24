@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   type CrudFilter,
   useGetIdentity,
@@ -117,6 +117,28 @@ export const DashboardPage = () => {
   const invalidate = useInvalidate();
   const [range, setRange] = useState(90);
   const [syncing, setSyncing] = useState(false);
+
+  // Son Aktiviteler paneli sol sütunla (KPI + grafik + harita) aynı
+  // yükseklikte olsun (xl+ iki sütunlu layout'ta) - sabit bir vh tahmini
+  // yerine gerçek ölçülen değer kullanılır, sol sütunun boyu değiştiğinde
+  // (KPI placeholder, harita yüksekliği vb.) otomatik doğru kalır.
+  const leftColRef = useRef<HTMLDivElement>(null);
+  const [leftColHeight, setLeftColHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const el = leftColRef.current;
+    if (!el) return;
+    const mq = window.matchMedia("(min-width: 1280px)");
+    const update = () =>
+      setLeftColHeight(mq.matches ? el.getBoundingClientRect().height : null);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    mq.addEventListener("change", update);
+    return () => {
+      ro.disconnect();
+      mq.removeEventListener("change", update);
+    };
+  }, []);
 
   const since = useMemo(
     () =>
@@ -497,7 +519,7 @@ export const DashboardPage = () => {
 
       {/* ════════ KPI + BAR CHART (sol) · LATEST UPDATES (sağ ray) ════════ */}
       <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="flex min-w-0 flex-col gap-4">
+        <div ref={leftColRef} className="flex min-w-0 flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-3">
             <KpiCard
               title="Reklam · Bugün"
@@ -566,7 +588,8 @@ export const DashboardPage = () => {
         <LatestUpdates
           alerts={alertsResult.data}
           runs={runsResult.data.slice(0, 20)}
-          className="flex min-h-0 flex-col xl:max-h-[calc(100vh-180px)] xl:self-start"
+          className="flex min-h-0 flex-col xl:self-start"
+          style={leftColHeight ? { maxHeight: leftColHeight } : undefined}
         />
       </div>
 
