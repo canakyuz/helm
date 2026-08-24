@@ -307,10 +307,41 @@ export const PushPage = () => {
               <Eye className="size-4" />
               Önizle
             </Button>
-            <Button onClick={() => send(false)} disabled={!canSend || sending}>
-              <Send className="size-4" />
-              Gönder
-            </Button>
+            {mode === "broadcast" ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button disabled={!canSend || sending}>
+                    <Send className="size-4" />
+                    Tümüne gönder
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Tüm kullanıcılara gönderilsin mi?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      "{title || "(başlıksız)"}" bildirimi push token'ı olan
+                      HERKESE gidecek. Bu geri alınamaz.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>İptal</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => send(false)}>
+                      Gönder
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <Button
+                onClick={() => send(false)}
+                disabled={!canSend || sending}
+              >
+                <Send className="size-4" />
+                Gönder
+              </Button>
+            )}
           </div>
 
           {/* Şablonlar */}

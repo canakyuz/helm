@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import {
   Ban,
+  BellRing,
   CalendarPlus,
   ChevronLeft,
   ChevronRight,
@@ -16,12 +17,24 @@ import {
   UserPlus,
   UserX,
   Users as UsersIcon,
+  X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -167,6 +180,59 @@ export const UsersPage = () => {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(0);
   const [preview, setPreview] = useState<ProjectUser | null>(null);
+
+  // Çoklu seçim + toplu push. Seçim sayfa/filtre değişse de yaşar;
+  // sayaç her zaman gerçek seçimi gösterir.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [pushOpen, setPushOpen] = useState(false);
+  const [pushTitle, setPushTitle] = useState("");
+  const [pushBody, setPushBody] = useState("");
+  const [pushSending, setPushSending] = useState(false);
+
+  const toggleSelected = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const sendBulkPush = async () => {
+    if (selected.size === 0 || !pushTitle.trim() || !pushBody.trim()) return;
+    setPushSending(true);
+    try {
+      const { data, error: fnError } = await supabaseClient.functions.invoke(
+        "helm-send-push",
+        {
+          body: {
+            project_id: scope,
+            user_ids: Array.from(selected),
+            title: pushTitle.trim(),
+            body: pushBody.trim(),
+          },
+        },
+      );
+      if (fnError) throw fnError;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`${data.sent} bildirim gönderildi`, {
+        description:
+          data.recipients < selected.size
+            ? `${selected.size} seçili kullanıcıdan ${data.recipients} cihazda token var`
+            : `${data.recipients} cihaza ulaşıldı`,
+      });
+      setPushOpen(false);
+      setPushTitle("");
+      setPushBody("");
+      setSelected(new Set());
+    } catch (e) {
+      toast.error("Gönderim başarısız", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setPushSending(false);
+    }
+  };
 
 
   // KPI hesapları
@@ -414,10 +480,53 @@ export const UsersPage = () => {
               />
             ) : (
               <>
+                {selected.size > 0 && (
+                  <div className="flex items-center justify-between rounded-md border border-primary/25 bg-primary/5 px-3 py-2">
+                    <span className="text-sm font-medium">
+                      {selected.size} kullanıcı seçili
+                    </span>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => setPushOpen(true)}>
+                        <BellRing className="size-4" />
+                        <span className="ml-1">Push gönder</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelected(new Set())}
+                      >
+                        <X className="size-4" />
+                        <span className="ml-1">Temizle</span>
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="overflow-auto rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-8">
+                          <input
+                            type="checkbox"
+                            className="size-4 accent-primary"
+                            aria-label="Sayfadakilerin tümünü seç"
+                            checked={
+                              pageData.length > 0 &&
+                              pageData.every((u) => selected.has(u.id))
+                            }
+                            onChange={(e) => {
+                              const check = e.target.checked;
+                              setSelected((prev) => {
+                                const next = new Set(prev);
+                                for (const u of pageData) {
+                                  if (check) next.add(u.id);
+                                  else next.delete(u.id);
+                                }
+                                return next;
+                              });
+                            }}
+                          />
+                        </TableHead>
                         <TableHead className="w-10" />
                         <TableHead>Kullanıcı</TableHead>
                         <TableHead>Konum</TableHead>
@@ -439,6 +548,18 @@ export const UsersPage = () => {
                             )}
                             onClick={() => setPreview(u)}
                           >
+                            <TableCell
+                              className="py-2"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <input
+                                type="checkbox"
+                                className="size-4 accent-primary"
+                                aria-label="Kullanıcıyı seç"
+                                checked={selected.has(u.id)}
+                                onChange={() => toggleSelected(u.id)}
+                              />
+                            </TableCell>
                             <TableCell className="py-2">
                               <Avatar user={u} />
                             </TableCell>
@@ -569,6 +690,54 @@ export const UsersPage = () => {
           <PreviewPanel user={preview} />
         </div>
       </div>
+
+      {/* Toplu push dialogu — seçili kullanıcılara helm-send-push (user_ids) */}
+      <Dialog open={pushOpen} onOpenChange={setPushOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selected.size} kullanıcıya push gönder
+            </DialogTitle>
+            <DialogDescription>
+              Yalnızca push token'ı olan cihazlara ulaşır; sonuç toast'ta
+              görünür ve kampanya geçmişine yazılır.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="bulk-push-title">Başlık</Label>
+              <Input
+                id="bulk-push-title"
+                value={pushTitle}
+                maxLength={120}
+                onChange={(e) => setPushTitle(e.target.value)}
+                placeholder="Özür dileriz 💎"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="bulk-push-body">Mesaj</Label>
+              <Textarea
+                id="bulk-push-body"
+                value={pushBody}
+                rows={4}
+                maxLength={500}
+                onChange={(e) => setPushBody(e.target.value)}
+                placeholder="Kısa, kişisel bir mesaj…"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              disabled={
+                pushSending || !pushTitle.trim() || !pushBody.trim()
+              }
+              onClick={sendBulkPush}
+            >
+              Gönder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
