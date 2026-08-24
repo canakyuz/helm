@@ -4,6 +4,7 @@ import { useInvalidate, useList } from "@refinedev/core";
 import {
   ArrowLeft,
   Ban,
+  BellRing,
   CheckCircle2,
   KeyRound,
   Mail,
@@ -28,6 +29,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -87,6 +100,9 @@ export const UserDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [acting, setActing] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [pushOpen, setPushOpen] = useState(false);
+  const [pushTitle, setPushTitle] = useState("");
+  const [pushBody, setPushBody] = useState("");
 
   useEffect(() => {
     if (isAll || !id) {
@@ -144,10 +160,12 @@ export const UserDetailPage = () => {
       } else {
         setReloadKey((k) => k + 1);
       }
+      return true;
     } catch (e) {
       toast.error("İşlem başarısız", {
         description: e instanceof Error ? e.message : String(e),
       });
+      return false;
     } finally {
       setActing(null);
     }
@@ -262,6 +280,66 @@ export const UserDetailPage = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Dialog open={pushOpen} onOpenChange={setPushOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={busy}>
+                    <BellRing className="size-4" />
+                    <span className="ml-2">Push gönder</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Kullanıcıya push gönder</DialogTitle>
+                    <DialogDescription>
+                      Expo push token'ı olan cihazlara gider; mesaj audit
+                      log'a kaydedilir. Token yoksa hata görürsün.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="push-title">Başlık</Label>
+                      <Input
+                        id="push-title"
+                        value={pushTitle}
+                        maxLength={120}
+                        onChange={(e) => setPushTitle(e.target.value)}
+                        placeholder="Özür dileriz 💎"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="push-body">Mesaj</Label>
+                      <Textarea
+                        id="push-body"
+                        value={pushBody}
+                        rows={4}
+                        maxLength={500}
+                        onChange={(e) => setPushBody(e.target.value)}
+                        placeholder="Kullanıcının dilinde kısa, kişisel bir mesaj…"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      disabled={busy || !pushTitle.trim() || !pushBody.trim()}
+                      onClick={async () => {
+                        const ok = await runAction(
+                          "send_push",
+                          { title: pushTitle.trim(), body: pushBody.trim() },
+                          { successMsg: "Push gönderildi" },
+                        );
+                        // Hata halinde dialog açık kalır — mesaj kaybolmaz.
+                        if (ok) {
+                          setPushOpen(false);
+                          setPushTitle("");
+                          setPushBody("");
+                        }
+                      }}
+                    >
+                      Gönder
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               {banned ? (
                 <Button
                   variant="outline"

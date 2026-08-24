@@ -10,6 +10,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 //   set_metadata      { scope: "app"|"user", patch: Record<string,unknown> }
 //   send_password_reset
 //   delete_user
+//   send_push         { title, body, data? } - tek kullanıcıya Expo push
+//                     (token tablosu project_integrations.supabase.config
+//                      push_token_{table,column} + push_user_column'dan;
+//                      defaults: profiles / expo_push_token / id)
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,7 +33,8 @@ type Action =
   | "unban"
   | "set_metadata"
   | "send_password_reset"
-  | "delete_user";
+  | "delete_user"
+  | "send_push";
 
 interface Body {
   project_id?: string;
@@ -87,6 +92,9 @@ Deno.serve(async (req) => {
   const cfg = integ.config as {
     project_url?: string;
     service_role_key?: string;
+    push_token_table?: string;
+    push_token_column?: string;
+    push_user_column?: string;
   };
   if (!cfg.project_url || !cfg.service_role_key) {
     return json({ error: "Supabase entegrasyon config'i eksik" }, 400);
@@ -140,6 +148,81 @@ Deno.serve(async (req) => {
       const { error } = await admin.auth.admin.deleteUser(user_id);
       if (error) throw error;
       detail = "user deleted";
+    } else if (action === "send_push") {
+      const title = typeof params.title === "string" ? params.title.trim() : "";
+      const msgBody = typeof params.body === "string" ? params.body.trim() : "";
+      if (!title || !msgBody) return json({ error: "title ve body gerekli" }, 400);
+
+      // Token tablo/kolon adları kullanıcı config'inden gelir → identifier guard
+      // (helm-send-push ile aynı kurallar; SQL injection + sistem tablosu koruması).
+      const SAFE = /^[a-z_][a-z0-9_]{0,62}$/i;
+      const tokenTable = cfg.push_token_table || "profiles";
+      const tokenCol = cfg.push_token_column || "expo_push_token";
+      const userCol = cfg.push_user_column || "id";
+      const BLOCKED = /^(pg_|auth_|vault_|storage_)/i;
+      if (
+        [tokenTable, tokenCol, userCol].some((s) => !SAFE.test(s)) ||
+        tokenTable.includes(".") ||
+        BLOCKED.test(tokenTable)
+      ) {
+        return json({ error: "push token config is unsafe" }, 400);
+      }
+
+      const { data: rows, error: tokErr } = await admin
+        .from(tokenTable)
+        .select(tokenCol)
+        .eq(userCol, user_id);
+      if (tokErr) {
+        return json(
+          { error: `Token tablosu okunamadı (${tokenTable}.${tokenCol}): ${tokErr.message}` },
+          500,
+        );
+      }
+      const tokens = Array.from(
+        new Set(
+          (rows ?? [])
+            .map((r) => (r as Record<string, unknown>)[tokenCol])
+            .filter(
+              (t): t is string =>
+                typeof t === "string" && t.startsWith("ExponentPushToken["),
+            ),
+        ),
+      );
+      if (tokens.length === 0) {
+        return json({ error: "Kullanıcının push token'ı yok" }, 400);
+      }
+
+      const messages = tokens.map((to) => ({
+        to,
+        title,
+        body: msgBody,
+        sound: "default",
+        ...(params.data && typeof params.data === "object"
+          ? { data: params.data }
+          : {}),
+      }));
+      const res = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Accept-Encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messages),
+      });
+      if (!res.ok) {
+        throw new Error(`Expo push ${res.status}: ${(await res.text()).slice(0, 200)}`);
+      }
+      const result = await res.json();
+      const tickets: Array<{ status?: string; message?: string }> =
+        result?.data ?? [];
+      const sent = tickets.filter((t) => t.status === "ok").length;
+      const failedMsg = tickets.find((t) => t.status !== "ok")?.message;
+      if (sent === 0) {
+        throw new Error(`Expo ticket'ları başarısız: ${failedMsg ?? "unknown"}`);
+      }
+      // Mesajın kendisi audit'e girer: destek yazışması kanıtı burada durur.
+      detail = `push sent (${sent}/${tokens.length} token) "${title}" — ${msgBody}`.slice(0, 500);
     } else {
       return json({ error: `Bilinmeyen aksiyon: ${action}` }, 400);
     }
