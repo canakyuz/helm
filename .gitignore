@@ -29,3 +29,4 @@ apps/web/deploy/.env.deploy
 
 # CLI her calistiginda yeniden yaziliyor - surekli "modified" gurultusu.
 supabase/.temp/cli-latest
+.playwright-mcp/
