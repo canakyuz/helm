@@ -87,8 +87,12 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
 - [x] `/audit` — aynı loading/error boşluğu (Müdahale geçmişi) → `PageStatus` eklendi
 
 ### Analitik & İçgörü
-- [ ] `/revenue` — Gelir & Reklam
-- [ ] `/growth` — Büyüme
+- [x] `/revenue` — `query.isError` hiç gösterilmiyordu (dashboard'daki aynı sessiz-hata deseni) →
+      `PageStatus` error banner eklendi
+- [x] `/growth` — aynı isError boşluğu + ülke kırılımı tablosu loading sırasında "Ülke kırılımı
+      yok" (yanlış) mesajı basıyordu → `countryQuery.isLoading` ayrımı eklendi. Alt bileşenler
+      (`PostHogGeoCard`, `AcquisitionCard`) zaten loading/error/empty'i doğru sırayla yapıyordu,
+      dokunulmadı.
 - [ ] `/funnel` — Huni
 - [ ] `/alerts` — Uyarılar
 

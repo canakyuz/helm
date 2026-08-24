@@ -10,6 +10,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageStatus } from "@/components/ui/page-status";
 import {
   Tabs,
   TabsContent,
@@ -256,6 +257,14 @@ export const RevenuePage = () => {
         </h1>
         <RangeSelect value={range} onChange={setRange} />
       </div>
+
+      {query.isError && (
+        <PageStatus
+          tone="error"
+          label="Metrikler yüklenemedi - rakamlar eksik olabilir, sayfayı yenile"
+          className="min-h-0 py-4"
+        />
+      )}
 
       {/* Üst KPI cluster - 3 kanal birleşik gelir özeti */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

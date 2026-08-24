@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageStatus } from "@/components/ui/page-status";
 import {
   Select,
   SelectContent,
@@ -83,7 +84,7 @@ export const GrowthPage = () => {
 
   // Ülke kırılımı
   const [geoMetric, setGeoMetric] = useState<string>("app_downloads");
-  const { result: countryResult } = useList<MetricCountry>({
+  const { result: countryResult, query: countryQuery } = useList<MetricCountry>({
     resource: "metrics_country",
     filters: [
       ...filters,
@@ -155,6 +156,14 @@ export const GrowthPage = () => {
         <h1 className="text-2xl font-semibold tracking-tight">Büyüme</h1>
         <RangeSelect value={range} onChange={setRange} />
       </div>
+
+      {query.isError && (
+        <PageStatus
+          tone="error"
+          label="Metrikler yüklenemedi - rakamlar eksik olabilir, sayfayı yenile"
+          className="min-h-0 py-4"
+        />
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -251,7 +260,9 @@ export const GrowthPage = () => {
           </CardAction>
         </CardHeader>
         <CardContent>
-          {byCountry.length === 0 ? (
+          {countryQuery.isLoading ? (
+            <PageStatus tone="loading" label="Ülke kırılımı yükleniyor…" />
+          ) : byCountry.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
               Ülke kırılımı yok. App Store Connect bağlanınca App Store
               raporundan otomatik dolar (App Store ilk senkronda T-1 günü
