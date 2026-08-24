@@ -112,8 +112,8 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
       çalışmadı" (yanlış) mesajı basılıyordu → düzeltildi. **Not:** sayfa 996 satır, 5 ayrı `useList`
       var (heartbeats, sentry hataları, entegrasyon sağlığı) - zaman bütçesi nedeniyle sadece en
       kritik bölüm düzeltildi, diğerleri gelecek bir turda gözden geçirilmeli.
-- [ ] `/logs` — Loglar
-- [ ] `/versions` — Sürümler
+- [x] `/logs` — aynı loading/error boşluğu → `PageStatus` eklendi
+- [x] `/versions` — aynı boşluk + 1 adet `en-US` tarih → `tr-TR`'ye çevrildi
 
 ### Destek
 - [ ] `/settings` — Ayarlar

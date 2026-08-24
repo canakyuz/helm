@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { type CrudFilter, useInvalidate, useList } from "@refinedev/core";
 import { Apple, Globe, Package, RefreshCw, Smartphone } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { PageStatus } from "@/components/ui/page-status";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -197,7 +198,11 @@ export const VersionsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {filtered.length === 0 && !query.isLoading ? (
+              {query.isLoading ? (
+                <PageStatus tone="loading" label="Sürümler yükleniyor…" />
+              ) : query.isError ? (
+                <PageStatus tone="error" label="Sürümler yüklenemedi - tekrar dene" />
+              ) : filtered.length === 0 ? (
                 <EmptyState
                   icon={<Package className="size-6" />}
                   title={
@@ -248,7 +253,7 @@ export const VersionsPage = () => {
                           <span className="text-xs text-muted-foreground">
                             {v.release_date
                               ? new Date(v.release_date).toLocaleDateString(
-                                  "en-US",
+                                  "tr-TR",
                                 )
                               : ""}
                           </span>

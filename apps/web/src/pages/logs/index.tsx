@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { PageStatus } from "@/components/ui/page-status";
 import {
   Select,
   SelectContent,
@@ -160,7 +161,11 @@ export const LogsPage = () => {
             </Select>
           </div>
 
-          {filtered.length === 0 && !query.isLoading ? (
+          {query.isLoading ? (
+            <PageStatus tone="loading" label="Loglar yükleniyor…" />
+          ) : query.isError ? (
+            <PageStatus tone="error" label="Loglar yüklenemedi - tekrar dene" />
+          ) : filtered.length === 0 ? (
             <EmptyState
               icon={<History className="size-6" />}
               title={
