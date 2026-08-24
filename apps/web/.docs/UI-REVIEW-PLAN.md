@@ -71,9 +71,12 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
       `HealthBadge`/`StatusStrip`); (3) `BarTrendCard` loading sırasında "Veri yok" (boş durum)
       gösteriyordu, gerçekte yükleniyor → `loading` prop + skeleton eklendi. `errors-panel.tsx` zaten
       iyi durumda, dokunulmadı.
-- [ ] `/cms/collections` — CMS · Şemalar
-- [ ] `/cms/entries` — CMS · İçerikler
-- [ ] `/cms/assets` — CMS · Medya
+- [x] `/cms/collections` — aynı desen bulundu: `useList` sonucu loading/error state olmadan
+      doğrudan render ediliyordu → `query.isLoading`/`isError` + `PageStatus` eklendi
+- [x] `/cms/entries` — aynı loading/error boşluğu + tarih `en-US` formatındaydı (Türkçe arayüzde
+      tutarsız) → `tr-TR`'ye çevrildi
+- [x] `/cms/assets` — aynı loading/error boşluğu + medya thumbnail'leri `loading="lazy"` yoktu
+      (çok sayıda görselde performans riski) → ikisi de eklendi
 - [ ] `/users` — Kullanıcılar
 - [ ] `/segments` — Segmentler
 - [ ] `/reviews` — Yorumlar

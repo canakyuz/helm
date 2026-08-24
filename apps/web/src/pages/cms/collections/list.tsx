@@ -50,6 +50,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageStatus } from "@/components/ui/page-status";
 import { slugify } from "@/pages/projects/schema";
 import { useScope } from "@/context/scope";
 import type { CmsCollection, CollectionKind, Project } from "@/types";
@@ -62,7 +63,7 @@ export const CollectionsListPage = () => {
   const [kind, setKind] = useState<CollectionKind>("collection");
   const [projectId, setProjectId] = useState<string>(isAll ? "" : scope);
 
-  const { result } = useList<CmsCollection>({
+  const { result, query } = useList<CmsCollection>({
     resource: "cms_collections",
     filters: isAll ? [] : [{ field: "project_id", operator: "eq", value: scope }],
     sorters: [{ field: "created_at", order: "desc" }],
@@ -200,6 +201,11 @@ export const CollectionsListPage = () => {
         </CardAction>
       </CardHeader>
       <CardContent>
+        {query.isLoading ? (
+          <PageStatus tone="loading" label="Şemalar yükleniyor…" />
+        ) : query.isError ? (
+          <PageStatus tone="error" label="Şemalar yüklenemedi - tekrar dene" />
+        ) : (
         <Table>
           <TableHeader>
             <TableRow>
@@ -279,6 +285,7 @@ export const CollectionsListPage = () => {
             )}
           </TableBody>
         </Table>
+        )}
       </CardContent>
     </Card>
   );

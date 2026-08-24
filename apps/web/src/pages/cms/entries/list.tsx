@@ -41,6 +41,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DEFAULT_LOCALES } from "@/components/cms/locale-switcher";
+import { PageStatus } from "@/components/ui/page-status";
 import { useScope } from "@/context/scope";
 import type { CmsCollection, CmsEntry, EntryStatus } from "@/types";
 
@@ -73,7 +74,7 @@ export const EntriesListPage = () => {
       : []),
   ];
 
-  const { result } = useList<CmsEntry>({
+  const { result, query } = useList<CmsEntry>({
     resource: "cms_entries",
     filters,
     sorters: [{ field: "updated_at", order: "desc" }],
@@ -155,6 +156,11 @@ export const EntriesListPage = () => {
           </Select>
         </div>
 
+        {query.isLoading ? (
+          <PageStatus tone="loading" label="İçerikler yükleniyor…" />
+        ) : query.isError ? (
+          <PageStatus tone="error" label="İçerikler yüklenemedi - tekrar dene" />
+        ) : (
         <Table>
           <TableHeader>
             <TableRow>
@@ -195,7 +201,7 @@ export const EntriesListPage = () => {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {new Date(entry.updated_at).toLocaleString("en-US")}
+                  {new Date(entry.updated_at).toLocaleString("tr-TR")}
                 </TableCell>
                 <TableCell>
                   <AlertDialog>
@@ -245,6 +251,7 @@ export const EntriesListPage = () => {
             )}
           </TableBody>
         </Table>
+        )}
       </CardContent>
     </Card>
   );

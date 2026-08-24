@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageStatus } from "@/components/ui/page-status";
 import { supabaseClient } from "@/providers/supabase-client";
 import { assetPublicUrl, deleteAsset, uploadAsset } from "@/lib/cms-assets";
 import { useScope } from "@/context/scope";
@@ -51,7 +52,7 @@ export const AssetsPage = () => {
   });
   const projects = projectsResult?.data ?? [];
 
-  const { result } = useList<CmsAsset>({
+  const { result, query } = useList<CmsAsset>({
     resource: "cms_assets",
     filters: isAll ? [] : [{ field: "project_id", operator: "eq", value: scope }],
     sorters: [{ field: "created_at", order: "desc" }],
@@ -145,6 +146,11 @@ export const AssetsPage = () => {
         </CardAction>
       </CardHeader>
       <CardContent>
+        {query.isLoading ? (
+          <PageStatus tone="loading" label="Medya yükleniyor…" />
+        ) : query.isError ? (
+          <PageStatus tone="error" label="Medya yüklenemedi - tekrar dene" />
+        ) : (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {assets.map((asset) => (
             <div
@@ -155,6 +161,7 @@ export const AssetsPage = () => {
                 <img
                   src={assetPublicUrl(supabaseClient, asset.storage_path)}
                   alt={asset.alt ?? asset.filename}
+                  loading="lazy"
                   className="size-full object-cover"
                 />
               </div>
@@ -218,6 +225,7 @@ export const AssetsPage = () => {
             </div>
           )}
         </div>
+        )}
       </CardContent>
     </Card>
   );
