@@ -9,6 +9,16 @@
 > Sıralama mantığı: önce paylaşılan altyapı (bir kere düzeltilir, 30 sayfaya birden fayda sağlar),
 > sonra sayfalar sidebar'ın kendi önem sırasına göre (Ana Menü → Analitik → Mesajlaşma → DevOps → Destek),
 > en son gizli CRUD sayfaları. Her faz kendi commit'ine girer.
+>
+> **Durum: TÜM FAZLAR TAMAMLANDI (Faz 0-3, 37/37 madde).** Otonom olarak `/goal bütün fazları
+> bitir` ile yürütüldü. Öne çıkan sistemik bulgular: (1) çoğu liste sayfasında `query.isLoading`/
+> `isError` hiç kontrol edilmiyordu, boş/yanlış mesaj kısa süreliğine yanlış gösteriliyordu — artık
+> hepsinde `PageStatus`; (2) tüm `useForm`/`useOne`+`reset()` düzenleme formlarında veri gelmeden
+> boş alanlarla render olma (flash) hatası vardı — 4 sayfada düzeltildi; (3) 10+ yerde `en-US` tarih
+> formatı vardı, `tr-TR`'ye çevrildi; (4) bir gerçek absolute-ban ihlali (side-stripe border) vardı.
+> **Ertelenen:** `/system` sayfasının 4 ikincil bölümü (996 satır, zaman bütçesi nedeniyle sadece
+> en kritik bölüm düzeltildi) ve genel `text-emerald-600 dark:text-emerald-400` tarzı (çalışan ama
+> bento-token'lara taşınmamış) renk kullanımı — ikisi de gelecek bir turda ele alınmalı.
 
 ---
 
@@ -132,9 +142,11 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
       `useForm`+`reset()` deseni tüm repo'da arandı (grep), 2 sayfa daha bulundu (aşağıda).
 - [x] `/brands/edit/:id` — aynı sistemik form-flash bulgusu → düzeltildi
 - [x] `/projects/edit/:id` — aynı sistemik form-flash bulgusu → düzeltildi (legacy proje düzenleme)
-- [ ] `/cms/collections/edit/:id`
-- [ ] `/cms/entries/create`
-- [ ] `/cms/entries/edit/:id`
+- [x] `/cms/collections/edit/:id` — zaten iyi kurulmuş (loading + not-found). Değişiklik yapılmadı.
+- [x] `/cms/entries/create` + `/cms/entries/edit/:id` (aynı dosya, `isCreate` ile ayrılıyor) —
+      aynı sistemik form-flash bulgusu (raw `useState`+`useEffect`, react-hook-form değil ama aynı
+      desen) → `entryQuery.isLoading`/`isError` guard eklendi (sadece edit modunda, create'te veri
+      çekilmiyor); 1 adet `en-US` tarih → `tr-TR`.
 
 ## Zaten yapıldı (referans, tekrar incelenmeyecek)
 - [x] `/login` — bu oturumda tamamen yeniden tasarlandı (split-panel, orbit görsel, TR/EN)

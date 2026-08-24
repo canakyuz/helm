@@ -14,6 +14,7 @@ import { ArrowLeft, History, RotateCcw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageStatus } from "@/components/ui/page-status";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +39,7 @@ export const EntryEditPage = () => {
   const initialCollectionId = params.get("collection") ?? "";
   const initialLocale = params.get("locale") ?? "en";
 
-  const { result: entryResult } = useOne<CmsEntry>({
+  const { result: entryResult, query: entryQuery } = useOne<CmsEntry>({
     resource: "cms_entries",
     id: id ?? "",
     queryOptions: { enabled: !isCreate },
@@ -173,6 +174,14 @@ export const EntryEditPage = () => {
     return typeof title === "string" && title ? title : slug || "Yeni içerik";
   }, [data, slug]);
 
+  if (!isCreate && entryQuery.isLoading) {
+    return <PageStatus tone="loading" label="İçerik yükleniyor…" />;
+  }
+
+  if (!isCreate && entryQuery.isError) {
+    return <PageStatus tone="error" label="İçerik yüklenemedi - tekrar dene" />;
+  }
+
   if (!collection) {
     return <p className="text-muted-foreground">Koleksiyon seçilmedi.</p>;
   }
@@ -266,7 +275,7 @@ export const EntryEditPage = () => {
                     <li key={rev.id} className="rounded-md border p-2 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">
-                          {new Date(rev.created_at).toLocaleString("en-US")}
+                          {new Date(rev.created_at).toLocaleString("tr-TR")}
                         </span>
                         <Badge variant="outline" className="text-[10px]">
                           {rev.status_at_snapshot === "published"
