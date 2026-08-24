@@ -5,6 +5,7 @@ import { ExternalLink, Layers, Plus, Trash2, UserCheck, Users } from "lucide-rea
 import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { PageStatus } from "@/components/ui/page-status";
 import { supabaseClient } from "@/providers/supabase-client";
 import {
   AlertDialog,
@@ -353,7 +354,11 @@ export const SegmentsPage = () => {
           </CardAction>
         </CardHeader>
         <CardContent>
-          {segments.length === 0 && !query.isLoading ? (
+          {query.isLoading ? (
+            <PageStatus tone="loading" label="Segmentler yükleniyor…" />
+          ) : query.isError ? (
+            <PageStatus tone="error" label="Segmentler yüklenemedi - tekrar dene" />
+          ) : segments.length === 0 ? (
             <EmptyState
               icon={<Layers className="size-6" />}
               title="Henüz segment yok"

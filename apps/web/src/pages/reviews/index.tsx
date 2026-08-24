@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageStatus } from "@/components/ui/page-status";
 import {
   Select,
   SelectContent,
@@ -276,7 +277,11 @@ export const ReviewsPage = () => {
             </Select>
           </div>
 
-          {filtered.length === 0 && !query.isLoading ? (
+          {query.isLoading ? (
+            <PageStatus tone="loading" label="Yorumlar yükleniyor…" />
+          ) : query.isError ? (
+            <PageStatus tone="error" label="Yorumlar yüklenemedi - tekrar dene" />
+          ) : filtered.length === 0 ? (
             <EmptyState
               icon={<MessageSquare className="size-6" />}
               title={
@@ -330,11 +335,11 @@ export const ReviewsPage = () => {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {r.author ?? "anonim"} ·{" "}
                       {r.review_date
-                        ? new Date(r.review_date).toLocaleDateString("en-US")
+                        ? new Date(r.review_date).toLocaleDateString("tr-TR")
                         : ""}
                     </p>
                     {r.developer_response ? (
-                      <div className="mt-2 rounded-md border-l-2 border-emerald-500/60 bg-emerald-500/5 p-2 text-sm">
+                      <div className="mt-2 rounded-md border border-emerald-500/30 bg-emerald-500/5 p-2 text-sm">
                         <div className="flex items-baseline justify-between">
                           <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
                             Yanıt

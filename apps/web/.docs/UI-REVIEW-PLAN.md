@@ -77,9 +77,13 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
       tutarsız) → `tr-TR`'ye çevrildi
 - [x] `/cms/assets` — aynı loading/error boşluğu + medya thumbnail'leri `loading="lazy"` yoktu
       (çok sayıda görselde performans riski) → ikisi de eklendi
-- [ ] `/users` — Kullanıcılar
-- [ ] `/segments` — Segmentler
-- [ ] `/reviews` — Yorumlar
+- [x] `/users` — zaten iyi kurulmuş: cache'li query (`staleTime` fix'i kod yorumunda belgeli),
+      skeleton loading, hata mesajı, zengin `EmptyState`. Değişiklik yapılmadı.
+- [x] `/segments` — `isLoading` sırasında boş tablo sessizce render ediliyordu (satır yoktu ama
+      loading göstergesi de yoktu), `isError` hiç kontrol edilmiyordu → `PageStatus` eklendi
+- [x] `/reviews` — aynı loading/error boşluğu; ayrıca gerçek bir **absolute-ban ihlali**:
+      geliştirici yanıtı kutusunda `border-l-2` (side-stripe border, impeccable'ın yasak listesinde)
+      → tam kenarlıkla değiştirildi. Tarih `en-US` → `tr-TR`.
 - [ ] `/audit` — Müdahale geçmişi
 
 ### Analitik & İçgörü
