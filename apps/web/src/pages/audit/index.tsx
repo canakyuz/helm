@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageStatus } from "@/components/ui/page-status";
 import {
   Select,
   SelectContent,
@@ -179,7 +180,11 @@ export const AuditPage = () => {
             </Select>
           </div>
 
-          {filtered.length === 0 && !query.isLoading ? (
+          {query.isLoading ? (
+            <PageStatus tone="loading" label="Kayıtlar yükleniyor…" />
+          ) : query.isError ? (
+            <PageStatus tone="error" label="Kayıtlar yüklenemedi - tekrar dene" />
+          ) : filtered.length === 0 ? (
             <EmptyState
               icon={<ClipboardList className="size-6" />}
               title={

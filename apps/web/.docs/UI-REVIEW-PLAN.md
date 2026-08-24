@@ -84,7 +84,7 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
 - [x] `/reviews` — aynı loading/error boşluğu; ayrıca gerçek bir **absolute-ban ihlali**:
       geliştirici yanıtı kutusunda `border-l-2` (side-stripe border, impeccable'ın yasak listesinde)
       → tam kenarlıkla değiştirildi. Tarih `en-US` → `tr-TR`.
-- [ ] `/audit` — Müdahale geçmişi
+- [x] `/audit` — aynı loading/error boşluğu (Müdahale geçmişi) → `PageStatus` eklendi
 
 ### Analitik & İçgörü
 - [ ] `/revenue` — Gelir & Reklam
