@@ -5,6 +5,7 @@ import { Boxes, Pencil, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageStatus } from "@/components/ui/page-status";
 import {
   MODULE_META,
   PROPERTY_TYPE_LABELS,
@@ -20,11 +21,11 @@ interface BrandGroup {
 export const PropertiesListPage = () => {
   const { create, edit } = useNavigation();
 
-  const { result: brandsResult } = useList<Brand>({
+  const { result: brandsResult, query: brandsQuery } = useList<Brand>({
     resource: "brands",
     pagination: { mode: "off" },
   });
-  const { result: propsResult } = useList<Property>({
+  const { result: propsResult, query: propsQuery } = useList<Property>({
     resource: "properties",
     pagination: { mode: "off" },
   });
@@ -63,7 +64,11 @@ export const PropertiesListPage = () => {
         </Button>
       </div>
 
-      {groups.length === 0 ? (
+      {brandsQuery.isLoading || propsQuery.isLoading ? (
+        <PageStatus tone="loading" label="Property'ler yükleniyor…" />
+      ) : brandsQuery.isError || propsQuery.isError ? (
+        <PageStatus tone="error" label="Property'ler yüklenemedi - tekrar dene" />
+      ) : groups.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
             Henüz property yok. <strong>Yeni property</strong> ile başla.

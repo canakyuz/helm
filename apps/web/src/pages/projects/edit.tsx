@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PageStatus } from "@/components/ui/page-status";
 import { projectSchema, type ProjectFormValues } from "./schema";
 import type { Project } from "@/types";
 
@@ -56,6 +57,28 @@ export const ProjectEdit = () => {
     await onFinish(values);
     navigate("/");
   });
+
+  if (query?.isLoading) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Projeyi düzenle
+        </h1>
+        <PageStatus tone="loading" label="Proje yükleniyor…" />
+      </div>
+    );
+  }
+
+  if (query?.isError) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Projeyi düzenle
+        </h1>
+        <PageStatus tone="error" label="Proje yüklenemedi - tekrar dene" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

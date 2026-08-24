@@ -28,6 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PageStatus } from "@/components/ui/page-status";
 import {
   Table,
   TableBody,
@@ -97,6 +98,24 @@ export const BrandEdit = () => {
     }
     navigate("/");
   };
+
+  if (query?.isLoading) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight">Marka ayarları</h1>
+        <PageStatus tone="loading" label="Marka yükleniyor…" />
+      </div>
+    );
+  }
+
+  if (query?.isError) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight">Marka ayarları</h1>
+        <PageStatus tone="error" label="Marka yüklenemedi - tekrar dene" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

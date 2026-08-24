@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PageStatus } from "@/components/ui/page-status";
 import { Switch } from "@/components/ui/switch";
 import {
   availableModules,
@@ -114,6 +115,24 @@ export const PropertyEdit = () => {
     });
     navigate("/");
   });
+
+  if (query?.isLoading) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight">Property ayarları</h1>
+        <PageStatus tone="loading" label="Property yükleniyor…" />
+      </div>
+    );
+  }
+
+  if (query?.isError) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight">Property ayarları</h1>
+        <PageStatus tone="error" label="Property yüklenemedi - tekrar dene" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

@@ -69,7 +69,7 @@ interface CrmTable {
 }
 
 const fmt = (value: string | null) =>
-  value ? new Date(value).toLocaleString("en-US") : "-";
+  value ? new Date(value).toLocaleString("tr-TR") : "-";
 
 const isBanned = (u: UserDetail) => {
   if (!u.banned_until) return false;
@@ -458,7 +458,7 @@ export const UserDetailPage = () => {
                   {auditLogs.map((l) => (
                     <TableRow key={l.id}>
                       <TableCell className="text-xs">
-                        {new Date(l.created_at).toLocaleString("en-US")}
+                        {new Date(l.created_at).toLocaleString("tr-TR")}
                       </TableCell>
                       <TableCell>{l.action}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">

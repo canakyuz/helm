@@ -123,12 +123,15 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
 
 ## Faz 3 - Gizli CRUD/detay sayfaları
 
-- [ ] `/users/:id` — kullanıcı detayı
-- [ ] `/properties` — liste
-- [ ] `/properties/create` — oluşturma
-- [ ] `/properties/edit/:id` — düzenleme
-- [ ] `/brands/edit/:id` — marka düzenleme
-- [ ] `/projects/edit/:id` — legacy proje düzenleme
+- [x] `/users/:id` — zaten iyi kurulmuş (skeleton, error state); 2 adet `en-US` tarih → `tr-TR`
+- [x] `/properties` — hiç loading/error kontrolü yoktu → eklendi
+- [x] `/properties/create` — zaten temiz (yeni kayıt, çekilecek veri yok)
+- [x] `/properties/edit/:id` — **sistemik bulgu**: form gerçek veri gelmeden boş/varsayılan
+      değerlerle render oluyor, `useEffect`+`reset()` ile üzerine yazılıyordu - kullanıcı kısa
+      süreliğine yanlış alan değerleri görüyordu → `query.isLoading`/`isError` guard eklendi. Aynı
+      `useForm`+`reset()` deseni tüm repo'da arandı (grep), 2 sayfa daha bulundu (aşağıda).
+- [x] `/brands/edit/:id` — aynı sistemik form-flash bulgusu → düzeltildi
+- [x] `/projects/edit/:id` — aynı sistemik form-flash bulgusu → düzeltildi (legacy proje düzenleme)
 - [ ] `/cms/collections/edit/:id`
 - [ ] `/cms/entries/create`
 - [ ] `/cms/entries/edit/:id`
