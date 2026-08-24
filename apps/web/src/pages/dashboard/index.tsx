@@ -39,6 +39,7 @@ import { KpiCard } from "@/components/cockpit/kpi-card";
 import { BarTrendCard } from "@/components/cockpit/bar-trend";
 import { LatestUpdates } from "@/components/cockpit/latest-updates";
 import { KpiPlaceholder } from "@/components/kpi-cell";
+import { PageStatus } from "@/components/ui/page-status";
 import { useIsModuleEnabled } from "@/hooks/use-enabled-modules";
 // Leaflet ağır (~150KB gzip); ayrı chunk'a koy, ilk dashboard renderı bloklamasın.
 const UsersGeoMap = lazy(() =>
@@ -486,6 +487,14 @@ export const DashboardPage = () => {
         </div>
       </div>
 
+      {metricsQuery.isError && (
+        <PageStatus
+          tone="error"
+          label="Metrikler yüklenemedi - rakamlar eksik olabilir, sayfayı yenile"
+          className="min-h-0 py-4"
+        />
+      )}
+
       {/* ════════ KPI + BAR CHART (sol) · LATEST UPDATES (sağ ray) ════════ */}
       <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex min-w-0 flex-col gap-4">
@@ -540,6 +549,7 @@ export const DashboardPage = () => {
             delta={barDelta}
             deltaLabel="vs önceki 7 gün"
             format={(v) => formatMoney(v, displayCcy)}
+            loading={loading}
           />
 
           <Suspense
@@ -636,8 +646,9 @@ export const DashboardPage = () => {
                           <span
                             className={cn(
                               "block size-2 rounded-full",
-                              row.health === "ok" && "bg-emerald-500",
-                              row.health === "error" && "bg-red-500",
+                              row.health === "ok" &&
+                                "bg-[rgb(var(--bento-pos))]",
+                              row.health === "error" && "bg-destructive",
                               row.health === "pending" &&
                                 "bg-muted-foreground/40",
                             )}
@@ -744,9 +755,9 @@ const StatusStrip = ({
       className={cn(
         "flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:text-foreground",
         errCount > 0
-          ? "text-red-600"
+          ? "text-destructive"
           : okCount === total && total > 0
-            ? "text-emerald-600"
+            ? "text-[rgb(var(--bento-pos))]"
             : "text-muted-foreground",
       )}
     >
@@ -759,7 +770,7 @@ const StatusStrip = ({
       to="/system"
       className={cn(
         "flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:text-foreground",
-        syncStale ? "text-red-600" : "text-muted-foreground",
+        syncStale ? "text-destructive" : "text-muted-foreground",
       )}
       title={
         syncStale
@@ -774,7 +785,7 @@ const StatusStrip = ({
       to="/alerts"
       className={cn(
         "flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:text-foreground",
-        openAlerts > 0 ? "text-red-600" : "text-muted-foreground",
+        openAlerts > 0 ? "text-destructive" : "text-muted-foreground",
       )}
     >
       <Bell className="size-3" />
@@ -785,7 +796,7 @@ const StatusStrip = ({
         to="/system"
         className={cn(
           "flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 transition-colors hover:text-foreground",
-          errorLatest > 0 ? "text-red-600" : "text-muted-foreground",
+          errorLatest > 0 ? "text-destructive" : "text-muted-foreground",
         )}
       >
         <AlertOctagon className="size-3" />
@@ -802,9 +813,9 @@ const HealthBadge = ({
   health: "ok" | "error" | "pending";
 }) => {
   const map = {
-    ok: { label: "Sağlıklı", cls: "text-emerald-600" },
-    error: { label: "Hata", cls: "text-red-600" },
-    pending: { label: "Bekliyor", cls: "text-amber-600" },
+    ok: { label: "Sağlıklı", cls: "text-[rgb(var(--bento-pos))]" },
+    error: { label: "Hata", cls: "text-destructive" },
+    pending: { label: "Bekliyor", cls: "text-[rgb(var(--bento-warn))]" },
   } as const;
   const { label, cls } = map[health];
   return (

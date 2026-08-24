@@ -33,7 +33,7 @@ const Sparkline = ({
     })
     .join(" ");
   const area = `${pts} L${W},${H} L0,${H} Z`;
-  const color = positive ? "#16a34a" : "#dc2626";
+  const color = positive ? "rgb(var(--bento-pos))" : "rgb(var(--bento-neg))";
   const gradId = `kpi-spark-${positive ? "pos" : "neg"}`;
   return (
     <svg
@@ -130,7 +130,9 @@ export const KpiCard = ({
                   <span
                     className={cn(
                       "font-semibold tabular-nums",
-                      positive ? "text-emerald-600" : "text-red-600",
+                      positive
+                        ? "text-[rgb(var(--bento-pos))]"
+                        : "text-destructive",
                     )}
                   >
                     {positive ? "+" : ""}

@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 interface BarPoint {
@@ -28,6 +29,7 @@ interface BarTrendCardProps {
   deltaLabel?: string;
   /** Tooltip/eksen değer formatı. */
   format: (v: number) => string;
+  loading?: boolean;
   className?: string;
 }
 
@@ -61,6 +63,7 @@ export const BarTrendCard = ({
   delta,
   deltaLabel = "vs önceki dönem",
   format,
+  loading,
   className,
 }: BarTrendCardProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
@@ -93,6 +96,13 @@ export const BarTrendCard = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="px-5 pb-5">
+        {loading ? (
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-56 w-full" />
+          </div>
+        ) : (
+          <>
         <div className="mb-3 flex items-baseline gap-2">
           <span className="helm-hero-number text-[2.25rem]">{total}</span>
           {hasDelta && (
@@ -100,7 +110,9 @@ export const BarTrendCard = ({
               <span
                 className={cn(
                   "font-semibold tabular-nums",
-                  positive ? "text-emerald-600" : "text-red-600",
+                  positive
+                    ? "text-[rgb(var(--bento-pos))]"
+                    : "text-destructive",
                 )}
               >
                 {positive ? "+" : ""}
@@ -177,6 +189,8 @@ export const BarTrendCard = ({
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+        )}
+          </>
         )}
       </CardContent>
     </Card>

@@ -64,7 +64,13 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
 ## Faz 2 - Sayfa sırası (sidebar önem sırasına göre)
 
 ### Ana Menü
-- [ ] `/` — Cockpit (dashboard) — *son aktiviteler paneli bu oturumda düzeltildi, geri kalanı incelenmedi*
+- [x] `/` — Cockpit (dashboard) — bulgular: (1) `metricsQuery.isError` hiç gösterilmiyordu, sessizce
+      0/boş rakam basıyordu → `PageStatus` error banner eklendi; (2) durum renkleri (`bg-emerald-500`,
+      `text-red-600`, `text-amber-600`) hardcoded, dark mode'da adapte olmuyordu → `--bento-pos/neg/warn`
+      token'larına ve mevcut `text-destructive`'e taşındı (`kpi-card.tsx`, `bar-trend.tsx`, dashboard
+      `HealthBadge`/`StatusStrip`); (3) `BarTrendCard` loading sırasında "Veri yok" (boş durum)
+      gösteriyordu, gerçekte yükleniyor → `loading` prop + skeleton eklendi. `errors-panel.tsx` zaten
+      iyi durumda, dokunulmadı.
 - [ ] `/cms/collections` — CMS · Şemalar
 - [ ] `/cms/entries` — CMS · İçerikler
 - [ ] `/cms/assets` — CMS · Medya
