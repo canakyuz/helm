@@ -49,6 +49,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { PageStatus } from "@/components/ui/page-status";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -123,7 +124,7 @@ export const AlertsPage = () => {
     resource: "projects",
     pagination: { mode: "off" },
   });
-  const { result: eventsResult } = useList<AlertEvent>({
+  const { result: eventsResult, query: eventsQuery } = useList<AlertEvent>({
     resource: "alert_events",
     sorters: [{ field: "triggered_at", order: "desc" }],
     pagination: { mode: "off" },
@@ -431,7 +432,11 @@ export const AlertsPage = () => {
           </CardAction>
         </CardHeader>
         <CardContent>
-          {rules.length === 0 && !query.isLoading ? (
+          {query.isLoading ? (
+            <PageStatus tone="loading" label="Kurallar yükleniyor…" />
+          ) : query.isError ? (
+            <PageStatus tone="error" label="Kurallar yüklenemedi - tekrar dene" />
+          ) : rules.length === 0 ? (
             <EmptyState
               icon={<Zap className="size-6" />}
               title="Henüz uyarı kuralı yok"
@@ -605,7 +610,11 @@ export const AlertsPage = () => {
             </Select>
           </div>
 
-          {filteredEvents.length === 0 ? (
+          {eventsQuery.isLoading ? (
+            <PageStatus tone="loading" label="Uyarılar yükleniyor…" />
+          ) : eventsQuery.isError ? (
+            <PageStatus tone="error" label="Uyarılar yüklenemedi - tekrar dene" />
+          ) : filteredEvents.length === 0 ? (
             <EmptyState
               icon={<BellRing className="size-6" />}
               title={

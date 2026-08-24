@@ -93,8 +93,10 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
       yok" (yanlış) mesajı basıyordu → `countryQuery.isLoading` ayrımı eklendi. Alt bileşenler
       (`PostHogGeoCard`, `AcquisitionCard`) zaten loading/error/empty'i doğru sırayla yapıyordu,
       dokunulmadı.
-- [ ] `/funnel` — Huni
-- [ ] `/alerts` — Uyarılar
+- [x] `/funnel` — zaten iyi kurulmuş: `ErrorBanner`, per-KPI loading, absolute-ban ihlali yok.
+      Değişiklik yapılmadı.
+- [x] `/alerts` — iki ayrı liste (kurallar + tetiklenen olaylar), ikisinde de aynı isLoading/isError
+      boşluğu vardı → ikisine de `PageStatus` eklendi
 
 ### Mesajlaşma
 - [ ] `/mail` — Mail
