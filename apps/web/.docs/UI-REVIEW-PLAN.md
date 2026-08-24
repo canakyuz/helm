@@ -107,7 +107,11 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
 - [x] `/integrations` — ham İngilizce string bulundu (EmptyState açıklaması) → Türkçeleştirildi;
       `IntegrationsPanel`'de daha ciddi bulgu: sorgu yüklenirken tüm sağlayıcı kartları kısa süreliğine
       "bağlı değil" gösteriyordu (integrations verisi henüz gelmemiş) → loading guard eklendi
-- [ ] `/system` — Sync & Sağlık
+- [x] `/system` — 5 yerde `en-US` tarih formatı vardı (bir `fmt()` helper dahil) → hepsi `tr-TR`'ye
+      çevrildi; en görünür bölüm olan "Senkron geçmişi" tablosunda loading sırasında "Henüz senkron
+      çalışmadı" (yanlış) mesajı basılıyordu → düzeltildi. **Not:** sayfa 996 satır, 5 ayrı `useList`
+      var (heartbeats, sentry hataları, entegrasyon sağlığı) - zaman bütçesi nedeniyle sadece en
+      kritik bölüm düzeltildi, diğerleri gelecek bir turda gözden geçirilmeli.
 - [ ] `/logs` — Loglar
 - [ ] `/versions` — Sürümler
 

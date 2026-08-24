@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { PageStatus } from "@/components/ui/page-status";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -83,7 +84,7 @@ const INTERVALS = [
 ];
 
 const fmt = (value: string | null) =>
-  value ? new Date(value).toLocaleString("en-US") : "-";
+  value ? new Date(value).toLocaleString("tr-TR") : "-";
 
 export const SystemPage = () => {
   const since90 = useMemo(
@@ -91,7 +92,7 @@ export const SystemPage = () => {
     [],
   );
 
-  const { result: runsResult } = useList<SyncRun>({
+  const { result: runsResult, query: runsQuery } = useList<SyncRun>({
     resource: "sync_runs",
     sorters: [{ field: "started_at", order: "desc" }],
     pagination: { mode: "off" },
@@ -556,7 +557,7 @@ export const SystemPage = () => {
                         </span>
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-xs">
-                        {new Date(i.last_seen).toLocaleString("en-US")}
+                        {new Date(i.last_seen).toLocaleString("tr-TR")}
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <Button
@@ -643,7 +644,7 @@ export const SystemPage = () => {
                     </div>
                     <div className="mt-0.5 text-xs">
                       {new Date(selectedIssue.first_seen).toLocaleString(
-                        "en-US",
+                        "tr-TR",
                       )}
                     </div>
                   </div>
@@ -653,7 +654,7 @@ export const SystemPage = () => {
                     </div>
                     <div className="mt-0.5 text-xs">
                       {new Date(selectedIssue.last_seen).toLocaleString(
-                        "en-US",
+                        "tr-TR",
                       )}
                     </div>
                   </div>
@@ -901,7 +902,11 @@ export const SystemPage = () => {
           <CardTitle>Senkron geçmişi</CardTitle>
         </CardHeader>
         <CardContent>
-          {runs.length === 0 ? (
+          {runsQuery.isLoading ? (
+            <PageStatus tone="loading" label="Senkron geçmişi yükleniyor…" />
+          ) : runsQuery.isError ? (
+            <PageStatus tone="error" label="Senkron geçmişi yüklenemedi - tekrar dene" />
+          ) : runs.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
               Henüz senkron çalışmadı
             </div>
@@ -919,7 +924,7 @@ export const SystemPage = () => {
                 {runs.slice(0, 20).map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>
-                      {new Date(r.started_at).toLocaleString("en-US")}
+                      {new Date(r.started_at).toLocaleString("tr-TR")}
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary">
