@@ -9,6 +9,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageStatus } from "@/components/ui/page-status";
 import { EmptyState } from "@/components/empty-state";
 import { IntegrationsPanel } from "@/components/integrations-panel";
 import { useScope } from "@/context/scope";
@@ -20,7 +21,7 @@ import { PROVIDER_LABELS } from "@/types";
 export const IntegrationsPage = () => {
   const { scope, isAll } = useScope();
 
-  const { result: integResult } = useList<ProjectIntegration>({
+  const { result: integResult, query: integQuery } = useList<ProjectIntegration>({
     resource: "project_integrations",
     filters: isAll
       ? []
@@ -67,7 +68,7 @@ export const IntegrationsPage = () => {
             <EmptyState
               icon={<Plug className="size-6" />}
               title="Bir proje seç"
-              description="Integrations are per-property. Use the switcher at the top of the sidebar to pick one - nothing can be added while All properties is selected."
+              description="Entegrasyonlar proje bazlıdır. Kenar çubuğunun üstündeki seçiciden bir proje seç - Tüm projeler seçiliyken hiçbir şey eklenemez."
             />
           </CardContent>
         </Card>
@@ -87,6 +88,14 @@ export const IntegrationsPage = () => {
           sağlayıcı bağlı
         </div>
       </div>
+
+      {integQuery.isError && (
+        <PageStatus
+          tone="error"
+          label="Entegrasyon durumu yüklenemedi - rakamlar eksik olabilir, sayfayı yenile"
+          className="min-h-0 py-4"
+        />
+      )}
 
       {/* KPI cluster - 6'lı */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

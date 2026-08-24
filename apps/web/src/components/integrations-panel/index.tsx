@@ -26,6 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { PageStatus } from "@/components/ui/page-status";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -651,6 +652,12 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {query.isLoading ? (
+          <PageStatus tone="loading" label="Entegrasyonlar yükleniyor…" />
+        ) : query.isError ? (
+          <PageStatus tone="error" label="Entegrasyonlar yüklenemedi - tekrar dene" />
+        ) : (
+        <>
         {CATEGORY_ORDER.map((cat) => {
           // Bu kategorideki tüm provider'lar (bağlı + bağlı olmayan)
           const providersInCat = (Object.keys(PROVIDER_LABELS) as ProviderName[])
@@ -714,11 +721,13 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
             </div>
           );
         })}
-        {integrations.length === 0 && !query.isLoading && (
+        {integrations.length === 0 && (
           <div className="rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground">
             Henüz hiçbir veri kaynağı bağlanmadı. Yukarıdaki kartlardan
             <strong> Bağlan</strong> ile başla.
           </div>
+        )}
+        </>
         )}
       </CardContent>
 

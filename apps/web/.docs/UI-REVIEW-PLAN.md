@@ -104,7 +104,9 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
 - [x] `/campaigns` — aynı boşluk → `PageStatus` eklendi
 
 ### DevOps
-- [ ] `/integrations` — Entegrasyonlar
+- [x] `/integrations` — ham İngilizce string bulundu (EmptyState açıklaması) → Türkçeleştirildi;
+      `IntegrationsPanel`'de daha ciddi bulgu: sorgu yüklenirken tüm sağlayıcı kartları kısa süreliğine
+      "bağlı değil" gösteriyordu (integrations verisi henüz gelmemiş) → loading guard eklendi
 - [ ] `/system` — Sync & Sağlık
 - [ ] `/logs` — Loglar
 - [ ] `/versions` — Sürümler
