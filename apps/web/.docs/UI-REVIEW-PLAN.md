@@ -99,9 +99,9 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
       boşluğu vardı → ikisine de `PageStatus` eklendi
 
 ### Mesajlaşma
-- [ ] `/mail` — Mail
-- [ ] `/push` — Push
-- [ ] `/campaigns` — Kampanya geçmişi
+- [x] `/mail` — aynı isLoading/isError boşluğu → `PageStatus` eklendi
+- [x] `/push` — aynı boşluk (mail ile neredeyse aynı şablon) → `PageStatus` eklendi
+- [x] `/campaigns` — aynı boşluk → `PageStatus` eklendi
 
 ### DevOps
 - [ ] `/integrations` — Entegrasyonlar

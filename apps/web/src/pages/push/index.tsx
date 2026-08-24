@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageStatus } from "@/components/ui/page-status";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -314,7 +315,11 @@ export const PushPage = () => {
           </CardAction>
         </CardHeader>
         <CardContent>
-          {campaigns.length === 0 && !campQuery.isLoading ? (
+          {campQuery.isLoading ? (
+            <PageStatus tone="loading" label="Gönderimler yükleniyor…" />
+          ) : campQuery.isError ? (
+            <PageStatus tone="error" label="Gönderimler yüklenemedi - tekrar dene" />
+          ) : campaigns.length === 0 ? (
             <EmptyState
               icon={<Bell className="size-6" />}
               title="Henüz bildirim gönderilmedi"

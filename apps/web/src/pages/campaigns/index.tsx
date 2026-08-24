@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { type CrudFilter, useList } from "@refinedev/core";
 import { Mail, MousePointerClick, Send, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { PageStatus } from "@/components/ui/page-status";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -189,7 +190,11 @@ export const CampaignsPage = () => {
             </SelectContent>
           </Select>
 
-          {campaigns.length === 0 && !query.isLoading ? (
+          {query.isLoading ? (
+            <PageStatus tone="loading" label="Kampanyalar yükleniyor…" />
+          ) : query.isError ? (
+            <PageStatus tone="error" label="Kampanyalar yüklenemedi - tekrar dene" />
+          ) : campaigns.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">
               Henüz kampanya gönderilmedi. Mail veya Push sayfasından bir
               segmente gönderim yap.
