@@ -116,7 +116,8 @@ sayfa incelemesini hem hızlandırır hem tutarlı kılar.
 - [x] `/versions` — aynı boşluk + 1 adet `en-US` tarih → `tr-TR`'ye çevrildi
 
 ### Destek
-- [ ] `/settings` — Ayarlar
+- [x] `/settings` — zaten temiz (tr-TR tarih, senkron sağlığı badge'i, `CronHealthCard` da doğru
+      loading/error/empty sırasına sahip). Değişiklik yapılmadı. **Faz 2 tamamlandı (18/18).**
 
 ---
 
