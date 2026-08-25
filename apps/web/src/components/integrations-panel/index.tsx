@@ -282,6 +282,19 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       placeholder: "en,tr",
       optional: true,
     },
+    {
+      key: "earnings_bucket",
+      label:
+        "Earnings Cloud Storage kovası (GELİR için gerekli - Play Console → Download reports → Financial → Copy Cloud Storage URI). Play Developer API kazanç vermez, gelir bu kovadan okunur.",
+      placeholder: "gs://pubsite_prod_rev_0123456789012345678",
+      optional: true,
+    },
+    {
+      key: "currency",
+      label: "Merchant (ödeme) para birimi - earnings raporundaki 'Merchant Currency' ile aynı olmalı",
+      placeholder: "USD",
+      optional: true,
+    },
   ],
 };
 

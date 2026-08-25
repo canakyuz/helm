@@ -17,6 +17,7 @@ import { fetchPlausible } from "./connectors/plausible.ts";
 import { fetchRest } from "./connectors/rest.ts";
 import { fetchSentry } from "./connectors/sentry.ts";
 import { fetchAppStoreConnect } from "./connectors/app-store-connect.ts";
+import { fetchGooglePlay } from "./connectors/google-play.ts";
 
 // helm-ingest - her enabled entegrasyonu gezer, sağlayıcı API'sini çağırır,
 // metrics tablosuna idempotent upsert eder. Her çalışma sync_runs'a kaydedilir.
@@ -31,6 +32,7 @@ const CONNECTORS: Record<string, Connector> = {
   rest: fetchRest,
   sentry: fetchSentry,
   app_store_connect: fetchAppStoreConnect,
+  google_play_developer: fetchGooglePlay,
 };
 
 const json = (body: unknown, status = 200) =>
