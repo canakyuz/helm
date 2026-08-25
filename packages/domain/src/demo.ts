@@ -119,7 +119,10 @@ export function isCountMetric(metric: string): boolean {
  *
  * Tam sayıya yuvarlanır; "1.240,5 kullanıcı" diye bir şey yok.
  */
-export function scaleCount<T extends number | null>(value: T, multiplier: number): T {
+export function scaleCount(value: null, multiplier: number): null;
+export function scaleCount(value: number, multiplier: number): number;
+export function scaleCount(value: number | null, multiplier: number): number | null;
+export function scaleCount(value: number | null, multiplier: number): number | null {
   if (value == null || multiplier === 1) return value;
-  return Math.round(value * multiplier) as T;
+  return Math.round(value * multiplier);
 }
