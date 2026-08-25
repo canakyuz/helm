@@ -97,7 +97,7 @@ export const ProjectSwitcher = () => {
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted text-foreground">
                 <Boxes className="size-4" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 transition-[opacity,width] duration-200 ease-linear overflow-hidden">
                 <span className="truncate font-medium">{label}</span>
                 <span className="truncate text-xs text-muted-foreground">{sub}</span>
               </div>

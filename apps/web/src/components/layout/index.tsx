@@ -200,7 +200,7 @@ const SidebarLogo = () => (
     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
       <span className="text-sm font-bold">H</span>
     </div>
-    <span className="flex-1 truncate text-[15px] font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
+    <span className="flex-1 truncate text-[15px] font-semibold tracking-tight group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 transition-[opacity,width] duration-200 ease-linear overflow-hidden">
       Helm
     </span>
     {/* Trigger ikon modunda da görünür kalmalı - gizlenirse sidebar'ı geri
@@ -241,7 +241,7 @@ const NavUser = () => {
                 </Avatar>
                 <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-card bg-emerald-500" />
               </span>
-              <span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+              <span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 transition-[opacity,width] duration-200 ease-linear overflow-hidden">
                 <span className="truncate text-[13px] font-semibold">{name}</span>
                 {user?.email && (
                   <span className="truncate text-[11px] text-muted-foreground">
