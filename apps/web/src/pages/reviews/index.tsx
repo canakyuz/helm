@@ -45,6 +45,13 @@ const starColor = (r: number | null) => {
 export const ReviewsPage = () => {
   const { scope, isAll } = useScope();
   const invalidate = useInvalidate();
+  // Yanit gonderildikten sonra liste (pagination: off) bastan cekiliyor;
+  // kullanici o sureyi beklemesin diye gonderilen metni yerel olarak ustte
+  // gosteriyoruz. Gercek veri gelince developer_response dolu olur ve bu
+  // katman kendiliginden devre disi kalir. Space: O(gonderilen yanit sayisi).
+  const [pendingReplies, setPendingReplies] = useState<Record<string, string>>(
+    {},
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [q, setQ] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
@@ -338,7 +345,7 @@ export const ReviewsPage = () => {
                         ? new Date(r.review_date).toLocaleDateString("tr-TR")
                         : ""}
                     </p>
-                    {r.developer_response ? (
+                    {(r.developer_response ?? pendingReplies[r.id]) ? (
                       <div className="mt-2 rounded-md border border-emerald-500/30 bg-emerald-500/5 p-2 text-sm">
                         <div className="flex items-baseline justify-between">
                           <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
@@ -353,10 +360,12 @@ export const ReviewsPage = () => {
                             Düzenle
                           </Button>
                         </div>
-                        <p className="mt-1">{r.developer_response}</p>
+                        <p className="mt-1">
+                          {r.developer_response ?? pendingReplies[r.id]}
+                        </p>
                         {r.responded_at && (
                           <p className="mt-1 text-xs text-muted-foreground">
-                            {new Date(r.responded_at).toLocaleString("en-US")}
+                            {new Date(r.responded_at).toLocaleString("tr-TR")}
                           </p>
                         )}
                       </div>
@@ -418,7 +427,12 @@ export const ReviewsPage = () => {
         review={replyTarget}
         open={replyTarget !== null}
         onOpenChange={(open) => !open && setReplyTarget(null)}
-        onReplied={() => invalidate({ resource: "reviews", invalidates: ["list"] })}
+        onReplied={(body) => {
+          if (replyTarget) {
+            setPendingReplies((prev) => ({ ...prev, [replyTarget.id]: body }));
+          }
+          invalidate({ resource: "reviews", invalidates: ["list"] });
+        }}
       />
     </div>
   );

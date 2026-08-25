@@ -10,7 +10,8 @@ interface Props {
   review: Review | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onReplied: () => void;
+  /** Gonderilen metni geri verir - liste onu aninda ustte gosterebilsin. */
+  onReplied: (body: string) => void;
 }
 
 const MAX = 350;
@@ -47,7 +48,7 @@ export function ReplyModal({ review, open, onOpenChange, onReplied }: Props) {
         throw new Error((data as { error?: string })?.error ?? "Bilinmeyen hata");
       }
       toast.success("Yanıt gönderildi");
-      onReplied();
+      onReplied(trimmed);
       onOpenChange(false);
       setBody("");
     } catch (e) {
