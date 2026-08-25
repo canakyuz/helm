@@ -11,7 +11,7 @@ import { formatRelativeTime } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
 import { useT } from "~/lib/i18n";
 import { useTheme } from "~/theme/use-theme";
-import { BentoBackground, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
+import { ScreenGround, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
 
 export default function Sources() {
   const router = useRouter();
@@ -23,8 +23,7 @@ export default function Sources() {
   const integrations = health.data?.integrations ?? [];
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow={t("AYARLAR")}
@@ -101,7 +100,7 @@ export default function Sources() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }
 

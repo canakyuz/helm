@@ -22,7 +22,7 @@ import { haptic } from "~/lib/haptics";
 import { useT } from "~/lib/i18n";
 import { useTheme } from "~/theme/use-theme";
 import { Toggle } from "~/components/liquid";
-import { BentoBackground, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
+import { ScreenGround, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
 import { IntegrationForm, SettingsRow as Row } from "~/components/settings";
 
 export default function SourceDetail() {
@@ -58,8 +58,7 @@ export default function SourceDetail() {
   }
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow={t("KAYNAK")}
@@ -163,6 +162,6 @@ export default function SourceDetail() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }

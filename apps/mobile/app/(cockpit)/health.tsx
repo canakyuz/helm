@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { space } from "@helm/design";
 import { AD_FORMAT_LABEL, instrumentationWarnings } from "@helm/api";
@@ -13,7 +13,7 @@ import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { formatInteger, formatRatio } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
-import { BentoBackground, BentoHeader, Rise } from "~/components/bento";
+import { ScreenGround, BentoHeader, Rise } from "~/components/bento";
 import {
   FunnelTile,
   InstrumentationTile,
@@ -89,8 +89,7 @@ export default function Health() {
   }));
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow={t("SAĞLIK")}
@@ -172,6 +171,6 @@ export default function Health() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }

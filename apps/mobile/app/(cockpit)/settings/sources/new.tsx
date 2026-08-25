@@ -10,7 +10,7 @@ import { useProperties } from "~/hooks/use-properties";
 import { haptic } from "~/lib/haptics";
 import { useT } from "~/lib/i18n";
 import { useTheme } from "~/theme/use-theme";
-import { BentoBackground, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
+import { ScreenGround, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
 import { IntegrationForm } from "~/components/settings";
 
 export default function NewSource() {
@@ -28,8 +28,7 @@ export default function NewSource() {
   const effectiveProjectId = projectId ?? (projects.length === 1 ? projects[0]!.id : null);
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader eyebrow={t("KAYNAKLAR")} title={t("Yeni kaynak")} onBack={() => router.back()} />
 
@@ -117,7 +116,7 @@ export default function NewSource() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }
 

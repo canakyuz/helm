@@ -5,11 +5,14 @@ import { View, ActivityIndicator } from "react-native";
 
 import { useAuth } from "~/hooks/use-auth";
 import { usePushRegistration } from "~/hooks/use-push-registration";
+import { ScreenGround } from "~/components/bento/ground";
+import { useTheme } from "~/theme/use-theme";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { session, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const { theme } = useTheme();
 
   // Oturum açıldığında push izni + token kaydı (izin verilene kadar no-op).
   usePushRegistration(session);
@@ -27,9 +30,11 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-bg-base">
-        <ActivityIndicator color="#fafafa" />
-      </View>
+      <ScreenGround>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color={theme.fg3} />
+        </View>
+      </ScreenGround>
     );
   }
 

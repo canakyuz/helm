@@ -26,7 +26,7 @@ import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
 import {
-  BentoBackground,
+  ScreenGround,
   BentoBars,
   BentoHeader,
   BentoRails,
@@ -148,8 +148,7 @@ export default function Analytics() {
   }));
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow={t("ANALİZ")}
@@ -289,7 +288,7 @@ export default function Analytics() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }
 

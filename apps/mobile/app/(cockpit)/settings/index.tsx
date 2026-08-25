@@ -12,7 +12,7 @@ import { useT } from "~/lib/i18n";
 import { usePreferences } from "~/lib/preferences";
 import { supabase } from "~/lib/supabase";
 import { useTheme } from "~/theme/use-theme";
-import { BentoBackground, BentoHeader, BentoTile, Rise, SolidTile } from "~/components/bento";
+import { ScreenGround, BentoHeader, BentoTile, Rise, SolidTile } from "~/components/bento";
 import { MODE_LABEL_KEY, SettingsRow as Row } from "~/components/settings";
 
 export default function SettingsHub() {
@@ -53,8 +53,7 @@ export default function SettingsHub() {
         : t("{n} bağlı", { n: okCount });
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow={t("SİSTEM")}
@@ -159,6 +158,6 @@ export default function SettingsHub() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }

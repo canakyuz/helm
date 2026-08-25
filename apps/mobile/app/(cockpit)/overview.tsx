@@ -32,7 +32,7 @@ import { CountUp } from "~/components/liquid";
 import { AttentionTile, StatTile, statFontSize, toItems } from "~/components/overview";
 import { useT } from "~/lib/i18n";
 import {
-  BentoBackground,
+  ScreenGround,
   HERO_NUMBER,
   BentoBars,
   BentoHeader,
@@ -184,8 +184,7 @@ export default function Overview() {
   };
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow={t("PORTFÖY")}
@@ -434,7 +433,7 @@ export default function Overview() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }
 

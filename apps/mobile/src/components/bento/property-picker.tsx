@@ -7,6 +7,7 @@ import { useProperties, type PropertyType } from "~/hooks/use-properties";
 import { haptic } from "~/lib/haptics";
 import { preferences, usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
+import { ScreenGround } from "./ground";
 import { useT } from "~/lib/i18n";
 
 const ALL = "Tüm projeler";
@@ -78,7 +79,8 @@ export function PropertyPicker() {
         presentationStyle="pageSheet"
         onRequestClose={() => setOpen(false)}
       >
-        <View style={{ flex: 1, backgroundColor: theme.bg }}>
+        {/* Modal da ekran - duz zemin yerine ayni isikli kap. */}
+        <ScreenGround>
           <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
             <View
               className="flex-row items-center justify-between"
@@ -118,7 +120,7 @@ export function PropertyPicker() {
               ))}
             </ScrollView>
           </SafeAreaView>
-        </View>
+        </ScreenGround>
       </Modal>
     </>
   );

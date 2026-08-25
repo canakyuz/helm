@@ -1,4 +1,4 @@
-import { RefreshControl, ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
@@ -11,7 +11,7 @@ import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { useSystemHealth } from "~/hooks/use-system-health";
 import { formatRelativeTime } from "~/lib/format";
 import { useTheme } from "~/theme/use-theme";
-import { BentoBackground, BentoHeader, BentoTile, InfoRow, Rise } from "~/components/bento";
+import { ScreenGround, BentoHeader, BentoTile, InfoRow, Rise } from "~/components/bento";
 
 export default function About() {
   const router = useRouter();
@@ -28,8 +28,7 @@ export default function About() {
   const version = Constants.expoConfig?.version ?? "-";
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow={t("AYARLAR")}
@@ -80,6 +79,6 @@ export default function About() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }

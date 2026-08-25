@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { space } from "@helm/design";
 
 import { useT } from "~/lib/i18n";
 import { preferences, usePreferences, type Language, type ThemeMode } from "~/lib/preferences";
-import { BentoBackground, BentoHeader, BentoSegment, BentoTile, Rise } from "~/components/bento";
+import { ScreenGround, BentoHeader, BentoSegment, BentoTile, Rise } from "~/components/bento";
 import {
   AccentPicker,
   MODE_LABEL_KEY,
@@ -34,8 +34,7 @@ export default function Appearance() {
   }, [themeOptions]);
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         {/* onSync yok: burada yenilenecek uzak veri yok, tercihler yerel. */}
         <BentoHeader eyebrow={t("AYARLAR")} title={t("Görünüm")} onBack={() => router.back()} />
@@ -91,6 +90,6 @@ export default function Appearance() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }

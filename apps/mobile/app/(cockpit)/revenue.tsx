@@ -24,7 +24,7 @@ import { CountUp } from "~/components/liquid";
 import { AdEconomicsTile, PaymentsTile, ReconciliationTile } from "~/components/revenue";
 import { tr, useT } from "~/lib/i18n";
 import {
-  BentoBackground,
+  ScreenGround,
   HERO_NUMBER,
   MiniTile,
   BentoBars,
@@ -134,8 +134,7 @@ export default function Revenue() {
   }));
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader
           eyebrow={t("GELİR")}
@@ -329,7 +328,7 @@ export default function Revenue() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }
 

@@ -1,4 +1,4 @@
-import { Alert, ScrollView, View } from "react-native";
+import { Alert, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { space } from "@helm/design";
@@ -15,7 +15,7 @@ import {
 } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
 import { Toggle } from "~/components/liquid";
-import { BentoBackground, BentoHeader, BentoSegment, BentoTile, Rise } from "~/components/bento";
+import { ScreenGround, BentoHeader, BentoSegment, BentoTile, Rise } from "~/components/bento";
 import { SettingsRow as Row } from "~/components/settings";
 
 const CURRENCIES: readonly Currency[] = ["USD", "EUR", "GBP", "TRY"];
@@ -64,8 +64,7 @@ export default function DataSettings() {
   }
 
   return (
-    <View className="flex-1 bg-canvas">
-      <BentoBackground />
+    <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
         <BentoHeader eyebrow={t("AYARLAR")} title={t("Veri ve biçim")} onBack={() => router.back()} />
 
@@ -131,6 +130,6 @@ export default function DataSettings() {
           </Rise>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ScreenGround>
   );
 }
