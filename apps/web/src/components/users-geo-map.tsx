@@ -209,7 +209,7 @@ export const UsersGeoMap = ({
   }
 
   return (
-    <Card className="h-full py-0">
+    <Card className="py-0">
       <CardHeader className="flex flex-row items-center justify-between px-5 pt-5 pb-0">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <Globe2 className="size-4" />

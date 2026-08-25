@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, displayName } from "@/lib/utils";
 import { useGetIdentity, useLogout } from "@refinedev/core";
 import { useKBar } from "@refinedev/kbar";
 import { Link, Outlet, useLocation } from "react-router";
@@ -232,7 +232,8 @@ const NavUser = () => {
   const { locale, setLocale, t } = useI18n();
   const isDark = theme.mode === "dark";
 
-  const name = user?.name ?? "Misafir";
+  // Ust satirda okunakli ad, alt satirda tam e-posta - ikisi ayni olmasin.
+  const name = displayName(user?.name ?? user?.email);
   const initial = name[0]?.toUpperCase() ?? "?";
 
   return (

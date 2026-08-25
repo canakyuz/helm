@@ -51,7 +51,7 @@ import { supabaseClient } from "@/providers/supabase-client";
 import { useScope } from "@/context/scope";
 import { useDisplayCurrency } from "@/context/currency";
 import { useHelmTheme } from "@/theme/ThemeProvider";
-import { cn } from "@/lib/utils";
+import { cn, displayName } from "@/lib/utils";
 import { useFxRates } from "@/lib/fx";
 import {
   compact,
@@ -372,7 +372,7 @@ export const DashboardPage = () => {
   }, [metrics, fxRates, rcCurrency, mrrCents]);
 
   const { data: identity } = useGetIdentity<{ name?: string }>();
-  const firstName = identity?.name?.split(" ")[0] ?? "Kaptan";
+  const firstName = displayName(identity?.name);
 
   // Bugünün reklam geliri delta'sı - düne göre (Kravio "vs last week" satırı).
   const adTodayDelta =
@@ -496,7 +496,7 @@ export const DashboardPage = () => {
       )}
 
       {/* ════════ KPI + BAR CHART (sol) · LATEST UPDATES (sağ ray) ════════ */}
-      <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex min-w-0 flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-3">
             <KpiCard
@@ -566,9 +566,9 @@ export const DashboardPage = () => {
         <LatestUpdates
           alerts={alertsResult.data}
           runs={runsResult.data.slice(0, 20)}
-          // items-stretch sagraya satir yuksekligini verir; icerik azsa kart
-          // sutunu doldurur, coksa ic liste kendi icinde scroll olur.
-          className="flex min-h-0 flex-col xl:h-full"
+          // Kart kendi icerigi kadar: sabit yukseklik verilirse az aktivite
+          // oldugunda kartin ICINDE olu bosluk kaliyordu.
+          className="flex flex-col"
         />
       </div>
 
