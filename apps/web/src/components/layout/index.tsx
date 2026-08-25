@@ -196,14 +196,16 @@ const SidebarSearch = () => {
 
 /** Logo satırı + collapse butonu (Kravio üst bloğu). */
 const SidebarLogo = () => (
-  <div className="flex items-center gap-2.5 px-2 pt-1">
+  <div className="flex items-center gap-2.5 px-2 pt-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:px-0">
     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
       <span className="text-sm font-bold">H</span>
     </div>
     <span className="flex-1 truncate text-[15px] font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
       Helm
     </span>
-    <SidebarTrigger className="text-muted-foreground group-data-[collapsible=icon]:hidden" />
+    {/* Trigger ikon modunda da görünür kalmalı - gizlenirse sidebar'ı geri
+        açmanın tek yolu görünmez rail şeridi oluyordu. */}
+    <SidebarTrigger className="text-muted-foreground" />
   </div>
 );
 
@@ -225,7 +227,11 @@ const NavUser = () => {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="h-14 rounded-xl border border-border bg-card px-2.5 shadow-[0_1px_2px_rgba(16,17,20,0.04)] data-[state=open]:bg-card"
+              className={cn(
+                "h-14 rounded-xl border border-border bg-card px-2.5 shadow-[0_1px_2px_rgba(16,17,20,0.04)] data-[state=open]:bg-card",
+                // İkon modunda kart kabuğu 48px'e sıkışıp içeriği taşırıyordu.
+                "group-data-[collapsible=icon]:h-8! group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:shadow-none",
+              )}
             >
               <span className="relative">
                 <Avatar className="size-8 rounded-full">
@@ -235,7 +241,7 @@ const NavUser = () => {
                 </Avatar>
                 <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-card bg-emerald-500" />
               </span>
-              <span className="grid flex-1 text-left leading-tight">
+              <span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate text-[13px] font-semibold">{name}</span>
                 {user?.email && (
                   <span className="truncate text-[11px] text-muted-foreground">
@@ -243,7 +249,7 @@ const NavUser = () => {
                   </span>
                 )}
               </span>
-              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
+              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="w-56">

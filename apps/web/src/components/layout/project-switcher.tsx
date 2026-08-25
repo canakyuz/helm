@@ -1,6 +1,7 @@
 import { useList, useNavigation } from "@refinedev/core";
 import { Boxes, ChevronsUpDown, Pencil, Plus } from "lucide-react";
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 import {
   DropdownMenu,
@@ -87,16 +88,20 @@ export const ProjectSwitcher = () => {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="h-12 rounded-xl border border-border bg-card px-2.5 shadow-[0_1px_2px_rgba(16,17,20,0.04)] data-[state=open]:bg-card"
+              className={cn(
+                "h-12 rounded-xl border border-border bg-card px-2.5 shadow-[0_1px_2px_rgba(16,17,20,0.04)] data-[state=open]:bg-card",
+                // İkon modunda kart kabuğu 48px'e sıkışıp metni taşırıyordu.
+                "group-data-[collapsible=icon]:h-8! group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:shadow-none",
+              )}
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted text-foreground">
                 <Boxes className="size-4" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-medium">{label}</span>
                 <span className="truncate text-xs text-muted-foreground">{sub}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-72" align="start">
@@ -117,7 +122,7 @@ export const ProjectSwitcher = () => {
                   {g.brand.id !== "__orphan__" && (
                     <button
                       type="button"
-                      aria-label={`${g.brand.name} - edit brand`}
+                      aria-label={`${g.brand.name} - markayı düzenle`}
                       onClick={(e) => {
                         e.stopPropagation();
                         edit("brands", g.brand.id);
@@ -143,7 +148,7 @@ export const ProjectSwitcher = () => {
                     </span>
                     <button
                       type="button"
-                      aria-label={`${p.name} - edit property`}
+                      aria-label={`${p.name} - property düzenle`}
                       onClick={(e) => {
                         e.stopPropagation();
                         edit("properties", p.id);
