@@ -47,7 +47,13 @@ export const PropertiesListPage = () => {
       .sort((a, b) => a.brand.name.localeCompare(b.brand.name));
     if (orphans.length > 0) {
       ordered.push({
-        brand: { id: "__orphan__", name: "Markasız", slug: "", created_at: "" },
+        brand: {
+          id: "__orphan__",
+          name: "Markasız",
+          slug: "",
+          created_at: "",
+          logo_url: null,
+        },
         properties: orphans,
       });
     }

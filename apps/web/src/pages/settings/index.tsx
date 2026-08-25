@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -61,6 +62,15 @@ export const SettingsPage = () => {
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold tracking-tight">Ayarlar</h1>
 
+      {/* Sekmeler: gunluk ayarlar (Genel) ile altyapi/tani bilgisi
+          (Sistem & Otomasyon) ayri okunur - tek uzun sayfa yerine. */}
+      <Tabs defaultValue="genel" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="genel">Genel</TabsTrigger>
+          <TabsTrigger value="sistem">Sistem & Otomasyon</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="genel" className="space-y-4">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -110,6 +120,19 @@ export const SettingsPage = () => {
         </Card>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Hesap</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" onClick={() => logout()}>
+            <LogOut className="size-4" /> Çıkış yap
+          </Button>
+        </CardContent>
+      </Card>
+        </TabsContent>
+
+        <TabsContent value="sistem" className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle>Sistem bilgisi</CardTitle>
@@ -194,17 +217,8 @@ export const SettingsPage = () => {
       </Card>
 
       <CronHealthCard />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Hesap</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button variant="outline" onClick={() => logout()}>
-            <LogOut className="size-4" /> Çıkış yap
-          </Button>
-        </CardContent>
-      </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
