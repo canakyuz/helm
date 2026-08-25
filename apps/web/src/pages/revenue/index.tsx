@@ -57,7 +57,11 @@ export const RevenuePage = () => {
   // hangi 1.000'in gelecegi ORDER BY olmadan belirsiz kaliyor. Sonuc yavaslik
   // degil, veri kaybi: kartlar sifir gorunurken veri veritabaninda duruyor.
   // Yeni metrik eklersen bu listeye de ekle.
-  const REVENUE_METRICS = ["ad_revenue", "ad_ecpm", "ad_impressions", "app_revenue", "app_downloads", "mrr", "active_subs"];
+  // iap_revenue / subscription_revenue: App Store Connect connector bunlari
+  // yaziyor (helm-ingest/connectors/app-store-connect.ts) ama listede
+  // olmadiklari icin UI'a hic gelmiyorlardi. revenue_28d de ayni sekilde
+  // RevenueCat'ten geliyor ve "Gelir (28 gun)" karti bu yuzden hep 0'di.
+  const REVENUE_METRICS = ["ad_revenue", "ad_ecpm", "ad_impressions", "app_revenue", "app_downloads", "mrr", "active_subs", "iap_revenue", "subscription_revenue", "revenue_28d"];
 
   const filters: CrudFilter[] = [
     { field: "date", operator: "gte", value: since },

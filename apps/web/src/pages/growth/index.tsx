@@ -64,13 +64,21 @@ export const GrowthPage = () => {
   // Yeni metrik eklersen bu listeye de ekle.
   const GROWTH_METRICS = ["dau", "wau", "mau", "new_users", "total_users"];
 
-  const filters: CrudFilter[] = [
+  // Kapsam filtreleri (tarih + proje) - metrik filtresi ICERMEZ.
+  // Ulke sorgusu tek bir metrige "eq" ile bakiyor; asagidaki metric-"in"
+  // filtresiyle birlikte gonderilirse PostgREST ikisini AND'ler ve sorgu
+  // hicbir zaman eslesmez (ulke widget'i her zaman bos gorunurdu).
+  const scopeFilters: CrudFilter[] = [
     { field: "date", operator: "gte", value: since },
-    { field: "metric", operator: "in", value: GROWTH_METRICS },
   ];
   if (!isAll) {
-    filters.push({ field: "project_id", operator: "eq", value: scope });
+    scopeFilters.push({ field: "project_id", operator: "eq", value: scope });
   }
+
+  const filters: CrudFilter[] = [
+    ...scopeFilters,
+    { field: "metric", operator: "in", value: GROWTH_METRICS },
+  ];
   const { result, query } = useList<Metric>({
     resource: "metrics",
     filters,
@@ -87,7 +95,7 @@ export const GrowthPage = () => {
   const { result: countryResult, query: countryQuery } = useList<MetricCountry>({
     resource: "metrics_country",
     filters: [
-      ...filters,
+      ...scopeFilters,
       { field: "metric", operator: "eq", value: geoMetric },
     ],
     pagination: { mode: "off" },
