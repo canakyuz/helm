@@ -1,10 +1,19 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// helm-acquisition - PostHog $initial_referrer breakdown.
-// Kullanıcı edinme kaynakları: direct / google / facebook / referral.
+// helm-acquisition - PostHog $initial_referrer + UTM breakdown.
+// Kullanıcı edinme kaynakları: direct / google / facebook / referral,
+// ayrıca ücretli kampanya atıfı ($initial_utm_*).
 //
 // Body: { project_id, days?: number }
-// Yanıt: { rows: [{ source, source_type, users }], total }
+// Yanıt: {
+//   rows: [{ source, type, users }], total, days,
+//   utm: {
+//     sources:   [{ source, users }],
+//     campaigns: [{ campaign, source, medium, users }],
+//     total
+//   }
+// }
+// utm alanı EK bir alandır; rows/total şekli değişmedi (UI ona bağlı).
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -50,6 +59,118 @@ const categorize = (raw: string): { source: string; type: string } => {
   }
 };
 
+/* ───────────────────────────── UTM atıfı ───────────────────────────── */
+
+interface UtmSourceRow {
+  source: string;
+  users: number;
+}
+interface UtmCampaignRow {
+  campaign: string;
+  // Kampanyaya en çok kullanıcı getiren source/medium - etiket amaçlı.
+  source: string | null;
+  medium: string | null;
+  users: number;
+}
+interface UtmBreakdown {
+  sources: UtmSourceRow[];
+  campaigns: UtmCampaignRow[];
+  total: number;
+}
+
+// UTM property'si olmayan (organik) uygulamalarda boş dönmek zorundayız:
+// UI bunu "UTM etiketli trafik bulunamadı" boş durumuna çevirir.
+const EMPTY_UTM: UtmBreakdown = { sources: [], campaigns: [], total: 0 };
+
+// Payload'ı ve tablo satırlarını sınırlı tutmak için üst sınır.
+const UTM_MAX_ROWS = 50;
+
+// PostHog string property'leri "", "null", "undefined" gibi çöp değerlerle
+// gelebiliyor; bunları yok saymazsak boş bir kampanya satırı gibi görünürler.
+const cleanProp = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "null" || trimmed === "undefined") return null;
+  return trimmed.slice(0, 60);
+};
+
+// (source, medium, campaign, users) satırlarını iki boyuta katlar.
+// $initial_* person-level ilk-dokunuş property'si olduğu için bir kullanıcı
+// tek bir üçlüye düşer; dolayısıyla dilim toplamları çift saymaz.
+// Zaman: O(n), Yer: O(farklı source + farklı campaign).
+const foldUtm = (results: unknown[][]): UtmBreakdown => {
+  const sources = new Map<string, number>();
+  const campaigns = new Map<string, UtmCampaignRow>();
+  let total = 0;
+
+  for (const row of results) {
+    const source = cleanProp(row[0]);
+    const medium = cleanProp(row[1]);
+    const campaign = cleanProp(row[2]);
+    const users = Number(row[3] ?? 0);
+    if (!Number.isFinite(users) || users <= 0) continue;
+    // Hem source hem campaign boşsa satır UTM taşımıyor demektir.
+    if (!source && !campaign) continue;
+
+    total += users;
+    if (source) sources.set(source, (sources.get(source) ?? 0) + users);
+    if (campaign) {
+      const existing = campaigns.get(campaign);
+      if (existing) {
+        existing.users += users;
+      } else {
+        // Sorgu users DESC sıralı geldiği için kampanyanın ILK görülen dilimi
+        // en büyük dilimidir - source/medium etiketini ondan alıyoruz.
+        campaigns.set(campaign, { campaign, source, medium, users });
+      }
+    }
+  }
+
+  const byUsersDesc = <T extends { users: number }>(a: T, b: T) =>
+    b.users - a.users;
+
+  return {
+    sources: [...sources.entries()]
+      .map(([source, users]) => ({ source, users }))
+      .sort(byUsersDesc)
+      .slice(0, UTM_MAX_ROWS),
+    campaigns: [...campaigns.values()]
+      .sort(byUsersDesc)
+      .slice(0, UTM_MAX_ROWS),
+    total,
+  };
+};
+
+/* ─────────────────────────── PostHog sorgusu ─────────────────────────── */
+
+type QueryResult =
+  | { ok: true; results: unknown[][] }
+  | { ok: false; error: string };
+
+const runHogQL = async (
+  host: string,
+  projectId: string | number,
+  apiKey: string,
+  query: string,
+): Promise<QueryResult> => {
+  const res = await fetch(`${host}/api/projects/${projectId}/query/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query: { kind: "HogQLQuery", query } }),
+  });
+  if (!res.ok) {
+    return {
+      ok: false,
+      error: `PostHog ${res.status}: ${(await res.text()).slice(0, 500)}`,
+    };
+  }
+  const data = await res.json();
+  return { ok: true, results: (data?.results as unknown[][]) ?? [] };
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: cors });
@@ -60,7 +181,11 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     if (typeof body?.project_id === "string") projectId = body.project_id;
-    if (typeof body?.days === "number" && body.days > 0) days = body.days;
+    // Gün sayısı hem SQL'e gömülüyor hem tarama maliyetini belirliyor:
+    // tam sayıya indirip 365'te tavanlıyoruz.
+    if (typeof body?.days === "number" && body.days > 0) {
+      days = Math.min(Math.floor(body.days), 365);
+    }
   } catch {
     // gövde yok
   }
@@ -85,7 +210,7 @@ Deno.serve(async (req) => {
   }
   const host = (cfg.host || "https://eu.posthog.com").replace(/\/+$/, "");
 
-  const hogql = `
+  const referrerHogQL = `
     SELECT
       properties.$initial_referrer AS referrer,
       count(DISTINCT person_id) AS users
@@ -97,22 +222,37 @@ Deno.serve(async (req) => {
     LIMIT 100
   `;
 
-  const res = await fetch(`${host}/api/projects/${cfg.project_id}/query/`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.api_key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query: { kind: "HogQLQuery", query: hogql } }),
-  });
-  if (!res.ok) {
-    return json(
-      { error: `PostHog ${res.status}: ${(await res.text()).slice(0, 500)}` },
-      500,
-    );
-  }
-  const data = await res.json();
-  const results: unknown[][] = data?.results ?? [];
+  // Referrer sorgusuyla AYNI temel (events + count(DISTINCT person_id) + aynı
+  // tarih penceresi) - aksi halde iki kart birbirini tutmayan rakam gösterir.
+  // Üçlüyü tek sorguda çekip TS tarafında katlıyoruz: ikinci bir HTTP turu
+  // yerine tek tur, ve source/medium/campaign ilişkisi korunuyor.
+  const utmHogQL = `
+    SELECT
+      properties.$initial_utm_source AS utm_source,
+      properties.$initial_utm_medium AS utm_medium,
+      properties.$initial_utm_campaign AS utm_campaign,
+      count(DISTINCT person_id) AS users
+    FROM events
+    WHERE timestamp > now() - INTERVAL ${days} DAY
+      AND (properties.$initial_utm_source IS NOT NULL
+        OR properties.$initial_utm_campaign IS NOT NULL)
+    GROUP BY utm_source, utm_medium, utm_campaign
+    ORDER BY users DESC
+    LIMIT 200
+  `;
+
+  // Paralel: UTM sorgusu toplam gecikmeyi artırmasın.
+  const [referrerRes, utmRes] = await Promise.all([
+    runHogQL(host, cfg.project_id, cfg.api_key, referrerHogQL),
+    runHogQL(host, cfg.project_id, cfg.api_key, utmHogQL),
+  ]);
+
+  if (!referrerRes.ok) return json({ error: referrerRes.error }, 500);
+  const results = referrerRes.results;
+
+  // UTM sorgusu patlarsa (ör. property hiç yoksa şema hatası) tüm yanıtı
+  // düşürmüyoruz: referrer kartı çalışmaya devam etsin, UTM boş görünsün.
+  const utm = utmRes.ok ? foldUtm(utmRes.results) : EMPTY_UTM;
 
   // Kategori bazlı topla
   const byCategory = new Map<string, { source: string; type: string; users: number }>();
@@ -130,5 +270,5 @@ Deno.serve(async (req) => {
   const rows = Array.from(byCategory.values()).sort((a, b) => b.users - a.users);
   const total = rows.reduce((s, r) => s + r.users, 0);
 
-  return json({ rows, total, days });
+  return json({ rows, total, days, utm });
 });

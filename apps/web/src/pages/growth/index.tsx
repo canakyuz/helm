@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Globe,
   MapPin,
+  Megaphone,
   Sparkles,
   UserPlus,
   Users,
@@ -245,8 +246,8 @@ export const GrowthPage = () => {
       {/* PostHog geo breakdown - IP tabanlı, izinsiz */}
       <PostHogGeoCard scope={scope} isAll={isAll} days={range} />
 
-      {/* Acquisition source breakdown */}
-      <AcquisitionCard scope={scope} isAll={isAll} days={range} />
+      {/* Acquisition: referrer kırılımı + UTM (ücretli kampanya) atıfı */}
+      <AcquisitionSection scope={scope} isAll={isAll} days={range} />
 
       {/* Ülke kırılımı - metrics_country tablosundan */}
       <Card>
@@ -569,6 +570,25 @@ interface AcqRow {
   users: number;
 }
 
+interface UtmSourceRow {
+  source: string;
+  users: number;
+}
+interface UtmCampaignRow {
+  campaign: string;
+  source: string | null;
+  medium: string | null;
+  users: number;
+}
+interface UtmBreakdown {
+  sources: UtmSourceRow[];
+  campaigns: UtmCampaignRow[];
+  total: number;
+}
+
+// Organik-only uygulamalarda edge function bunu döner; kart boş durumu gösterir.
+const EMPTY_UTM: UtmBreakdown = { sources: [], campaigns: [], total: 0 };
+
 const TYPE_LABELS: Record<string, string> = {
   direct: "Doğrudan",
   search: "Arama",
@@ -585,7 +605,9 @@ const TYPE_COLORS: Record<string, string> = {
   referral: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
 };
 
-const AcquisitionCard = ({
+// Veri çekimi tek yerde: aynı edge function yanıtı hem referrer hem UTM
+// kartını besliyor, ikinci bir istek atmıyoruz.
+const AcquisitionSection = ({
   scope,
   isAll,
   days,
@@ -596,6 +618,7 @@ const AcquisitionCard = ({
 }) => {
   const [rows, setRows] = useState<AcqRow[]>([]);
   const [total, setTotal] = useState(0);
+  const [utm, setUtm] = useState<UtmBreakdown>(EMPTY_UTM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -613,6 +636,7 @@ const AcquisitionCard = ({
   useEffect(() => {
     if (isAll || !phConnected) {
       setRows([]);
+      setUtm(EMPTY_UTM);
       return;
     }
     let cancelled = false;
@@ -626,6 +650,8 @@ const AcquisitionCard = ({
         if (data?.error) throw new Error(data.error);
         setRows((data?.rows as AcqRow[]) ?? []);
         setTotal(data?.total ?? 0);
+        // utm alanı eski deploy'larda yok - eksikse boş kırılım kullanılır.
+        setUtm((data?.utm as UtmBreakdown | undefined) ?? EMPTY_UTM);
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
@@ -638,6 +664,35 @@ const AcquisitionCard = ({
     };
   }, [scope, isAll, days, phConnected]);
 
+  if (isAll || !phConnected) return null;
+
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <AcquisitionCard
+        days={days}
+        rows={rows}
+        total={total}
+        loading={loading}
+        error={error}
+      />
+      <UtmCard days={days} utm={utm} loading={loading} error={error} />
+    </div>
+  );
+};
+
+const AcquisitionCard = ({
+  days,
+  rows,
+  total,
+  loading,
+  error,
+}: {
+  days: number;
+  rows: AcqRow[];
+  total: number;
+  loading: boolean;
+  error: string | null;
+}) => {
   // Tip bazlı topla
   const byType = useMemo(() => {
     const map = new Map<string, number>();
@@ -646,8 +701,6 @@ const AcquisitionCard = ({
     }
     return [...map.entries()].sort((a, b) => b[1] - a[1]);
   }, [rows]);
-
-  if (isAll || !phConnected) return null;
 
   return (
     <Card>
@@ -746,6 +799,154 @@ const AcquisitionCard = ({
               {rows.length > 20 && (
                 <p className="pt-1 text-center text-[10px] text-muted-foreground">
                   +{rows.length - 20} kaynak daha
+                </p>
+              )}
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+/* ───────────────────────── UTM Campaign Card ───────────────────────── */
+
+const UTM_TOP_CAMPAIGNS = 10;
+const UTM_TOP_SOURCES = 8;
+
+// Kampanya satırının altındaki "google · cpc" etiketi. İkisi de yoksa satır
+// altına boş bir satır bırakmamak için null döner.
+const utmContext = (row: UtmCampaignRow): string | null => {
+  const parts = [row.source, row.medium].filter(
+    (p): p is string => p !== null && p.length > 0,
+  );
+  return parts.length > 0 ? parts.join(" · ") : null;
+};
+
+const UtmCard = ({
+  days,
+  utm,
+  loading,
+  error,
+}: {
+  days: number;
+  utm: UtmBreakdown;
+  loading: boolean;
+  error: string | null;
+}) => {
+  const share = (users: number) =>
+    utm.total > 0 ? (users / utm.total) * 100 : 0;
+  const isEmpty = utm.campaigns.length === 0 && utm.sources.length === 0;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Megaphone className="size-4" />
+          Kampanya Atıfı - son {days} gün
+          <span className="text-xs font-normal text-muted-foreground">
+            PostHog · $initial_utm_*
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {error ? (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        ) : loading ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            Yükleniyor…
+          </div>
+        ) : isEmpty ? (
+          // Organik-only uygulamada normal durum - kırık kart yerine ne
+          // yapılması gerektiğini anlatıyoruz.
+          <div className="space-y-2 py-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              UTM etiketli trafik bulunamadı.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Reklam ve kampanya linklerine{" "}
+              <code>?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=…</code>{" "}
+              eklersen kampanya kırılımı burada görünür.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Kampanyalar */}
+            <div className="space-y-1">
+              <div className="grid grid-cols-[1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                <span>Kampanya</span>
+                <span className="text-right">Kullanıcı</span>
+                <span className="text-right">Pay</span>
+              </div>
+              {utm.campaigns.length === 0 ? (
+                <p className="px-2 py-2 text-xs text-muted-foreground">
+                  Kampanya etiketi (<code>utm_campaign</code>) olan trafik yok.
+                </p>
+              ) : (
+                utm.campaigns.slice(0, UTM_TOP_CAMPAIGNS).map((c) => {
+                  const context = utmContext(c);
+                  return (
+                    <div
+                      key={c.campaign}
+                      className="grid grid-cols-[1fr_80px_60px] items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate font-medium">{c.campaign}</div>
+                        {context && (
+                          <div className="truncate text-[10px] text-muted-foreground">
+                            {context}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-right text-sm tabular-nums">
+                        {compact(c.users)}
+                      </span>
+                      <span className="text-right text-xs tabular-nums text-muted-foreground">
+                        %{share(c.users).toFixed(1)}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+              {utm.campaigns.length > UTM_TOP_CAMPAIGNS && (
+                <p className="pt-1 text-center text-[10px] text-muted-foreground">
+                  +{utm.campaigns.length - UTM_TOP_CAMPAIGNS} kampanya daha
+                </p>
+              )}
+            </div>
+
+            {/* UTM source'ları */}
+            <div className="space-y-1 border-t border-border pt-3">
+              <div className="grid grid-cols-[1fr_80px_60px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                <span>UTM source</span>
+                <span className="text-right">Kullanıcı</span>
+                <span className="text-right">Pay</span>
+              </div>
+              {utm.sources.length === 0 ? (
+                <p className="px-2 py-2 text-xs text-muted-foreground">
+                  <code>utm_source</code> etiketi olan trafik yok.
+                </p>
+              ) : (
+                utm.sources.slice(0, UTM_TOP_SOURCES).map((s) => (
+                  <div
+                    key={s.source}
+                    className="grid grid-cols-[1fr_80px_60px] items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                  >
+                    <span className="truncate font-medium">{s.source}</span>
+                    <span className="text-right text-sm tabular-nums">
+                      {compact(s.users)}
+                    </span>
+                    <span className="text-right text-xs tabular-nums text-muted-foreground">
+                      %{share(s.users).toFixed(1)}
+                    </span>
+                  </div>
+                ))
+              )}
+              {utm.sources.length > UTM_TOP_SOURCES && (
+                <p className="pt-1 text-center text-[10px] text-muted-foreground">
+                  +{utm.sources.length - UTM_TOP_SOURCES} source daha
                 </p>
               )}
             </div>
