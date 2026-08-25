@@ -61,7 +61,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ProjectSwitcher } from "./project-switcher";
+import { ProjectSwitcher, useActiveBrand } from "./project-switcher";
 import { useHelmTheme } from "@/theme/ThemeProvider";
 import { useEnabledModules } from "@/hooks/use-enabled-modules";
 import type { ModuleKey } from "@/lib/modules";
@@ -194,20 +194,35 @@ const SidebarSearch = () => {
   );
 };
 
-/** Logo satırı + collapse butonu (Kravio üst bloğu). */
-const SidebarLogo = () => (
-  <div className="flex items-center gap-2.5 px-2 pt-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:px-0">
-    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-      <span className="text-sm font-bold">H</span>
+/** Logo satırı + collapse butonu (Kravio üst bloğu).
+    Kare, aktif markanın logosunu taşır; logo yoksa ürün kimliği olan "H"
+    karesine düşer. "Helm" kelime markası her durumda kalır. */
+const SidebarLogo = () => {
+  const activeBrand = useActiveBrand();
+  return (
+    <div className="flex items-center gap-2.5 px-2 pt-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:px-0">
+      {activeBrand?.logo_url ? (
+        <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-card">
+          <img
+            src={activeBrand.logo_url}
+            alt={`${activeBrand.name} logosu`}
+            className="size-full object-cover"
+          />
+        </span>
+      ) : (
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <span className="text-sm font-bold">H</span>
+        </div>
+      )}
+      <span className="flex-1 truncate text-[15px] font-semibold tracking-tight group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 transition-[opacity,width] duration-200 ease-linear overflow-hidden">
+        Helm
+      </span>
+      {/* Trigger ikon modunda da görünür kalmalı - gizlenirse sidebar'ı geri
+          açmanın tek yolu görünmez rail şeridi oluyordu. */}
+      <SidebarTrigger className="text-muted-foreground" />
     </div>
-    <span className="flex-1 truncate text-[15px] font-semibold tracking-tight group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 transition-[opacity,width] duration-200 ease-linear overflow-hidden">
-      Helm
-    </span>
-    {/* Trigger ikon modunda da görünür kalmalı - gizlenirse sidebar'ı geri
-        açmanın tek yolu görünmez rail şeridi oluyordu. */}
-    <SidebarTrigger className="text-muted-foreground" />
-  </div>
-);
+  );
+};
 
 /** Footer user kartı: avatar + online dot + isim + email (Kravio alt bloğu). */
 const NavUser = () => {

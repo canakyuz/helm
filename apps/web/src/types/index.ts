@@ -30,6 +30,8 @@ export interface Brand {
   id: string;
   name: string;
   slug: string;
+  /** cms-assets bucket'ındaki logo public URL'i. Null = logo yok (harf fallback). */
+  logo_url: string | null;
   created_at: string;
 }
 

@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useList } from "@refinedev/core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm as useHookForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { z } from "zod";
-import { Plus, Trash2 } from "lucide-react";
+import { ImageUp, Plus, Trash2 } from "lucide-react";
 
 import {
   AlertDialog,
@@ -37,6 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BrandLogo } from "@/components/brand-logo";
 import { PROPERTY_TYPE_LABELS } from "@/lib/modules";
 import { supabaseClient } from "@/providers/supabase-client";
 import type { Brand, Property } from "@/types";
@@ -47,9 +49,38 @@ const brandSchema = z.object({
     .string()
     .min(1, "Slug zorunlu")
     .regex(/^[a-z0-9-]+$/, "Sadece küçük harf, rakam ve tire"),
+  // Logo opsiyonel: null = logo yok (harf fallback'i çizilir).
+  logo_url: z.string().nullable(),
 });
 
 type BrandFormValues = z.infer<typeof brandSchema>;
+
+// Logo depolama: 0017'deki `cms-assets` bucket'ı (public read + authenticated
+// write). `brand-logos/` prefix'i CMS medya kütüphanesinden ayırır - buraya
+// yüklenen dosya `cms_assets` tablosuna kayıt düşmediği için listede çıkmaz.
+const LOGO_BUCKET = "cms-assets";
+const LOGO_PREFIX = "brand-logos";
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+
+/** İstemci tarafı kabul kuralı: sadece görsel + max 2MB. */
+const rejectReason = (file: File): string | null => {
+  if (!file.type.startsWith("image/")) return "Sadece görsel dosyası";
+  if (file.size > MAX_LOGO_BYTES) return "Dosya 2MB'den küçük olmalı";
+  return null;
+};
+
+const uploadBrandLogo = async (brandId: string, file: File): Promise<string> => {
+  const dot = file.name.lastIndexOf(".");
+  const ext = dot >= 0 ? file.name.slice(dot) : "";
+  const path = `${LOGO_PREFIX}/${brandId}-${crypto.randomUUID()}${ext}`;
+
+  const { error } = await supabaseClient.storage
+    .from(LOGO_BUCKET)
+    .upload(path, file, { contentType: file.type || undefined, upsert: false });
+  if (error) throw error;
+
+  return supabaseClient.storage.from(LOGO_BUCKET).getPublicUrl(path).data.publicUrl;
+};
 
 export const BrandEdit = () => {
   const { onFinish, query } = useForm({ resource: "brands", redirect: false });
@@ -68,14 +99,44 @@ export const BrandEdit = () => {
 
   const form = useHookForm<BrandFormValues>({
     resolver: zodResolver(brandSchema),
-    defaultValues: { name: "", slug: "" },
+    defaultValues: { name: "", slug: "", logo_url: null },
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const logoUrl = form.watch("logo_url");
+  const brandName = form.watch("name");
 
   useEffect(() => {
     if (record) {
-      form.reset({ name: record.name, slug: record.slug });
+      form.reset({
+        name: record.name,
+        slug: record.slug,
+        logo_url: record.logo_url ?? null,
+      });
     }
   }, [record?.id]);
+
+  const pickLogo = async (file: File | undefined) => {
+    if (!file || !record) return;
+    const reason = rejectReason(file);
+    if (reason) {
+      toast.error(reason);
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadBrandLogo(record.id, file);
+      form.setValue("logo_url", url, { shouldDirty: true });
+      toast.success("Logo yüklendi", { description: "Kaydet'e basmayı unutma." });
+    } catch (error) {
+      toast.error("Logo yüklenemedi", {
+        description: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const submit = form.handleSubmit(async (values) => {
     await onFinish(values);
@@ -150,6 +211,60 @@ export const BrandEdit = () => {
                     <FormControl>
                       <Input placeholder="dante" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="logo_url"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Logo</FormLabel>
+                    <div className="flex items-center gap-3">
+                      <BrandLogo
+                        name={brandName || record?.name || "?"}
+                        logoUrl={logoUrl}
+                        className="size-12 rounded-lg"
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={uploading || !record}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <ImageUp className="size-4" />
+                          {uploading ? "Yükleniyor…" : "Logo yükle"}
+                        </Button>
+                        {logoUrl && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              form.setValue("logo_url", null, { shouldDirty: true })
+                            }
+                          >
+                            Kaldır
+                          </Button>
+                        )}
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          void pickLogo(e.target.files?.[0]);
+                          e.target.value = "";
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Kare görsel önerilir. PNG/SVG, en fazla 2MB.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

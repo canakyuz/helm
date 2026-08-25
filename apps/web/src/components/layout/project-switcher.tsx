@@ -3,6 +3,7 @@ import { Boxes, ChevronsUpDown, Pencil, Plus } from "lucide-react";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
+import { BrandLogo } from "@/components/brand-logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +26,44 @@ interface BrandGroup {
   properties: Property[];
 }
 
+const ORPHAN_BRAND: Brand = {
+  id: "__orphan__",
+  name: "Marka'sız",
+  slug: "",
+  logo_url: null,
+  created_at: "",
+};
+
+// Brand + property listeleri. Refine useList react-query üzerinden çalıştığı
+// için aynı resource/param ile çağıran ikinci tüketici (SidebarLogo) ek network
+// isteği doğurmaz - aynı cache anahtarını paylaşır.
+const useScopeData = (): { brands: Brand[]; properties: Property[] } => {
+  const { result: brandsResult } = useList<Brand>({
+    resource: "brands",
+    pagination: { mode: "off" },
+    queryOptions: { retry: false },
+  });
+  const { result: propsResult } = useList<Property>({
+    resource: "properties",
+    pagination: { mode: "off" },
+    queryOptions: { retry: false },
+  });
+  return {
+    brands: brandsResult?.data ?? [],
+    properties: propsResult?.data ?? [],
+  };
+};
+
+/** Aktif kapsamın markası - scope "all" ise veya marka yoksa null. */
+export const useActiveBrand = (): Brand | null => {
+  const { scope } = useScope();
+  const { brands, properties } = useScopeData();
+  if (scope === "all") return null;
+  const property = properties.find((p) => p.id === scope);
+  if (!property) return null;
+  return brands.find((b) => b.id === property.brand_id) ?? null;
+};
+
 // Sidebar üstündeki 2-seviye kapsam seçici:
 // • Brand'ler altında property'ler grup grup listelenir.
 // • Property tıklayınca scope = property.id (eski projects davranışı ile uyumlu).
@@ -36,19 +75,7 @@ export const ProjectSwitcher = () => {
   const { scope, setScope } = useScope();
   const { create, edit } = useNavigation();
 
-  const { result: brandsResult } = useList<Brand>({
-    resource: "brands",
-    pagination: { mode: "off" },
-    queryOptions: { retry: false },
-  });
-  const { result: propsResult } = useList<Property>({
-    resource: "properties",
-    pagination: { mode: "off" },
-    queryOptions: { retry: false },
-  });
-
-  const brands: Brand[] = brandsResult?.data ?? [];
-  const properties: Property[] = propsResult?.data ?? [];
+  const { brands, properties } = useScopeData();
 
   const groups: BrandGroup[] = useMemo(() => {
     const byBrand = new Map<string, BrandGroup>();
@@ -63,10 +90,7 @@ export const ProjectSwitcher = () => {
       .filter((g) => g.properties.length > 0)
       .sort((a, b) => a.brand.name.localeCompare(b.brand.name));
     if (orphans.length > 0) {
-      ordered.push({
-        brand: { id: "__orphan__", name: "Marka'sız", slug: "", created_at: "" },
-        properties: orphans,
-      });
+      ordered.push({ brand: ORPHAN_BRAND, properties: orphans });
     }
     return ordered;
   }, [brands, properties]);
@@ -94,9 +118,13 @@ export const ProjectSwitcher = () => {
                 "group-data-[collapsible=icon]:h-8! group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:shadow-none",
               )}
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted text-foreground">
-                <Boxes className="size-4" />
-              </div>
+              {/* Aktif property'nin markasında logo varsa onu göster, yoksa
+                  jenerik kutu ikonu. */}
+              <BrandLogo
+                name={activeBrand?.name ?? label}
+                logoUrl={activeBrand?.logo_url}
+                fallback={<Boxes className="size-4" />}
+              />
               <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 transition-[opacity,width] duration-200 ease-linear overflow-hidden">
                 <span className="truncate font-medium">{label}</span>
                 <span className="truncate text-xs text-muted-foreground">{sub}</span>
@@ -115,11 +143,18 @@ export const ProjectSwitcher = () => {
             {groups.map((g) => (
               <div key={g.brand.id}>
                 <DropdownMenuSeparator />
-                <div className="flex items-center justify-between px-2 py-1">
-                  <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    {g.brand.name}
+                <div className="flex items-center justify-between gap-2 px-2 py-1">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <BrandLogo
+                      name={g.brand.name}
+                      logoUrl={g.brand.logo_url}
+                      className="size-5 rounded"
+                    />
+                    <span className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                      {g.brand.name}
+                    </span>
                   </span>
-                  {g.brand.id !== "__orphan__" && (
+                  {g.brand.id !== ORPHAN_BRAND.id && (
                     <button
                       type="button"
                       aria-label={`${g.brand.name} - markayı düzenle`}
