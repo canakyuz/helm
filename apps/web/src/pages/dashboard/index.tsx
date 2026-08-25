@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import {
   type CrudFilter,
   useGetIdentity,
@@ -91,9 +91,9 @@ const timeAgo = (iso: string | null) => {
   if (!iso) return "hiç";
   const min = (Date.now() - new Date(iso).getTime()) / 60_000;
   if (min < 1) return "az önce";
-  if (min < 60) return `${Math.round(min)}m ago`;
-  if (min < 1440) return `${Math.round(min / 60)}h ago`;
-  return `${Math.round(min / 1440)}d ago`;
+  if (min < 60) return `${Math.round(min)}dk önce`;
+  if (min < 1440) return `${Math.round(min / 60)}sa önce`;
+  return `${Math.round(min / 1440)}g önce`;
 };
 
 /** Bir projenin connector sağlığı: ok / error / pending. */
@@ -117,28 +117,6 @@ export const DashboardPage = () => {
   const invalidate = useInvalidate();
   const [range, setRange] = useState(90);
   const [syncing, setSyncing] = useState(false);
-
-  // Son Aktiviteler paneli sol sütunla (KPI + grafik + harita) aynı
-  // yükseklikte olsun (xl+ iki sütunlu layout'ta) - sabit bir vh tahmini
-  // yerine gerçek ölçülen değer kullanılır, sol sütunun boyu değiştiğinde
-  // (KPI placeholder, harita yüksekliği vb.) otomatik doğru kalır.
-  const leftColRef = useRef<HTMLDivElement>(null);
-  const [leftColHeight, setLeftColHeight] = useState<number | null>(null);
-  useEffect(() => {
-    const el = leftColRef.current;
-    if (!el) return;
-    const mq = window.matchMedia("(min-width: 1280px)");
-    const update = () =>
-      setLeftColHeight(mq.matches ? el.getBoundingClientRect().height : null);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    mq.addEventListener("change", update);
-    return () => {
-      ro.disconnect();
-      mq.removeEventListener("change", update);
-    };
-  }, []);
 
   const since = useMemo(
     () =>
@@ -519,7 +497,7 @@ export const DashboardPage = () => {
 
       {/* ════════ KPI + BAR CHART (sol) · LATEST UPDATES (sağ ray) ════════ */}
       <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div ref={leftColRef} className="flex min-w-0 flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-3">
             <KpiCard
               title="Reklam · Bugün"
@@ -588,8 +566,9 @@ export const DashboardPage = () => {
         <LatestUpdates
           alerts={alertsResult.data}
           runs={runsResult.data.slice(0, 20)}
-          className="flex min-h-0 flex-col xl:self-start"
-          style={leftColHeight ? { maxHeight: leftColHeight } : undefined}
+          // items-stretch sagraya satir yuksekligini verir; icerik azsa kart
+          // sutunu doldurur, coksa ic liste kendi icinde scroll olur.
+          className="flex min-h-0 flex-col xl:h-full"
         />
       </div>
 
