@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   acquisitionQueryOptions,
@@ -8,6 +9,14 @@ import {
 } from "@helm/queries";
 
 import { supabase } from "~/lib/supabase";
+import {
+  lensAcquisition,
+  lensFunnel,
+  lensGeoBreakdown,
+  lensOsBreakdown,
+  useDemoLens,
+} from "~/lib/demo";
+import type { AcquisitionData, FunnelData, GeoData, OsData } from "@helm/api";
 
 // PostHog-backed edge'ler tek project_id scope'lu - çağıran efektif id'yi geçer.
 export type {
@@ -24,11 +33,19 @@ export type {
 } from "@helm/api";
 
 export function useAcquisition(projectId?: string) {
-  return useQuery(acquisitionQueryOptions(supabase, projectId));
+  const lens = useDemoLens();
+  return useQuery({
+    ...acquisitionQueryOptions(supabase, projectId),
+    select: useCallback((d: AcquisitionData) => lensAcquisition(d, lens), [lens]),
+  });
 }
 
 export function useFunnel(projectId?: string) {
-  return useQuery(funnelQueryOptions(supabase, projectId));
+  const lens = useDemoLens();
+  return useQuery({
+    ...funnelQueryOptions(supabase, projectId),
+    select: useCallback((d: FunnelData) => lensFunnel(d, lens), [lens]),
+  });
 }
 
 export function useRetention(projectId?: string) {
@@ -36,9 +53,17 @@ export function useRetention(projectId?: string) {
 }
 
 export function useOsBreakdown(projectId?: string) {
-  return useQuery(osBreakdownQueryOptions(supabase, projectId));
+  const lens = useDemoLens();
+  return useQuery({
+    ...osBreakdownQueryOptions(supabase, projectId),
+    select: useCallback((d: OsData) => lensOsBreakdown(d, lens), [lens]),
+  });
 }
 
 export function useGeoBreakdown(projectId?: string) {
-  return useQuery(geoBreakdownQueryOptions(supabase, projectId));
+  const lens = useDemoLens();
+  return useQuery({
+    ...geoBreakdownQueryOptions(supabase, projectId),
+    select: useCallback((d: GeoData) => lensGeoBreakdown(d, lens), [lens]),
+  });
 }

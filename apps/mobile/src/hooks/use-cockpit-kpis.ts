@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   cockpitKpisQueryOptions,
@@ -7,6 +8,8 @@ import {
 
 import { supabase } from "~/lib/supabase";
 import { usePreferences } from "~/lib/preferences";
+import { lensCockpitKpis, useDemoLens } from "~/lib/demo";
+import type { CockpitKpis as CockpitKpisShape } from "@helm/api";
 
 // Fetch + queryOptions @helm/api / @helm/queries'e taşındı; bu hook'lar
 // sadece client + selectedPropertyId enjekte eder (web ile tek kaynak).
@@ -16,7 +19,11 @@ type QueryGate = { enabled?: boolean };
 
 export function useCockpitKpis(options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
-  return useQuery(cockpitKpisQueryOptions(supabase, selectedPropertyId, options));
+  const lens = useDemoLens();
+  return useQuery({
+    ...cockpitKpisQueryOptions(supabase, selectedPropertyId, options),
+    select: useCallback((d: CockpitKpisShape) => lensCockpitKpis(d, lens), [lens]),
+  });
 }
 
 export function useMrrSpark(options: QueryGate = {}) {

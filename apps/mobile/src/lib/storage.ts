@@ -28,6 +28,7 @@ export const PREF_KEYS = {
   themeMode: "pref.themeMode",
   accent: "pref.accent",
   language: "pref.language",
+  maskNames: "pref.maskNames",
 } as const;
 
 // Time:  O(n) preference key count; Space: O(n) for cache entries.

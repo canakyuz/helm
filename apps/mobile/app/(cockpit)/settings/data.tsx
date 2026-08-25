@@ -24,7 +24,8 @@ export default function DataSettings() {
   const router = useRouter();
   const { theme } = useTheme();
   const t = useT();
-  const { currency, revenueMultiplier, prioritizeRevenueRequests } = usePreferences();
+  const { currency, revenueMultiplier, prioritizeRevenueRequests, maskNames } =
+    usePreferences();
   const goal = useRevenueGoal();
   const setGoal = useSetRevenueGoal();
 
@@ -109,6 +110,27 @@ export default function DataSettings() {
                 divider
                 onPress={promptMultiplier}
                 value={`×${revenueMultiplier}`}
+              />
+              {/* Çarpanın hemen altında, çünkü ikisi aynı işi görüyor: ekran
+                  görüntüsünü paylaşılabilir hale getirmek. Ama AYRI anahtarlar -
+                  çarpanı 1'de bırakıp yalnızca portföyü gizlemek meşru bir
+                  kombinasyon (gerçek büyüklüğü göster, hangi projeler olduğunu
+                  gösterme). Bkz. preferences.ts → maskNames. */}
+              <Row
+                label={t("Proje adlarını gizle")}
+                sub={t("ekran görüntüsü için takma ad")}
+                divider
+                right={
+                  <Toggle
+                    on={maskNames}
+                    offColor={theme.tile2}
+                    onColor={theme.accent}
+                    onChange={(v) => {
+                      haptic.tap();
+                      preferences.setMaskNames(v);
+                    }}
+                  />
+                }
               />
               <Row
                 label={t("Gelir önceliği")}

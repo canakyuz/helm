@@ -57,6 +57,8 @@ const EN: Record<string, string> = {
   "Aylık gelir hedefi": "Monthly revenue goal",
   "Belirle": "Set",
   "Gelir çarpanı": "Revenue multiplier",
+  "Proje adlarını gizle": "Mask project names",
+  "ekran görüntüsü için takma ad": "aliases for screenshots",
   "yalnızca yerel gösterim": "local display only",
   "Gelir önceliği": "Revenue priority",
   "gelir sorgusu önce yüklensin": "load the revenue query first",

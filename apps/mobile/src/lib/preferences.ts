@@ -30,6 +30,15 @@ export type Preferences = {
   themeMode: ThemeMode;
   accent: Accent;
   language: Language;
+  /**
+   * Proje ve marka adlarini takma adla degistir - ekran goruntusu modu.
+   *
+   * NEDEN CARPANDAN AYRI BIR ANAHTAR: `revenueMultiplier` bir OLCEK, bu bir
+   * MASKE. Ikisini tek anahtara baglamak "carpani 1 birak ama adlari gizle"
+   * kombinasyonunu imkansiz kilardi - LinkedIn gorselinde gercek buyuklugu
+   * gostermek isteyip sadece portfoyu gizlemek mesru bir istek.
+   */
+  maskNames: boolean;
 };
 
 const KEYS = PREF_KEYS;
@@ -42,6 +51,7 @@ const DEFAULTS: Preferences = {
   themeMode: "system",
   accent: DEFAULT_ACCENT,
   language: "tr",
+  maskNames: false,
 };
 
 const MIN_REVENUE_MULTIPLIER = 1;
@@ -72,6 +82,7 @@ function readLanguage(): Language {
 
 function readCurrent(): Preferences {
   const prioritizeRevenueRequests = storage.getString(KEYS.prioritizeRevenueRequests);
+  const maskNames = storage.getString(KEYS.maskNames);
 
   return {
     themeMode: readThemeMode(),
@@ -89,6 +100,7 @@ function readCurrent(): Preferences {
       prioritizeRevenueRequests == null
         ? DEFAULTS.prioritizeRevenueRequests
         : prioritizeRevenueRequests === "true",
+    maskNames: maskNames === "true",
   };
 }
 
@@ -137,6 +149,9 @@ export const preferences = {
       KEYS.revenueMultiplier,
       String(normalizeRevenueMultiplier(multiplier)),
     );
+  },
+  setMaskNames(enabled: boolean) {
+    storage.set(KEYS.maskNames, String(enabled));
   },
   setPrioritizeRevenueRequests(enabled: boolean) {
     storage.set(KEYS.prioritizeRevenueRequests, String(enabled));

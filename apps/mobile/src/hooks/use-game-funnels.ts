@@ -1,7 +1,10 @@
+import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { gameFunnelsQueryOptions } from "@helm/queries";
 
 import { supabase } from "~/lib/supabase";
+import { lensGameFunnels, useDemoLens } from "~/lib/demo";
+import type { GameFunnels } from "@helm/api";
 import { usePreferences } from "~/lib/preferences";
 
 type QueryGate = { enabled?: boolean };
@@ -14,5 +17,9 @@ type QueryGate = { enabled?: boolean };
  */
 export function useGameFunnels(days = 30, options: QueryGate = {}) {
   const { selectedPropertyId } = usePreferences();
-  return useQuery(gameFunnelsQueryOptions(supabase, selectedPropertyId, days, options));
+  const lens = useDemoLens();
+  return useQuery({
+    ...gameFunnelsQueryOptions(supabase, selectedPropertyId, days, options),
+    select: useCallback((d: GameFunnels) => lensGameFunnels(d, lens), [lens]),
+  });
 }
