@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import {
   Ban,
   BellRing,
@@ -97,6 +97,7 @@ type SortDir = "asc" | "desc";
 type Tab = "all" | "new" | "active" | "inactive" | "banned" | "premium";
 
 const PAGE = 25;
+const TABS: Tab[] = ["all", "new", "active", "inactive", "banned", "premium"];
 const NEW_DAYS = 7;
 const ACTIVE_DAYS = 7;
 const INACTIVE_DAYS = 30;
@@ -175,7 +176,27 @@ export const UsersPage = () => {
     : null;
 
   const [q, setQ] = useState("");
-  const [tab, setTab] = useState<Tab>("all");
+  // Tab ve gun esigi URL'den okunur: segment sayfasindan drill-down
+  // (/users?tab=inactive&days=60) ve paylasilabilir/geri-tuslu filtre icin.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get("tab");
+  const tab: Tab = TABS.includes(urlTab as Tab) ? (urlTab as Tab) : "all";
+  const setTab = (next: Tab) => {
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        if (next === "all") p.delete("tab");
+        else p.set("tab", next);
+        // Gun esigi yalnizca onu getiren tab icin anlamli.
+        p.delete("days");
+        return p;
+      },
+      { replace: true },
+    );
+  };
+  const urlDays = Number(searchParams.get("days"));
+  const daysOverride =
+    Number.isFinite(urlDays) && urlDays > 0 ? urlDays : null;
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(0);
@@ -276,16 +297,20 @@ export const UsersPage = () => {
         ? new Date(u.last_sign_in_at).getTime()
         : 0;
       const created = new Date(u.created_at).getTime();
-      if (tab === "new") return created >= nowMs - NEW_DAYS * 86_400_000;
+      if (tab === "new")
+        return created >= nowMs - (daysOverride ?? NEW_DAYS) * 86_400_000;
       if (tab === "active")
-        return lastSign >= nowMs - ACTIVE_DAYS * 86_400_000;
+        return lastSign >= nowMs - (daysOverride ?? ACTIVE_DAYS) * 86_400_000;
       if (tab === "inactive")
-        return !u.last_sign_in_at || lastSign < nowMs - INACTIVE_DAYS * 86_400_000;
+        return (
+          !u.last_sign_in_at ||
+          lastSign < nowMs - (daysOverride ?? INACTIVE_DAYS) * 86_400_000
+        );
       if (tab === "banned") return u.banned;
       if (tab === "premium") return u.premium;
       return true;
     });
-  }, [users, tab]);
+  }, [users, tab, daysOverride]);
 
   // Arama + sıralama
   const filtered = useMemo(() => {
@@ -396,7 +421,7 @@ export const UsersPage = () => {
             <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
               <TabsList>
                 {(
-                  ["all", "new", "active", "inactive", "banned", "premium"] as Tab[]
+                  TABS
                 ).map((t) => (
                   <TabsTrigger key={t} value={t}>
                     {tabIcon(t)}

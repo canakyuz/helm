@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useCreate, useDelete, useList } from "@refinedev/core";
 import { ExternalLink, Layers, Plus, Trash2, UserCheck, Users } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
@@ -70,6 +70,7 @@ interface CountResult {
 }
 
 export const SegmentsPage = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [projectId, setProjectId] = useState("all");
@@ -380,7 +381,18 @@ export const SegmentsPage = () => {
                 {segments.map((s) => {
                   const c = counts[s.id];
                   return (
-                    <TableRow key={s.id}>
+                    <TableRow
+                      key={s.id}
+                      className="cursor-pointer"
+                      // Drill-down: segment kurali users sayfasinin tab +
+                      // gun esigiyle birebir ortusuyor.
+                      onClick={() =>
+                        navigate(
+                          `/users?tab=${s.rule_type}&days=${s.rule_days}`,
+                        )
+                      }
+                      title={`${s.name} - eslesen kullanicilari ac`}
+                    >
                       <TableCell className="font-medium">{s.name}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {projectName(s.project_id)}
@@ -403,7 +415,12 @@ export const SegmentsPage = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="flex justify-end gap-1">
+                        <div
+                          className="flex justify-end gap-1"
+                          // Satir tiklamasi drill-down'a gidiyor; buradaki
+                          // aksiyonlar onu tetiklememeli.
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Button
                             variant="ghost"
                             size="icon-sm"
