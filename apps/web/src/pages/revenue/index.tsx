@@ -18,6 +18,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { RangeSelect } from "@/components/range-select";
+import { LiveFeed } from "@/components/revenue/live-feed";
 import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
 import { useScope } from "@/context/scope";
@@ -349,6 +350,9 @@ export const RevenuePage = () => {
               />
             </CardContent>
           </Card>
+          {/* Metrics T-1 gecikmeli; bu kart RevenueCat webhook'undan "az once
+              ne oldu"yu gosterir. Toplamlarla toplanmaz - cift sayim olur. */}
+          <LiveFeed />
         </TabsContent>
 
         <TabsContent value="ads" className="space-y-4">
