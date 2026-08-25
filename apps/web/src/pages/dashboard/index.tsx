@@ -496,7 +496,7 @@ export const DashboardPage = () => {
       )}
 
       {/* ════════ KPI + BAR CHART (sol) · LATEST UPDATES (sağ ray) ════════ */}
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex min-w-0 flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-3">
             <KpiCard
@@ -566,9 +566,10 @@ export const DashboardPage = () => {
         <LatestUpdates
           alerts={alertsResult.data}
           runs={runsResult.data.slice(0, 20)}
-          // Kart kendi icerigi kadar: sabit yukseklik verilirse az aktivite
-          // oldugunda kartin ICINDE olu bosluk kaliyordu.
-          className="flex flex-col"
+          // Sol sutunla ayni hizada bitsin; ic liste flex-1 + overflow-y-auto
+          // ile kendi icinde kayar. Sol sutun her zaman daha uzun oldugu icin
+          // satir yuksekligini o belirler, ray sismez.
+          className="flex min-h-0 flex-col xl:h-full"
         />
       </div>
 
