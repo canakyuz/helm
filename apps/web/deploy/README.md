@@ -31,14 +31,19 @@ EOF
 
 Bu dosya `.gitignore` kapsamındadır; sunucu adresi commit'e girmez.
 
+Repo kökünden tek güvenli deploy komutunu çalıştır:
+
 ```bash
-./deploy/deploy.sh
+bun run deploy:web
 ```
 
 Build lokal yapılır, hedef klasörün varlığı/yazma izni doğrulanır ve `dist/`
 `rsync --delete` ile senkronlanır. `apps/web/.env`'de
 `VITE_HELM_SUPABASE_URL` + `VITE_HELM_SUPABASE_ANON_KEY` dolu olmalı (bunlar
 dist'e gömülür - public anon key, RLS korumalı).
+
+Repo kökündeki `dist/` deploy kaynağı değildir. Manuel `rsync --delete`
+kullanma; script boş veya eksik build çıktısını sunucuya göndermeden durur.
 
 ## 5. Supabase kilidi (kuşak+askı)
 - Supabase Dashboard → Auth → **public signup KAPALI**, sadece kendi email'ine magic link.

@@ -48,6 +48,12 @@ echo "→ build (VITE_* anahtarları .env'den gömülür; SERVICE_ROLE gömülme
 bun install --frozen-lockfile
 bun run build
 
+FIRST_ASSET="$(find dist/assets -type f -print -quit 2>/dev/null || true)"
+if [[ ! -s dist/index.html || -z "$FIRST_ASSET" ]]; then
+  echo "Hata: build çıktısı eksik; boş dist ile deploy reddedildi."
+  exit 1
+fi
+
 echo "→ hedef klasör ve yazma izni kontrol ediliyor"
 ssh "$SSH_TARGET" "test -d '$REMOTE_DIR' && test -w '$REMOTE_DIR'"
 

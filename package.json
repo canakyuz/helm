@@ -10,7 +10,8 @@
     "react-dom": "19.2.3"
   },
   "scripts": {
-    "build": "bun run --filter '*' build",
+    "build": "bun run --cwd apps/web build",
+    "deploy:web": "bash apps/web/deploy/deploy.sh",
     "typecheck": "bun run --filter '*' typecheck",
     "gen:types": "supabase gen types typescript --project-id $HELM_SUPABASE_PROJECT_ID --schema public > packages/types/src/database.ts",
     "db:push": "supabase db push",
