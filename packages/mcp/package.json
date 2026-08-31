@@ -1,0 +1,20 @@
+{
+  "name": "@helm/mcp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": { "helm-mcp": "./src/index.ts" },
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@helm/api": "workspace:*",
+    "@helm/domain": "workspace:*",
+    "@helm/types": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@supabase/supabase-js": "^2.106.2",
+    "zod": "^4.4.3"
+  }
+}
