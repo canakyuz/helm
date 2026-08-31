@@ -68,8 +68,10 @@ gen-types: require-token ## Supabase schema → packages/types/src/database.ts
 # NEDEN require-token YOK: bu hedef Management API'ye hiç gitmiyor, doğrudan
 # Postgres'e bağlanıyor. Token'ı şart koşmak, gereği olmayan bir engelde
 # durdurup "yetki sorunu var" sanısı yaratıyordu. Kendi ön koşulu DB URL'i.
+# @ ile: make komutu olduğu gibi ekrana yazar, HELM_DB_URL de DB şifresini
+# taşır. Şifre terminale, oradan da scrollback'e / CI log'una düşmesin.
 db-push: require-db-url ## migration'ları remote'a uygula
-	supabase db push --db-url "$(HELM_DB_URL)"
+	@supabase db push --db-url "$(HELM_DB_URL)"
 
 require-db-url:
 	@test -n "$(HELM_DB_URL)" || { \
