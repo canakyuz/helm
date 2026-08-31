@@ -12,6 +12,20 @@ talk to the **same Supabase hub**.
 > One product, two shells, a shared data layer - not one UI stretched across two
 > screens. See [ADR-001](./docs/architecture/decisions/001-monorepo-shared-packages.md).
 
+## Screenshots
+
+| Overview | Revenue | Users | Health |
+|:---:|:---:|:---:|:---:|
+| ![Overview](docs/assets/screens/overview.webp) | ![Revenue](docs/assets/screens/revenue.webp) | ![Users](docs/assets/screens/users.webp) | ![Health](docs/assets/screens/health.webp) |
+
+| Home screen widget | Sources |
+|:---:|:---:|
+| ![Widget](docs/assets/screens/widget.webp) | ![Sources](docs/assets/screens/sources.webp) |
+
+The Health tab includes a **measurement suspect** panel: it flags malformed event
+reporting (more session ends than starts, funnels with missing start events)
+instead of charting bad data as truth.
+
 ## Layout
 
 ```
