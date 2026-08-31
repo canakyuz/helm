@@ -93,7 +93,7 @@ packages/config/
 
 ```bash
 cd helm
-export HELM_SUPABASE_PROJECT_ID=mqiwgorivtglnjbwhkve  # .env'den
+export HELM_SUPABASE_PROJECT_ID=<your-project-ref>  # .env'den
 bun run gen:types
 ```
 

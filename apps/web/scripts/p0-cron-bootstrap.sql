@@ -11,10 +11,10 @@
 -- cron job'unu (varsa) silip yeniden kurar.
 
 -- Hub URL (helm'in kendisi - bu dosya hub repo'sundaki helm projesi için):
---   https://mqiwgorivtglnjbwhkve.supabase.co
+--   https://YOUR_PROJECT_REF.supabase.co
 do $$
 declare
-  v_url constant text := 'https://mqiwgorivtglnjbwhkve.supabase.co';
+  v_url constant text := 'https://YOUR_PROJECT_REF.supabase.co';
   v_srk constant text := '<SERVICE_ROLE_KEY>';
   v_existing uuid;
 begin
@@ -79,7 +79,7 @@ order by name;
 
 -- (Opsiyonel) hemen bir kez tetikle - gece beklemeden test:
 -- select net.http_post(
---   url := 'https://mqiwgorivtglnjbwhkve.supabase.co/functions/v1/helm-ingest',
+--   url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/helm-ingest',
 --   headers := jsonb_build_object(
 --     'Content-Type', 'application/json',
 --     'Authorization', 'Bearer ' || (

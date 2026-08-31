@@ -28,7 +28,7 @@ Bu Faz 0'ın hedefi: kod TAŞIMADAN iskelet kur. İki app aynen eskisi gibi buil
 | `priv/helm-mobile/` | Expo app | branch `feat/liquid-glass-overview`, **~12 kirli dosya** | taşımadan önce commit/stash ŞART |
 
 Doğrulanmış gerçekler:
-- Supabase project id: **`mqiwgorivtglnjbwhkve`** (remote, deploy edilmiş - migration 0030/0031 uygulandı).
+- Supabase project id: **`<your-project-ref>`** (remote, deploy edilmiş - migration 0030/0031 uygulandı).
 - **Gerçek tipler zaten üretildi:** `helm-mobile/src/types/database.ts` (1226 satır, `gen:types` çıktısı). Bu, `packages/types`'ın kaynağı olacak.
 - Mobile config: `metro.config.js` `withNativeWind` ile sarılı; `babel.config.js` `babel-preset-expo`+`nativewind/babel`+`react-native-worklets/plugin`; tsconfig alias `~/* → ./src/*`; `main: expo-router/entry`.
 - Web: Refine + Vite, `supabase/` CLI projesi web repo'sunun içinde.
@@ -106,7 +106,7 @@ mkdir -p apps packages
 ### 4.2 - `.env` taşı/birleştir
 Web ve mobile `.env`'lerini root'a topla. Gerekli anahtarlar:
 ```
-HELM_SUPABASE_PROJECT_ID=mqiwgorivtglnjbwhkve
+HELM_SUPABASE_PROJECT_ID=<your-project-ref>
 # web (Vite):    VITE_HELM_SUPABASE_URL, VITE_HELM_SUPABASE_ANON_KEY
 # mobile (Expo): EXPO_PUBLIC_HELM_SUPABASE_URL, EXPO_PUBLIC_HELM_SUPABASE_ANON_KEY
 # ANON_KEY değeri yeni format olmalı (sb_publishable_...). Legacy JWT anon key 2026-08-17'de kapatıldı → "Legacy API keys are disabled" (401).
