@@ -34,3 +34,6 @@ supabase/.temp/cli-latest
 # Supabase CLI state (contains project ref + org id)
 supabase/.temp/
 **/supabase/.temp/
+
+# local launch assets (large binaries, personal)
+marketing/
