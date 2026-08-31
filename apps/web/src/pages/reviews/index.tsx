@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { type CrudFilter, useInvalidate, useList } from "@refinedev/core";
+import { useQueryClient } from "@tanstack/react-query";
+import { reviewsKeys } from "@helm/queries";
 import {
   ChevronLeft,
   ChevronRight,
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { StatCard } from "@/components/stat-card";
 import { supabaseClient } from "@/providers/supabase-client";
+import { useReviewStats } from "@/hooks/use-review-stats";
 import { useScope } from "@/context/scope";
 import type { Project, Review } from "@/types";
 import { ReplyModal } from "./reply-modal";
@@ -45,6 +48,7 @@ const starColor = (r: number | null) => {
 export const ReviewsPage = () => {
   const { scope, isAll } = useScope();
   const invalidate = useInvalidate();
+  const queryClient = useQueryClient();
   // Yanit gonderildikten sonra liste (pagination: off) bastan cekiliyor;
   // kullanici o sureyi beklemesin diye gonderilen metni yerel olarak ustte
   // gosteriyoruz. Gercek veri gelince developer_response dolu olur ve bu
@@ -54,6 +58,7 @@ export const ReviewsPage = () => {
   );
   const [refreshing, setRefreshing] = useState(false);
   const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
 
@@ -62,17 +67,43 @@ export const ReviewsPage = () => {
   // A) Platform state
   const [platform, setPlatform] = useState<"all" | "appstore" | "playstore">("all");
 
+  // Arama artik sunucuya gidiyor - her tusa bir sorgu atmamak icin geciktir.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(q.trim()), 300);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  // Filtrelerin TAMAMI sorguda: PostgREST max_rows = 1000, yani "hepsini cek,
+  // tarayicida filtrele" yaklasimi portfoy buyudugunde listeyi sessizce keser.
   const filters: CrudFilter[] = [];
   if (!isAll) {
     filters.push({ field: "project_id", operator: "eq", value: scope });
   }
+  if (platform !== "all") {
+    filters.push({ field: "source", operator: "eq", value: platform });
+  }
+  if (ratingFilter !== "all") {
+    filters.push({ field: "rating", operator: "eq", value: Number(ratingFilter) });
+  }
+  if (debouncedQ) {
+    filters.push({
+      operator: "or",
+      value: [
+        { field: "title", operator: "contains", value: debouncedQ },
+        { field: "body", operator: "contains", value: debouncedQ },
+        { field: "author", operator: "contains", value: debouncedQ },
+      ],
+    });
+  }
+
   const { result, query } = useList<Review>({
     resource: "reviews",
     filters,
     sorters: [{ field: "review_date", order: "desc" }],
-    pagination: { mode: "off" },
+    pagination: { currentPage: page + 1, pageSize: PAGE, mode: "server" },
   });
   const reviews = result.data;
+  const totalCount = result.total ?? 0;
 
   const { result: projResult } = useList<Project>({
     resource: "projects",
@@ -81,60 +112,42 @@ export const ReviewsPage = () => {
   const projectName = (id: string) =>
     projResult.data.find((p) => p.id === id)?.name ?? "-";
 
-  // A) platformFiltered
-  const platformFiltered = useMemo(
-    () => (platform === "all" ? reviews : reviews.filter((r) => r.source === platform)),
-    [reviews, platform],
-  );
+  // Ozet DB'de toplanir (helm_review_stats). Listeden hesaplanmiyor: liste
+  // artik yalnizca gorunen sayfayi tasiyor, ustelik 1000 tavani da var.
+  const statsQuery = useReviewStats();
+  const stats = statsQuery.data;
+  const scoped = stats
+    ? platform === "all"
+      ? stats.all
+      : stats[platform]
+    : undefined;
 
-  // B) rated / avg / distribution - all from platformFiltered
-  const rated = platformFiltered.filter((r) => r.rating != null);
-  const avg = rated.length
-    ? rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length
-    : 0;
+  const avg = scoped?.average ?? 0;
+  const ratedCount = scoped?.rated ?? 0;
+  const scopedTotal = scoped?.total ?? 0;
 
   const distribution = useMemo(() => {
     const d = [0, 0, 0, 0, 0]; // 1..5
-    for (const r of rated) {
-      const idx = Math.min(5, Math.max(1, r.rating ?? 0)) - 1;
-      d[idx]++;
-    }
+    if (!scoped) return d;
+    for (const star of [1, 2, 3, 4, 5] as const) d[star - 1] = scoped.distribution[star];
     return d;
-  }, [rated]);
+  }, [scoped]);
   const distMax = Math.max(1, ...distribution);
 
-  // C) iOS + Android avg - always from full reviews, platform-filter independent
-  const iosRated = reviews.filter((r) => r.source === "appstore" && r.rating != null);
-  const androidRated = reviews.filter((r) => r.source === "playstore" && r.rating != null);
-  const iosAvg = iosRated.length
-    ? iosRated.reduce((s, r) => s + (r.rating ?? 0), 0) / iosRated.length
-    : 0;
-  const androidAvg = androidRated.length
-    ? androidRated.reduce((s, r) => s + (r.rating ?? 0), 0) / androidRated.length
-    : 0;
+  const iosAvg = stats?.appstore.average ?? 0;
+  const androidAvg = stats?.playstore.average ?? 0;
+  const platformTotals = {
+    all: stats?.all.total ?? 0,
+    appstore: stats?.appstore.total ?? 0,
+    playstore: stats?.playstore.total ?? 0,
+  };
 
-  // G) filtered - built from platformFiltered
-  const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    return platformFiltered.filter((r) => {
-      if (ratingFilter !== "all" && r.rating !== Number(ratingFilter)) return false;
-      if (needle) {
-        const hay =
-          (r.title ?? "").toLowerCase() +
-          " " +
-          (r.body ?? "").toLowerCase() +
-          " " +
-          (r.author ?? "").toLowerCase();
-        if (!hay.includes(needle)) return false;
-      }
-      return true;
-    });
-  }, [platformFiltered, ratingFilter, q]);
+  const hasFilter =
+    platform !== "all" || ratingFilter !== "all" || debouncedQ.length > 0;
 
-  useEffect(() => setPage(0), [q, ratingFilter, scope, isAll, platform]);
+  useEffect(() => setPage(0), [debouncedQ, ratingFilter, scope, isAll, platform]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE));
-  const pageData = filtered.slice(page * PAGE, (page + 1) * PAGE);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE));
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -148,6 +161,9 @@ export const ReviewsPage = () => {
         description: `${data?.reviews ?? 0} yorum çekildi.`,
       });
       invalidate({ resource: "reviews", invalidates: ["list"] });
+      // Ozet Refine'in disinda, kendi query'sinde duruyor - yeni yorumlar
+      // gelince onun da tazelenmesi gerekir.
+      queryClient.invalidateQueries({ queryKey: reviewsKeys.stats(isAll ? "all" : scope) });
     } catch (e) {
       toast.error("Güncelleme başarısız", {
         description: e instanceof Error ? e.message : String(e),
@@ -175,27 +191,27 @@ export const ReviewsPage = () => {
           title="Genel Ortalama"
           value={avg ? `${avg.toFixed(2)} / 5` : "-"}
           icon={<Star />}
-          loading={query.isLoading}
+          loading={statsQuery.isLoading}
         />
         <StatCard
           title="iOS Ortalama"
           value={iosAvg ? `${iosAvg.toFixed(2)}` : "-"}
-          loading={query.isLoading}
+          loading={statsQuery.isLoading}
         />
         <StatCard
           title="Android Ortalama"
           value={androidAvg ? `${androidAvg.toFixed(2)}` : "-"}
-          loading={query.isLoading}
+          loading={statsQuery.isLoading}
         />
         <StatCard
           title="Toplam yorum"
-          value={platformFiltered.length}
-          loading={query.isLoading}
+          value={scopedTotal}
+          loading={statsQuery.isLoading}
         />
         <StatCard
           title="Negatif (1-2★)"
           value={distribution[0] + distribution[1]}
-          loading={query.isLoading}
+          loading={statsQuery.isLoading}
         />
       </div>
 
@@ -209,9 +225,7 @@ export const ReviewsPage = () => {
             onClick={() => setPlatform(p)}
           >
             {p === "all" ? "Tümü" : p === "appstore" ? "iOS" : "Android"}
-            <span className="ml-2 text-xs opacity-70">
-              {p === "all" ? reviews.length : reviews.filter((r) => r.source === p).length}
-            </span>
+            <span className="ml-2 text-xs opacity-70">{platformTotals[p]}</span>
           </Button>
         ))}
       </div>
@@ -223,7 +237,7 @@ export const ReviewsPage = () => {
         <CardContent className="space-y-2">
           {[5, 4, 3, 2, 1].map((r) => {
             const count = distribution[r - 1];
-            const pct = rated.length > 0 ? (count / rated.length) * 100 : 0;
+            const pct = ratedCount > 0 ? (count / ratedCount) * 100 : 0;
             const widthPct = (count / distMax) * 100;
             return (
               <div key={r} className="flex items-center gap-3 text-sm">
@@ -288,25 +302,21 @@ export const ReviewsPage = () => {
             <PageStatus tone="loading" label="Yorumlar yükleniyor…" />
           ) : query.isError ? (
             <PageStatus tone="error" label="Yorumlar yüklenemedi - tekrar dene" />
-          ) : filtered.length === 0 ? (
+          ) : totalCount === 0 ? (
             <EmptyState
               icon={<MessageSquare className="size-6" />}
-              title={
-                reviews.length === 0
-                  ? "Henüz yorum yok"
-                  : "Filtreye uyan kayıt yok"
-              }
+              title={hasFilter ? "Filtreye uyan kayıt yok" : "Henüz yorum yok"}
               description={
-                reviews.length === 0
-                  ? "Property → Düzenle → App Store ID / Package ID gir, sonra Ayarlar → Entegrasyonlar → App Store Connect veya Google Play Developer bağla. Cron 30 dakikada bir çeker; hemen istiyorsan Yenile'yi kullan."
-                  : "Filtreyi gevşet veya aramayı değiştir."
+                hasFilter
+                  ? "Filtreyi gevşet veya aramayı değiştir."
+                  : "Property → Düzenle → App Store ID / Package ID gir, sonra Ayarlar → Entegrasyonlar → App Store Connect veya Google Play Developer bağla. Cron 30 dakikada bir çeker; hemen istiyorsan Yenile'yi kullan."
               }
               compact
             />
           ) : (
             <>
               <div className="divide-y">
-                {pageData.map((r) => (
+                {reviews.map((r) => (
                   <div key={r.id} className="py-3 first:pt-0 last:pb-0">
                     <div className="flex items-baseline justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -388,11 +398,9 @@ export const ReviewsPage = () => {
 
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
-                  {page * PAGE + 1}–
-                  {Math.min(filtered.length, (page + 1) * PAGE)} /{" "}
-                  {filtered.length}
-                  {reviews.length !== filtered.length &&
-                    ` (toplam ${reviews.length})`}
+                  {page * PAGE + 1}–{Math.min(totalCount, (page + 1) * PAGE)} /{" "}
+                  {totalCount}
+                  {hasFilter && ` (toplam ${platformTotals.all})`}
                 </span>
                 <div className="flex items-center gap-1">
                   <Button

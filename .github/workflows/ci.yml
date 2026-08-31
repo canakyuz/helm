@@ -55,6 +55,11 @@ jobs:
       - name: Tests
         run: cd apps/mobile && bun test
 
+      # Paylasilan katmanin testleri de kosmali - @helm/api'deki yorum ozeti
+      # gibi saf hesaplar burada yasiyor.
+      - name: Tests (packages)
+        run: cd packages/api && bun test
+
   lint:
     name: Lint (mobile)
     runs-on: ubuntu-latest
