@@ -1,5 +1,9 @@
 # Helm
 
+<p align="center">
+  <img src="docs/assets/readme-hero.webp" alt="Helm mobile app - portfolio overview, revenue breakdown, user analytics and health screens" width="100%">
+</p>
+
 An indie founder's **portfolio operations hub** - revenue, users, crashes and
 reviews for every app you ship, in one place. A web console (setup and deep
 admin) and a mobile app (KPIs, alerts and an iOS widget in your pocket) both
