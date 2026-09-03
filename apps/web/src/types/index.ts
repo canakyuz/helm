@@ -232,3 +232,29 @@ export const PROVIDER_LABELS: Record<ProviderName, string> = {
   resend: "Resend (Mail)",
   google_play_developer: "Google Play Developer",
 };
+
+/**
+ * Banka odemesi. Tutar KAYNAK para biriminde durur; gosterim para birimine
+ * cevrimi okuma aninda canli kurla yapilir (lib/fx). Cevrilmis tutar tabloda
+ * SAKLANMAZ - sabitlenen kur haftalar icinde sessizce bayatlar.
+ */
+export interface Payout {
+  id: string;
+  project_id: string | null;
+  source: string;
+  amount: number;
+  currency: string;
+  status: string;
+  /** Kazancin ait oldugu donem (YYYY-MM); odeme tarihinden ayridir. */
+  period: string | null;
+  /** Odeme penceresinin basi. */
+  arrival_date: string | null;
+  /** Pencerenin bitisi; null ise tek gun. */
+  arrival_end: string | null;
+  /** 'sync' = konnektor yazdi, 'manual' = elle girilmis tahmin. */
+  entry_source: string;
+  note: string | null;
+  gross: number | null;
+  fees: number | null;
+  created_at: string;
+}

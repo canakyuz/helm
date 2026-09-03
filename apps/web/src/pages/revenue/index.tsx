@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tabs";
 import { RangeSelect } from "@/components/range-select";
 import { LiveFeed } from "@/components/revenue/live-feed";
+import { PayoutsCard } from "@/components/revenue/payouts-card";
 import { StatCard } from "@/components/stat-card";
 import { TrendChart } from "@/components/trend-chart";
 import { useScope } from "@/context/scope";
@@ -532,6 +533,11 @@ export const RevenuePage = () => {
           </TabsContent>
         )}
       </Tabs>
+
+      {/* Sekmelerin DISINDA: banka odemesi tek bir gelir kaynaginin alt kumesi
+          degil - abonelik, reklam ve magaza gelirinin ortak cikisi. Bir sekmeye
+          gomulseydi digerlerinde yokmus gibi gorunurdu. */}
+      <PayoutsCard />
     </div>
   );
 };
