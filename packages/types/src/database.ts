@@ -677,11 +677,15 @@ export type Database = {
         Row: {
           amount: number
           arrival_date: string | null
+          arrival_end: string | null
           created_at: string
           currency: string
+          entry_source: string
           fees: number | null
           gross: number | null
           id: string
+          note: string | null
+          period: string | null
           project_id: string | null
           source: string
           status: string
@@ -689,11 +693,15 @@ export type Database = {
         Insert: {
           amount: number
           arrival_date?: string | null
+          arrival_end?: string | null
           created_at?: string
           currency?: string
+          entry_source?: string
           fees?: number | null
           gross?: number | null
           id: string
+          note?: string | null
+          period?: string | null
           project_id?: string | null
           source: string
           status: string
@@ -701,11 +709,15 @@ export type Database = {
         Update: {
           amount?: number
           arrival_date?: string | null
+          arrival_end?: string | null
           created_at?: string
           currency?: string
+          entry_source?: string
           fees?: number | null
           gross?: number | null
           id?: string
+          note?: string | null
+          period?: string | null
           project_id?: string | null
           source?: string
           status?: string

@@ -21,7 +21,12 @@ import { monthLabel, MONTHS_SHORT, localToday } from "~/lib/labels";
 import { useTheme } from "~/theme/use-theme";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
-import { AdEconomicsTile, PaymentsTile, ReconciliationTile } from "~/components/revenue";
+import {
+  AdEconomicsTile,
+  PaymentsTile,
+  PayoutsTile,
+  ReconciliationTile,
+} from "~/components/revenue";
 import { tr, useT } from "~/lib/i18n";
 import {
   ScreenGround,
@@ -114,6 +119,10 @@ export default function Revenue() {
   // Reklam kirilimi SECILI DONEMI izler - sabit "son 7 gun" degil. Kova
   // yoksa bos aralik gecer ve hook istek atmaz.
   const ads = useAdEconomics(picked?.start ?? "", picked?.end ?? "");
+
+  // Banka odemeleri donemden BAGIMSIZ: secili ay Haziran olsa da parasi
+  // Eylul'de yatar. Bu yuzden `picked`e baglanmiyor.
+  const payouts = usePayouts(projectId, { enabled: ready });
 
   const handleRefresh = () => {
     void onRefresh().then(() => setReplayKey((k) => k + 1));
@@ -326,6 +335,20 @@ export default function Revenue() {
               fmt={fmt}
             />
           </Rise>
+
+          {/* Paranin BANKAYA gectigi an - PaymentsTile'daki islem gelirinden
+              haftalar sonra olabilir. Entegrasyon yoksa ve elle girilmis
+              tahmin de yoksa kart cizilmez; bos kutu her ekranda gurultu. */}
+          {payouts.data != null || payouts.isLoading ? (
+            <Rise index={8} replayKey={replayKey}>
+              <PayoutsTile
+                pending={payouts.data?.pending ?? []}
+                recent={payouts.data?.recent ?? []}
+                loading={payouts.isLoading}
+                fmt={fmt}
+              />
+            </Rise>
+          ) : null}
         </ScrollView>
       </SafeAreaView>
     </ScreenGround>

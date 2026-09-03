@@ -32,15 +32,34 @@ type PayoutRow = {
   currency: string;
   status: string;
   arrival_date: string | null;
+  entry_source: string;
+  period?: string | null;
 };
-type Pending = { source: string; amount: number; currency: string };
+// `estimated` = satir elle girilmis bir TAHMIN (entry_source='manual'), banka
+// hareketi degil. UI bunu gizlemez - tahmini gerceklesmis odeme gibi gostermek
+// kokpitte en pahali yalan olur.
+type Pending = {
+  source: string;
+  amount: number;
+  currency: string;
+  status?: string;
+  period?: string | null;
+  arrival_date?: string | null;
+  arrival_end?: string | null;
+  estimated?: boolean;
+  note?: string | null;
+};
 type Recent = {
   source: string;
   amount: number;
   currency: string;
   status: string;
   arrival_date: string | null;
+  arrival_end?: string | null;
+  period?: string | null;
   net: number;
+  estimated?: boolean;
+  note?: string | null;
 };
 
 const ymd = (unix: number) => new Date(unix * 1000).toISOString().slice(0, 10);
@@ -73,6 +92,7 @@ async function fetchStripe(projectId: string, secretKey: string) {
     currency: p.currency.toUpperCase(),
     status: p.status,
     arrival_date: ymd(p.arrival_date),
+    entry_source: "sync",
   }));
   const isPending = (s: string) => s === "pending" || s === "in_transit";
   const pending: Pending[] = payouts
@@ -155,6 +175,8 @@ async function fetchAscFinance(
         currency: cur,
         status: "paid",
         arrival_date: arrival,
+        entry_source: "sync",
+        period: month,
       });
       recent.push({
         source: "App Store",
@@ -162,6 +184,7 @@ async function fetchAscFinance(
         currency: cur,
         status: "paid",
         arrival_date: arrival,
+        period: month,
         net: Number(amount.toFixed(2)),
       });
     }
@@ -182,19 +205,40 @@ Deno.serve(async (req) => {
   } catch {
     // gövde yok
   }
-  if (!projectId) return json({ error: "project_id gerekli" }, 400);
+  // project_id asagida .or() icine STRING olarak gomuluyor (PostgREST'in or
+  // filtresi .eq gibi parametrelenmez) → bicim dogrulanmadan gecerse filtre
+  // enjeksiyonuna acik olur. UUID disi her sey burada durur.
+  const UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!projectId || !UUID_RE.test(projectId)) {
+    return json({ error: "gecerli project_id (uuid) gerekli" }, 400);
+  }
 
   const hub = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  const { data: integs } = await hub
-    .from("project_integrations")
-    .select("provider, config")
-    .eq("project_id", projectId)
-    .eq("enabled", true)
-    .in("provider", ["stripe", "app_store_connect"]);
+  // Elle girilen tahminler konnektorden BAGIMSIZ okunur: Apple'in devrettigi
+  // bakiye ya da AdSense odemesi icin bu projede kurulu bir entegrasyon
+  // olmayabilir. project_id null = hesap duzeyi odeme (Apple uygulama basina
+  // degil, HESAP basina oder) → o satirlar her projede gorunur.
+  const [{ data: integs }, { data: manualRows }] = await Promise.all([
+    hub
+      .from("project_integrations")
+      .select("provider, config")
+      .eq("project_id", projectId)
+      .eq("enabled", true)
+      .in("provider", ["stripe", "app_store_connect"]),
+    hub
+      .from("payouts")
+      .select("source, amount, currency, status, arrival_date, arrival_end, period, note")
+      .eq("entry_source", "manual")
+      .or(`project_id.eq.${projectId},project_id.is.null`)
+      .order("arrival_date", { ascending: false })
+      .limit(50),
+  ]);
+  const manual = manualRows ?? [];
 
   const stripeCfg = integs?.find((i) => i.provider === "stripe")?.config as
     | { secret_key?: string }
@@ -203,7 +247,9 @@ Deno.serve(async (req) => {
     | Record<string, string>
     | undefined;
 
-  if (!stripeCfg?.secret_key && !ascCfg?.vendor_number) {
+  // Entegrasyon YOKSA bile elle girilmis tahmin varsa donmeliyiz - yoksa
+  // kullanicinin kendi girdigi veri gorunmez olur.
+  if (!stripeCfg?.secret_key && !ascCfg?.vendor_number && manual.length === 0) {
     return json({ error: "Bu projede Stripe veya App Store Connect entegrasyonu yok" }, 400);
   }
 
@@ -236,7 +282,38 @@ Deno.serve(async (req) => {
     await hub.from("payouts").upsert(allRows, { onConflict: "id" });
   }
 
-  // recent'i tarihe göre (yeni → eski) sırala.
+  // Elle girilen satirlari birlestir. Para henuz bankada degilse "pending"
+  // tarafina duser - 'carried_forward' (esik altinda devretti) dahil: hak
+  // edilmis ama takvimde olmayan para da bekleyen paradir.
+  const NOT_YET_PAID = new Set([
+    "carried_forward",
+    "pending_fiscal_close",
+    "threshold_reached",
+    "pending",
+    "in_transit",
+  ]);
+  for (const r of manual) {
+    const amount = Number(r.amount);
+    const row = {
+      source: r.source,
+      amount,
+      currency: r.currency,
+      status: r.status,
+      period: r.period,
+      arrival_date: r.arrival_date,
+      arrival_end: r.arrival_end,
+      estimated: true,
+      note: r.note,
+    };
+    if (NOT_YET_PAID.has(r.status)) pending.push(row);
+    else recent.push({ ...row, net: amount });
+  }
+
+  // pending: en yakin odeme once (tarihsiz satirlar sona).
+  pending.sort((a, b) =>
+    (a.arrival_date ?? "9999").localeCompare(b.arrival_date ?? "9999")
+  );
+  // recent: yeni → eski.
   recent.sort((a, b) => (a.arrival_date ?? "") < (b.arrival_date ?? "") ? 1 : -1);
 
   return json({ pending, recent: recent.slice(0, 12), ...(errors.length ? { errors } : {}) });
