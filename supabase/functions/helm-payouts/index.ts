@@ -190,7 +190,7 @@ async function fetchAscFinance(
     }
     break; // en yeni veri döneni aldık, yeter
   }
-  return { rows, pending: [] as Pending[], recent };
+  return { rows, pending: [] as Pending[], recent, tried: candidates };
 }
 
 Deno.serve(async (req) => {
@@ -273,6 +273,17 @@ Deno.serve(async (req) => {
       const r = await fetchAscFinance(projectId, ascCfg);
       allRows.push(...r.rows);
       recent.push(...r.recent);
+      // Entegrasyon ACIK ama hicbir sey donmediyse SUS-MA. Bu cagri hata
+      // firlatmaz: financeReports var olmayan bir fiscal ay icin 404 doner ve
+      // dongu sessizce tukenir. Sessiz bos sonuc, kokpitte "gelir yok" ile
+      // "veri gelmiyor"u ayirt edilemez kilar - bu projedeki en pahali hata
+      // turu (bkz. 0041_data_coverage.sql). Gorunur bir uyariya cevriliyor.
+      if (r.rows.length === 0) {
+        errors.push(
+          `App Store Connect finansal raporu bos dondu (vendor ${ascCfg.vendor_number}, denenen donemler: ${r.tried.join(", ")}). ` +
+            `Olasi nedenler: Apple FISCAL takvimi takvim ayiyla ortusmuyor, vendor numarasi hatali, ya da API anahtarinda Finance rolu yok.`,
+        );
+      }
     } catch (e) {
       errors.push(e instanceof Error ? e.message : String(e));
     }
