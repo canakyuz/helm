@@ -30,6 +30,10 @@ Helm'i ticari birleşik ürüne (web + mobile + hosted hub) taşıma planı.
 - [integrations/architecture.md](./integrations/architecture.md) - sync orchestration, schema, adapter interface
 - [integrations/providers.md](./integrations/providers.md) - provider başına connect/sync spec
 
+### Operasyon
+
+- [operations/mobile-release.md](./operations/mobile-release.md) - iOS yerel build + yükleme, OTA, tüm Make komutları, sorun giderme
+
 ### İş / pazar
 
 Strateji, pazar analizi ve fiyatlandırma dokümanları bu repo'nun kapsamı dışında

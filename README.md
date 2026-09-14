@@ -110,6 +110,7 @@ new `metric` string plus a connector that writes it - no migration.
 ## Documentation
 
 - [docs/README.md](./docs/README.md) - documentation index
+- [docs/operations/mobile-release.md](./docs/operations/mobile-release.md) - local iOS build + upload, OTA, every Make target
 - [docs/architecture/monorepo.md](./docs/architecture/monorepo.md) - package rules, import direction
 - [docs/integrations/architecture.md](./docs/integrations/architecture.md) - sync orchestration, adapter interface
 - [docs/migration/](./docs/migration/) - migration phases

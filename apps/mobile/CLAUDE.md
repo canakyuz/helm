@@ -173,6 +173,10 @@ helm-mobile/
 
 ## 11) EAS / TestFlight Akışı
 
+> Tam referans, kararların nedenleri ve sorun giderme:
+> [`docs/operations/mobile-release.md`](../../docs/operations/mobile-release.md).
+> Akış değişirse o belgeyi de güncelle.
+
 **Build ve submit HER ZAMAN YEREL.** Cloud build (`eas build` `--local`'sız)
 ücretsiz kuyrukta 5-6 saat bekliyor ve non-interactive'de `EXPO_TOKEN` istiyor;
 aynı build bu Mac'te 15-20 dk. Cloud yalnızca Can açıkça isterse (`CLOUD=1`).
