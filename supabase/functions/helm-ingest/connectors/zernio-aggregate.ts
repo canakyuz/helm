@@ -100,6 +100,12 @@ export function aggregateDaily(
 ): { points: MetricPoint[]; daily: SocialAccountDailyRow[] } {
   const byDay = new Map<string, DayTotals>();
   const byAccountDay = new Map<string, SocialAccountDailyRow>();
+  // social_account_daily.account_id -> social_accounts FK'si var; listAccounts
+  // sadece SU ANKI hesaplari dondurur. Kaldirilmis/baglantisi kesilmis bir
+  // hesabin son 90 gunluk postu hala platformAnalytics'te gorunebilir - o
+  // hesap icin gunluk satir acmak upsert'i FK ihlaliyle patlatir. O(1) set
+  // lookup ile atla; post.analytics uzerinden gun toplami etkilenmez.
+  const known = new Set(accounts.map((a) => a._id));
 
   for (const post of posts) {
     if (!post.publishedAt || !PUBLISHED.has(post.status)) continue;
@@ -108,7 +114,7 @@ export function aggregateDaily(
     // platformAnalytics'i de toplarsak cift sayariz.
     addDay(byDay, date, post.analytics ?? {});
     for (const pa of post.platformAnalytics ?? []) {
-      if (!pa.accountId) continue;
+      if (!pa.accountId || !known.has(pa.accountId)) continue;
       addAccountDay(byAccountDay, pa.accountId, date, pa.analytics, null);
     }
   }

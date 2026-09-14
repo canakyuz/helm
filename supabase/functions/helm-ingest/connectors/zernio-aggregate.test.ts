@@ -67,6 +67,27 @@ describe("aggregateDaily", () => {
     const none = aggregateDaily([{ _id: "x", platform: "tiktok", followersCount: null, isActive: true }], [], "2026-09-14");
     expect(none.points.some((p) => p.metric === "social_followers")).toBe(false);
   });
+
+  it("bilinmeyen hesaba ait platformAnalytics gunluk satir uretmez ama gun toplamina dahil olur", () => {
+    // acc9 accounts listesinde yok (kaldirilmis/baglantisi kesilmis hesap) -
+    // social_accounts FK'sini ihlal etmemek icin gunluk satiri atlanmali,
+    // ama post.analytics uzerinden gun toplamina yine de girmeli.
+    const postWithUnknownAccount: ZernioAnalyticsPost[] = [
+      {
+        _id: "p4",
+        status: "published",
+        publishedAt: "2026-09-11T10:00:00.000Z",
+        analytics: { impressions: 50, reach: 40, likes: 1, comments: 1, shares: 0, saves: 0 },
+        platformAnalytics: [
+          { platform: "instagram", accountId: "acc9", analytics: { impressions: 50, reach: 40, likes: 1, comments: 1, shares: 0, saves: 0 } },
+        ],
+      },
+    ];
+    const { points, daily } = aggregateDaily(accounts, postWithUnknownAccount, "2026-09-14");
+    const get = (date: string, metric: string) => points.find((p) => p.date === date && p.metric === metric)?.value;
+    expect(get("2026-09-11", "social_impressions")).toBe(50);
+    expect(daily.some((d) => d.account_id === "acc9")).toBe(false);
+  });
 });
 
 describe("toAccountRows", () => {
