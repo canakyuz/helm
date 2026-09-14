@@ -81,6 +81,9 @@ const PushPage = lazy(() =>
 const CampaignsPage = lazy(() =>
   import("@/pages/campaigns").then((m) => ({ default: m.CampaignsPage })),
 );
+const SocialPage = lazy(() =>
+  import("@/pages/social").then((m) => ({ default: m.SocialPage })),
+);
 const AuditPage = lazy(() =>
   import("@/pages/audit").then((m) => ({ default: m.AuditPage })),
 );
@@ -197,6 +200,7 @@ function App() {
                   list: "/campaigns",
                   meta: { label: "Campaign history" },
                 },
+                { name: "social", list: "/social", meta: { label: "Sosyal" } },
                 {
                   name: "audit",
                   list: "/audit",
@@ -306,6 +310,7 @@ function App() {
                     <Route path="/funnel" element={<FunnelPage />} />
                     <Route path="/push" element={<PushPage />} />
                     <Route path="/campaigns" element={<CampaignsPage />} />
+                    <Route path="/social" element={<SocialPage />} />
                     <Route path="/audit" element={<AuditPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route

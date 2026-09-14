@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { invokeSocial } from "@helm/api";
 import { supabaseClient } from "@/providers/supabase-client";
 import {
   AlertDialog,
@@ -527,9 +528,21 @@ export const IntegrationsPanel = ({ projectId }: { projectId: string }) => {
           values: { project_id: projectId, provider, config, enabled: true },
         },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
             setOpen(false);
             resetForm();
+            // Zernio: kaydin hemen ardindan hesaplari cek + webhook'u kur.
+            // Kullanici ayrica bir dugmeye basmasin; bu iki adim olmadan
+            // sayfa bos kalir ve olaylar gelmez.
+            if (provider === "zernio" && projectId) {
+              try {
+                await invokeSocial(supabaseClient, { project_id: projectId, action: "accounts.sync" });
+                await invokeSocial(supabaseClient, { project_id: projectId, action: "webhook.ensure" });
+                toast.success("Zernio bağlandı: hesaplar çekildi, webhook kuruldu");
+              } catch (e) {
+                toast.error(`Zernio kurulumu eksik: ${e instanceof Error ? e.message : String(e)}`);
+              }
+            }
           },
         },
       );
