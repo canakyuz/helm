@@ -1,12 +1,10 @@
 import { useMemo, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { toUsd, FX_FALLBACK, type AlertSeverity } from "@helm/api";
 import { space, withAlpha, type Theme } from "@helm/design";
 
 import { useCockpitKpis } from "~/hooks/use-cockpit-kpis";
-import { useSocialAccounts, useSocialKpis } from "~/hooks/use-social";
 import { useMetricDetail } from "~/hooks/use-metric-detail";
 import { useDataCoverage } from "~/hooks/use-data-coverage";
 import { useAlerts, useAckAlert } from "~/hooks/use-alerts";
@@ -84,10 +82,7 @@ export default function Overview() {
   // Stat kutularinda kurussuz: uzun deger tum satirin punto'sunu dusuruyordu.
   const fmtStat = useFormatCurrencyCompact();
   const { data: rates } = useFxRates();
-  const router = useRouter();
   const kpis = useCockpitKpis();
-  const social = useSocialAccounts();
-  const socialKpis = useSocialKpis(30);
   const alerts = useAlerts();
   const coverage = useDataCoverage();
   const ack = useAckAlert();
@@ -198,6 +193,7 @@ export default function Overview() {
           syncing={refreshing}
           picker
           alertCount={attention.length}
+          settings
         />
 
         <ScrollView
@@ -333,29 +329,8 @@ export default function Overview() {
             />
           </View>
 
-          {/* Sosyal - yalnizca bagli hesap varsa gorunur */}
-          {social.data && social.data.length > 0 && (
-            <Rise index={4} replayKey={replayKey}>
-              <Pressable onPress={() => { haptic.tap(); router.push("/settings/social"); }}>
-                <BentoTile>
-                  <View className="flex-row items-center justify-between">
-                    <View>
-                      <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">{t("SOSYAL")}</Text>
-                      <Text className="font-semibold text-title tracking-tighter text-fg">
-                        {socialKpis.data?.followers == null ? "-" : formatInteger(socialKpis.data.followers)} {t("takipçi")}
-                      </Text>
-                    </View>
-                    <Text className="font-mono-medium text-eyebrow text-fg3">
-                      {social.data.length} {t("hesap")} ›
-                    </Text>
-                  </View>
-                </BentoTile>
-              </Pressable>
-            </Rise>
-          )}
-
           {/* Aylik hedef */}
-          <Rise index={5} replayKey={replayKey}>
+          <Rise index={4} replayKey={replayKey}>
             <BentoTile>
               <View className="flex-row items-center justify-between">
                 <Text className="font-semibold text-emph tracking-tight text-fg">
@@ -386,7 +361,7 @@ export default function Overview() {
           </Rise>
 
           {/* Projeler */}
-          <Rise index={6} replayKey={replayKey}>
+          <Rise index={5} replayKey={replayKey}>
             <BentoTile>
               <View className="mb-xs flex-row items-center justify-between">
                 <Text className="font-semibold text-emph tracking-tight text-fg">
@@ -444,7 +419,7 @@ export default function Overview() {
           </Rise>
 
           {/* Dikkat gerekiyor - kaydedilmis uyarilar + turetilen veri sinyalleri */}
-          <Rise index={7} replayKey={replayKey}>
+          <Rise index={6} replayKey={replayKey}>
             <AttentionTile
               items={attention}
               onResolve={(eventId, key) => {

@@ -156,6 +156,7 @@ export default function Analytics() {
           onSync={handleRefresh}
           syncing={refreshing}
           picker
+          settings
         />
 
         <ScrollView

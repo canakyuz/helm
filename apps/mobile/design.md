@@ -180,9 +180,10 @@ Sayılar daima mono + tabular (RN'de Geist Mono zaten tabular akar). Eyebrow `<E
 
 ---
 
-## 9. Bilgi Mimarisi - 5 sekme
+## 9. Bilgi Mimarisi - 5 sekme + Ayarlar yigini
 
-`app/(cockpit)/`: **Overview · Revenue · Analytics · Health · Settings** (native tab bar).
+`app/(cockpit)/(tabs)/`: **Overview · Revenue · Analytics · Social · Health** (native tab bar, `minimizeBehavior="onScrollDown"`).
+`app/(cockpit)/settings/`: sekme DEGIL; her sekme basligindaki sag ust disli (`BentoHeader settings`) sekmelerin ustune iter. `(cockpit)/_layout.tsx` = Stack, `(tabs)/_layout.tsx` = NativeTabs.
 
 - **Overview** - gelir hero + canlı aktif + aylık hedef + tip-filtreli Projects (`NativeSegmented`) + Alerts (resolve/ack).
 - **Revenue** *(ana odak)* - dönem `NativeSegmented` hero; kart-içi `NativeSegmented` Mix/Subs/Payouts. (By platform / recent payments kaldırıldı - kaynak yok.)

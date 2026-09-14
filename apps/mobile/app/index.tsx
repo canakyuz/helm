@@ -20,7 +20,7 @@ export default function Index() {
   }
 
   if (session) {
-    return <Redirect href="/(cockpit)/overview" />;
+    return <Redirect href="/(cockpit)/(tabs)/overview" />;
   }
 
   return <Redirect href="/(auth)/login" />;

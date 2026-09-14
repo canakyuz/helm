@@ -55,8 +55,8 @@ CLAUDE.md kazanır. Backend-only / non-UI işlerde bu skill'ler gerekmez.
 
 | Katman | Seçim | Sürüm |
 |--------|-------|-------|
-| Runtime | Expo | SDK 54 |
-| Router | Expo Router (file-based) | 4.x |
+| Runtime | Expo | SDK 57 |
+| Router | Expo Router (file-based) | 57.x |
 | Dil | TypeScript strict | 5.x |
 | Styling | NativeWind | v4 |
 | Server state | TanStack Query | v5 |
@@ -122,7 +122,8 @@ helm-mobile/
 ## 5) Routing (Expo Router)
 
 - **Route groups:** `(auth)` ve `(cockpit)` URL'de görünmez, sadece layout grupları.
-- **Tab bar:** sadece `(cockpit)/_layout.tsx` içinde. 5 sekme: Cockpit / Alerts / Properties / Audit / Settings.
+- **Tab bar:** sadece `(cockpit)/(tabs)/_layout.tsx` içinde (NativeTabs). 5 sekme: Özet / Gelir / Kullanıcı / Sosyal / Sağlık.
+- **Ayarlar:** sekme değil; `(cockpit)/_layout.tsx` Stack'i sekmelerin üstüne iter, girişi başlıktaki sağ üst dişli (`BentoHeader settings`).
 - **Auth gate:** `app/_layout.tsx` içinde `useAuth()` → session yoksa `/login`'a redirect.
 - **Deep link:** `helmmobile://` scheme, `app.config.ts` içinde tanımlı.
 

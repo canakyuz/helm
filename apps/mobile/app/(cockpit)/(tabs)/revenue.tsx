@@ -151,6 +151,7 @@ export default function Revenue() {
           onSync={handleRefresh}
           syncing={refreshing}
           picker
+          settings
         />
 
         <ScrollView

@@ -25,7 +25,7 @@ export function HeaderAlertsButton() {
       hitSlop={10}
       onPress={() => {
         haptic.tap();
-        router.push("/(cockpit)/health");
+        router.push("/(cockpit)/(tabs)/health");
       }}
       style={({ pressed }) => ({
         paddingRight: 16,

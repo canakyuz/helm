@@ -24,7 +24,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     if (!session && !inAuthGroup) {
       router.replace("/(auth)/login");
     } else if (session && inAuthGroup) {
-      router.replace("/(cockpit)/overview");
+      router.replace("/(cockpit)/(tabs)/overview");
     }
   }, [session, isLoading, segments, router]);
 

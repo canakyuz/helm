@@ -98,6 +98,7 @@ export default function Health() {
           syncing={refreshing}
           picker
           alertCount={fatalCount}
+          settings
         />
 
         <ScrollView

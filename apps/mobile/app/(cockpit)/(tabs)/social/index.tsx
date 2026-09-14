@@ -1,6 +1,5 @@
 import { Image, Linking, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { press, space, withAlpha } from "@helm/design";
 
 import { useSocialAccounts, useSocialKpis } from "~/hooks/use-social";
@@ -14,7 +13,6 @@ import { StatTile, statFontSize } from "~/components/overview";
 import { ScreenGround, BentoHeader, BentoTile, Empty, Rise } from "~/components/bento";
 
 export default function SocialOverview() {
-  const router = useRouter();
   const { theme } = useTheme();
   const t = useT();
   const accounts = useSocialAccounts();
@@ -34,7 +32,13 @@ export default function SocialOverview() {
   return (
     <ScreenGround>
       <SafeAreaView edges={["top"]} className="flex-1">
-        <BentoHeader eyebrow={t("SOSYAL")} title={t("Hesaplar")} onBack={() => router.back()} />
+        <BentoHeader
+          eyebrow={t("SOSYAL")}
+          title={t("Hesaplar")}
+          onSync={onRefresh}
+          syncing={refreshing}
+          settings
+        />
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: space.screenX,

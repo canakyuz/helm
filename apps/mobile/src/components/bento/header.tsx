@@ -9,8 +9,10 @@ import Animated, {
   withTiming,
   cancelAnimation,
 } from "react-native-reanimated";
+import { useRouter } from "expo-router";
 import { duration, press } from "@helm/design";
 
+import { Icon } from "~/components/ui/icon";
 import { useLastSync } from "~/hooks/use-last-sync";
 import { formatClock } from "~/lib/format";
 import { haptic } from "~/lib/haptics";
@@ -47,6 +49,11 @@ type Props = {
   picker?: boolean;
   /** Verilirse solda geri okunu cizer. Ayarlar alt ekranlari icin. */
   onBack?: () => void;
+  /**
+   * Sagda Ayarlar dislisi. Sekme kok ekranlari icin: Ayarlar tab bar'da degil,
+   * sekmelerin ustune itilen yigin. Router burada cunku bes ekran ayni hedefe gidiyor.
+   */
+  settings?: boolean;
 };
 
 /** Cockpit ekranlarinin ve Ayarlar alt ekranlarinin ortak baslik seridi. */
@@ -58,8 +65,10 @@ export function BentoHeader({
   alertCount = 0,
   picker = false,
   onBack,
+  settings = false,
 }: Props) {
   const { theme } = useTheme();
+  const router = useRouter();
 
   return (
     <View className="flex-row items-center justify-between px-tilePadLg pt-headerY pb-tilePadSm">
@@ -123,6 +132,23 @@ export function BentoHeader({
           <View className="h-[34px] w-[34px] items-center justify-center rounded-btn bg-chrome">
             <Text className="font-mono-semibold text-meta text-neg">{alertCount}</Text>
           </View>
+        ) : null}
+
+        {/* En sagda: sayfa-ustu gezinme, ekrana ait aksiyonlarin (yenile, uyari)
+            sonrasinda gelir. Yenile ile ayni 34px buton - tek sekil ailesi. */}
+        {settings ? (
+          <Pressable
+            onPress={() => {
+              haptic.tap();
+              router.push("/settings");
+            }}
+            style={({ pressed }) => pressed && { opacity: press.opacity }}
+            className="h-[34px] w-[34px] items-center justify-center rounded-btn bg-chrome"
+            accessibilityRole="button"
+            accessibilityLabel="Ayarlar"
+          >
+            <Icon name="settings" size={16} color={theme.fg2} />
+          </Pressable>
         ) : null}
       </View>
     </View>
