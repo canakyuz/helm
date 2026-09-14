@@ -8,6 +8,9 @@ import { fetchStripe } from "../helm-ingest/connectors/stripe.ts";
 import { fetchPlausible } from "../helm-ingest/connectors/plausible.ts";
 import { fetchRest } from "../helm-ingest/connectors/rest.ts";
 import { fetchSentry } from "../helm-ingest/connectors/sentry.ts";
+import { fetchAppStoreConnect } from "../helm-ingest/connectors/app-store-connect.ts";
+import { fetchGooglePlay } from "../helm-ingest/connectors/google-play.ts";
+import { fetchZernio } from "../helm-ingest/connectors/zernio.ts";
 
 // helm-verify - bir entegrasyonun connector'ını koşar + son N gün
 // stored metric'leri okur + (date, metric) üzerinden DIFF tablosu döner.
@@ -35,6 +38,9 @@ const CONNECTORS: Record<string, Connector> = {
   plausible: fetchPlausible,
   rest: fetchRest,
   sentry: fetchSentry,
+  app_store_connect: fetchAppStoreConnect,
+  google_play_developer: fetchGooglePlay,
+  zernio: fetchZernio,
 };
 
 type DiffStatus = "match" | "mismatch" | "missing_stored" | "missing_upstream";
@@ -130,7 +136,8 @@ Deno.serve(async (req) => {
   const t0 = Date.now();
   let upstream: MetricPoint[];
   try {
-    upstream = await connector(integ.config ?? {});
+    const result = await connector(integ.config ?? {});
+    upstream = Array.isArray(result) ? result : result.points;
   } catch (e) {
     return json({
       ok: false,
