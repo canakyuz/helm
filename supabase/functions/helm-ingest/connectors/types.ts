@@ -17,13 +17,26 @@ export interface FormatMetricPoint extends MetricPoint {
   format: string; // app_open, banner, interstitial, rewarded
 }
 
-/** Geriye uyumlu connector çıktısı: düz dizi veya {points, byCountry, byFormat}. */
+/**
+ * Connector'in metrics dısında yazmak istedigi satirlar. helm-ingest sirayla
+ * upsert eder; `withProjectId` true ise her satira `project_id` enjekte edilir
+ * (connector projeyi bilmez, yalnizca config alir).
+ */
+export interface ExtraUpsert {
+  table: string;
+  rows: Record<string, unknown>[];
+  onConflict: string;
+  withProjectId: boolean;
+}
+
+/** Geriye uyumlu connector çıktısı: düz dizi veya {points, byCountry, byFormat, extra}. */
 export type ConnectorResult =
   | MetricPoint[]
   | {
       points: MetricPoint[];
       byCountry?: CountryMetricPoint[];
       byFormat?: FormatMetricPoint[];
+      extra?: ExtraUpsert[];
     };
 
 export type ConnectorConfig = Record<string, string>;
@@ -33,3 +46,7 @@ export type Connector = (config: ConnectorConfig) => Promise<ConnectorResult>;
 
 /** Bugünün UTC tarihi (YYYY-MM-DD). */
 export const today = () => new Date().toISOString().slice(0, 10);
+
+/** n gün önceki UTC tarihi (YYYY-MM-DD). */
+export const daysAgo = (n: number) =>
+  new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10);
