@@ -13,6 +13,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, json } from "../_shared/cors.ts";
 import { verifyZernioSignature } from "../_shared/zernio-signature.ts";
 import { sendCockpitPush } from "../_shared/expo-push.ts";
+import { isRecentSync } from "../_shared/sync-debounce.ts";
+
+const SYNC_DEBOUNCE_MS = 30 * 60 * 1000; // 30 dk (bkz. I2)
 
 interface ZernioEvent {
   id?: string;
@@ -29,6 +32,31 @@ function accountIdOf(data: Record<string, unknown> | undefined): string | null {
   if (acc && typeof acc._id === "string") return acc._id;
   if (acc && typeof acc.id === "string") return acc.id;
   return null;
+}
+
+/**
+ * En son "senkron oldu" damgası 30 dk'dan tazeyse true döner (bkz. I2).
+ * Sadece analytics.synced için kullanılır - account.connected yeni bağlanan
+ * hesabın hızlı görünmesi için hep tetiklemeye devam eder.
+ * DB okuması hata verirse fail-open: false dönüp tetiklemeye izin ver -
+ * ingest zaten idempotent, kaçırmak debounce'tan daha kötü.
+ */
+async function zernioRecentlySynced(
+  hub: ReturnType<typeof createClient>,
+): Promise<boolean> {
+  const { data, error } = await hub
+    .from("project_integrations")
+    .select("last_synced_at")
+    .eq("provider", "zernio")
+    .eq("enabled", true)
+    .order("last_synced_at", { ascending: false, nullsFirst: false })
+    .limit(1);
+  if (error) {
+    console.error("[helm-zernio-webhook] last_synced_at read failed", error.message);
+    return false;
+  }
+  const lastSyncedAt = (data?.[0] as { last_synced_at?: string | null } | undefined)?.last_synced_at;
+  return isRecentSync(lastSyncedAt, new Date(), SYNC_DEBOUNCE_MS);
 }
 
 async function triggerZernioIngest(): Promise<void> {
@@ -83,9 +111,16 @@ Deno.serve(async (req) => {
       return json({ ok: true, event: name, event_id: eventId });
 
     case "account.connected":
-    case "analytics.synced":
       await background(triggerZernioIngest());
       return json({ ok: true, event: name, event_id: eventId });
+
+    case "analytics.synced": {
+      if (await zernioRecentlySynced(hub)) {
+        return json({ ok: true, event: name, skipped: "recent sync" });
+      }
+      await background(triggerZernioIngest());
+      return json({ ok: true, event: name, event_id: eventId });
+    }
 
     case "account.disconnected": {
       const accountId = accountIdOf(evt.data);

@@ -292,25 +292,33 @@ Deno.serve(async (req) => {
   // bekletiyordu. Gerçekten arka plana almak için EdgeRuntime.waitUntil gerekir:
   // await'i düpedüz kaldırmak isteği runtime yanıtı dönünce öldürür ve uyarı
   // değerlendirmesi sessizce kaybolurdu.
-  const evaluateAlerts = (async () => {
-    try {
-      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/helm-alert`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-          "Content-Type": "application/json",
-        },
-        body: "{}",
-      });
-    } catch {
-      // uyarı değerlendirmesi senkronu bloklamasın
-    }
-  })();
+  //
+  // NEDEN providerFilter VARSA ATLANIR: provider filtreli çalışma webhook'tan
+  // tetiklenen KISMİ bir yenileme (ör. tek Zernio entegrasyonu) - her seferinde
+  // TÜM kuralları yeniden değerlendirmek, o an ateşleyen her kural için tekrar
+  // push+alert_events demek (bkz. I2). Gece yarısı cron'u (providerFilter yok)
+  // tam çalışma olduğu için uyarıları değerlendirmeye devam eder.
+  if (!providerFilter) {
+    const evaluateAlerts = (async () => {
+      try {
+        await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/helm-alert`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            "Content-Type": "application/json",
+          },
+          body: "{}",
+        });
+      } catch {
+        // uyarı değerlendirmesi senkronu bloklamasın
+      }
+    })();
 
-  const runtime = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } })
-    .EdgeRuntime;
-  if (runtime) runtime.waitUntil(evaluateAlerts);
-  else await evaluateAlerts;
+    const runtime = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } })
+      .EdgeRuntime;
+    if (runtime) runtime.waitUntil(evaluateAlerts);
+    else await evaluateAlerts;
+  }
 
   return json({ ingested, ok: okCount, errors: errorCount, results });
 });
