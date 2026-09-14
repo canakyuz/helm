@@ -182,8 +182,10 @@ Sayılar daima mono + tabular (RN'de Geist Mono zaten tabular akar). Eyebrow `<E
 
 ## 9. Bilgi Mimarisi - 5 sekme + Ayarlar yigini
 
-`app/(cockpit)/(tabs)/`: **Overview · Revenue · Analytics · Social · Health** (native tab bar, `minimizeBehavior="onScrollDown"`).
-`app/(cockpit)/settings/`: sekme DEGIL; her sekme basligindaki sag ust disli (`BentoHeader settings`) sekmelerin ustune iter. `(cockpit)/_layout.tsx` = Stack, `(tabs)/_layout.tsx` = NativeTabs.
+`app/(cockpit)/(tabs)/`: **Overview · Revenue · Analytics · Social** + ayrık **Search** (`role="search"`). Native tab bar: `minimizeBehavior="onScrollDown"`, `BottomAccessory` = proje seçici.
+- **Toplam 5 sınırı:** iOS 26 ayrık arama sekmesi yalnızca toplam 5 sekmede çıkar; 6'da UIKit sekmeleri "More" menüsüne keser. Yeni sekme = bir sekme çıkar.
+- **Sekme olmayanlar** (`(cockpit)/_layout.tsx` Stack'i sekmelerin üstüne iter): `settings/` (başlıktaki sağ üst dişli), `health` (Özet'teki CRASH kutusu), `project-picker` (form sheet).
+- Sekme ekranlarının ana kaydırma alanı `TabScrollView` (ScrollViewMarker); yoksa bar küçülmez ve başa kayma çalışmaz.
 
 - **Overview** - gelir hero + canlı aktif + aylık hedef + tip-filtreli Projects (`NativeSegmented`) + Alerts (resolve/ack).
 - **Revenue** *(ana odak)* - dönem `NativeSegmented` hero; kart-içi `NativeSegmented` Mix/Subs/Payouts. (By platform / recent payments kaldırıldı - kaynak yok.)

@@ -154,9 +154,11 @@ export function PayoutsTile({
         </>
       ) : (
         <>
+          {/* Index key'in PARCASI, yedegi degil: ayni kaynak+donem iki satir olabilir
+              (senkron + elle girilen devir), yalniz donemle key cakisiyordu. */}
           {pending.map((p, i) => (
             <PayoutRow
-              key={`p-${p.source}-${p.period ?? p.arrival_date ?? i}`}
+              key={`p-${p.source}-${p.period ?? p.arrival_date ?? "na"}-${i}`}
               row={p}
               fmt={fmt}
               tone={theme.fg2}

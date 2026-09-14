@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { toUsd, FX_FALLBACK, type AlertSeverity } from "@helm/api";
 import { space, withAlpha, type Theme } from "@helm/design";
 
@@ -27,6 +28,7 @@ import {
 } from "~/lib/labels";
 import { amountOn, currentMonthTotal, heroDays, isoDay } from "~/lib/revenue-hero";
 import { useTheme } from "~/theme/use-theme";
+import { TabScrollView } from "~/components/bento/tab-scroll-view";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
 import { AttentionTile, StatTile, statFontSize, toItems } from "~/components/overview";
@@ -77,6 +79,7 @@ function dayPoint(
 
 export default function Overview() {
   const t = useT();
+  const router = useRouter();
   const { theme, glass } = useTheme();
   const fmt = useFormatCurrency();
   // Stat kutularinda kurussuz: uzun deger tum satirin punto'sunu dusuruyordu.
@@ -196,7 +199,7 @@ export default function Overview() {
           settings
         />
 
-        <ScrollView
+        <TabScrollView
           contentContainerStyle={{
             paddingHorizontal: space.screenX,
             paddingBottom: 120,
@@ -321,6 +324,8 @@ export default function Overview() {
               replayKey={replayKey}
               label="CRASH"
               value={crashText}
+              // Saglik artik sekme degil; crash kutusu onun kapisi.
+              onPress={() => router.push("/health")}
               note={crashText === "-" ? t("ölçüm yok") : undefined}
               fontSize={statSize}
               // Crash-free'de delta YUZDE DEGISIM degil PUAN farki: %99.5'ten
@@ -432,7 +437,7 @@ export default function Overview() {
               }}
             />
           </Rise>
-        </ScrollView>
+        </TabScrollView>
       </SafeAreaView>
     </ScreenGround>
   );

@@ -19,6 +19,7 @@ import { haptic } from "~/lib/haptics";
 import { usePreferences } from "~/lib/preferences";
 import { monthLabel, MONTHS_SHORT, localToday } from "~/lib/labels";
 import { useTheme } from "~/theme/use-theme";
+import { TabScrollView } from "~/components/bento/tab-scroll-view";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
 import {
@@ -150,11 +151,10 @@ export default function Revenue() {
           title={t("Kazanç")}
           onSync={handleRefresh}
           syncing={refreshing}
-          picker
           settings
         />
 
-        <ScrollView
+        <TabScrollView
           contentContainerStyle={{
             paddingHorizontal: space.screenX,
             paddingBottom: 120,
@@ -350,7 +350,7 @@ export default function Revenue() {
               />
             </Rise>
           ) : null}
-        </ScrollView>
+        </TabScrollView>
       </SafeAreaView>
     </ScreenGround>
   );

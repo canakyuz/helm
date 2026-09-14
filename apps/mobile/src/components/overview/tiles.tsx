@@ -44,6 +44,7 @@ export function StatTile({
   delta,
   fontSize = type.stat,
   note,
+  onPress,
 }: {
   index: number;
   replayKey: number;
@@ -55,6 +56,8 @@ export function StatTile({
   /** Delta yerine gosterilecek kisa aciklama (olcum yoksa). Kutu bos kalmasin:
    *  delta yuvasi seffaf birakilinca kutu bozuk gorunuyordu, veri yok demiyordu. */
   note?: string | undefined;
+  /** Verilirse kutu detay ekranina gider (CRASH → Saglik). */
+  onPress?: () => void;
 }) {
   const { theme } = useTheme();
   const hasDelta = delta != null && Number.isFinite(delta);
@@ -72,7 +75,8 @@ export function StatTile({
           ile kuculunce o kartin govdesi de kisaliyor, uc kartin ALT kenari
           ayrisiyordu. Ust kenari `transparent` delta metni hizaliyor, alt
           kenari bu. */}
-      <BentoTile padding={space.tilePadSm} style={{ flex: 1 }}>
+      {/* Kosullu yayma: exactOptionalPropertyTypes `onPress={undefined}` kabul etmiyor. */}
+      <BentoTile padding={space.tilePadSm} style={{ flex: 1 }} {...(onPress ? { onPress } : {})}>
         <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
           {label}
         </Text>

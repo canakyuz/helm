@@ -1,6 +1,6 @@
 import { useT } from "~/lib/i18n";
 import { useEffect, useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   Easing,
@@ -23,6 +23,7 @@ import { formatInteger, formatRatio } from "~/lib/format";
 import { usePreferences } from "~/lib/preferences";
 import { seriesTints } from "~/lib/labels";
 import { useTheme } from "~/theme/use-theme";
+import { TabScrollView } from "~/components/bento/tab-scroll-view";
 import { ScreenStatus } from "~/components/screen-status";
 import { CountUp } from "~/components/liquid";
 import {
@@ -155,11 +156,10 @@ export default function Analytics() {
           title={t("Kullanıcılar")}
           onSync={handleRefresh}
           syncing={refreshing}
-          picker
           settings
         />
 
-        <ScrollView
+        <TabScrollView
           contentContainerStyle={{
             paddingHorizontal: space.screenX,
             paddingBottom: 120,
@@ -287,7 +287,7 @@ export default function Analytics() {
               )}
             </BentoTile>
           </Rise>
-        </ScrollView>
+        </TabScrollView>
       </SafeAreaView>
     </ScreenGround>
   );

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { RefreshControl, ScrollView, Text } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { space } from "@helm/design";
 import { AD_FORMAT_LABEL, instrumentationWarnings } from "@helm/api";
@@ -30,6 +31,7 @@ import {
 
 export default function Health() {
   const t = useT();
+  const router = useRouter();
   const { theme } = useTheme();
   const { refreshing, onRefresh } = useScreenRefresh();
   const [replayKey, setReplayKey] = useState(0);
@@ -96,9 +98,8 @@ export default function Health() {
           title={t("Kararlılık")}
           onSync={handleRefresh}
           syncing={refreshing}
-          picker
           alertCount={fatalCount}
-          settings
+          onBack={() => router.back()}
         />
 
         <ScrollView

@@ -1,13 +1,11 @@
-import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import { press, radius as R, space } from "@helm/design";
 
 import { useProperties, type PropertyType } from "~/hooks/use-properties";
 import { haptic } from "~/lib/haptics";
 import { preferences, usePreferences } from "~/lib/preferences";
 import { useTheme } from "~/theme/use-theme";
-import { ScreenGround } from "./ground";
 import { useT } from "~/lib/i18n";
 
 const ALL = "Tüm projeler";
@@ -23,105 +21,86 @@ const TYPE_LABEL: Record<PropertyType, string> = {
 };
 
 /**
+ * Seçili projenin görünen adı. Başlık ve tab bar aksesuarı aynı metni göstermeli.
+ * Time: O(n) proje; Space: O(1).
+ */
+export function useSelectedProjectLabel(): string {
+  const t = useT();
+  const { selectedPropertyId } = usePreferences();
+  const properties = useProperties();
+  if (selectedPropertyId === "all") return t(ALL);
+  return properties.data?.find((p) => p.id === selectedPropertyId)?.name ?? t(ALL);
+}
+
+/**
  * Proje seçici - portföy cockpit'inin en temel kontrolü.
  *
- * NEDEN YENİDEN YAZILDI: mevcut src/components/property-picker.tsx (277 satır)
- * eski statik `colors` token'larını kullanıyor - dark hardcode. Bento'da light
- * temada bozulur ve seçili accent'i takip etmez. 277 satırı çevirmek yerine
- * başlığa sığan kompakt ve tema-duyarlı bir sürüm.
+ * NEDEN ROUTE, NEDEN MODAL DEĞİL: liste artık `/project-picker` form sheet'i.
+ * Aynı seçici hem başlıkta hem tab bar aksesuarında var; aksesuar iki kopya
+ * render ediliyor ve yerel `open` state'i kopyalar arasında paylaşılmazdı.
  */
 export function PropertyPicker() {
   const t = useT();
   const { theme } = useTheme();
-  const { selectedPropertyId } = usePreferences();
-  const properties = useProperties();
-  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const label = useSelectedProjectLabel();
 
-  const list = properties.data ?? [];
-  const selected = list.find((p) => p.id === selectedPropertyId);
-  const label = selectedPropertyId === "all" ? t(ALL) : (selected?.name ?? t(ALL));
+  return (
+    <Pressable
+      onPress={() => {
+        haptic.tap();
+        router.push("/project-picker");
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={t("Proje seç")}
+    >
+      {({ pressed }) => (
+        <View
+          className="flex-row items-center gap-[6px]"
+          style={pressed ? { opacity: press.opacity } : undefined}
+        >
+          <Text
+            className="font-semibold text-title tracking-tighter text-fg"
+            numberOfLines={1}
+          >
+            {label}
+          </Text>
+          <Text style={{ fontSize: 12, color: theme.fg3, marginTop: 2 }}>▾</Text>
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
+/** Sheet içeriği: "Tüm projeler" + her proje. Seçim preferences'a yazılır. */
+export function ProjectOptionList({ onPicked }: { onPicked: () => void }) {
+  const t = useT();
+  const { selectedPropertyId } = usePreferences();
+  const list = useProperties().data ?? [];
 
   const pick = (id: string) => {
     haptic.tap();
     preferences.setSelectedProperty(id);
-    setOpen(false);
+    onPicked();
   };
 
   return (
     <>
-      <Pressable
-        onPress={() => {
-          haptic.tap();
-          setOpen(true);
-        }}
-        accessibilityRole="button"
-        accessibilityLabel={t("Proje seç")}
-      >
-        {({ pressed }) => (
-          <View
-            className="flex-row items-center gap-[6px]"
-            style={pressed ? { opacity: press.opacity } : undefined}
-          >
-            <Text
-              className="font-semibold text-title tracking-tighter text-fg"
-              numberOfLines={1}
-            >
-              {label}
-            </Text>
-            <Text style={{ fontSize: 12, color: theme.fg3, marginTop: 2 }}>▾</Text>
-          </View>
-        )}
-      </Pressable>
-
-      <Modal
-        visible={open}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setOpen(false)}
-      >
-        {/* Modal da ekran - duz zemin yerine ayni isikli kap. */}
-        <ScreenGround>
-          <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-            <View
-              className="flex-row items-center justify-between"
-              style={{ paddingHorizontal: space.screenX, paddingVertical: space.headerY }}
-            >
-              <Text className="font-semibold text-title tracking-tighter text-fg">
-                Proje
-              </Text>
-              <Pressable onPress={() => setOpen(false)} accessibilityRole="button">
-                <Text className="font-mono-medium text-eyebrow tracking-wide text-fg2">
-                  KAPAT
-                </Text>
-              </Pressable>
-            </View>
-
-            <ScrollView
-              contentContainerStyle={{
-                paddingHorizontal: space.screenX,
-                paddingBottom: 40,
-                gap: space.tileGap,
-              }}
-            >
-              <Option
-                label={t(ALL)}
-                sub={`${list.length} proje`}
-                active={selectedPropertyId === "all"}
-                onPress={() => pick("all")}
-              />
-              {list.map((p) => (
-                <Option
-                  key={p.id}
-                  label={p.name}
-                  sub={TYPE_LABEL[p.type] ?? p.type}
-                  active={p.id === selectedPropertyId}
-                  onPress={() => pick(p.id)}
-                />
-              ))}
-            </ScrollView>
-          </SafeAreaView>
-        </ScreenGround>
-      </Modal>
+      <Option
+        label={t(ALL)}
+        sub={t("{n} proje", { n: list.length })}
+        active={selectedPropertyId === "all"}
+        onPress={() => pick("all")}
+      />
+      {list.map((p) => (
+        <Option
+          key={p.id}
+          label={p.name}
+          sub={t(TYPE_LABEL[p.type] ?? p.type)}
+          active={p.id === selectedPropertyId}
+          onPress={() => pick(p.id)}
+        />
+      ))}
     </>
   );
 }

@@ -281,6 +281,18 @@ const EN: Record<string, string> = {
   "Kullanıcı": "Users",
   "Sağlık": "Health",
   "Ayar": "Settings",
+  "Sosyal": "Social",
+
+  // Ara sekmesi ve proje secici
+  "Arama": "Search",
+  "Proje": "Project",
+  "{n} proje": "{n} projects",
+  "Web app": "Web app",
+  "UYARI": "ALERT",
+  "HESAP": "ACCOUNT",
+  "Sonuç yok": "No results",
+  "Proje, uyarı veya hesap ara": "Search projects, alerts, accounts",
+  "Projeler, uyarılar ve sosyal hesaplar içinde ara": "Search across projects, alerts and social accounts",
 
   // Kart basliklari - tirnaksiz JSX metni oldugu icin ilk taramada kacmisti
   "Sürümler": "Versions",
