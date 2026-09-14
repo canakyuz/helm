@@ -100,20 +100,28 @@ function ItemHero({ item, post }: { item: SocialLibraryItem; post: SocialPost | 
   const { theme } = useTheme();
   const tone = itemStateTone(socialItemState(post), t, theme);
   const duration = durationLabel(item.duration_sec, t);
+  const hasVideo = item.video_url != null;
   const openVideo = () => {
+    if (item.video_url == null) return;
     haptic.tap();
-    void Linking.openURL(item.video_url);
+    // Linking.openURL cihazda ilgili uygulama/tarayici yoksa reddedebilir;
+    // yakalanmazsa unhandled rejection olur.
+    Linking.openURL(item.video_url).catch(() => toast.error(t("Video açılamadı")));
   };
 
   return (
     <View className="flex-row gap-tilePad pb-tilePad pt-xs">
-      <Pressable onPress={openVideo} accessibilityRole="link" accessibilityLabel={t("Videoyu aç")}>
-        {({ pressed }) => (
-          <View style={pressed ? { opacity: press.opacity } : undefined}>
-            <SocialThumb uri={item.thumbnail_url} width={124} />
-          </View>
-        )}
-      </Pressable>
+      {hasVideo ? (
+        <Pressable onPress={openVideo} accessibilityRole="link" accessibilityLabel={t("Videoyu aç")}>
+          {({ pressed }) => (
+            <View style={pressed ? { opacity: press.opacity } : undefined}>
+              <SocialThumb uri={item.thumbnail_url} width={124} />
+            </View>
+          )}
+        </Pressable>
+      ) : (
+        <SocialThumb uri={item.thumbnail_url} width={124} />
+      )}
       <View className="flex-1 justify-between">
         <View>
           <Text className="font-semibold text-emph text-fg">{item.hook}</Text>
@@ -125,7 +133,13 @@ function ItemHero({ item, post }: { item: SocialLibraryItem; post: SocialPost | 
           <Text className="font-mono-semibold text-meta" style={{ color: tone.color }}>
             {tone.label}
           </Text>
-          <TextAction label={t("Videoyu aç ›")} color={theme.fg2} onPress={openVideo} />
+          {hasVideo ? (
+            <TextAction label={t("Videoyu aç ›")} color={theme.fg2} onPress={openVideo} />
+          ) : (
+            <Text className="text-meta" style={{ color: theme.neg }}>
+              {t("Video yüklenmemiş")}
+            </Text>
+          )}
         </View>
       </View>
     </View>
@@ -222,6 +236,7 @@ function PublishPanel({ item, lastFailed }: { item: SocialLibraryItem; lastFaile
   const selected = SOCIAL_PLATFORMS.filter((p) => flags[p]);
   const minimumDate = new Date(openedAt.getTime() + MIN_LEAD_MS);
   const platformNames = selected.map((p) => PLATFORM_LABEL[p]).join(" + ");
+  const hasVideo = item.video_url != null;
 
   function openPlanning() {
     haptic.tap();
@@ -232,7 +247,7 @@ function PublishPanel({ item, lastFailed }: { item: SocialLibraryItem; lastFaile
   }
 
   function shareNow() {
-    if (selected.length === 0) return;
+    if (!hasVideo || selected.length === 0) return;
     haptic.press();
     Alert.alert(t("Şimdi paylaş"), t("{p} için yaklaşık 2 dakika içinde yayınlanacak.", { p: platformNames }), [
       { text: t("Vazgeç"), style: "cancel" },
@@ -244,7 +259,7 @@ function PublishPanel({ item, lastFailed }: { item: SocialLibraryItem; lastFaile
   }
 
   function schedule() {
-    if (selected.length === 0) return;
+    if (!hasVideo || selected.length === 0) return;
     if (when.getTime() < Date.now() + 60_000) {
       toast.error(t("Geçmiş bir zaman seçilemez"));
       return;
@@ -258,6 +273,11 @@ function PublishPanel({ item, lastFailed }: { item: SocialLibraryItem; lastFaile
 
   return (
     <DetailSection title={t("Paylaş")}>
+      {hasVideo ? null : (
+        <Text className="mb-sm text-meta" style={{ color: theme.neg }}>
+          {t("Video yüklenmemiş")}
+        </Text>
+      )}
       {lastFailed != null ? (
         <Text className="mb-sm text-meta" style={{ color: theme.neg }}>
           {t("Son deneme başarısız: {e}", { e: lastFailed.error ?? t("bilinmeyen hata") })}
@@ -287,11 +307,15 @@ function PublishPanel({ item, lastFailed }: { item: SocialLibraryItem; lastFaile
           variant="primary"
           label={t("Şimdi paylaş")}
           onPress={shareNow}
-          disabled={selected.length === 0 || planning}
+          disabled={!hasVideo || selected.length === 0 || planning}
           busy={publish.isPending && !planning}
         />
         {planning ? null : (
-          <SocialButton label={t("Planla")} onPress={openPlanning} disabled={selected.length === 0} />
+          <SocialButton
+            label={t("Planla")}
+            onPress={openPlanning}
+            disabled={!hasVideo || selected.length === 0}
+          />
         )}
         {selected.length === 0 ? (
           <Text className="text-meta text-fg3">{t("En az bir platform seç.")}</Text>

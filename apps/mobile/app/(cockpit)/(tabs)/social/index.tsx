@@ -5,8 +5,8 @@ import { useRouter } from "expo-router";
 import {
   SOCIAL_PLATFORMS,
   groupSocialQueue,
-  isActivePost,
   latestPostByLibrary,
+  readyProjectCounts,
   socialItemState,
   type SocialKpis,
   type SocialLibraryItem,
@@ -111,18 +111,16 @@ function LibraryView() {
   const items = library.data ?? [];
   // Time: O(p) map + O(n) sayim. Satir basina durum Map'ten O(1) okunur.
   const latest = useMemo(() => latestPostByLibrary(posts.data ?? []), [posts.data]);
-  const readyCount = useMemo(() => {
-    let n = 0;
-    for (const item of items) {
-      const post = latest.get(item.id);
-      if (post == null || !isActivePost(post.status)) n += 1;
-    }
-    return n;
-  }, [items, latest]);
+  // Scope "all" iken kutuphane birden fazla projeyi kapsayabilir; proje basina
+  // hazir sayisi burada tutulur, RPC de proje basina sirayla cagrilir.
+  const projectCounts = useMemo(() => readyProjectCounts(items, posts.data ?? []), [items, posts.data]);
+  const readyCount = useMemo(
+    () => Array.from(projectCounts.values()).reduce((sum, n) => sum + n, 0),
+    [projectCounts],
+  );
 
   function confirmScheduleAll() {
-    const first = items[0];
-    if (first == null || readyCount === 0) return;
+    if (readyCount === 0) return;
     haptic.press();
     Alert.alert(
       t("Hepsini planla"),
@@ -131,8 +129,7 @@ function LibraryView() {
         { text: t("Vazgeç"), style: "cancel" },
         {
           text: t("Planla"),
-          // Kutuphane ogeleri tek projeye ait (spec); proje id'si ilk ogeden.
-          onPress: () => scheduleAll.mutate({ projectId: first.project_id, platforms: [...SOCIAL_PLATFORMS] }),
+          onPress: () => scheduleAll.mutate({ projectCounts, platforms: [...SOCIAL_PLATFORMS] }),
         },
       ],
     );
