@@ -15,6 +15,7 @@ Diğer provider'lar Faz 4 sonrası.
 | `supabase` | Service role (read) | v1.1 | 6h | users → DAU |
 | `resend` | API key | v2 | daily | delivery stats |
 | `rest` | URL + mapping | beta | configurable | custom |
+| `zernio` | API key paste | v1 | nightly + webhook | `metrics` (social_*), `social_accounts`, `social_account_daily` |
 
 ---
 
@@ -262,6 +263,7 @@ Property `enabled_modules` ile KPI tile görünürlüğü (`src/lib/modules.ts`)
 | `users` | supabase veya posthog |
 | `reviews` | appstoreconnect |
 | `analytics` | posthog |
+| `social` | zernio |
 | errors (implicit) | sentry |
 
 Wizard: entegrasyon bağlandığında ilgili modül otomatik enable önerisi.
@@ -277,6 +279,34 @@ Wizard: entegrasyon bağlandığında ilgili modül otomatik enable önerisi.
 - [ ] Sync worker deploy + cron
 - [ ] `sync_runs` + health UI retry
 - [ ] Beta: 5 user, connect success > 90%
+
+## Zernio (sosyal)
+
+### credentials
+
+```json
+{ "api_key": "sk_...", "profile_id": "opsiyonel 24 hex" }
+```
+
+`profile_id` boşsa `isDefault` profil. Hesaplar bu profilden okunur.
+
+### sync (nightly, helm-ingest)
+
+| Zernio | Hub |
+|---|---|
+| `GET /v1/accounts` | `social_accounts` (upsert id) |
+| `GET /v1/analytics` (90 gün, yayın gününe toplanır) | `metrics`: `social_impressions`, `social_reach`, `social_engagements`, `social_posts_published`; `social_account_daily` |
+| `accounts[].followersCount` | `metrics.social_followers` (bugün, anlık) |
+
+### webhook
+
+`helm-social` → `webhook.ensure` Zernio'da aboneliği kurar (URL `…/functions/v1/helm-zernio-webhook`, secret `ZERNIO_WEBHOOK_SECRET`). İmza `X-Zernio-Signature` HMAC-SHA256. Alt proje 1 olayları: `webhook.test`, `account.connected`, `account.disconnected`, `analytics.synced`.
+
+### Deploy notu
+
+`helm-zernio-webhook` `--no-verify-jwt` ile deploy edilir; `ZERNIO_WEBHOOK_SECRET` Supabase secrets'ta olmalı.
+
+---
 
 ## İlgili
 

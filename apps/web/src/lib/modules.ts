@@ -112,8 +112,7 @@ export const MODULE_META: Record<ModuleKey, ModuleMeta> = {
   social: {
     label: "Sosyal",
     icon: "Share2",
-    description: "Post scheduling (coming soon).",
-    comingSoon: true,
+    description: "Sosyal hesaplar, takipçi ve etkileşim (Zernio).",
   },
 };
 
@@ -131,6 +130,7 @@ export const SOURCE_TO_MODULE: Record<ProviderName, ModuleKey> = {
   sentry: "analytics", // hata oranı = analytics altı
   rest: "analytics", // genel
   google_play_developer: "reviews",
+  zernio: "social",
 };
 
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {

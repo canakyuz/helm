@@ -18,6 +18,7 @@ import { fetchRest } from "./connectors/rest.ts";
 import { fetchSentry } from "./connectors/sentry.ts";
 import { fetchAppStoreConnect } from "./connectors/app-store-connect.ts";
 import { fetchGooglePlay } from "./connectors/google-play.ts";
+import { fetchZernio } from "./connectors/zernio.ts";
 
 // helm-ingest - her enabled entegrasyonu gezer, sağlayıcı API'sini çağırır,
 // metrics tablosuna idempotent upsert eder. Her çalışma sync_runs'a kaydedilir.
@@ -33,6 +34,7 @@ const CONNECTORS: Record<string, Connector> = {
   sentry: fetchSentry,
   app_store_connect: fetchAppStoreConnect,
   google_play_developer: fetchGooglePlay,
+  zernio: fetchZernio,
 };
 
 const json = (body: unknown, status = 200) =>
@@ -51,13 +53,16 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  // İstek gövdesi: trigger (panel "manual", cron yok) + opsiyonel project_id.
+  // İstek gövdesi: trigger (panel "manual", cron yok) + opsiyonel project_id
+  // + opsiyonel provider (webhook tetiklediğinde yalnızca o sağlayıcı koşar).
   let trigger: "manual" | "cron" = "cron";
   let projectId: string | undefined;
+  let providerFilter: string | undefined;
   try {
     const body = await req.json();
     if (body?.trigger === "manual") trigger = "manual";
     if (typeof body?.project_id === "string") projectId = body.project_id;
+    if (typeof body?.provider === "string") providerFilter = body.provider;
   } catch {
     // gövde yok - cron
   }
@@ -77,6 +82,9 @@ Deno.serve(async (req) => {
     .eq("enabled", true);
   if (projectId) {
     integrationsQuery = integrationsQuery.eq("project_id", projectId);
+  }
+  if (providerFilter) {
+    integrationsQuery = integrationsQuery.eq("provider", providerFilter);
   }
   const { data: integrations, error } = await integrationsQuery;
 
@@ -176,6 +184,22 @@ Deno.serve(async (req) => {
         if (fmtErr) throw new Error(fmtErr.message);
       }
 
+      // Connector'ın metrics dışı satırları (ör. zernio → social_accounts).
+      // Sırayla: bir tablo diğerine FK ile bağlı olabilir.
+      const extra = Array.isArray(result) ? [] : (result.extra ?? []);
+      let extraCount = 0;
+      for (const ex of extra) {
+        if (ex.rows.length === 0) continue;
+        const rows = ex.withProjectId
+          ? ex.rows.map((r) => ({ project_id: it.project_id, ...r }))
+          : ex.rows;
+        const { error: exErr } = await hub
+          .from(ex.table)
+          .upsert(rows, { onConflict: ex.onConflict });
+        if (exErr) throw new Error(`${ex.table}: ${exErr.message}`);
+        extraCount += rows.length;
+      }
+
       await hub
         .from("project_integrations")
         .update({
@@ -191,7 +215,7 @@ Deno.serve(async (req) => {
         project_id: it.project_id,
         points: rows.length,
         country_points: byCountry.length,
-        ingested: rows.length + byCountry.length + byFormat.length,
+        ingested: rows.length + byCountry.length + byFormat.length + extraCount,
       };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
@@ -268,25 +292,33 @@ Deno.serve(async (req) => {
   // bekletiyordu. Gerçekten arka plana almak için EdgeRuntime.waitUntil gerekir:
   // await'i düpedüz kaldırmak isteği runtime yanıtı dönünce öldürür ve uyarı
   // değerlendirmesi sessizce kaybolurdu.
-  const evaluateAlerts = (async () => {
-    try {
-      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/helm-alert`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-          "Content-Type": "application/json",
-        },
-        body: "{}",
-      });
-    } catch {
-      // uyarı değerlendirmesi senkronu bloklamasın
-    }
-  })();
+  //
+  // NEDEN providerFilter VARSA ATLANIR: provider filtreli çalışma webhook'tan
+  // tetiklenen KISMİ bir yenileme (ör. tek Zernio entegrasyonu) - her seferinde
+  // TÜM kuralları yeniden değerlendirmek, o an ateşleyen her kural için tekrar
+  // push+alert_events demek (bkz. I2). Gece yarısı cron'u (providerFilter yok)
+  // tam çalışma olduğu için uyarıları değerlendirmeye devam eder.
+  if (!providerFilter) {
+    const evaluateAlerts = (async () => {
+      try {
+        await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/helm-alert`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            "Content-Type": "application/json",
+          },
+          body: "{}",
+        });
+      } catch {
+        // uyarı değerlendirmesi senkronu bloklamasın
+      }
+    })();
 
-  const runtime = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } })
-    .EdgeRuntime;
-  if (runtime) runtime.waitUntil(evaluateAlerts);
-  else await evaluateAlerts;
+    const runtime = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } })
+      .EdgeRuntime;
+    if (runtime) runtime.waitUntil(evaluateAlerts);
+    else await evaluateAlerts;
+  }
 
   return json({ ingested, ok: okCount, errors: errorCount, results });
 });

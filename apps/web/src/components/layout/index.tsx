@@ -26,6 +26,7 @@ import {
   Search,
   Send,
   Settings,
+  Share2,
   Star,
   Sun,
   Tag,
@@ -137,6 +138,7 @@ const NAV_GROUPS: NavGroup[] = [
         url: "/campaigns",
         requires: ["mail", "push"],
       },
+      { title: "Sosyal", icon: Share2, url: "/social", requires: "social" },
     ],
   },
   {

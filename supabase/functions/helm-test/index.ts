@@ -8,6 +8,8 @@ import { fetchStripe } from "../helm-ingest/connectors/stripe.ts";
 import { fetchPlausible } from "../helm-ingest/connectors/plausible.ts";
 import { fetchRest } from "../helm-ingest/connectors/rest.ts";
 import { fetchSentry } from "../helm-ingest/connectors/sentry.ts";
+import { fetchAppStoreConnect } from "../helm-ingest/connectors/app-store-connect.ts";
+import { fetchZernio } from "../helm-ingest/connectors/zernio.ts";
 import { getPlayAccessToken } from "../_shared/play-oauth.ts";
 
 // helm-test - tek bir entegrasyonu çalıştırır, sonucu DB'ye YAZMADAN döner.
@@ -35,6 +37,8 @@ const CONNECTORS: Record<string, Connector> = {
   plausible: fetchPlausible,
   rest: fetchRest,
   sentry: fetchSentry,
+  app_store_connect: fetchAppStoreConnect,
+  zernio: fetchZernio,
 };
 
 Deno.serve(async (req) => {
@@ -109,7 +113,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const points = await connector(integ.config ?? {});
+    const result = await connector(integ.config ?? {});
+    // Connector düz dizi ya da {points, extra…} döner; ikisini de göster.
+    const points = Array.isArray(result) ? result : result.points;
+    const extra = Array.isArray(result) ? [] : (result.extra ?? []);
     const ms = Date.now() - t0;
     return json({
       ok: true,
@@ -117,6 +124,7 @@ Deno.serve(async (req) => {
       duration_ms: ms,
       count: points.length,
       points: points.slice(0, 100), // ilk 100 - UI'da göstermek için
+      extra: extra.map((e) => ({ table: e.table, rows: e.rows.length })),
     });
   } catch (e) {
     return json({

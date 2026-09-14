@@ -19,7 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     appleTeamId: process.env.EXPO_APPLE_TEAM_ID ?? "AZPJSKX9C9",
     buildNumber: "16",
     icon: {
-      // HELM iOS asset set (1024×1024): Default / Dark / Clear Light (tinted home screen)
+      // HELM iOS asset set (1024×1024): fırçalanmış metal kart + H işareti. Default / Dark / Tinted
       light: "./assets/icon.png",
       dark: "./assets/icon-dark.png",
       tinted: "./assets/icon-tinted.png",
@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: "com.canakyuz.helmmobile",
     adaptiveIcon: {
-      foregroundImage: "./assets/icon.png",
+      foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#000000",
     },
   },

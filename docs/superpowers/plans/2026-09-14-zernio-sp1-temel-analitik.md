@@ -574,8 +574,8 @@ import { aggregateDaily, toAccountRows } from "./zernio-aggregate";
 import type { ZernioAccount, ZernioAnalyticsPost } from "../../_shared/zernio";
 
 const accounts: ZernioAccount[] = [
-  { _id: "acc1", platform: "instagram", username: "wesanco", followersCount: 120, isActive: true },
-  { _id: "acc2", platform: "tiktok", username: "wesan.studio", followersCount: null, isActive: true },
+  { _id: "acc1", platform: "instagram", username: "brand_main", followersCount: 120, isActive: true },
+  { _id: "acc2", platform: "tiktok", username: "brand_studio", followersCount: null, isActive: true },
   { _id: "acc3", platform: "youtube", username: "old", followersCount: 9, isActive: false },
 ];
 
@@ -644,7 +644,7 @@ describe("toAccountRows", () => {
   it("Zernio hesabini social_accounts satirina cevirir", () => {
     const rows = toAccountRows(accounts.slice(0, 1), "2026-09-14T00:00:00.000Z");
     expect(rows[0]).toEqual({
-      id: "acc1", platform: "instagram", username: "wesanco", display_name: null,
+      id: "acc1", platform: "instagram", username: "brand_main", display_name: null,
       avatar_url: null, profile_url: null, followers_count: 120,
       is_active: true, needs_reconnection: false, synced_at: "2026-09-14T00:00:00.000Z",
     });
@@ -2191,7 +2191,7 @@ import { invokeSocial } from "@helm/api";
 
 Run: `make typecheck && make dev-web`
 Tarayıcı: `/properties` → ilgili property'de `social` modülünü etkinleştir (modül seçimi). Sidebar "Mesajlaşma" altında "Sosyal" görünür. `/social`: 5 KPI, grafik, 2 hesaplı tablo. Konsolda hata yok.
-Expected: Takipçi değeri Zernio panelindeki ile aynı (Instagram `wesanco`).
+Expected: Takipçi değeri Zernio panelindeki ile aynı (Instagram `brand_main`).
 
 - [ ] **Step 6: Commit**
 
