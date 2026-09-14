@@ -47,6 +47,18 @@ export function shortDate(iso: string): string {
   return `${d} ${MONTHS_SHORT[(m ?? 1) - 1] ?? ""}`;
 }
 
+/**
+ * ISO zaman damgası → yerel "15 Eyl 20:00". Planlı paylaşımların tek biçimi.
+ * Yıl yazılmaz: kuyruk en fazla birkaç hafta ileriye bakıyor.
+ */
+export function shortDateTime(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "-";
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${date.getDate()} ${tr(MONTHS_SHORT[date.getMonth()] ?? "")} ${hh}:${mm}`;
+}
+
 /** "2026-08-09" → "9 AĞUSTOS" - hero eyebrow'unda seçili gün. */
 export function longDayLabel(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
