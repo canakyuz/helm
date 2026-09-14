@@ -13,7 +13,8 @@ export type ProviderName =
   | "sentry"
   | "app_store_connect"
   | "resend"
-  | "google_play_developer";
+  | "google_play_developer"
+  | "zernio";
 
 export interface Project {
   id: string;
@@ -231,6 +232,7 @@ export const PROVIDER_LABELS: Record<ProviderName, string> = {
   app_store_connect: "App Store Connect",
   resend: "Resend (Mail)",
   google_play_developer: "Google Play Developer",
+  zernio: "Zernio (Sosyal)",
 };
 
 /**

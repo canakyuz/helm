@@ -41,6 +41,7 @@ const EXPECTED_LAG: Record<string, number> = {
   game: 0,
   app_store_connect: 1,
   play_console: 1,
+  zernio: 0,
 };
 const DEFAULT_LAG = 1;
 

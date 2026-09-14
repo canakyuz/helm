@@ -296,6 +296,20 @@ const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       optional: true,
     },
   ],
+  zernio: [
+    {
+      key: "api_key",
+      label: "Zernio API Key (Zernio → Settings → API Keys, sk_ ile başlar)",
+      secret: true,
+      placeholder: "sk_…",
+    },
+    {
+      key: "profile_id",
+      label: "Zernio Profile ID (boşsa varsayılan profil - hesaplar bu profilden okunur)",
+      placeholder: "24 karakter hex",
+      optional: true,
+    },
+  ],
 };
 
 const PROVIDERS = Object.keys(PROVIDER_LABELS) as ProviderName[];

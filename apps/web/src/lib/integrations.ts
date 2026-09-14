@@ -84,6 +84,12 @@ export const PROVIDER_META: Record<ProviderName, ProviderMeta> = {
     description: "Android reviews · ratings · replies · service account",
     docs: "https://developers.google.com/android-publisher",
   },
+  zernio: {
+    category: "communication",
+    icon: "Share2",
+    description: "Sosyal hesaplar · takipçi · etkileşim · yayın · inbox",
+    docs: "https://docs.zernio.com",
+  },
 };
 
 export const CATEGORY_LABELS: Record<ProviderCategory, string> = {
