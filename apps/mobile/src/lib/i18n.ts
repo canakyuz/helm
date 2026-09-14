@@ -133,6 +133,23 @@ const EN: Record<string, string> = {
   "PORTFÖY": "PORTFOLIO",
   "Yükleniyor…": "Loading…",
   "YÜKLENİYOR…": "LOADING…",
+
+  // Banka odemeleri karti
+  "Banka ödemeleri": "Bank payouts",
+  "BEKLEYEN": "PENDING",
+  "TAHMİN": "ESTIMATE",
+  "GEÇMİŞ": "HISTORY",
+  "ÖDEME KAYDI YOK": "NO PAYOUT RECORDS",
+  "Stripe veya App Store Connect bağlayın; eşik altında devreden bakiyeleri elle de girebilirsiniz.":
+    "Connect Stripe or App Store Connect; you can also enter below-threshold carried balances by hand.",
+  "Devredildi": "Carried forward",
+  "Dönem kapanmadı": "Period not closed",
+  "Eşik aşıldı": "Threshold reached",
+  "Bekliyor": "Pending",
+  "Yolda": "In transit",
+  "Ödendi": "Paid",
+  "Başarısız": "Failed",
+  "İptal edildi": "Canceled",
   "Analiz yüklenemedi": "Couldn't load analytics",
   "Cockpit yüklenemedi": "Couldn't load the cockpit",
   "Gelir yüklenemedi": "Couldn't load revenue",

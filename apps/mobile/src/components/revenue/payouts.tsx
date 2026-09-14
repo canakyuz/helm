@@ -21,15 +21,17 @@ const SOURCE_LABEL: Record<string, string> = {
 // ayri tutuluyor: ikisi de "bekliyor" degil. Biri esik altinda kalip devreden
 // bakiye, digeri mali donemi kapanmamis tutar. Hepsini "BEKLIYOR" diye
 // gostermek kullaniciya parasinin NEDEN gelmedigini gizler.
+// Cumle duzeni: satirin ikinci satirinda govde metni gibi okunur; buyuk harf
+// orada hem yer yiyor hem de TAHMIN isaretiyle ayni sesi cikariyordu.
 const STATUS_LABEL: Record<string, string> = {
-  carried_forward: "DEVREDİLDİ",
-  pending_fiscal_close: "DÖNEM KAPANMADI",
-  threshold_reached: "EŞİK AŞILDI",
-  pending: "BEKLİYOR",
-  in_transit: "YOLDA",
-  paid: "ÖDENDİ",
-  failed: "BAŞARISIZ",
-  canceled: "İPTAL",
+  carried_forward: "Devredildi",
+  pending_fiscal_close: "Dönem kapanmadı",
+  threshold_reached: "Eşik aşıldı",
+  pending: "Bekliyor",
+  in_transit: "Yolda",
+  paid: "Ödendi",
+  failed: "Başarısız",
+  canceled: "İptal edildi",
 };
 
 /** "2026-09-03" → "3 Eyl" */
@@ -58,48 +60,61 @@ function windowLabel(start?: string | null, end?: string | null): string {
 
 type Row = PendingPayout | RecentPayout;
 
+/**
+ * Iki satir: ust satir "ne + ne kadar", alt satir "ne zaman + neden".
+ * Eskiden tarih 54px'lik sabit bir sutundaydi; "21–26 Eyl" iki satira kiriliyor,
+ * TAHMIN isareti de tutarin ustune tasiyordu. Tarih alt satira inince kaynak
+ * adi tum genisligi aliyor ve tutar sutunu hep ayni hizada kaliyor.
+ */
 function PayoutRow({
   row,
   fmt,
   tone,
+  showEstimate,
 }: {
   row: Row;
   fmt: (n: number) => string;
   tone: string;
+  /** Baslik zaten "hepsi tahmin" diyorsa satirda tekrarlanmaz. */
+  showEstimate: boolean;
 }) {
+  const t = useT();
   const { theme } = useTheme();
-  const status = row.status != null ? STATUS_LABEL[row.status] ?? row.status : null;
+  const status = row.status != null ? t(STATUS_LABEL[row.status] ?? row.status) : null;
 
   return (
-    <View className="flex-row items-center gap-rowY border-t border-line py-rowY">
-      <Text className="w-[54px] font-mono-medium text-meta text-fg3">
-        {windowLabel(row.arrival_date, row.arrival_end)}
-      </Text>
-      <View className="min-w-0 flex-1">
-        <Text className="font-medium text-row tracking-tight text-fg" numberOfLines={1}>
+    <View className="border-t border-line py-rowY">
+      <View className="flex-row items-baseline">
+        <Text
+          className="mr-rowY min-w-0 flex-1 font-medium text-row tracking-tight text-fg"
+          numberOfLines={1}
+        >
           {SOURCE_LABEL[row.source] ?? row.source}
           {row.period != null ? ` · ${shortPeriod(row.period)}` : ""}
         </Text>
-        <View className="mt-[1px] flex-row items-center">
-          <Text className="text-meta text-fg3" numberOfLines={1}>
-            {status}
-          </Text>
-          {/* Tahmin oldugu SAKLANMAZ ve gri metne gomulmez - gerceklesmis odeme
-              gibi gostermek kokpitte en pahali yalandir. warn tonu, sistemde
-              zaten "gercek olmayan veri" isareti (DEMO cipi, design.md §2). */}
-          {row.estimated === true ? (
-            <Text
-              className="font-mono-medium text-eyebrow tracking-wide"
-              style={{ color: theme.warn }}
-            >
-              {`  ·  ${"TAHMİN"}`}
-            </Text>
-          ) : null}
-        </View>
+        <Text className="font-mono-semibold text-row" style={{ color: tone }}>
+          {fmt(row.amount)}
+        </Text>
       </View>
-      <Text className="font-mono-semibold text-body" style={{ color: tone }}>
-        {fmt(row.amount)}
-      </Text>
+      <View className="mt-xs flex-row items-center">
+        <Text className="mr-rowY min-w-0 flex-1 text-meta text-fg3" numberOfLines={1}>
+          <Text className="font-mono-medium">
+            {windowLabel(row.arrival_date, row.arrival_end)}
+          </Text>
+          {status != null ? `  ·  ${status}` : ""}
+        </Text>
+        {/* Tahmin oldugu SAKLANMAZ - gerceklesmis odeme gibi gostermek kokpitte
+            en pahali yalandir. Tutarin hemen altina hizali: neyin tahmin oldugu
+            belirsiz kalmaz. warn tonu sistemde "gercek olmayan veri" isareti. */}
+        {showEstimate && row.estimated === true ? (
+          <Text
+            className="font-mono-medium text-eyebrow tracking-wide"
+            style={{ color: theme.warn }}
+          >
+            {t("TAHMİN")}
+          </Text>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -127,17 +142,36 @@ export function PayoutsTile({
   const { theme } = useTheme();
   const pendingTotal = pending.reduce((a, p) => a + p.amount, 0);
   const empty = pending.length === 0 && recent.length === 0;
+  // Bekleyenlerin HEPSI tahminse isaret bir kez, toplamin yaninda durur: ayni
+  // sari etiketi bes satirda tekrarlamak sinyal degil gurultu. Karisiksa satir
+  // bazinda kalir. O(n), n = bekleyen satir sayisi.
+  const allPendingEstimated = pending.length > 0 && pending.every((p) => p.estimated === true);
 
   return (
     <BentoTile>
-      <View className="flex-row items-center justify-between">
-        <Text className="font-semibold text-emph tracking-tight text-fg">
-          {t("Banka ödemeleri")}
-        </Text>
-        <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
-          {pending.length > 0 ? `${t("BEKLEYEN")} · ${fmt(pendingTotal)}` : ""}
-        </Text>
-      </View>
+      <Text className="font-semibold text-emph tracking-tight text-fg">
+        {t("Banka ödemeleri")}
+      </Text>
+
+      {/* Kartin asil sorusu "bankaya ne kadar gelecek" - eskiden 10px gri
+          eyebrow'daydi. MiniTile ile ayni etiket-ustte / rakam-altta dizilim. */}
+      {pending.length > 0 ? (
+        <View className="mb-rowY mt-sm">
+          <Text className="font-mono-medium text-eyebrow tracking-wide text-fg3">
+            {t("BEKLEYEN")}
+            {allPendingEstimated ? (
+              <Text style={{ color: theme.warn }}>{`  ·  ${t("TAHMİN")}`}</Text>
+            ) : null}
+          </Text>
+          <Text
+            className="mt-xs font-semibold text-statSm tracking-tighter text-fg"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
+            {fmt(pendingTotal)}
+          </Text>
+        </View>
+      ) : null}
 
       {empty ? (
         <>
@@ -161,7 +195,8 @@ export function PayoutsTile({
               key={`p-${p.source}-${p.period ?? p.arrival_date ?? "na"}-${i}`}
               row={p}
               fmt={fmt}
-              tone={theme.fg2}
+              tone={theme.fg}
+              showEstimate={!allPendingEstimated}
             />
           ))}
           {pending.length > 0 && recent.length > 0 ? (
@@ -175,6 +210,7 @@ export function PayoutsTile({
               row={p}
               fmt={fmt}
               tone={p.status === "paid" ? theme.pos : theme.fg2}
+              showEstimate
             />
           ))}
         </>
