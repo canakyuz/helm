@@ -17,6 +17,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: "com.canakyuz.helmmobile",
     // Required by @bacons/apple-targets on EAS (not only local .env).
     appleTeamId: process.env.EXPO_APPLE_TEAM_ID ?? "AZPJSKX9C9",
+    // YOK SAYILIR: eas.json appVersionSource=remote. Yalnizca EAS sayacinin ilk
+    // degeri; production build'ler sayaci otomatik artirir. Elle degistirme.
     buildNumber: "16",
     icon: {
       // HELM iOS asset set (1024×1024): fırçalanmış metal kart + H işareti. Default / Dark / Tinted

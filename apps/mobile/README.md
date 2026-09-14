@@ -45,13 +45,18 @@ Build + submit **yerelde** yapılır (cloud kuyruğu saatler sürüyor, yerel 15
 Hat varsayılansız: verilmezse terminalde sorulur.
 
 ```bash
-EAS_PROFILE=production make ios-local-release     # --local build → dist/helm-ios-production.ipa → TestFlight
+EAS_PROFILE=production make ios-local-release     # --local build → dist/helm-ios-production.ipa → altool → TestFlight
 EAS_PROFILE=preview make ios-local-build          # AdHoc IPA, sadece kayıtlı cihaz (TestFlight'a gidemez)
-EAS_PROFILE=production make ios-submit IPA=./dist/foo.ipa   # mevcut IPA yükle
+EAS_PROFILE=production make ios-submit IPA=./dist/foo.ipa   # mevcut IPA'yı altool ile yükle
+EAS_PROFILE=production make ios-submit-eas        # yedek: EAS Submit
 CLOUD=1 EAS_PROFILE=production make ios-cloud-build         # cloud, sadece bilerek
 ```
 
-Önce `app.config.ts` → `ios.buildNumber`'ı artır; TestFlight aynı numarayı reddeder.
+- **buildNumber otomatik:** `eas.json` → `appVersionSource: remote` + production `autoIncrement`.
+  Her production build EAS sayacını bir artırır; `app.config.ts`'teki değer yok sayılır.
+- **Yükleme için bir kez:** App Store Connect API anahtarı `~/.appstoreconnect/private_keys/AuthKey_<ID>.p8`
+  altında olmalı; issuer ID'yi (App Store Connect → Users and Access → Integrations →
+  App Store Connect API) kök `.env`'e `ASC_ISSUER_ID=<uuid>` olarak ekle.
 
 JS-only OTA update (build yok, doğrudan kullanıcıya), kök dizinden:
 

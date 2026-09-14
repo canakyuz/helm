@@ -101,7 +101,9 @@ new `metric` string plus a connector that writes it - no migration.
   Caddy/nginx and an auth wall; the RLS policy is permissive because Helm was
   built single-user first.
 - **Mobile** - `EAS_PROFILE=production make ios-release` runs the EAS build
-  locally (`--local`) and submits the resulting IPA (`--path`) to TestFlight.
+  locally (`--local`) and uploads the IPA to App Store Connect from this machine
+  with `xcrun altool` (App Store Connect API key, `ASC_ISSUER_ID` in `.env`).
+  The build number is managed remotely by EAS and auto-increments.
   The cloud queue can take hours; a local build takes 15-20 minutes. There is no
   default profile: it is asked every time.
 

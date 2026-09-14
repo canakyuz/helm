@@ -1,7 +1,7 @@
 {
   "cli": {
     "version": ">= 12.0.0",
-    "appVersionSource": "local"
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -25,6 +25,7 @@
     },
     "production": {
       "channel": "production",
+      "autoIncrement": true,
       "env": {
         "EXPO_APPLE_TEAM_ID": "AZPJSKX9C9",
         "EAS_BUILD_NO_EXPO_GO_WARNING": "true"

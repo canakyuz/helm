@@ -182,16 +182,20 @@ development). Varsayılan yok; önceki build'in hattını tekrar kullanmak da va
 sayılır. Makefile hat verilmezse etkileşimsiz ortamda bilerek durur.
 
 ```bash
-# Önce app.config.ts ios.buildNumber'ı artır (TestFlight aynı numarayı reddeder)
-EAS_PROFILE=production make ios-local-release  # eas build --local → dist/*.ipa → eas submit --path
+EAS_PROFILE=production make ios-local-release  # eas build --local → dist/*.ipa → xcrun altool upload
 
 EAS_PROFILE=<hat> make ios-local-build         # sadece IPA
-EAS_PROFILE=production make ios-submit         # mevcut yerel IPA'yı gönder (IPA=yol)
+EAS_PROFILE=production make ios-submit         # mevcut yerel IPA'yı altool ile yükle (IPA=yol)
+EAS_PROFILE=production make ios-submit-eas     # yedek: altool yetki sorunu verirse EAS Submit
 
 # OTA update (JS-only değişiklikler) - kök dizinden; kanal yine sorulur
 CHANNEL=<kanal> make ota
 ```
 
+- **buildNumber elle artırılmaz:** `appVersionSource: remote` + production `autoIncrement`.
+  `app.config.ts`'teki `buildNumber` yok sayılır (sadece EAS sayacının ilk değeriydi).
+- Yükleme `xcrun altool` + `~/.appstoreconnect/private_keys/AuthKey_*.p8`; issuer ID kök
+  `.env`'de `ASC_ISSUER_ID`. Anahtar/issuer ID repo'ya YAZILMAZ (public repo).
 - `eas submit --latest` KULLANMA: EAS'teki son **cloud** build'i seçer, yerel IPA'yı görmez.
 - `EXPO_TOKEN` isteyen bir akışa düştüysen yanlış yoldasın: cloud'a gidiyorsun.
 
