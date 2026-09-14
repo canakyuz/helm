@@ -5,6 +5,7 @@ import Constants from "expo-constants";
 import { accentById, press, space } from "@helm/design";
 
 import { useProperties } from "~/hooks/use-properties";
+import { useSocialAccounts } from "~/hooks/use-social";
 import { useSystemHealth } from "~/hooks/use-system-health";
 import { useScreenRefresh } from "~/hooks/use-screen-refresh";
 import { haptic } from "~/lib/haptics";
@@ -24,12 +25,14 @@ export default function SettingsHub() {
 
   const propertiesQuery = useProperties();
   const healthQuery = useSystemHealth();
+  const socialQuery = useSocialAccounts();
 
   const projectCount = propertiesQuery.data?.length ?? 0;
   const sources = healthQuery.data?.totalIntegrations ?? 0;
   const okCount = healthQuery.data?.okCount ?? 0;
   const errorCount = healthQuery.data?.errorCount ?? 0;
   const version = Constants.expoConfig?.version ?? "-";
+  const socialSummary = `${socialQuery.data?.length ?? 0} ${t("hesap")}`;
 
   function confirmSignOut() {
     haptic.tap();
@@ -132,6 +135,13 @@ export default function SettingsHub() {
                 divider
                 value={sourcesSummary}
                 onPress={() => router.push("/settings/sources")}
+              />
+              <Row
+                label={t("Sosyal")}
+                sub={t("hesaplar ve etkileşim")}
+                divider
+                value={socialSummary}
+                onPress={() => router.push("/settings/social")}
               />
               <Row
                 label={t("Hakkında")}
