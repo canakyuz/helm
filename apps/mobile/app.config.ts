@@ -5,7 +5,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: "Helm",
   slug: "helm-mobile",
   scheme: "helmmobile",
-  version: "0.1.3",
+  // SDK 57 native degisiklik: runtimeVersion appVersion'a bagli, 56 build'lerine
+  // 57 OTA'si inmesin diye surum artti.
+  version: "0.1.4",
   orientation: "portrait",
   userInterfaceStyle: "automatic",
   icon: "./assets/icon.png",
@@ -15,7 +17,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: "com.canakyuz.helmmobile",
     // Required by @bacons/apple-targets on EAS (not only local .env).
     appleTeamId: process.env.EXPO_APPLE_TEAM_ID ?? "AZPJSKX9C9",
-    buildNumber: "15",
+    buildNumber: "16",
     icon: {
       // HELM iOS asset set (1024×1024): Default / Dark / Clear Light (tinted home screen)
       light: "./assets/icon.png",
