@@ -30,3 +30,4 @@ export * from "./ad-economics";
 export * from "./data-coverage";
 export * from "./project-integrations";
 export * from "./social";
+export * from "./social-publishing";
