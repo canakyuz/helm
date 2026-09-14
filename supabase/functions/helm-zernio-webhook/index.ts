@@ -41,7 +41,8 @@ async function triggerZernioIngest(): Promise<void> {
       },
       body: JSON.stringify({ trigger: "manual", provider: "zernio" }),
     });
-  } catch {
+  } catch (e) {
+    console.error("[helm-zernio-webhook] helm-ingest trigger failed", e instanceof Error ? e.message : String(e));
     // ingest tetiklenemezse gece cron'u toplar
   }
 }
@@ -89,12 +90,16 @@ Deno.serve(async (req) => {
     case "account.disconnected": {
       const accountId = accountIdOf(evt.data);
       if (!accountId) return json({ ok: true, event: name, skipped: "accountId yok" });
-      const { data: acc } = await hub
+      const { data: acc, error: updErr } = await hub
         .from("social_accounts")
         .update({ needs_reconnection: true, is_active: false })
         .eq("id", accountId)
         .select("platform, username")
         .maybeSingle();
+      if (updErr) {
+        console.error("[helm-zernio-webhook] social_accounts update failed", { accountId, message: updErr.message });
+        return json({ error: "social_accounts update failed" }, 500);
+      }
       const label = acc ? `${acc.platform} · ${acc.username ?? accountId}` : accountId;
       await sendCockpitPush(
         hub,
