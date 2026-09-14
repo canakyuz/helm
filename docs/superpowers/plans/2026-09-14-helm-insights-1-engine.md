@@ -718,7 +718,7 @@ export type SeriesIndex = Map<string, Map<string, DailySeries>>;
 export function buildSeriesIndex(rows: readonly MetricRow[]): SeriesIndex {
   const bySource = new Map<string, Map<string, DailySeries>>();
   for (const r of rows) {
-    const key = `${r.project_id} ${r.metric}`;
+    const key = `${r.project_id}|${r.metric}`;
     let sources = bySource.get(key);
     if (!sources) bySource.set(key, (sources = new Map()));
     let s = sources.get(r.source);
@@ -728,7 +728,7 @@ export function buildSeriesIndex(rows: readonly MetricRow[]): SeriesIndex {
 
   const index: SeriesIndex = new Map();
   for (const [key, sources] of bySource) {
-    const [project, metric] = key.split(" ") as [string, string];
+    const [project, metric] = key.split("|") as [string, string];
     let best: DailySeries | undefined;
     for (const s of sources.values()) if (!best || s.size > best.size) best = s;
     let metrics = index.get(project);
