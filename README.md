@@ -75,8 +75,8 @@ runs in CI. See [SECURITY.md](./SECURITY.md).
 | `make gen-types` | Supabase schema → `packages/types/src/database.ts` |
 | `make db-push` | Apply migrations to the remote database |
 | `make fn-deploy FN=helm-payouts` | Deploy an edge function (omit `FN` for all) |
-| `make ios-release` | Local IPA + TestFlight (delegates to `apps/mobile/Makefile`) |
-| `make ota` | Publish an over-the-air update to the production channel |
+| `make ios-release` | Local IPA + TestFlight (delegates to `apps/mobile/Makefile`; asks for the profile) |
+| `make ota` | Publish an over-the-air update (asks for the channel) |
 | `make scan-secrets` | Scan tracked files for credentials |
 | `make audit-secrets` | Scan the entire git history |
 | `make clean` | Remove node_modules and build output |
@@ -100,8 +100,10 @@ new `metric` string plus a connector that writes it - no migration.
 - **Web** - `make build-web` produces a static `dist/`. Serve it behind your own
   Caddy/nginx and an auth wall; the RLS policy is permissive because Helm was
   built single-user first.
-- **Mobile** - `make ios-release` runs the EAS build locally and submits to
-  TestFlight, which avoids burning cloud build quota.
+- **Mobile** - `EAS_PROFILE=production make ios-release` runs the EAS build
+  locally (`--local`) and submits the resulting IPA (`--path`) to TestFlight.
+  The cloud queue can take hours; a local build takes 15-20 minutes. There is no
+  default profile: it is asked every time.
 
 ## Documentation
 

@@ -173,25 +173,32 @@ helm-mobile/
 
 ## 11) EAS / TestFlight Akışı
 
+**Build ve submit HER ZAMAN YEREL.** Cloud build (`eas build` `--local`'sız)
+ücretsiz kuyrukta 5-6 saat bekliyor ve non-interactive'de `EXPO_TOKEN` istiyor;
+aynı build bu Mac'te 15-20 dk. Cloud yalnızca Can açıkça isterse (`CLOUD=1`).
+
+**Hat her seferinde Can'e SORULUR** (`AskUserQuestion`: production / preview /
+development). Varsayılan yok; önceki build'in hattını tekrar kullanmak da varsayım
+sayılır. Makefile hat verilmezse etkileşimsiz ortamda bilerek durur.
+
 ```bash
-# İlk kurulum
-eas init
-eas device:create          # iPhone UDID register (development build için)
+# Önce app.config.ts ios.buildNumber'ı artır (TestFlight aynı numarayı reddeder)
+EAS_PROFILE=production make ios-local-release  # eas build --local → dist/*.ipa → eas submit --path
 
-# Build (TestFlight'a)
-eas build -p ios --profile preview
+EAS_PROFILE=<hat> make ios-local-build         # sadece IPA
+EAS_PROFILE=production make ios-submit         # mevcut yerel IPA'yı gönder (IPA=yol)
 
-# Submit
-eas submit -p ios --latest
-
-# OTA update (JS-only değişiklikler)
-eas update --branch preview --message "WES-XXX neden"
+# OTA update (JS-only değişiklikler) - kök dizinden; kanal yine sorulur
+CHANNEL=<kanal> make ota
 ```
+
+- `eas submit --latest` KULLANMA: EAS'teki son **cloud** build'i seçer, yerel IPA'yı görmez.
+- `EXPO_TOKEN` isteyen bir akışa düştüysen yanlış yoldasın: cloud'a gidiyorsun.
 
 **eas.json profilleri:**
 - `development` - dev client, simulator + device
-- `preview` - internal distribution, TestFlight'a submit edilir
-- `production` - KULLANMA (App Store için, kapsam dışı)
+- `preview` - internal distribution = **AdHoc imza, TestFlight'a GİDEMEZ**
+- `production` - TestFlight'a giden tek profil; kurulu build'ler `production` kanalını dinler
 
 ## 12) Environment
 

@@ -41,26 +41,22 @@ eas init                   # projectId üretir → app.config.ts'ye kopyala
 eas device:create          # kendi iPhone'unu kaydet
 ```
 
-Build + submit:
+Build + submit **yerelde** yapılır (cloud kuyruğu saatler sürüyor, yerel 15-20 dk).
+Hat varsayılansız: verilmezse terminalde sorulur.
 
 ```bash
-bun run build:preview      # eas build -p ios --profile preview (cloud - aylık kota)
-bun run submit:preview     # son cloud build → TestFlight
+EAS_PROFILE=production make ios-local-release     # --local build → dist/helm-ios-production.ipa → TestFlight
+EAS_PROFILE=preview make ios-local-build          # AdHoc IPA, sadece kayıtlı cihaz (TestFlight'a gidemez)
+EAS_PROFILE=production make ios-submit IPA=./dist/foo.ipa   # mevcut IPA yükle
+CLOUD=1 EAS_PROFILE=production make ios-cloud-build         # cloud, sadece bilerek
 ```
 
-Cloud kotası doluysa **yerel build + submit** (kota harcamaz):
+Önce `app.config.ts` → `ios.buildNumber`'ı artır; TestFlight aynı numarayı reddeder.
+
+JS-only OTA update (build yok, doğrudan kullanıcıya), kök dizinden:
 
 ```bash
-make ios-local-release              # preview → dist/helm-ios-preview.ipa → TestFlight
-make ios-local-build                # sadece IPA
-make ios-submit IPA=./dist/foo.ipa  # mevcut IPA yükle
-make EAS_PROFILE=production ios-local-release
-```
-
-JS-only OTA update (build yok, doğrudan kullanıcıya):
-
-```bash
-bun run update:preview -- --message "WES-XXX neden"
+make ota    # kanal sorulur
 ```
 
 ## iOS Home Widget (WidgetKit)
@@ -99,11 +95,10 @@ eas credentials -p ios
 eas build -p ios --profile production
 ```
 
-Credential’lar hazır olduktan sonra CI/non-interactive çalışır:
+Credential’lar hazır olduktan sonra non-interactive yerel akış çalışır:
 
 ```bash
-eas build -p ios --profile production --non-interactive
-eas submit -p ios --profile production --latest --non-interactive
+EAS_PROFILE=production make ios-local-release
 ```
 
 `ios.appleTeamId` EAS ile aynı team: `AZPJSKX9C9`.

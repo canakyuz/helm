@@ -91,17 +91,13 @@ ios-release: ## yerel IPA + TestFlight (apps/mobile/Makefile'a delege)
 clean: ## node_modules + build çıktıları temizle
 	rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/web/dist
 
-# CHANNEL varsayilani production: EAS'teki TUM bitmis iOS build'leri
-# `production` profiliyle uretilmis ve `production` kanalini dinliyor
-# (dogrulama: eas build:list --platform ios).
+# CHANNEL BILEREK VARSAYILANSIZ: her yayinda secilir.
 #
-# NEDEN NOT DUSULDU: bir ara varsayilan `preview` yapilmisti, cunku
-# apps/mobile/Makefile'da `EAS_PROFILE ?= preview` yaziyor. O degisken yerel
-# build komutunun varsayilani; cihazdaki build'in hangi kanali dinledigini
-# SOYLEMEZ. Sonuc: `make ota` preview'a yayinladi, telefon production'i
-# dinledigi icin guncelleme hic ulasmadi ve widget eski rakamda kaldi.
-# Kanal sorusunun tek dogru kaynagi `eas build:list`.
-CHANNEL ?= production
+# NEDEN: once varsayilan `preview` idi, sonra `production` yapildi. Ikisi de
+# ayni hatayi saklar: yayin, cihazdaki build'in dinledigi kanali TAHMIN eder.
+# `make ota` preview'a yayinladi, telefon production'i dinliyordu, guncelleme hic
+# ulasmadi ve widget eski rakamda kaldi. Kanal sorusunun tek dogru kaynagi
+# `eas build:list --platform ios`; secimi insana birakmak tek satirlik soru.
 
 # Yayindan ONCE hedef ortamin anahtarini dogrula.
 #
@@ -110,8 +106,18 @@ CHANNEL ?= production
 # production ortami legacy JWT (eyJ...) tasiyordu, Supabase'de legacy anahtarlar
 # kapatilmisti, yayindan sonra telefonda TUM ekranlar bosaldi. Anahtar formati
 # tek satirlik bir kontrol; yayindan sonra fark etmek cok pahali.
-ota: check-ota-env ## OTA update (CHANNEL=production ile prod kanalina)
+ifndef CHANNEL
+ota: ## OTA update (kanal sorulur; CHANNEL=production|preview ile ver)
+	@if [ ! -t 0 ]; then \
+		echo "HATA: kanal secilmedi. Kullaniciya sor, sonra: CHANNEL=production|preview make ota"; \
+		exit 1; \
+	fi; \
+	read -rp "Hangi kanal? [production/preview]: " c; \
+	$(MAKE) --no-print-directory ota CHANNEL="$$c"
+else
+ota: check-ota-env
 	cd apps/mobile && eas update --channel $(CHANNEL) --environment $(CHANNEL) --message "$$(git log -1 --pretty=%s)"
+endif
 
 check-ota-env:
 	@cd apps/mobile && key=$$(eas env:list --environment $(CHANNEL) 2>/dev/null \
