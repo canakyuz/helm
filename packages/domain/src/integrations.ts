@@ -25,6 +25,7 @@ export const PROVIDERS = [
   "app_store_connect",
   "resend",
   "google_play_developer",
+  "zernio",
 ] as const;
 
 export type ProviderName = (typeof PROVIDERS)[number];
@@ -42,6 +43,7 @@ export const PROVIDER_LABEL: Record<ProviderName, string> = {
   app_store_connect: "App Store Connect",
   resend: "Resend",
   google_play_developer: "Google Play Developer",
+  zernio: "Zernio",
 };
 
 /** Bir saglayicinin "bagla" formundaki tek alani. */
@@ -246,6 +248,20 @@ export const PROVIDER_FIELDS: Record<ProviderName, FieldDef[]> = {
       key: "language_codes",
       label: "Yorum çeviri dilleri (virgülle, opsiyonel - reviews için, versions etkilenmez)",
       placeholder: "en,tr",
+      optional: true,
+    },
+  ],
+  zernio: [
+    {
+      key: "api_key",
+      label: "Zernio API Key (sk_ ile baslar)",
+      secret: true,
+      placeholder: "sk_…",
+    },
+    {
+      key: "profile_id",
+      label: "Zernio Profile ID (bos ise varsayilan profil kullanilir)",
+      placeholder: "24 karakter hex",
       optional: true,
     },
   ],
