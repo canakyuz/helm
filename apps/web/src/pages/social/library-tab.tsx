@@ -5,6 +5,7 @@ import {
   SOCIAL_PLATFORMS,
   isActivePost,
   latestPostByLibrary,
+  readyProjectCounts,
   socialItemState,
   type SocialLibraryItem,
   type SocialPlatform,
@@ -57,9 +58,12 @@ export function LibraryTab() {
   const items = library.data ?? [];
   // Time: O(p) + O(n). Satir basina durum Map'ten O(1).
   const latest = useMemo(() => latestPostByLibrary(posts.data ?? []), [posts.data]);
+  // Scope "all" iken kutuphane birden fazla projeyi kapsayabilir; proje basina
+  // hazir sayisi burada tutulur, RPC de proje basina sirayla cagrilir.
+  const projectCounts = useMemo(() => readyProjectCounts(items, posts.data ?? []), [items, posts.data]);
   const readyCount = useMemo(
-    () => items.filter((i) => !isActivePost(latest.get(i.id)?.status ?? "cancelled")).length,
-    [items, latest],
+    () => Array.from(projectCounts.values()).reduce((sum, n) => sum + n, 0),
+    [projectCounts],
   );
   const selected = items.find((i) => i.id === selectedId);
 
@@ -154,11 +158,7 @@ export function LibraryTab() {
           <AlertDialogFooter>
             <AlertDialogCancel>Vazgeç</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                const first = items[0];
-                if (!first) return;
-                scheduleAll.mutate({ projectId: first.project_id, platforms: [...SOCIAL_PLATFORMS] });
-              }}
+              onClick={() => scheduleAll.mutate({ projectCounts, platforms: [...SOCIAL_PLATFORMS] })}
             >
               Planla
             </AlertDialogAction>
@@ -203,19 +203,30 @@ function ItemSheet({
             </SheetHeader>
             <div className="space-y-6 px-4 pb-6">
               <div className="flex gap-4">
-                <a href={item.video_url} target="_blank" rel="noreferrer" aria-label="Videoyu aç">
-                  <Thumb item={item} className="h-48 w-27" />
-                </a>
-                <div className="flex flex-col justify-end gap-2 text-sm">
-                  <a
-                    className="inline-flex items-center gap-1 underline-offset-4 hover:underline"
-                    href={item.video_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <ExternalLink className="size-3.5" /> Videoyu aç
-                  </a>
-                </div>
+                {item.video_url ? (
+                  <>
+                    <a href={item.video_url} target="_blank" rel="noreferrer" aria-label="Videoyu aç">
+                      <Thumb item={item} className="h-48 w-27" />
+                    </a>
+                    <div className="flex flex-col justify-end gap-2 text-sm">
+                      <a
+                        className="inline-flex items-center gap-1 underline-offset-4 hover:underline"
+                        href={item.video_url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <ExternalLink className="size-3.5" /> Videoyu aç
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Thumb item={item} className="h-48 w-27" />
+                    <div className="flex flex-col justify-end gap-2 text-sm">
+                      <p className="text-muted-foreground">Video yüklenmemiş</p>
+                    </div>
+                  </>
+                )}
               </div>
 
               {post && isActivePost(post.status) ? (
@@ -333,6 +344,7 @@ function PublishForm({ item, lastFailed }: { item: SocialLibraryItem; lastFailed
   const platforms = SOCIAL_PLATFORMS.filter((p) => flags[p]);
   const whenDate = new Date(when);
   const whenValid = !Number.isNaN(whenDate.getTime()) && whenDate.getTime() >= Date.now() + 60_000;
+  const hasVideo = item.video_url != null;
 
   const submit = (scheduledFor: string | null) =>
     publish.mutate({ libraryId: item.id, platforms, scheduledFor });
@@ -340,6 +352,7 @@ function PublishForm({ item, lastFailed }: { item: SocialLibraryItem; lastFailed
   return (
     <section className="space-y-4 border-t pt-4">
       <h3 className="text-sm font-medium">Paylaş</h3>
+      {!hasVideo && <p className="text-sm text-muted-foreground">Video yüklenmemiş</p>}
       {lastFailed && (
         <p className="text-sm text-destructive">Son deneme başarısız: {lastFailed.error ?? "bilinmeyen hata"}</p>
       )}
@@ -357,7 +370,11 @@ function PublishForm({ item, lastFailed }: { item: SocialLibraryItem; lastFailed
       </div>
       {platforms.length === 0 && <p className="text-xs text-muted-foreground">En az bir platform seç.</p>}
 
-      <Button className="w-full" disabled={platforms.length === 0 || publish.isPending} onClick={() => setConfirmNow(true)}>
+      <Button
+        className="w-full"
+        disabled={!hasVideo || platforms.length === 0 || publish.isPending}
+        onClick={() => setConfirmNow(true)}
+      >
         Şimdi paylaş
       </Button>
 
@@ -373,7 +390,7 @@ function PublishForm({ item, lastFailed }: { item: SocialLibraryItem; lastFailed
           />
           <Button
             variant="outline"
-            disabled={platforms.length === 0 || !whenValid || publish.isPending}
+            disabled={!hasVideo || platforms.length === 0 || !whenValid || publish.isPending}
             onClick={() => submit(whenDate.toISOString())}
           >
             Planla

@@ -1,4 +1,4 @@
-import type { SocialItemState, SocialPlatform, SocialPostStatus } from "@helm/api";
+import { istanbulEveningSlot, type SocialItemState, type SocialPlatform, type SocialPostStatus } from "@helm/api";
 
 export type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
@@ -63,9 +63,9 @@ export const toLocalInput = (d: Date): string =>
 /** Planlamaya izin verilen en erken an: simdiden 5 dk sonra. */
 export const MIN_LEAD_MS = 5 * 60_000;
 
-/** Bir sonraki 20:00 (bugun yetisiyorsa bugun, degilse yarin). */
+/** Bir sonraki Istanbul 20:00'i (bugun yetisiyorsa bugun, degilse yarin). */
 export function nextEvening(now: Date): Date {
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 20, 0, 0, 0);
+  const today = istanbulEveningSlot(now, 0);
   if (today.getTime() >= now.getTime() + MIN_LEAD_MS) return today;
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 20, 0, 0, 0);
+  return istanbulEveningSlot(now, 1);
 }

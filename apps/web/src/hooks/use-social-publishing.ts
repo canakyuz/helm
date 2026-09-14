@@ -4,7 +4,8 @@ import {
   cancelSocialPost,
   publishSocialItem,
   refreshSocialPosts,
-  scheduleAllSocial,
+  scheduleAllReady,
+  ScheduleAllPartialError,
   type SocialPlatform,
 } from "@helm/api";
 import {
@@ -47,16 +48,28 @@ export function usePublishSocialItem() {
   });
 }
 
+/**
+ * Scope "all" iken kutuphane birden fazla projeye ait olabilir; `projectCounts`
+ * (bkz. `readyProjectCounts`) proje basina RPC cagrisini sirayla yapar. Bir
+ * proje basarisiz olursa o ana kadar planlanan adet + sunucu mesaji gosterilir.
+ */
 export function useScheduleAllSocial() {
   const invalidate = useInvalidateSocialPublishing();
   return useMutation({
-    mutationFn: (args: { projectId: string; platforms: SocialPlatform[] }) =>
-      scheduleAllSocial(supabaseClient, args),
+    mutationFn: (args: { projectCounts: ReadonlyMap<string, number>; platforms: SocialPlatform[] }) =>
+      scheduleAllReady(supabaseClient, args.projectCounts, args.platforms),
     onSuccess: (count) => {
       toast.success(`${count} video planlandı`);
       void invalidate();
     },
-    onError: (e: Error) => toast.error("Planlanamadı", { description: e.message }),
+    onError: (e: Error) => {
+      if (e instanceof ScheduleAllPartialError) {
+        toast.error(`${e.scheduled} video planlandı, sonra durdu`, { description: e.message });
+      } else {
+        toast.error("Planlanamadı", { description: e.message });
+      }
+      void invalidate();
+    },
   });
 }
 
