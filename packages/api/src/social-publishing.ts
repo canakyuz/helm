@@ -27,7 +27,8 @@ export interface SocialLibraryItem {
   sort_order: number;
   hook: string;
   voice: string | null;
-  video_url: string;
+  /** Import presign'i once satir yazmadan da olusabilir; RPC bos/null URL'yi reddeder. */
+  video_url: string | null;
   thumbnail_url: string | null;
   duration_sec: number | null;
   tiktok_caption: string;
@@ -143,6 +144,46 @@ export async function scheduleAllSocial(
   return Number(data ?? 0);
 }
 
+/**
+ * `scheduleAllSocial` bir istekte tek `project_id` kabul eder (bkz.
+ * `0053_social_publishing.sql:530`); "hepsini planla" scope "all"
+ * iken birden fazla projeyi kapsayabilir, o yuzden proje basina sirayla
+ * cagirilir. Ara projede hata olursa o ana kadar planlanan adet bu hatada
+ * tasinir - UI "N planlandi, sonra durdu: <sunucu mesaji>" gosterebilir.
+ */
+export class ScheduleAllPartialError extends Error {
+  constructor(
+    public readonly scheduled: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ScheduleAllPartialError";
+  }
+}
+
+/**
+ * `projectCounts` icindeki her proje icin `scheduleAllSocial`'i sirayla
+ * cagirir ve planlanan toplami dondurur. Sirayla: ayni anda iki RPC proje
+ * basina bagimsiz olsa da paralel calistirmanin ek fayda saglamadigi, hata
+ * ayiklamayi ("hangi proje?") zorlastirdigi bir akis - basitlik tercih edildi.
+ * Time: O(p) RPC cagrisi (p = proje sayisi), Space: O(1).
+ */
+export async function scheduleAllReady(
+  client: SupabaseClient,
+  projectCounts: ReadonlyMap<string, number>,
+  platforms: SocialPlatform[],
+): Promise<number> {
+  let scheduled = 0;
+  for (const projectId of projectCounts.keys()) {
+    try {
+      scheduled += await scheduleAllSocial(client, { projectId, platforms });
+    } catch (e) {
+      throw new ScheduleAllPartialError(scheduled, e instanceof Error ? e.message : String(e));
+    }
+  }
+  return scheduled;
+}
+
 /** Yalnizca `scheduled` durumdaki post iptal edilebilir; sunucu dogrular. */
 export async function cancelSocialPost(client: SupabaseClient, postId: string): Promise<void> {
   const { error } = await client.rpc("helm_social_cancel", { p_post_id: postId });
@@ -182,6 +223,29 @@ export function latestPostByLibrary(posts: readonly SocialPost[]): Map<string, S
     }
   }
   return latest;
+}
+
+/**
+ * Proje basina "planlanmaya hazir" video sayisi: arsivlenmemis, video_url
+ * dolu, aktif postu olmayan ogeler - sunucunun `helm_social_schedule_all`
+ * filtresiyle ayni kural (`0053_social_publishing.sql:558-566`). "Hepsini
+ * planla" onay metni ve proje basina RPC cagrisi bu Map'ten turer.
+ * Time: O(n) (latestPostByLibrary O(n) + tek gecis), Space: O(p) p = proje sayisi.
+ */
+export function readyProjectCounts(
+  items: readonly SocialLibraryItem[],
+  posts: readonly SocialPost[],
+): Map<string, number> {
+  const latest = latestPostByLibrary(posts);
+  const counts = new Map<string, number>();
+  for (const item of items) {
+    if (item.archived) continue;
+    if (item.video_url == null || item.video_url === "") continue;
+    const post = latest.get(item.id);
+    if (post != null && isActivePost(post.status)) continue;
+    counts.set(item.project_id, (counts.get(item.project_id) ?? 0) + 1);
+  }
+  return counts;
 }
 
 /** Bir kutuphane satirinin gosterilen durumu - en yeni posttan turer. */
@@ -237,4 +301,33 @@ export function groupSocialQueue(posts: readonly SocialPost[]): SocialQueue {
   );
   queue.failed.sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
   return queue;
+}
+
+/**
+ * `now`dan `dayOffset` gun sonraki Istanbul takvim gunu, saat `hour`:00
+ * (varsayilan 20 - sunucunun toplu planlama saatiyle ayni, bkz.
+ * `0053_social_publishing.sql:539`). Cihaz saat dilimini YOK SAYAR: mobil ve
+ * web'de "Bugun/Yarin 20:00" hep Turkiye saatidir, kullanicinin telefonu
+ * hangi dilimde olursa olsun.
+ *
+ * Turkiye 2016'dan beri DST uygulamiyor, sabit UTC+3 (kanun ile) - bu yuzden
+ * `hour - 3` guvenli sabit bir donusum; IANA kurali degisirse burasi da
+ * degismeli.
+ *
+ * Time: O(1) (Intl formatToParts sabit maliyetli).
+ */
+export function istanbulEveningSlot(now: Date, dayOffset: 0 | 1, hour = 20): Date {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Istanbul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const get = (type: "year" | "month" | "day"): number =>
+    Number(parts.find((p) => p.type === type)?.value ?? NaN);
+  const year = get("year");
+  const month = get("month");
+  const day = get("day") + dayOffset;
+  // Date.UTC ay tasmasini kendi normalize eder (orn. gun 31 -> bir sonraki ay).
+  return new Date(Date.UTC(year, month - 1, day, hour - 3, 0));
 }
