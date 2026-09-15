@@ -1,6 +1,7 @@
 import { Linking, Pressable, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { press, withAlpha } from "@helm/design";
+import { platformDisplayStatus } from "@helm/api";
 import type { SocialAccount, SocialItemState, SocialLibraryItem, SocialPost } from "@helm/api";
 
 import { formatInteger } from "~/lib/format";
@@ -13,7 +14,7 @@ import {
   durationLabel,
   itemStateTone,
   platformTone,
-  postStatusTone,
+  postTone,
 } from "./status";
 import { SocialThumb } from "./thumb";
 
@@ -126,7 +127,7 @@ export function QueueRow({
 }) {
   const t = useT();
   const { theme } = useTheme();
-  const tone = postStatusTone(post.status, t, theme);
+  const tone = postTone(post, t, theme);
   const at =
     post.status === "published" || post.status === "partial"
       ? (post.published_at ?? post.updated_at)
@@ -148,7 +149,7 @@ export function QueueRow({
         {post.platforms.length > 0 ? (
           <View className="mt-sm flex-row flex-wrap gap-xs">
             {post.platforms.map((p) => (
-              <PlatformChip key={`${p.platform}-${p.account_id}`} platform={p.platform} status={p.status} url={p.url} />
+              <PlatformChip key={`${p.platform}-${p.account_id}`} platform={p.platform} status={platformDisplayStatus(post, p)} url={p.url} />
             ))}
           </View>
         ) : null}

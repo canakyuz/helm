@@ -6,6 +6,7 @@ import {
   isActivePost,
   latestPostByLibrary,
   readyProjectCounts,
+  platformDisplayStatus,
   socialItemState,
   type SocialLibraryItem,
   type SocialPlatform,
@@ -292,7 +293,7 @@ export function PlatformList({ post }: { post: SocialPost }) {
   return (
     <ul className="flex flex-wrap gap-2">
       {post.platforms.map((p) => {
-        const badge = platformBadge(p.status);
+        const badge = platformBadge(platformDisplayStatus(post, p));
         const label = `${PLATFORM_LABEL[p.platform]} · ${badge.label}`;
         return (
           <li key={`${p.platform}-${p.account_id}`} title={p.error ?? undefined}>
@@ -340,6 +341,11 @@ function PublishForm({ item, lastFailed }: { item: SocialLibraryItem; lastFailed
   const [flags, setFlags] = useState<Record<SocialPlatform, boolean>>({ tiktok: true, instagram: true });
   const [when, setWhen] = useState(() => toLocalInput(nextEvening(new Date())));
   const [confirmNow, setConfirmNow] = useState(false);
+  const [confirmDraft, setConfirmDraft] = useState(false);
+  // Yalnizca TikTok girdisi olan basarisiz denemede sunulur: dogrudan paylasim
+  // kotasina (Zernio "at capacity") takilan videonun cikis yolu. Hata metnini
+  // ayristirmiyoruz; Zernio mesaji degisirse sessizce kaybolmasin.
+  const canDraft = lastFailed?.platforms.some((p) => p.platform === "tiktok") === true;
 
   const platforms = SOCIAL_PLATFORMS.filter((p) => flags[p]);
   const whenDate = new Date(when);
@@ -355,6 +361,16 @@ function PublishForm({ item, lastFailed }: { item: SocialLibraryItem; lastFailed
       {!hasVideo && <p className="text-sm text-muted-foreground">Video yüklenmemiş</p>}
       {lastFailed && (
         <p className="text-sm text-destructive">Son deneme başarısız: {lastFailed.error ?? "bilinmeyen hata"}</p>
+      )}
+      {canDraft && (
+        <Button
+          variant="outline"
+          className="w-full"
+          disabled={!hasVideo || publish.isPending}
+          onClick={() => setConfirmDraft(true)}
+        >
+          TikTok'a taslak gönder
+        </Button>
       )}
       <div className="flex flex-wrap gap-6">
         {SOCIAL_PLATFORMS.map((p) => (
@@ -410,6 +426,28 @@ function PublishForm({ item, lastFailed }: { item: SocialLibraryItem; lastFailed
           <AlertDialogFooter>
             <AlertDialogCancel>Vazgeç</AlertDialogCancel>
             <AlertDialogAction onClick={() => submit(null)}>Paylaş</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmDraft} onOpenChange={setConfirmDraft}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>TikTok'a taslak gönder</AlertDialogTitle>
+            <AlertDialogDescription>
+              Video TikTok uygulamasındaki gelen kutuna düşer. Açıklama, kapak ve Paylaş adımını uygulamada sen
+              tamamlarsın. Instagram'a gönderilmez.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Vazgeç</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                publish.mutate({ libraryId: item.id, platforms: ["tiktok"], scheduledFor: null, tiktokDraft: true })
+              }
+            >
+              Taslak gönder
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

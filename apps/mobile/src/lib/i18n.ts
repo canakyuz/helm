@@ -150,6 +150,15 @@ const EN: Record<string, string> = {
   "Ödendi": "Paid",
   "Başarısız": "Failed",
   "İptal edildi": "Canceled",
+
+  // TikTok taslak (Creator Inbox) yedegi
+  "TikTok'a taslak gönder": "Send TikTok draft",
+  "Video TikTok uygulamasındaki gelen kutuna düşer. Açıklama, kapak ve Paylaş adımını uygulamada sen tamamlarsın. Instagram'a gönderilmez.":
+    "The video lands in your TikTok app inbox. You finish the caption, cover and Post step in the app. Nothing is sent to Instagram.",
+  "Taslak gönder": "Send draft",
+  "Taslak TikTok'a gönderiliyor": "Sending draft to TikTok",
+  "TikTok taslağı": "TikTok draft",
+  "Taslak": "Draft",
   "Analiz yüklenemedi": "Couldn't load analytics",
   "Cockpit yüklenemedi": "Couldn't load the cockpit",
   "Gelir yüklenemedi": "Couldn't load revenue",

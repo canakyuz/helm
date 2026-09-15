@@ -7,6 +7,7 @@ import {
   SOCIAL_PLATFORMS,
   isActivePost,
   latestPostByLibrary,
+  platformDisplayStatus,
   socialItemState,
   type SocialLibraryItem,
   type SocialPlatform,
@@ -40,7 +41,7 @@ import {
   durationLabel,
   itemStateTone,
   platformTone,
-  postStatusTone,
+  postTone,
   quickSlots,
 } from "~/components/social";
 
@@ -151,7 +152,7 @@ function ActivePost({ post }: { post: SocialPost }) {
   const t = useT();
   const { theme } = useTheme();
   const cancel = useCancelSocialPost();
-  const tone = postStatusTone(post.status, t, theme);
+  const tone = postTone(post, t, theme);
   const at = post.published_at ?? post.scheduled_for;
 
   function confirmCancel() {
@@ -180,7 +181,7 @@ function ActivePost({ post }: { post: SocialPost }) {
         {at == null ? tone.label : `${tone.label} · ${shortDateTime(at)}`}
       </Text>
       {post.platforms.map((p) => {
-        const pt = platformTone(p.status, t, theme);
+        const pt = platformTone(platformDisplayStatus(post, p), t, theme);
         return (
           <View key={`${p.platform}-${p.account_id}`} className="border-t border-line py-rowY mt-sm">
             <View className="flex-row items-center justify-between">
@@ -258,6 +259,30 @@ function PublishPanel({ item, lastFailed }: { item: SocialLibraryItem; lastFaile
     ]);
   }
 
+  // Yalnizca TikTok girdisi olan basarisiz denemede: dogrudan paylasim kotasina
+  // takilan videonun cikis yolu. Hata metni ayristirilmiyor; Zernio mesaji
+  // degisirse secenek sessizce kaybolmasin.
+  const canDraft = lastFailed?.platforms.some((p) => p.platform === "tiktok") === true;
+
+  function sendDraft() {
+    if (!hasVideo) return;
+    haptic.press();
+    Alert.alert(
+      t("TikTok'a taslak gönder"),
+      t(
+        "Video TikTok uygulamasındaki gelen kutuna düşer. Açıklama, kapak ve Paylaş adımını uygulamada sen tamamlarsın. Instagram'a gönderilmez.",
+      ),
+      [
+        { text: t("Vazgeç"), style: "cancel" },
+        {
+          text: t("Taslak gönder"),
+          onPress: () =>
+            publish.mutate({ libraryId: item.id, platforms: ["tiktok"], scheduledFor: null, tiktokDraft: true }),
+        },
+      ],
+    );
+  }
+
   function schedule() {
     if (!hasVideo || selected.length === 0) return;
     if (when.getTime() < Date.now() + 60_000) {
@@ -317,6 +342,13 @@ function PublishPanel({ item, lastFailed }: { item: SocialLibraryItem; lastFaile
             disabled={!hasVideo || selected.length === 0}
           />
         )}
+        {canDraft && !planning ? (
+          <SocialButton
+            label={t("TikTok'a taslak gönder")}
+            onPress={sendDraft}
+            disabled={!hasVideo || publish.isPending}
+          />
+        ) : null}
         {selected.length === 0 ? (
           <Text className="text-meta text-fg3">{t("En az bir platform seç.")}</Text>
         ) : null}

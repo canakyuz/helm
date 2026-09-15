@@ -4,6 +4,7 @@ import {
   isActivePost,
   istanbulEveningSlot,
   latestPostByLibrary,
+  platformDisplayStatus,
   readyProjectCounts,
   socialItemState,
   type SocialLibraryItem,
@@ -28,6 +29,7 @@ const post = (
   published_at: null,
   platforms: [],
   error: null,
+  tiktok_draft: false,
   created_at: createdAt,
   updated_at: createdAt,
   ...extra,
@@ -75,6 +77,25 @@ describe("socialItemState", () => {
     expect(s).toEqual({ kind: "scheduled", at: "2026-09-15T17:00:00Z" });
     expect(socialItemState(post("y", "L", "partial", "2026-09-01T00:00:00Z")).kind).toBe("published");
     expect(socialItemState(post("z", "L", "sending", "2026-09-01T00:00:00Z")).kind).toBe("publishing");
+  });
+
+  // Zernio taslagi da "published" ile bitirir; arayuz buna "Yayinda" dememeli.
+  it("tiktok taslagi yayinlandi degil taslak sayilir", () => {
+    const draft = post("d", "L", "published", "2026-09-01T00:00:00Z", { tiktok_draft: true });
+    expect(socialItemState(draft).kind).toBe("draft");
+  });
+});
+
+describe("platformDisplayStatus", () => {
+  const tiktok = { platform: "tiktok" as const, account_id: "a1", status: "published", url: null, error: null };
+  const instagram = { ...tiktok, platform: "instagram" as const };
+
+  it("taslak postun yayinlanan tiktok girdisini draft yapar, digerlerine dokunmaz", () => {
+    const draft = post("d", "L", "published", "2026-09-01T00:00:00Z", { tiktok_draft: true });
+    expect(platformDisplayStatus(draft, tiktok)).toBe("draft");
+    expect(platformDisplayStatus(draft, instagram)).toBe("published");
+    expect(platformDisplayStatus(draft, { ...tiktok, status: "failed" })).toBe("failed");
+    expect(platformDisplayStatus(post("n", "L", "published", "2026-09-01T00:00:00Z"), tiktok)).toBe("published");
   });
 });
 

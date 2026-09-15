@@ -62,7 +62,7 @@ RLS: `social_library`, `social_posts` authenticated SELECT. Yazma yalnızca RPC
 
 | Fonksiyon | Dönüş | Davranış |
 |---|---|---|
-| `helm_social_publish(p_library_id uuid, p_platforms text[], p_scheduled_for timestamptz default null)` | `uuid` (post id) | platformlar ⊆ {tiktok, instagram}; null zaman → now()+2 dk; aynı kütüphane öğesinde aktif post (sending/scheduled/publishing/published/partial) varsa hata; hesapları aynı projenin aktif `social_accounts` satırlarından seçer |
+| `helm_social_publish(p_library_id uuid, p_platforms text[], p_scheduled_for timestamptz default null, p_tiktok_draft boolean default false)` | `uuid` (post id) | platformlar ⊆ {tiktok, instagram}; null zaman → now()+2 dk; aynı kütüphane öğesinde aktif post (sending/scheduled/publishing/published/partial) varsa hata; hesapları aynı projenin aktif `social_accounts` satırlarından seçer |
 | `helm_social_schedule_all(p_project_id uuid, p_platforms text[] default '{tiktok,instagram}')` | `int` | aktif postu olmayan öğeleri `sort_order` ile, en son planlı günden (en erken yarın) başlayarak her gün 20:00 Europe/Istanbul'a planlar |
 | `helm_social_cancel(p_post_id uuid)` | `void` | yalnızca `scheduled`; Zernio'da siler, toplayıcı `cancelled` yapar |
 | `helm_social_refresh()` | `void` | Zernio post listesini çekme isteği kuyruğa atar |
@@ -76,8 +76,16 @@ Hepsi `grant execute to authenticated`, `revoke from public, anon`.
 `POST /v1/posts`, `X-Request-Id: <social_posts.id>`:
 `mediaItems:[{type:video, url:video_url}]`, `scheduledFor`, `timezone: Europe/Istanbul`,
 `platforms:[{platform, accountId, customContent, platformSpecificData}]`.
-TikTok: `privacyLevel` (creator info'dan doğrulanır), `allowComment/allowDuet/allowStitch: true`,
-`contentPreviewConfirmed/expressConsentGiven: true`, `videoCoverImageUrl: thumbnail_url`.
+TikTok (0055'ten beri): ayarlar isteğin en üst seviyesindeki `tiktokSettings` nesnesinde,
+Zernio bunu her TikTok girdisine birleştirir: `privacy_level: PUBLIC_TO_EVERYONE`,
+`allow_comment/allow_duet/allow_stitch: true`, `content_preview_confirmed/express_consent_given: true`,
+`video_cover_image_url: thumbnail_url`, `draft: social_posts.tiktok_draft`.
+Taslak (Creator Inbox): TikTok'un uygulama başına 24 saatlik doğrudan paylaşım kotası dolunca
+(`reached_active_user_cap`, Zernio "at capacity") post `failed` olur ve Zernio tekrar denemez.
+Taslak bu kotadan muaf; video gelen kutusuna düşer, paylaşımı creator uygulamada bitirir.
+Zernio taslağı da `published` ile bitirir (`platformPostUrl` yok), bu yüzden Helm
+`tiktok_draft` kolonuna bakar ve "Yayında" yerine "TikTok taslağı" gösterir.
+Arayüz taslak seçeneğini yalnızca TikTok girdisi olan başarısız denemede sunar.
 Instagram: `shareToFeed: true`, `firstComment: pinned_comment` (varsa).
 `metadata: {helm_post_id}`. İlk gerçek gönderiden önce TikTok `dryRun` ile doğrulanır.
 

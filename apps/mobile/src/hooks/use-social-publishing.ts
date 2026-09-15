@@ -53,9 +53,16 @@ export function usePublishSocialItem() {
       libraryId: string;
       platforms: SocialPlatform[];
       scheduledFor: string | null;
+      tiktokDraft?: boolean;
     }) => publishSocialItem(supabase, args),
     onSuccess: (_id, args) => {
-      toast.success(args.scheduledFor == null ? tr("Paylaşım sıraya alındı") : tr("Planlandı"));
+      toast.success(
+        args.tiktokDraft === true
+          ? tr("Taslak TikTok'a gönderiliyor")
+          : args.scheduledFor == null
+            ? tr("Paylaşım sıraya alındı")
+            : tr("Planlandı"),
+      );
       void invalidate();
     },
     onError: (e: Error) => toast.error(tr("Paylaşılamadı"), e.message),

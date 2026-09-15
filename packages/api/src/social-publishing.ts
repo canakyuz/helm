@@ -58,6 +58,11 @@ export interface SocialPost {
   published_at: string | null;
   platforms: SocialPostPlatform[];
   error: string | null;
+  /**
+   * TikTok girdisi Creator Inbox taslagi olarak gonderildi. Zernio taslagi da
+   * `published` ile bitirir; video creator uygulamada paylasana kadar public degil.
+   */
+  tiktok_draft: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -66,7 +71,7 @@ const LIBRARY_COLUMNS =
   "id, project_id, campaign, code, sort_order, hook, voice, video_url, thumbnail_url, duration_sec, tiktok_caption, instagram_caption, pinned_comment, archived, created_at, updated_at";
 
 const POST_COLUMNS =
-  "id, project_id, library_id, zernio_post_id, status, scheduled_for, published_at, platforms, error, created_at, updated_at";
+  "id, project_id, library_id, zernio_post_id, status, scheduled_for, published_at, platforms, error, tiktok_draft, created_at, updated_at";
 
 /** PostgREST numeric'i string dondurebilir; bos/bozuk deger null olur. */
 const toNumberOrNull = (v: unknown): number | null => {
@@ -114,18 +119,29 @@ export async function fetchSocialPosts(
   return ((data ?? []) as SocialPost[]).map((p) => ({
     ...p,
     platforms: Array.isArray(p.platforms) ? p.platforms : [],
+    tiktok_draft: p.tiktok_draft === true,
   }));
 }
 
-/** `scheduledFor` null = "simdi paylas" (sunucu +2 dk'ya planlar). Doner: post id. */
+/**
+ * `scheduledFor` null = "simdi paylas" (sunucu +2 dk'ya planlar). Doner: post id.
+ * `tiktokDraft`: TikTok'a Creator Inbox taslagi olarak gonder - dogrudan paylasim
+ * kotasina takilmaz, paylasimi creator uygulamada bitirir (0055).
+ */
 export async function publishSocialItem(
   client: SupabaseClient,
-  args: { libraryId: string; platforms: SocialPlatform[]; scheduledFor: string | null },
+  args: {
+    libraryId: string;
+    platforms: SocialPlatform[];
+    scheduledFor: string | null;
+    tiktokDraft?: boolean;
+  },
 ): Promise<string> {
   const { data, error } = await client.rpc("helm_social_publish", {
     p_library_id: args.libraryId,
     p_platforms: args.platforms,
     p_scheduled_for: args.scheduledFor,
+    p_tiktok_draft: args.tiktokDraft ?? false,
   });
   if (error) throw rpcError(error);
   return String(data);
@@ -254,6 +270,8 @@ export type SocialItemState =
   | { kind: "scheduled"; at: string | null }
   | { kind: "publishing" }
   | { kind: "published" }
+  /** TikTok gelen kutusuna taslak dustu; creator paylasana kadar public degil. */
+  | { kind: "draft" }
   | { kind: "failed" };
 
 export function socialItemState(post: SocialPost | undefined): SocialItemState {
@@ -266,10 +284,21 @@ export function socialItemState(post: SocialPost | undefined): SocialItemState {
       return { kind: "publishing" };
     case "published":
     case "partial":
-      return { kind: "published" };
+      return post.tiktok_draft ? { kind: "draft" } : { kind: "published" };
     case "failed":
       return { kind: "failed" };
   }
+}
+
+/**
+ * Platform satirinda gosterilecek durum. Zernio taslagi `published` diye
+ * raporluyor; taslak postun TikTok girdisi icin bunu "draft"a cevirir ki
+ * arayuz hic yayinlanmamis videoya "Yayinda" demesin. Time: O(1)
+ */
+export function platformDisplayStatus(post: SocialPost, platform: SocialPostPlatform): string {
+  const deliveredDraft =
+    post.tiktok_draft && platform.platform === "tiktok" && platform.status.toLowerCase() === "published";
+  return deliveredDraft ? "draft" : platform.status;
 }
 
 export interface SocialQueue {

@@ -38,10 +38,20 @@ function useInvalidateSocialPublishing() {
 export function usePublishSocialItem() {
   const invalidate = useInvalidateSocialPublishing();
   return useMutation({
-    mutationFn: (args: { libraryId: string; platforms: SocialPlatform[]; scheduledFor: string | null }) =>
-      publishSocialItem(supabaseClient, args),
+    mutationFn: (args: {
+      libraryId: string;
+      platforms: SocialPlatform[];
+      scheduledFor: string | null;
+      tiktokDraft?: boolean;
+    }) => publishSocialItem(supabaseClient, args),
     onSuccess: (_id, args) => {
-      toast.success(args.scheduledFor == null ? "Paylaşım sıraya alındı" : "Planlandı");
+      toast.success(
+        args.tiktokDraft === true
+          ? "Taslak TikTok'a gönderiliyor"
+          : args.scheduledFor == null
+            ? "Paylaşım sıraya alındı"
+            : "Planlandı",
+      );
       void invalidate();
     },
     onError: (e: Error) => toast.error("Paylaşılamadı", { description: e.message }),

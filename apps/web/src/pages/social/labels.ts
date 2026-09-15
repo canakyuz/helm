@@ -1,4 +1,10 @@
-import { istanbulEveningSlot, type SocialItemState, type SocialPlatform, type SocialPostStatus } from "@helm/api";
+import {
+  istanbulEveningSlot,
+  type SocialItemState,
+  type SocialPlatform,
+  type SocialPost,
+  type SocialPostStatus,
+} from "@helm/api";
 
 export type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
@@ -31,6 +37,8 @@ export function itemStateBadge(state: SocialItemState): { label: string; variant
       return { label: "Gönderiliyor", variant: "secondary" };
     case "published":
       return { label: "Yayında", variant: "default" };
+    case "draft":
+      return { label: "TikTok taslağı", variant: "secondary" };
     case "failed":
       return { label: "Hata", variant: "destructive" };
   }
@@ -46,9 +54,16 @@ export const POST_STATUS_LABEL: Record<SocialPostStatus, string> = {
   cancelled: "İptal edildi",
 };
 
-/** Zernio platform durumu serbest metin; uc kovaya indirgenir. */
+/** Kuyruk satirinin durum metni; taslak post Zernio'da published olsa da taslaktir. */
+export function postStatusLabel(post: SocialPost): string {
+  const delivered = post.status === "published" || post.status === "partial";
+  return post.tiktok_draft && delivered ? "TikTok taslağı" : POST_STATUS_LABEL[post.status];
+}
+
+/** Zernio platform durumu serbest metin; uc kovaya indirgenir (+ Helm'in "draft"i). */
 export function platformBadge(status: string): { label: string; variant: BadgeVariant } {
   const s = status.toLowerCase();
+  if (s === "draft") return { label: "Taslak", variant: "secondary" };
   if (s === "published" || s === "success") return { label: "Yayında", variant: "default" };
   if (s === "failed" || s === "error") return { label: "Hata", variant: "destructive" };
   return { label: "Bekliyor", variant: "outline" };

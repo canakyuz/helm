@@ -11,7 +11,7 @@ import {
   useSocialPosts,
 } from "@/hooks/use-social-publishing";
 import { CancelButton, PlatformList, Thumb } from "./library-tab";
-import { POST_STATUS_LABEL, fmtDateTime } from "./labels";
+import { fmtDateTime, postStatusLabel } from "./labels";
 
 type Section = { key: string; title: string; posts: SocialPost[]; timeOf: (p: SocialPost) => string | null };
 
@@ -88,7 +88,7 @@ export function QueueTab() {
                     <TableCell className="tabular-nums">
                       {fmtDateTime(section.timeOf(post))}
                       {post.status !== "scheduled" && (
-                        <span className="block text-xs text-muted-foreground">{POST_STATUS_LABEL[post.status]}</span>
+                        <span className="block text-xs text-muted-foreground">{postStatusLabel(post)}</span>
                       )}
                     </TableCell>
                     <TableCell>
